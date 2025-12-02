@@ -1,11 +1,15 @@
+# Admin settings page.
 myeventlane_tickets.settings:
   path: '/admin/config/myeventlane/tickets'
   defaults:
     _form: '\Drupal\myeventlane_tickets\Form\TicketSettingsForm'
     _title: 'Ticket settings'
   requirements:
-    _permission: 'administer site configuration'
+    _permission: 'administer myeventlane tickets'
+  options:
+    _admin_route: TRUE
 
+# Ticket PDF download.
 myeventlane_tickets.download_pdf:
   path: '/ticket/pdf/{order_item_id}'
   defaults:

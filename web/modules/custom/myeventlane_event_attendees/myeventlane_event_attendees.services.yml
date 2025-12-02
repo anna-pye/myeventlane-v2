@@ -1,0 +1,10 @@
+services:
+  # Unified attendance management service.
+  myeventlane_event_attendees.manager:
+    class: Drupal\myeventlane_event_attendees\Service\AttendanceManager
+    arguments: ['@entity_type.manager']
+
+  # Waitlist management service (uses main manager internally).
+  myeventlane_event_attendees.waitlist:
+    class: Drupal\myeventlane_event_attendees\Service\AttendanceWaitlistManager
+    arguments: ['@entity_type.manager', '@myeventlane_event_attendees.manager']

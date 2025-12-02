@@ -1,0 +1,10 @@
+# Admin config menu link.
+myeventlane_wallet.settings:
+  title: 'Wallet'
+  description: 'Configure Apple Wallet and Google Wallet pass integration.'
+  route_name: myeventlane_wallet.settings
+  parent: myeventlane_core.config
+  weight: 8
+
+
+

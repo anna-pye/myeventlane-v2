@@ -1,0 +1,10 @@
+name: 'MyEventLane Views'
+type: module
+description: 'Views integration and CSV export functionality for MyEventLane. Provides attendee data exports and custom Views access plugins for vendor filtering.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_event_attendees:myeventlane_event_attendees
+  - drupal:views

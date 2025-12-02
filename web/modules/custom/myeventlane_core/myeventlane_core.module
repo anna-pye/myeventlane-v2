@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Core services and utilities for MyEventLane platform.
+ *
+ * This module provides shared services used throughout MyEventLane:
+ * - myeventlane_core.date_formatter: Date formatting utilities for events.
+ * - myeventlane_core.route_helper: Route lookup and URL generation helpers.
+ */
+
+declare(strict_types=1);
+
+
+

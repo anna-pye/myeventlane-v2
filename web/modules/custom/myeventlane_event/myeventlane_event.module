@@ -1,0 +1,393 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for myeventlane_event module.
+ *
+ * This module provides unified event orchestration between RSVP and Ticket
+ * flows. It determines the effective booking mode for events and provides
+ * consistent CTA rendering for customers and configuration UX for vendors.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function myeventlane_event_theme(): array {
+  return [
+    'event_ctas' => [
+      'variables' => [
+        'event' => NULL,
+        'mode' => NULL,
+        'primary_cta' => [],
+        'all_ctas' => [],
+        'is_bookable' => FALSE,
+      ],
+      'template' => 'event-ctas',
+    ],
+    'event_booking_status' => [
+      'variables' => [
+        'event' => NULL,
+        'status' => [],
+      ],
+      'template' => 'event-booking-status',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view() for node entities.
+ *
+ * Injects CTA render arrays into event node views.
+ */
+function myeventlane_event_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode): void {
+  // Only process event nodes.
+  if (!$entity instanceof NodeInterface || $entity->bundle() !== 'event') {
+    return;
+  }
+
+  // Only inject CTAs for full/default view modes.
+  if (!in_array($view_mode, ['full', 'default'], TRUE)) {
+    return;
+  }
+
+  /** @var \Drupal\myeventlane_event\Service\EventModeManager $modeManager */
+  $modeManager = \Drupal::service('myeventlane_event.mode_manager');
+
+  $mode = $modeManager->getEffectiveMode($entity);
+  $primaryCta = $modeManager->getPrimaryCta($entity);
+  $allCtas = $modeManager->getAllCtas($entity);
+  $isBookable = $modeManager->isBookable($entity);
+
+  // Add CTAs to the build array.
+  $build['event_ctas'] = [
+    '#theme' => 'event_ctas',
+    '#event' => $entity,
+    '#mode' => $mode,
+    '#primary_cta' => $primaryCta,
+    '#all_ctas' => $allCtas,
+    '#is_bookable' => $isBookable,
+    '#weight' => 50,
+    '#cache' => [
+      'tags' => $entity->getCacheTags(),
+      'contexts' => ['user.roles', 'url.path'],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for node_event_form.
+ *
+ * Enhances the Event node form with booking configuration UX for vendors.
+ */
+function myeventlane_event_form_node_event_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  _myeventlane_event_alter_event_form($form, $form_state);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for node_event_edit_form.
+ */
+function myeventlane_event_form_node_event_edit_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  _myeventlane_event_alter_event_form($form, $form_state);
+}
+
+/**
+ * Alters the event node form to improve vendor UX.
+ *
+ * @param array $form
+ *   The form array.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state.
+ */
+function _myeventlane_event_alter_event_form(array &$form, FormStateInterface $form_state): void {
+  // Create a booking configuration fieldset.
+  $form['booking_configuration'] = [
+    '#type' => 'details',
+    '#title' => t('Booking Configuration'),
+    '#description' => t('Configure how attendees can register for this event.'),
+    '#open' => TRUE,
+    '#weight' => 5,
+    '#group' => 'advanced',
+  ];
+
+  // Move booking-related fields into the fieldset.
+  $booking_fields = [
+    'field_event_type',
+    'field_capacity',
+    'field_product_target',
+    'field_external_url',
+  ];
+
+  foreach ($booking_fields as $field_name) {
+    if (isset($form[$field_name])) {
+      $form[$field_name]['#group'] = 'booking_configuration';
+
+      // Add descriptions to help vendors understand the fields.
+      switch ($field_name) {
+        case 'field_event_type':
+          $form[$field_name]['widget']['#description'] = t('Choose how attendees will register:<br>• <strong>RSVP (Free)</strong>: Free registration, auto-created<br>• <strong>Paid (Ticketed)</strong>: Requires manual product creation<br>• <strong>Both (Free + Paid)</strong>: Product with $0 and paid variations<br>• <strong>External Link</strong>: Link to another ticketing platform');
+          break;
+
+        case 'field_capacity':
+          $form[$field_name]['widget'][0]['value']['#description'] = t('Maximum number of attendees. Leave empty or set to 0 for unlimited. This applies to RSVP events.');
+          break;
+
+        case 'field_product_target':
+          $form[$field_name]['widget'][0]['target_id']['#description'] = t('<strong>For RSVP events:</strong> A free product is automatically created for you.<br><strong>For Paid/Both events:</strong> You must first <a href="@url" target="_blank">create a ticket product</a>, then link it here.', [
+            '@url' => '/product/add',
+          ]);
+          break;
+
+        case 'field_external_url':
+          $form[$field_name]['widget'][0]['uri']['#description'] = t('External ticketing URL. Required when Event Type is "External".');
+          break;
+      }
+    }
+  }
+
+  // Add conditional visibility based on event type.
+  if (isset($form['field_capacity'])) {
+    $form['field_capacity']['#states'] = [
+      'visible' => [
+        ':input[name="field_event_type"]' => ['value' => 'rsvp'],
+      ],
+    ];
+  }
+
+  if (isset($form['field_product_target'])) {
+    // Make field not required - we'll handle RSVP auto-creation
+    $form['field_product_target']['#required'] = FALSE;
+    if (isset($form['field_product_target']['widget'][0]['target_id'])) {
+      $form['field_product_target']['widget'][0]['target_id']['#required'] = FALSE;
+    }
+    
+    $form['field_product_target']['#states'] = [
+      'visible' => [
+        [':input[name="field_event_type"]' => ['value' => 'paid']],
+        [':input[name="field_event_type"]' => ['value' => 'both']],
+      ],
+    ];
+    
+    // Add description for RSVP events
+    $form['field_product_target']['#description'] = t('For RSVP events, a free product is auto-created. For paid/both events, link your ticket product here.');
+  }
+
+  if (isset($form['field_external_url'])) {
+    $form['field_external_url']['#states'] = [
+      'visible' => [
+        ':input[name="field_event_type"]' => ['value' => 'external'],
+      ],
+    ];
+  }
+  
+  // Add custom submit handler to create RSVP product before save
+  array_unshift($form['actions']['submit']['#submit'], '_myeventlane_event_form_submit');
+
+  // Add a status message area for existing events.
+  $node = $form_state->getFormObject()->getEntity();
+  if ($node instanceof NodeInterface && !$node->isNew()) {
+    /** @var \Drupal\myeventlane_event\Service\EventModeManager $modeManager */
+    $modeManager = \Drupal::service('myeventlane_event.mode_manager');
+    $status = $modeManager->getConfigurationStatus($node);
+
+    $form['booking_status'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['mel-booking-status']],
+      '#weight' => -10,
+    ];
+
+    $form['booking_status']['info'] = [
+      '#theme' => 'status_messages',
+      '#message_list' => _myeventlane_event_build_status_messages($status),
+      '#status_headings' => [
+        'status' => t('Configuration Status'),
+        'warning' => t('Action Needed'),
+      ],
+    ];
+  }
+
+  // Add custom validation.
+  $form['#validate'][] = '_myeventlane_event_form_validate';
+}
+
+/**
+ * Custom submit handler to create RSVP product before node save.
+ */
+function _myeventlane_event_form_submit(array &$form, FormStateInterface $form_state): void {
+  $eventType = $form_state->getValue(['field_event_type', 0, 'value']);
+  
+  // Only auto-create product for pure RSVP events.
+  if ($eventType !== 'rsvp') {
+    return;
+  }
+  
+  // Check if product already linked.
+  $productTarget = $form_state->getValue(['field_product_target', 0, 'target_id']);
+  if (!empty($productTarget)) {
+    return;
+  }
+  
+  // Get the event title from form values.
+  $eventTitle = $form_state->getValue(['title', 0, 'value']);
+  if (empty($eventTitle)) {
+    $eventTitle = 'Untitled Event';
+  }
+  
+  // Create RSVP product now (before save).
+  /** @var \Drupal\myeventlane_event\Service\EventProductManager $productManager */
+  $productManager = \Drupal::service('myeventlane_event.product_manager');
+  
+  $entity = $form_state->getFormObject()->getEntity();
+  if ($entity->isNew()) {
+    // For new events, create the product and link it.
+    $product = $productManager->createRsvpProductForNewEvent($eventTitle);
+    if ($product) {
+      $form_state->setValue(['field_product_target', 0, 'target_id'], $product->id());
+    }
+  }
+}
+
+/**
+ * Builds status messages for the booking configuration.
+ *
+ * @param array $status
+ *   The configuration status array from EventModeManager.
+ *
+ * @return array
+ *   Message list suitable for status_messages theme.
+ */
+function _myeventlane_event_build_status_messages(array $status): array {
+  $messages = ['status' => [], 'warning' => []];
+
+  $mode = $status['effective_mode'] ?? 'none';
+
+  // Mode-specific status.
+  switch ($mode) {
+    case 'rsvp':
+      $messages['status'][] = t('✓ RSVP mode active. Attendees can RSVP for free.');
+      break;
+
+    case 'paid':
+      $messages['status'][] = t('✓ Paid ticket mode active. Attendees will purchase tickets.');
+      break;
+
+    case 'both':
+      $messages['status'][] = t('✓ Both modes active. Attendees can RSVP for free or purchase tickets.');
+      break;
+
+    case 'external':
+      $messages['status'][] = t('✓ External link mode. Attendees will be directed to an external site.');
+      break;
+
+    case 'none':
+      $messages['warning'][] = t('⚠ Booking is not yet configured. Please select an event type and complete the required fields.');
+      break;
+  }
+
+  // Check for missing configurations.
+  if ($status['event_type'] === 'paid' && !$status['tickets']['configured']) {
+    $messages['warning'][] = t('⚠ No ticket product linked. Please link a Commerce product for paid ticketing.');
+  }
+
+  if ($status['event_type'] === 'external' && !$status['external']['configured']) {
+    $messages['warning'][] = t('⚠ No external URL set. Please provide an external ticketing link.');
+  }
+
+  return $messages;
+}
+
+/**
+ * Custom validation for the event form.
+ */
+function _myeventlane_event_form_validate(array &$form, FormStateInterface $form_state): void {
+  $eventType = $form_state->getValue(['field_event_type', 0, 'value']);
+  $productTarget = $form_state->getValue(['field_product_target', 0, 'target_id']);
+
+  // Validate paid events have a product linked.
+  if ($eventType === 'paid' && empty($productTarget)) {
+    $form_state->setErrorByName(
+      'field_product_target',
+      t('A ticket product is required when Event Type is set to "Paid". Please create a ticket product first at <a href="@url">Add Product</a>, then link it here.', [
+        '@url' => '/product/add',
+      ])
+    );
+  }
+
+  // Validate "both" mode events have a product linked.
+  if ($eventType === 'both' && empty($productTarget)) {
+    $form_state->setErrorByName(
+      'field_product_target',
+      t('A ticket product is required when Event Type is set to "Both". The product should have both free ($0) and paid variations. Create it at <a href="@url">Add Product</a> first.', [
+        '@url' => '/product/add',
+      ])
+    );
+  }
+
+  // RSVP events: product will be auto-created, so no validation needed
+  // (the submit handler creates it before save)
+
+  // Validate external events have a URL.
+  if ($eventType === 'external') {
+    $externalUrl = $form_state->getValue(['field_external_url', 0, 'uri']);
+    if (empty($externalUrl)) {
+      $form_state->setErrorByName(
+        'field_external_url',
+        t('An external URL is required when Event Type is set to "External".')
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_node() for event nodes.
+ *
+ * Makes CTA variables available in node templates.
+ */
+function myeventlane_event_preprocess_node(array &$variables): void {
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $variables['node'];
+
+  if ($node->bundle() !== 'event') {
+    return;
+  }
+
+  // Only process full view modes.
+  if (!in_array($variables['view_mode'], ['full', 'default'], TRUE)) {
+    return;
+  }
+
+  /** @var \Drupal\myeventlane_event\Service\EventModeManager $modeManager */
+  $modeManager = \Drupal::service('myeventlane_event.mode_manager');
+
+  // Add convenience variables for templates.
+  $variables['event_mode'] = $modeManager->getEffectiveMode($node);
+  $variables['event_is_bookable'] = $modeManager->isBookable($node);
+  $variables['event_rsvp_enabled'] = $modeManager->isRsvpEnabled($node);
+  $variables['event_tickets_enabled'] = $modeManager->isTicketsEnabled($node);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave() for node entities.
+ *
+ * Syncs Commerce products for RSVP events before save.
+ */
+function myeventlane_event_node_presave(EntityInterface $entity): void {
+  if ($entity->bundle() !== 'event') {
+    return;
+  }
+
+  // Skip if already synced in this request to prevent recursion.
+  if (isset($entity->_myeventlane_product_synced)) {
+    return;
+  }
+
+  /** @var \Drupal\myeventlane_event\Service\EventProductManager $productManager */
+  $productManager = \Drupal::service('myeventlane_event.product_manager');
+  $productManager->syncProductToEvent($entity);
+}

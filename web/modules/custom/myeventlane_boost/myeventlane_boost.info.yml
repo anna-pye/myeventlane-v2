@@ -1,0 +1,15 @@
+name: 'MyEventLane Boost'
+type: module
+description: 'Event promotion and featuring for MyEventLane. Allows vendors to purchase boost packages via Commerce to feature their events on the homepage and in listings.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_core:myeventlane_core
+  - myeventlane_schema:myeventlane_schema
+  - myeventlane_event:myeventlane_event
+  - drupal:commerce
+  - drupal:commerce_product
+  - drupal:commerce_order
+  - drupal:commerce_cart

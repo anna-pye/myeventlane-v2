@@ -1,5 +1,9 @@
-name: MyEventLane Core
+name: 'MyEventLane Core'
 type: module
-core_version_requirement: ^11
+description: 'Core services, helper utilities, and shared architecture for the MyEventLane platform. This module provides the foundation that all other MyEventLane modules depend on.'
 package: MyEventLane
-description: Core services, helper utilities, and shared architecture for MyEventLane.
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - drupal:system

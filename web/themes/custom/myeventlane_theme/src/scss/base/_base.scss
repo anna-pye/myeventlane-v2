@@ -1,0 +1,139 @@
+// ==========================================================================
+// Base Styles
+// ==========================================================================
+// Global element defaults using design tokens.
+
+@use '../tokens/colors';
+@use '../tokens/typography';
+@use '../tokens/spacing';
+
+// ---------------------------------------------------------------------------
+// Document
+// ---------------------------------------------------------------------------
+
+html {
+  font-size: 100%; // 16px base
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: colors.$mel-color-bg;
+  color: colors.$mel-color-text;
+  font-family: typography.$mel-font-family;
+  font-weight: typography.$mel-font-regular;
+  font-size: typography.mel-font-size(base);
+  line-height: typography.$mel-leading-normal;
+}
+
+// ---------------------------------------------------------------------------
+// Box Model
+// ---------------------------------------------------------------------------
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+// ---------------------------------------------------------------------------
+// Media
+// ---------------------------------------------------------------------------
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+// ---------------------------------------------------------------------------
+// Form Elements Reset
+// ---------------------------------------------------------------------------
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+// ---------------------------------------------------------------------------
+// Remove Default Margins
+// ---------------------------------------------------------------------------
+
+h1, h2, h3, h4, h5, h6,
+p,
+figure,
+blockquote,
+dl, dd {
+  margin: 0;
+}
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+}
+
+// ---------------------------------------------------------------------------
+// Links
+// ---------------------------------------------------------------------------
+
+a {
+  color: colors.$mel-color-primary;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: colors.$mel-color-primary-hover;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+    border-radius: 2px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Selection
+// ---------------------------------------------------------------------------
+
+::selection {
+  background-color: colors.$mel-color-secondary;
+  color: colors.$mel-color-text-inverse;
+}
+
+// ---------------------------------------------------------------------------
+// Scrollbar (WebKit)
+// ---------------------------------------------------------------------------
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: colors.$mel-color-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  background: colors.$mel-color-border-strong;
+  border-radius: 4px;
+
+  &:hover {
+    background: colors.$mel-color-text-light;
+  }
+}

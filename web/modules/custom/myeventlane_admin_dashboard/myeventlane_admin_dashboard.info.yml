@@ -1,0 +1,13 @@
+name: 'MyEventLane Admin Dashboard'
+type: module
+description: 'Platform administration dashboard for MyEventLane. Provides site administrators with an overview of events, vendors, users, and platform statistics.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_core:myeventlane_core
+  - myeventlane_event:myeventlane_event
+  - myeventlane_vendor:myeventlane_vendor
+  - drupal:system
+  - drupal:user

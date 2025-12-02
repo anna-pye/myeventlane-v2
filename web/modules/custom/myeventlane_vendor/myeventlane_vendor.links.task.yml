@@ -1,0 +1,6 @@
+# Settings tab for vendor configuration.
+myeventlane_vendor.settings:
+  title: 'Settings'
+  route_name: myeventlane_vendor.settings
+  base_route: myeventlane_vendor.settings
+  weight: 0

@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - paragraphs
+id: attendee_extra_field
+label: 'Attendee Extra Field'
+description: 'A custom question field to collect additional information from event attendees during RSVP or checkout.'
+icon_uuid: null
+icon_default: null
+behavior_plugins: {  }

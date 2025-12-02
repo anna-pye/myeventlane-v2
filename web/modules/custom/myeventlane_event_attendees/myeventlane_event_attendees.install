@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the event attendees module.
+ */
+
+/**
+ * Implements hook_install().
+ *
+ * Note: The event_attendee table is automatically created by Drupal
+ * based on the EventAttendee content entity definition.
+ */
+function myeventlane_event_attendees_install() {
+  // Entity schema is created automatically.
+  // No manual table creation needed.
+  \Drupal::logger('myeventlane_event_attendees')->notice('Event Attendees module installed. Entity schema created automatically.');
+}

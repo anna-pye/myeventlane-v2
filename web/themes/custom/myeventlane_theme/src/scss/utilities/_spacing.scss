@@ -1,0 +1,143 @@
+// ==========================================================================
+// Spacing Utilities
+// ==========================================================================
+// Margin and padding helper classes.
+
+@use '../tokens/spacing';
+
+// ---------------------------------------------------------------------------
+// Margin Utilities
+// ---------------------------------------------------------------------------
+
+// All sides
+.mel-m-0 { margin: spacing.mel-space(0); }
+.mel-m-1 { margin: spacing.mel-space(1); }
+.mel-m-2 { margin: spacing.mel-space(2); }
+.mel-m-3 { margin: spacing.mel-space(3); }
+.mel-m-4 { margin: spacing.mel-space(4); }
+.mel-m-5 { margin: spacing.mel-space(5); }
+.mel-m-6 { margin: spacing.mel-space(6); }
+.mel-m-7 { margin: spacing.mel-space(7); }
+.mel-m-8 { margin: spacing.mel-space(8); }
+.mel-m-auto { margin: auto; }
+
+// Margin top
+.mel-mt-0 { margin-top: spacing.mel-space(0); }
+.mel-mt-1 { margin-top: spacing.mel-space(1); }
+.mel-mt-2 { margin-top: spacing.mel-space(2); }
+.mel-mt-3 { margin-top: spacing.mel-space(3); }
+.mel-mt-4 { margin-top: spacing.mel-space(4); }
+.mel-mt-5 { margin-top: spacing.mel-space(5); }
+.mel-mt-6 { margin-top: spacing.mel-space(6); }
+.mel-mt-7 { margin-top: spacing.mel-space(7); }
+.mel-mt-8 { margin-top: spacing.mel-space(8); }
+.mel-mt-auto { margin-top: auto; }
+
+// Margin bottom
+.mel-mb-0 { margin-bottom: spacing.mel-space(0); }
+.mel-mb-1 { margin-bottom: spacing.mel-space(1); }
+.mel-mb-2 { margin-bottom: spacing.mel-space(2); }
+.mel-mb-3 { margin-bottom: spacing.mel-space(3); }
+.mel-mb-4 { margin-bottom: spacing.mel-space(4); }
+.mel-mb-5 { margin-bottom: spacing.mel-space(5); }
+.mel-mb-6 { margin-bottom: spacing.mel-space(6); }
+.mel-mb-7 { margin-bottom: spacing.mel-space(7); }
+.mel-mb-8 { margin-bottom: spacing.mel-space(8); }
+
+// Margin left
+.mel-ml-0 { margin-left: spacing.mel-space(0); }
+.mel-ml-1 { margin-left: spacing.mel-space(1); }
+.mel-ml-2 { margin-left: spacing.mel-space(2); }
+.mel-ml-3 { margin-left: spacing.mel-space(3); }
+.mel-ml-4 { margin-left: spacing.mel-space(4); }
+.mel-ml-auto { margin-left: auto; }
+
+// Margin right
+.mel-mr-0 { margin-right: spacing.mel-space(0); }
+.mel-mr-1 { margin-right: spacing.mel-space(1); }
+.mel-mr-2 { margin-right: spacing.mel-space(2); }
+.mel-mr-3 { margin-right: spacing.mel-space(3); }
+.mel-mr-4 { margin-right: spacing.mel-space(4); }
+.mel-mr-auto { margin-right: auto; }
+
+// Margin horizontal
+.mel-mx-0 { margin-left: spacing.mel-space(0); margin-right: spacing.mel-space(0); }
+.mel-mx-1 { margin-left: spacing.mel-space(1); margin-right: spacing.mel-space(1); }
+.mel-mx-2 { margin-left: spacing.mel-space(2); margin-right: spacing.mel-space(2); }
+.mel-mx-3 { margin-left: spacing.mel-space(3); margin-right: spacing.mel-space(3); }
+.mel-mx-4 { margin-left: spacing.mel-space(4); margin-right: spacing.mel-space(4); }
+.mel-mx-auto { margin-left: auto; margin-right: auto; }
+
+// Margin vertical
+.mel-my-0 { margin-top: spacing.mel-space(0); margin-bottom: spacing.mel-space(0); }
+.mel-my-1 { margin-top: spacing.mel-space(1); margin-bottom: spacing.mel-space(1); }
+.mel-my-2 { margin-top: spacing.mel-space(2); margin-bottom: spacing.mel-space(2); }
+.mel-my-3 { margin-top: spacing.mel-space(3); margin-bottom: spacing.mel-space(3); }
+.mel-my-4 { margin-top: spacing.mel-space(4); margin-bottom: spacing.mel-space(4); }
+.mel-my-5 { margin-top: spacing.mel-space(5); margin-bottom: spacing.mel-space(5); }
+.mel-my-6 { margin-top: spacing.mel-space(6); margin-bottom: spacing.mel-space(6); }
+
+// ---------------------------------------------------------------------------
+// Padding Utilities
+// ---------------------------------------------------------------------------
+
+// All sides
+.mel-p-0 { padding: spacing.mel-space(0); }
+.mel-p-1 { padding: spacing.mel-space(1); }
+.mel-p-2 { padding: spacing.mel-space(2); }
+.mel-p-3 { padding: spacing.mel-space(3); }
+.mel-p-4 { padding: spacing.mel-space(4); }
+.mel-p-5 { padding: spacing.mel-space(5); }
+.mel-p-6 { padding: spacing.mel-space(6); }
+.mel-p-7 { padding: spacing.mel-space(7); }
+.mel-p-8 { padding: spacing.mel-space(8); }
+
+// Padding top
+.mel-pt-0 { padding-top: spacing.mel-space(0); }
+.mel-pt-1 { padding-top: spacing.mel-space(1); }
+.mel-pt-2 { padding-top: spacing.mel-space(2); }
+.mel-pt-3 { padding-top: spacing.mel-space(3); }
+.mel-pt-4 { padding-top: spacing.mel-space(4); }
+.mel-pt-5 { padding-top: spacing.mel-space(5); }
+.mel-pt-6 { padding-top: spacing.mel-space(6); }
+
+// Padding bottom
+.mel-pb-0 { padding-bottom: spacing.mel-space(0); }
+.mel-pb-1 { padding-bottom: spacing.mel-space(1); }
+.mel-pb-2 { padding-bottom: spacing.mel-space(2); }
+.mel-pb-3 { padding-bottom: spacing.mel-space(3); }
+.mel-pb-4 { padding-bottom: spacing.mel-space(4); }
+.mel-pb-5 { padding-bottom: spacing.mel-space(5); }
+.mel-pb-6 { padding-bottom: spacing.mel-space(6); }
+
+// Padding left
+.mel-pl-0 { padding-left: spacing.mel-space(0); }
+.mel-pl-1 { padding-left: spacing.mel-space(1); }
+.mel-pl-2 { padding-left: spacing.mel-space(2); }
+.mel-pl-3 { padding-left: spacing.mel-space(3); }
+.mel-pl-4 { padding-left: spacing.mel-space(4); }
+
+// Padding right
+.mel-pr-0 { padding-right: spacing.mel-space(0); }
+.mel-pr-1 { padding-right: spacing.mel-space(1); }
+.mel-pr-2 { padding-right: spacing.mel-space(2); }
+.mel-pr-3 { padding-right: spacing.mel-space(3); }
+.mel-pr-4 { padding-right: spacing.mel-space(4); }
+
+// Padding horizontal
+.mel-px-0 { padding-left: spacing.mel-space(0); padding-right: spacing.mel-space(0); }
+.mel-px-1 { padding-left: spacing.mel-space(1); padding-right: spacing.mel-space(1); }
+.mel-px-2 { padding-left: spacing.mel-space(2); padding-right: spacing.mel-space(2); }
+.mel-px-3 { padding-left: spacing.mel-space(3); padding-right: spacing.mel-space(3); }
+.mel-px-4 { padding-left: spacing.mel-space(4); padding-right: spacing.mel-space(4); }
+.mel-px-5 { padding-left: spacing.mel-space(5); padding-right: spacing.mel-space(5); }
+.mel-px-6 { padding-left: spacing.mel-space(6); padding-right: spacing.mel-space(6); }
+
+// Padding vertical
+.mel-py-0 { padding-top: spacing.mel-space(0); padding-bottom: spacing.mel-space(0); }
+.mel-py-1 { padding-top: spacing.mel-space(1); padding-bottom: spacing.mel-space(1); }
+.mel-py-2 { padding-top: spacing.mel-space(2); padding-bottom: spacing.mel-space(2); }
+.mel-py-3 { padding-top: spacing.mel-space(3); padding-bottom: spacing.mel-space(3); }
+.mel-py-4 { padding-top: spacing.mel-space(4); padding-bottom: spacing.mel-space(4); }
+.mel-py-5 { padding-top: spacing.mel-space(5); padding-bottom: spacing.mel-space(5); }
+.mel-py-6 { padding-top: spacing.mel-space(6); padding-bottom: spacing.mel-space(6); }

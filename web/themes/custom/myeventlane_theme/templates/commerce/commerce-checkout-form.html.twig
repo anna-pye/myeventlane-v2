@@ -1,0 +1,62 @@
+{#
+/**
+ * @file
+ * Theme override for the checkout form.
+ *
+ * Available variables:
+ * - form: The checkout form with all its panes and elements.
+ */
+#}
+
+<div class="mel-checkout">
+  <div class="mel-checkout-main">
+    {# Progress Steps #}
+    {% if form['#steps'] is defined %}
+      <nav class="mel-checkout-steps" aria-label="Checkout progress">
+        {% for step_id, step in form['#steps'] %}
+          <div class="mel-checkout-step {{ step.status == 'current' ? 'is-active' : '' }} {{ step.status == 'complete' ? 'is-complete' : '' }}">
+            <span class="mel-checkout-step-number">
+              {% if step.status != 'complete' %}{{ loop.index }}{% endif %}
+            </span>
+            <span class="mel-checkout-step-label">{{ step.label }}</span>
+          </div>
+        {% endfor %}
+      </nav>
+    {% endif %}
+
+    {# Checkout Panes #}
+    {% for key, pane in form if key matches '/^(?!#|actions|sidebar)/' %}
+      {% if pane['#type'] is defined or pane['#markup'] is defined or pane|render|trim %}
+        <section class="mel-checkout-pane">
+          {% if pane['#title'] is defined %}
+            <h2 class="mel-checkout-pane-title">
+              {{ pane['#title'] }}
+            </h2>
+          {% endif %}
+          {{ pane }}
+        </section>
+      {% endif %}
+    {% endfor %}
+
+    {# Actions #}
+    <div class="mel-checkout-actions">
+      {{ form.actions }}
+    </div>
+  </div>
+
+  {# Order Summary Sidebar #}
+  <aside class="mel-checkout-sidebar">
+    <div class="mel-checkout-order-summary">
+      <h2 class="mel-checkout-order-title">Order Summary</h2>
+
+      {% if form.sidebar is defined %}
+        {{ form.sidebar }}
+      {% endif %}
+
+      <p class="mel-checkout-security">Secure checkout</p>
+    </div>
+  </aside>
+</div>
+
+
+

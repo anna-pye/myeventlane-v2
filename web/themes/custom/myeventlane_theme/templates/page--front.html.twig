@@ -1,0 +1,315 @@
+{#
+/**
+ * @file
+ * Theme override for the front page.
+ * Beautiful event platform landing with hero, events grid, and CTA.
+ */
+#}
+
+<div class="mel-page mel-page--front">
+
+  {# Skip to main content #}
+  <a href="#main-content" class="visually-hidden focusable skip-link">
+    {{ 'Skip to main content'|t }}
+  </a>
+
+  {# ==================== HEADER ==================== #}
+  <div class="mel-region-header">
+    <header class="mel-header">
+      <div class="mel-header-inner mel-container">
+        <div class="mel-header-left">
+          <a href="{{ path('<front>') }}" class="mel-logo">
+            <span class="mel-logo-icon">
+              <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect width="64" height="64" rx="12" fill="#ff6f61"/>
+                <path d="M16 64 C16 64 16 44 24 36 C28 32 34 34 38 32 C44 29 42 22 38 18 C34 14 28 16 24 22 C20 28 20 36 20 36" fill="#faf7fb"/>
+                <line x1="40" y1="14" x2="48" y2="6" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+                <line x1="46" y1="20" x2="56" y2="16" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+                <line x1="48" y1="28" x2="58" y2="28" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <span class="mel-logo-text">
+              <span class="mel-logo-my">My</span>
+              <span class="mel-logo-eventlane">EventLane</span>
+            </span>
+          </a>
+        </div>
+        <nav class="mel-nav-desktop" aria-label="Main navigation">
+          <ul class="mel-nav-list">
+            <li><a href="/events" class="mel-nav-link">Events</a></li>
+            <li><a href="/categories" class="mel-nav-link">Categories</a></li>
+            <li><a href="/calendar" class="mel-nav-link">Calendar</a></li>
+            <li><a href="/vendors" class="mel-nav-link">Organisers</a></li>
+          </ul>
+        </nav>
+        <div class="mel-header-actions">
+          {% if logged_in %}
+            <a href="/dashboard" class="mel-btn mel-btn-ghost">Dashboard</a>
+          {% else %}
+            <a href="/user/login" class="mel-btn mel-btn-ghost">Log in</a>
+          {% endif %}
+          <a href="/node/add/event" class="mel-btn mel-btn-primary">Create Event</a>
+        </div>
+        <button class="mel-nav-toggle" aria-label="Open menu" aria-expanded="false">
+          <span class="mel-nav-toggle-box">
+            <span class="mel-nav-toggle-line"></span>
+            <span class="mel-nav-toggle-line"></span>
+            <span class="mel-nav-toggle-line"></span>
+          </span>
+        </button>
+      </div>
+      <div class="mel-nav-mobile-wrapper" aria-hidden="true">
+        <div class="mel-nav-mobile-header">
+          <button class="mel-nav-mobile-close" aria-label="Close menu">×</button>
+        </div>
+        <nav class="mel-nav-mobile" aria-label="Mobile navigation">
+          <ul class="mel-nav-mobile-list">
+            <li><a href="/events">Browse Events</a></li>
+            <li><a href="/categories">Categories</a></li>
+            <li><a href="/calendar">Calendar</a></li>
+            <li><a href="/vendors">Organisers</a></li>
+            <li class="mel-mobile-divider"></li>
+            {% if logged_in %}
+              <li><a href="/dashboard">Dashboard</a></li>
+              <li><a href="/user/logout">Log out</a></li>
+            {% else %}
+              <li><a href="/user/login">Log in</a></li>
+              <li><a href="/user/register">Sign up</a></li>
+            {% endif %}
+            <li class="mel-mobile-divider"></li>
+            <li><a href="/node/add/event" class="mel-btn-mobile-accent">Create Event</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <div class="mel-nav-overlay"></div>
+  </div>
+
+  {# ==================== HERO ==================== #}
+  <div class="mel-region-hero">
+    <section class="mel-hero">
+      <div class="mel-container mel-hero-inner">
+        <div class="mel-hero-header">
+          <div class="mel-hero-brand">
+            {# Logo + Large headline #}
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+              <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 64px; height: 64px;" aria-hidden="true">
+                <rect width="64" height="64" rx="12" fill="#ff6f61"/>
+                <path d="M16 64 C16 64 16 44 24 36 C28 32 34 34 38 32 C44 29 42 22 38 18 C34 14 28 16 24 22 C20 28 20 36 20 36" fill="#faf7fb"/>
+                <line x1="40" y1="14" x2="48" y2="6" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+                <line x1="46" y1="20" x2="56" y2="16" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+                <line x1="48" y1="28" x2="58" y2="28" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+              </svg>
+              <div>
+                <span style="color: #ff6f61; font-size: 1.25rem; font-weight: 600; display: block;">My</span>
+                <span style="color: #ff6f61; font-size: 1.75rem; font-weight: 800; display: block; margin-top: -0.25rem;">EventLane</span>
+              </div>
+            </div>
+            <h1 style="color: #ff6f61; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 3.5rem; line-height: 1.05; margin: 0; letter-spacing: -0.02em;">
+              Run Your<br>Show
+            </h1>
+            <p class="mel-hero-tagline" style="font-size: 1.25rem; margin-top: 0.75rem; color: #1a1a2e;">Empowering Event Creators</p>
+          </div>
+          <div class="mel-hero-illustration" aria-hidden="true" style="width: 180px; height: 180px;">
+            <div class="mel-hero-pie"></div>
+          </div>
+        </div>
+        <div class="mel-hero-categories">
+          <a href="/events" class="mel-category-chip mel-category-chip--coral is-active">All Events</a>
+          {% if event_categories is defined and event_categories|length %}
+            {% set chip_colors = ['', 'mel-category-chip--purple', 'mel-category-chip--blue', 'mel-category-chip--teal', '', 'mel-category-chip--purple'] %}
+            {% for category in event_categories %}
+              <a href="{{ category.url }}" class="mel-category-chip {{ chip_colors[loop.index0 % 6] }}">
+                {{ category.name }}
+              </a>
+            {% endfor %}
+          {% endif %}
+        </div>
+        <form class="mel-hero-search" action="/events" method="get">
+          <div class="mel-hero-search-box">
+            <input type="text" name="q" placeholder="Search events..." aria-label="Search events">
+            <button type="submit" class="mel-hero-search-btn">Search</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  {# ==================== MAIN CONTENT ==================== #}
+  <main id="main-content" class="mel-main">
+    <div class="mel-container">
+
+      {# Featured Events Section #}
+      <section class="mel-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin: 0;">Featured Events</h2>
+          <a href="/node/add/event" class="mel-btn mel-btn-primary" style="padding: 0.5rem 1.5rem; border-radius: 999px;">Create an Event</a>
+        </div>
+        
+        {# CSS for event grid #}
+        <style>
+          /* Hide view titles */
+          .mel-events-section h2:not(.mel-section-title),
+          .mel-events-section h3,
+          .mel-events-section .view-header { display: none !important; }
+          
+          /* Target the view content and make it a grid */
+          .mel-events-section .view-content {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 1.5rem !important;
+          }
+          
+          /* Fallback: if view-content doesn't exist, target views-row parent */
+          .mel-events-section .view > div:not(.view-header):not(.view-filters) {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 1.5rem !important;
+          }
+          
+          /* Event cards */
+          .mel-events-section .mel-event-card {
+            display: flex !important;
+            flex-direction: column !important;
+          }
+          
+          @media (max-width: 1024px) {
+            .mel-events-section .view-content,
+            .mel-events-section .view > div:not(.view-header):not(.view-filters) { 
+              grid-template-columns: repeat(2, 1fr) !important; 
+            }
+          }
+          @media (max-width: 640px) {
+            .mel-events-section .view-content,
+            .mel-events-section .view > div:not(.view-header):not(.view-filters) { 
+              grid-template-columns: 1fr !important; 
+            }
+          }
+        </style>
+        
+        <div class="mel-events-section">
+          {{ page.content }}
+        </div>
+      </section>
+
+      {# ==================== MINI CALENDAR ==================== #}
+      {% if calendar is defined %}
+      <section class="mel-section" style="margin-top: 3rem;">
+        <div class="mel-calendar-section" style="background: #fff; border-radius: 28px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin: 0;">Events Calendar</h2>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <span style="font-size: 1.1rem; font-weight: 600; color: #1a1a2e;">{{ calendar.month_name }} {{ calendar.year }}</span>
+              <a href="/calendar" class="mel-btn mel-btn-ghost" style="padding: 0.5rem 1rem; font-size: 0.875rem;">View Full Calendar</a>
+            </div>
+          </div>
+          
+          {# Mini Calendar Grid #}
+          <div class="mel-mini-calendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; text-align: center;">
+            {# Day headers #}
+            {% for day in ['S', 'M', 'T', 'W', 'T', 'F', 'S'] %}
+              <div style="padding: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #8888a0; text-transform: uppercase;">{{ day }}</div>
+            {% endfor %}
+            
+            {# Empty cells for days before month starts #}
+            {% for i in 1..calendar.start_day %}
+              <div style="padding: 0.75rem; color: #ccc;"></div>
+            {% endfor %}
+            
+            {# Days of the month #}
+            {% for day in 1..calendar.days_in_month %}
+              {% set has_events = calendar.events_by_day[day] is defined %}
+              {% set is_today = calendar.is_current_month and day == calendar.today %}
+              <div style="
+                padding: 0.75rem;
+                border-radius: 12px;
+                font-size: 0.875rem;
+                font-weight: {% if has_events or is_today %}600{% else %}400{% endif %};
+                cursor: {% if has_events %}pointer{% else %}default{% endif %};
+                position: relative;
+                {% if is_today %}
+                  background: #8d79f6;
+                  color: #fff;
+                {% elseif has_events %}
+                  background: #fff5f4;
+                  color: #ff6f61;
+                {% else %}
+                  color: #1a1a2e;
+                {% endif %}
+              " {% if has_events %}title="{{ calendar.events_by_day[day]|length }} event(s)"{% endif %}>
+                {{ day }}
+                {% if has_events and not is_today %}
+                  <span style="position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: #ff6f61; border-radius: 50%;"></span>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+          
+          {# Legend #}
+          <div style="display: flex; gap: 1.5rem; margin-top: 1rem; font-size: 0.75rem; color: #5c5c6f;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="width: 12px; height: 12px; background: #8d79f6; border-radius: 4px;"></span>
+              Today
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="width: 12px; height: 12px; background: #fff5f4; border: 1px solid #ff6f61; border-radius: 4px;"></span>
+              Has Events
+            </div>
+          </div>
+        </div>
+      </section>
+      {% endif %}
+
+      {# CTA Banner #}
+      <section class="mel-cta-banner">
+        <h2 class="mel-cta-title">{{ 'Ready to host your event?'|t }}</h2>
+        <p class="mel-cta-text">{{ 'Create and manage events with ease. Free for free events!'|t }}</p>
+        <div class="mel-cta-actions">
+          <a href="/node/add/event" class="mel-btn mel-btn-accent mel-btn-lg">{{ 'Get Started Free'|t }}</a>
+          <a href="/vendors" class="mel-btn mel-btn-ghost mel-btn-lg" style="color: white; border-color: rgba(255,255,255,0.5);">{{ 'For Vendors'|t }}</a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  {# ==================== FOOTER ==================== #}
+  <footer class="mel-footer mel-footer--simple">
+    <div class="mel-container">
+      <div class="mel-footer-simple-inner">
+        <div class="mel-footer-brand">
+          <span class="mel-footer-logo">MyEventLane</span>
+          <p class="mel-footer-tagline">Empowering event creators everywhere.</p>
+        </div>
+        <nav class="mel-footer-nav" aria-label="Footer navigation">
+          <ul class="mel-footer-links-inline">
+            <li><a href="/about">About</a></li>
+            <li><a href="/support">Support</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><a href="/privacy">Privacy</a></li>
+            <li><a href="/terms">Terms</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </footer>
+  <div class="mel-post-footer mel-post-footer--dark">
+    <div class="mel-container">
+      <div class="mel-post-footer-inner">
+        <span class="mel-copyright">© {{ "now"|date("Y") }} MyEventLane. All rights reserved.</span>
+        <div class="mel-footer-social-icons">
+          <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook">
+            <span>FB</span>
+          </a>
+          <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
+            <span>IG</span>
+          </a>
+          <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="Twitter">
+            <span>X</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

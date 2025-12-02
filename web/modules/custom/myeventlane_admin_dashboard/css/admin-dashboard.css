@@ -1,0 +1,196 @@
+/**
+ * @file
+ * Styles for MyEventLane Admin Dashboard.
+ *
+ * Mobile-first approach with pastel card-based UI.
+ */
+
+/* CSS Custom Properties */
+:root {
+  --mel-admin-bg: #f8f9fa;
+  --mel-admin-card-bg: #ffffff;
+  --mel-admin-primary: #6c5ce7;
+  --mel-admin-primary-light: #ece8ff;
+  --mel-admin-primary-hover: #5b4cdb;
+  --mel-admin-text: #2d3436;
+  --mel-admin-text-muted: #636e72;
+  --mel-admin-border: #dfe6e9;
+  --mel-admin-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --mel-admin-radius: 8px;
+  --mel-admin-spacing: 16px;
+}
+
+/* Wrapper */
+.admin-dashboard-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--mel-admin-spacing);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--mel-admin-text);
+}
+
+/* Stats Section */
+.admin-dashboard-stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--mel-admin-spacing);
+  margin-bottom: calc(var(--mel-admin-spacing) * 2);
+}
+
+@media (min-width: 480px) {
+  .admin-dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .admin-dashboard-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.admin-dashboard-stat-card {
+  background: var(--mel-admin-card-bg);
+  border: 1px solid var(--mel-admin-border);
+  border-radius: var(--mel-admin-radius);
+  padding: calc(var(--mel-admin-spacing) * 1.5);
+  text-align: center;
+  box-shadow: var(--mel-admin-shadow);
+}
+
+.admin-dashboard-stat-card .stat-value {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--mel-admin-primary);
+  line-height: 1.2;
+}
+
+.admin-dashboard-stat-card .stat-label {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--mel-admin-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+}
+
+/* Section */
+.admin-dashboard-section {
+  margin-bottom: calc(var(--mel-admin-spacing) * 2);
+}
+
+.admin-dashboard-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 var(--mel-admin-spacing);
+  padding-bottom: calc(var(--mel-admin-spacing) / 2);
+  border-bottom: 2px solid var(--mel-admin-primary-light);
+}
+
+/* Quick Links */
+.admin-dashboard-links {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--mel-admin-spacing);
+}
+
+@media (min-width: 600px) {
+  .admin-dashboard-links {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .admin-dashboard-links {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.admin-dashboard-link {
+  display: flex;
+  flex-direction: column;
+  padding: var(--mel-admin-spacing);
+  background: var(--mel-admin-primary-light);
+  border-radius: var(--mel-admin-radius);
+  text-decoration: none;
+  color: var(--mel-admin-text);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.admin-dashboard-link:hover,
+.admin-dashboard-link:focus {
+  background: #dcd4ff;
+  transform: translateY(-2px);
+  outline: none;
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+}
+
+.admin-dashboard-link:focus-visible {
+  outline: 2px solid var(--mel-admin-primary);
+  outline-offset: 2px;
+}
+
+.admin-dashboard-link .link-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.admin-dashboard-link .link-description {
+  font-size: 0.8125rem;
+  color: var(--mel-admin-text-muted);
+}
+
+/* Recent Events List */
+.admin-dashboard-recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-dashboard-recent-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: calc(var(--mel-admin-spacing) * 0.75) 0;
+  border-bottom: 1px solid var(--mel-admin-border);
+}
+
+@media (min-width: 480px) {
+  .admin-dashboard-recent-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.admin-dashboard-recent-item:last-child {
+  border-bottom: none;
+}
+
+.admin-dashboard-recent-item a {
+  color: var(--mel-admin-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.admin-dashboard-recent-item a:hover,
+.admin-dashboard-recent-item a:focus {
+  text-decoration: underline;
+}
+
+.admin-dashboard-recent-item .event-date {
+  font-size: 0.8125rem;
+  color: var(--mel-admin-text-muted);
+}
+
+/* Empty State */
+.admin-dashboard-empty {
+  color: var(--mel-admin-text-muted);
+  font-style: italic;
+  padding: var(--mel-admin-spacing);
+  background: var(--mel-admin-bg);
+  border-radius: var(--mel-admin-radius);
+  text-align: center;
+}

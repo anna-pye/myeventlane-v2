@@ -1,0 +1,15 @@
+name: 'MyEventLane Vendor'
+type: module
+description: 'Defines the Vendor (Organiser) entity for MyEventLane. Vendors represent event organisers who can create and manage events on the platform.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_core:myeventlane_core
+  - drupal:field
+  - drupal:text
+  - drupal:image
+  - drupal:link
+  - drupal:user
+  - drupal:field_ui

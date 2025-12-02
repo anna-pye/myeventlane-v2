@@ -1,0 +1,3 @@
+administer myeventlane vendor:
+  title: 'Administer vendors / organisers'
+  description: 'Manage vendor entities and settings.'

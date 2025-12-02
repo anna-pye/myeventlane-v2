@@ -1,0 +1,8 @@
+# Admin permission.
+administer myeventlane messaging:
+  title: 'Administer messaging settings'
+  description: 'Configure email templates, sender settings, and notification timing.'
+  restrict access: TRUE
+
+
+

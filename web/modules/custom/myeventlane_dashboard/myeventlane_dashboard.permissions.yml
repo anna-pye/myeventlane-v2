@@ -1,0 +1,5 @@
+# Permissions for MyEventLane Dashboard module.
+
+access vendor dashboard:
+  title: 'Access vendor dashboard'
+  description: 'View the vendor dashboard to manage your own events and see analytics.'

@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Primary module file for MyEventLane Vendor v3.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function myeventlane_vendor_theme($existing, $type, $theme, $path) {
+  return [
+    'myeventlane_vendor_list' => [
+      'variables' => ['vendors' => NULL],
+      'template' => 'myeventlane-vendor-list',
+    ],
+    'myeventlane_vendor_detail' => [
+      'variables' => ['vendor' => NULL],
+      'template' => 'myeventlane-vendor-detail',
+    ],
+  ];
+}

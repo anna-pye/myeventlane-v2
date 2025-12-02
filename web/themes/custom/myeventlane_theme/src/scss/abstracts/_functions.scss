@@ -1,0 +1,58 @@
+// ==========================================================================
+// Functions
+// ==========================================================================
+// Sass helper functions for calculations and utilities.
+
+@use 'sass:math';
+@use 'sass:map';
+@use 'sass:list';
+
+// ---------------------------------------------------------------------------
+// Strip Unit
+// ---------------------------------------------------------------------------
+// Remove the unit from a number.
+
+@function strip-unit($value) {
+  @return math.div($value, ($value * 0 + 1));
+}
+
+// ---------------------------------------------------------------------------
+// Convert to Rem
+// ---------------------------------------------------------------------------
+// Convert pixel value to rem (assumes 16px base).
+
+@function to-rem($px, $base: 16) {
+  @return math.div($px, $base) * 1rem;
+}
+
+// ---------------------------------------------------------------------------
+// Convert to Em
+// ---------------------------------------------------------------------------
+
+@function to-em($px, $base: 16) {
+  @return math.div($px, $base) * 1em;
+}
+
+// ---------------------------------------------------------------------------
+// Z-Index Helper
+// ---------------------------------------------------------------------------
+// Get z-index from a named layer.
+
+$z-layers: (
+  'base': 1,
+  'dropdown': 10,
+  'sticky': 50,
+  'header': 100,
+  'overlay': 150,
+  'nav': 200,
+  'modal': 300,
+  'toast': 400,
+);
+
+@function z($layer) {
+  @if map.has-key($z-layers, $layer) {
+    @return map.get($z-layers, $layer);
+  }
+  @warn "Unknown z-index layer: #{$layer}";
+  @return 1;
+}

@@ -1,0 +1,8 @@
+services:
+  myeventlane_dashboard.access:
+    class: Drupal\myeventlane_dashboard\Service\DashboardAccess
+    arguments: ['@current_user', '@request_stack']
+
+  myeventlane_dashboard.event_loader:
+    class: Drupal\myeventlane_dashboard\Service\DashboardEventLoader
+    arguments: ['@entity_type.manager', '@current_user']

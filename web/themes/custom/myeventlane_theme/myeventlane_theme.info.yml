@@ -1,4 +1,20 @@
 name: MyEventLane Theme
 type: theme
+base theme: stable9
 core_version_requirement: ^11
-base theme: claro
+
+libraries:
+  - myeventlane_theme/global-styling
+
+regions:
+  utility_bar: Utility Bar
+  header: Header
+  hero: Hero
+  pre_content: Pre-Content
+  sidebar_left: Sidebar Left
+  content: Content
+  sidebar_right: Sidebar Right
+  pre_footer: Pre-Footer
+  footer: Footer
+  post_footer: Post-Footer
+

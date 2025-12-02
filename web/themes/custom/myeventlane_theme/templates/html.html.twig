@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="{{ language.getId }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    {# Preconnect to Google Fonts for performance #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    {# Nunito font - weights: 400 (regular), 500 (medium), 600 (semibold), 700 (bold), 800 (extrabold) #}
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <head-placeholder token="{{ placeholder_token }}">
+    <css-placeholder token="{{ placeholder_token }}">
+    <js-placeholder token="{{ placeholder_token }}">
+  </head>
+  <body class="mel-body">
+    <a href="#main-content" class="visually-hidden focusable skip-link">
+      {{ 'Skip to main content'|t }}
+    </a>
+    {{ page_top }}
+    {{ attach_library('core/drupal.big_pipe') }}
+    {{ page }}
+    {{ page_bottom }}
+  </body>
+</html>

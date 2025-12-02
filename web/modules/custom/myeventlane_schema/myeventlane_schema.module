@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * @file
+ * Primary module file for MyEventLane Schema.
+ *
+ * This module defines core fields and content types for MyEventLane.
+ * It contains no business logic - only schema/field/config responsibilities.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_help().
+ */
+function myeventlane_schema_help(string $route_name): string {
+  if ($route_name === 'help.page.myeventlane_schema') {
+    return '<p>' . t('MyEventLane Schema provides the foundational fields and content types for the MyEventLane event platform. This includes:') . '</p>'
+      . '<ul>'
+      . '<li>' . t('The <strong>Event</strong> content type with all event-related fields') . '</li>'
+      . '<li>' . t('Taxonomy vocabularies for <strong>Categories</strong> and <strong>Accessibility</strong> options') . '</li>'
+      . '<li>' . t('The <strong>Attendee Extra Field</strong> paragraph type for custom attendee questions') . '</li>'
+      . '<li>' . t('Commerce product and order item fields for event ticketing') . '</li>'
+      . '</ul>'
+      . '<p>' . t('Other MyEventLane modules depend on these definitions. Do not uninstall this module while other MyEventLane modules are enabled.') . '</p>';
+  }
+  return '';
+}

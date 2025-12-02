@@ -1,0 +1,134 @@
+{#
+/**
+ * @file
+ * Theme override for event nodes in teaser view mode.
+ * Renders as a beautiful event card.
+ */
+#}
+
+{% set variant = variant|default('default') %}
+{% set card_classes = ['mel-event-card'] %}
+{% if variant == 'featured' %}
+  {% set card_classes = card_classes|merge(['mel-event-card--featured']) %}
+{% endif %}
+
+{# Pastel background colors - rotate based on node ID #}
+{% set bg_colors = ['lavender', 'mint', 'peach', 'sky', 'rose', 'yellow', 'coral'] %}
+{% set bg_index = node.id|default(1) % 7 %}
+{% set bg_color = bg_colors[bg_index] %}
+
+{# Category info and colors #}
+{% set category_entity = node.field_category.entity %}
+{% set category_label = category_entity.label|default('') %}
+{% set category_name_lower = category_label|lower %}
+
+{# Category emoji #}
+{% set category_icons = {
+  'music': '🎸',
+  'movie': '🎬',
+  'workshop': '🎨',
+  'community': '👥',
+  'food & drink': '🍕',
+  'food': '🍕',
+  'sports': '⚽',
+  'tech': '💻',
+  'arts': '🎭',
+  'lgbtqi+': '🏳️‍🌈',
+  'default': '📅'
+} %}
+{% set card_icon = category_icons[category_name_lower]|default(category_icons['default']) %}
+
+{# Category colors - matching hero chips #}
+{% set category_colors = {
+  'music': '#8d79f6',
+  'movie': '#3b82f6',
+  'workshop': '#ff6f61',
+  'community': '#3b82f6',
+  'food & drink': '#70d6c4',
+  'food': '#70d6c4',
+  'arts': '#8d79f6',
+  'lgbtqi+': '#ff6f61',
+  'default': '#8888a0'
+} %}
+{% set category_color = category_colors[category_name_lower]|default(category_colors['default']) %}
+
+<article{{ attributes.addClass(card_classes) }}>
+
+  {# Image or Placeholder #}
+  {% if node.field_event_image.entity %}
+    <div class="mel-event-card-image">
+      {% if node.field_event_start.value %}
+        <div class="mel-event-card-date-badge">
+          <span class="mel-event-card-date-month">{{ node.field_event_start.value|date('M')|upper }}</span>
+          <span class="mel-event-card-date-day">{{ node.field_event_start.value|date('d') }}</span>
+        </div>
+      {% endif %}
+      <img src="{{ file_url(node.field_event_image.entity.uri.value) }}" 
+           alt="{{ node.field_event_image.alt }}" 
+           loading="lazy">
+    </div>
+  {% else %}
+    <div class="mel-event-card-image mel-event-card-image--placeholder mel-event-card-image--{{ bg_color }}">
+      {% if node.field_event_start.value %}
+        <div class="mel-event-card-date-badge">
+          <span class="mel-event-card-date-month">{{ node.field_event_start.value|date('M')|upper }}</span>
+          <span class="mel-event-card-date-day">{{ node.field_event_start.value|date('d') }}</span>
+        </div>
+      {% endif %}
+      <span class="mel-event-card-illustration">{{ card_icon }}</span>
+    </div>
+  {% endif %}
+
+  <div class="mel-event-card-body">
+    {# Category Tag #}
+    {% if category_label %}
+      <div class="mel-event-card-tags" style="margin-bottom: 0.5rem;">
+        <span class="mel-category-chip" style="
+          background-color: {{ category_color }}20;
+          color: {{ category_color }};
+          border: 1px solid {{ category_color }}40;
+          padding: 0.25rem 0.75rem;
+          font-size: 0.75rem;
+          font-weight: 600;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+        ">
+          <span>{{ card_icon }}</span>
+          {{ category_label }}
+        </span>
+      </div>
+    {% endif %}
+
+    {# Title #}
+    <h3 class="mel-event-card-title">
+      <a href="{{ url }}">{{ label }}</a>
+    </h3>
+
+    {# Meta #}
+    <div class="mel-event-card-meta">
+      {% if node.field_event_start.value %}
+        <div class="mel-event-card-meta-item">
+          <span class="mel-event-card-meta-icon">📅</span>
+          <span>{{ node.field_event_start.value|date('M d, Y') }}</span>
+        </div>
+      {% endif %}
+      {% if node.field_venue_name.value %}
+        <div class="mel-event-card-meta-item">
+          <span class="mel-event-card-meta-icon">📍</span>
+          <span>{{ node.field_venue_name.value }}</span>
+        </div>
+      {% endif %}
+    </div>
+
+    {# Footer #}
+    <div class="mel-event-card-footer">
+      <span class="mel-event-card-price mel-event-card-price--free">Free</span>
+      <div class="mel-event-card-cta">
+        <a href="{{ url }}" class="mel-btn mel-btn-primary mel-btn-sm mel-btn-pill">View</a>
+      </div>
+    </div>
+  </div>
+
+</article>

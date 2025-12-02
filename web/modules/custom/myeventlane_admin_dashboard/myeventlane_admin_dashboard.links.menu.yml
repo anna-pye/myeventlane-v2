@@ -1,0 +1,7 @@
+# Admin menu link for MyEventLane section.
+myeventlane_admin_dashboard.overview:
+  title: 'MyEventLane'
+  description: 'Platform overview and administration for MyEventLane.'
+  route_name: myeventlane_admin_dashboard.overview
+  parent: system.admin
+  weight: -5

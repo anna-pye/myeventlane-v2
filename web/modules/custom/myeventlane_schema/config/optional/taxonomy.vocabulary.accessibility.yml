@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+name: Accessibility
+vid: accessibility
+description: 'Accessibility options and features available at events (e.g., Wheelchair Access, Sign Language Interpreter, Quiet Room).'
+weight: 1

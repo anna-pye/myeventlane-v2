@@ -37,8 +37,8 @@ class IcsBundleGenerator {
 
       $events[] = [
         'title' => $event->label(),
-        'start' => $event->get('field_start_date')->value,
-        'end'   => $event->get('field_end_date')->value,
+        'start' => $event->get('field_event_start')->value,
+        'end'   => $event->get('field_event_end')->value,
         'url'   => $event->toUrl('canonical', ['absolute' => TRUE])->toString(),
         'location' => $event->get('field_location')->value ?? '',
       ];

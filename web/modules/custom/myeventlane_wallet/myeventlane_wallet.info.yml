@@ -1,0 +1,14 @@
+name: 'MyEventLane Wallet'
+type: module
+description: 'Apple Wallet and Google Wallet pass generation for event tickets. Allows attendees to add tickets to their mobile wallets.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_core:myeventlane_core
+  - myeventlane_tickets:myeventlane_tickets
+  - drupal:commerce_order
+
+
+

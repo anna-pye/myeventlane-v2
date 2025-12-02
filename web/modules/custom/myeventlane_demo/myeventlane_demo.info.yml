@@ -1,0 +1,16 @@
+name: 'MyEventLane Demo'
+type: module
+description: 'Demo data seeding for MyEventLane. Provides Drush commands to create sample events for testing all booking paths. Safe to disable in production environments.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_event:myeventlane_event
+  - myeventlane_rsvp:myeventlane_rsvp
+  - myeventlane_event_attendees:myeventlane_event_attendees
+  - drupal:node
+  - drupal:user
+  - drupal:taxonomy
+  - commerce_product:commerce_product
+  - commerce_store:commerce_store

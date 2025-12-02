@@ -4,10 +4,21 @@ namespace Drupal\myeventlane_tickets\Ticket;
 
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Core\Render\RendererInterface;
+use Dompdf\Dompdf;
 
+/**
+ * Generates ticket PDFs.
+ */
 class TicketPdfGenerator {
 
+  /**
+   * @var \Drupal\Core\Render\RendererInterface
+   */
   protected $renderer;
+
+  /**
+   * @var \Drupal\Core\Extension\ThemeHandlerInterface
+   */
   protected $themeHandler;
 
   public function __construct(RendererInterface $renderer, ThemeHandlerInterface $theme_handler) {
@@ -15,22 +26,25 @@ class TicketPdfGenerator {
     $this->themeHandler = $theme_handler;
   }
 
-  public function buildPdf($ticket_code, $event, $holder) {
+  /**
+   * Build PDF output for a ticket.
+   */
+  public function buildPdf(string $ticket_code, $event, string $holder) : string {
+
     $render = [
       '#theme' => 'ticket_pdf',
       '#event' => $event,
       '#holder' => $holder,
-      '#code' => $ticket_code,
+      '#code'  => $ticket_code,
     ];
 
-    $html = $this->renderer->renderPlain($render);
+    $html = $this->renderer->renderInIsolation($render);
 
-    // DomPDF recommended for Drupal
-    $pdf = new \Dompdf\Dompdf();
-    $pdf->loadHtml($html);
-    $pdf->render();
+    $dompdf = new Dompdf();
+    $dompdf->loadHtml($html);
+    $dompdf->render();
 
-    return $pdf->output();
+    return $dompdf->output();
   }
 
 }

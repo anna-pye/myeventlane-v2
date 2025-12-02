@@ -1,0 +1,144 @@
+// ==========================================================================
+// Flexbox Utilities
+// ==========================================================================
+// Common flexbox patterns.
+
+@use '../tokens/spacing';
+
+// ---------------------------------------------------------------------------
+// Flex Containers
+// ---------------------------------------------------------------------------
+
+.mel-flex {
+  display: flex;
+}
+
+.mel-flex-inline {
+  display: inline-flex;
+}
+
+// ---------------------------------------------------------------------------
+// Direction
+// ---------------------------------------------------------------------------
+
+.mel-flex-row {
+  flex-direction: row;
+}
+
+.mel-flex-col {
+  flex-direction: column;
+}
+
+.mel-flex-row-reverse {
+  flex-direction: row-reverse;
+}
+
+.mel-flex-col-reverse {
+  flex-direction: column-reverse;
+}
+
+// ---------------------------------------------------------------------------
+// Alignment
+// ---------------------------------------------------------------------------
+
+.mel-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mel-flex-between {
+  display: flex;
+  justify-content: space-between;
+}
+
+.mel-flex-around {
+  display: flex;
+  justify-content: space-around;
+}
+
+.mel-flex-evenly {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.mel-flex-start {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.mel-flex-end {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mel-items-start {
+  align-items: flex-start;
+}
+
+.mel-items-center {
+  align-items: center;
+}
+
+.mel-items-end {
+  align-items: flex-end;
+}
+
+.mel-items-stretch {
+  align-items: stretch;
+}
+
+// ---------------------------------------------------------------------------
+// Wrap
+// ---------------------------------------------------------------------------
+
+.mel-flex-wrap {
+  flex-wrap: wrap;
+}
+
+.mel-flex-nowrap {
+  flex-wrap: nowrap;
+}
+
+// ---------------------------------------------------------------------------
+// Gap
+// ---------------------------------------------------------------------------
+
+.mel-gap-1 { gap: spacing.mel-space(1); }
+.mel-gap-2 { gap: spacing.mel-space(2); }
+.mel-gap-3 { gap: spacing.mel-space(3); }
+.mel-gap-4 { gap: spacing.mel-space(4); }
+.mel-gap-5 { gap: spacing.mel-space(5); }
+.mel-gap-6 { gap: spacing.mel-space(6); }
+
+// ---------------------------------------------------------------------------
+// Grow & Shrink
+// ---------------------------------------------------------------------------
+
+.mel-flex-1 {
+  flex: 1 1 0%;
+}
+
+.mel-flex-auto {
+  flex: 1 1 auto;
+}
+
+.mel-flex-none {
+  flex: none;
+}
+
+.mel-grow {
+  flex-grow: 1;
+}
+
+.mel-grow-0 {
+  flex-grow: 0;
+}
+
+.mel-shrink {
+  flex-shrink: 1;
+}
+
+.mel-shrink-0 {
+  flex-shrink: 0;
+}

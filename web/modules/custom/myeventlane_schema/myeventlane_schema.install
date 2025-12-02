@@ -1,0 +1,156 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall hooks for MyEventLane Schema module.
+ *
+ * This module owns the creation of all core field storages and field instances
+ * that MyEventLane depends on. Fields are primarily created via config/install
+ * YAML files, but this file handles any programmatic setup needed.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\EntityStorageException;
+
+/**
+ * Implements hook_install().
+ *
+ * Performs additional setup after config is imported.
+ */
+function myeventlane_schema_install(): void {
+  // Log successful installation.
+  \Drupal::logger('myeventlane_schema')->notice('MyEventLane Schema module installed. Core fields and content types are now available.');
+
+  // Rebuild caches to ensure all field definitions are picked up.
+  drupal_flush_all_caches();
+}
+
+/**
+ * Implements hook_uninstall().
+ *
+ * Cleans up module-specific data. Note: Field data is NOT deleted by default.
+ * Drupal will retain field storage until all bundles using the field are removed.
+ */
+function myeventlane_schema_uninstall(): void {
+  \Drupal::logger('myeventlane_schema')->warning(
+    'MyEventLane Schema module uninstalled. Field storages may remain until manually removed. Check /admin/config/development/configuration/single/export for orphaned config.'
+  );
+}
+
+/**
+ * Implements hook_requirements().
+ *
+ * Reports on the status of the schema module.
+ */
+function myeventlane_schema_requirements(string $phase): array {
+  $requirements = [];
+
+  if ($phase === 'runtime') {
+    // Check if the event content type exists.
+    $node_type_storage = \Drupal::entityTypeManager()->getStorage('node_type');
+    $event_type = $node_type_storage->load('event');
+
+    $requirements['myeventlane_schema_event'] = [
+      'title' => t('MyEventLane Event Content Type'),
+      'value' => $event_type ? t('Configured') : t('Missing'),
+      'severity' => $event_type ? REQUIREMENT_OK : REQUIREMENT_WARNING,
+    ];
+
+    if (!$event_type) {
+      $requirements['myeventlane_schema_event']['description'] = t('The Event content type is not configured. Run config import or create it manually.');
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Creates ticket product type and variation type for Commerce.
+ */
+function myeventlane_schema_update_9001(): string {
+  $entity_type_manager = \Drupal::entityTypeManager();
+
+  // Create ticket variation type.
+  $variation_type_storage = $entity_type_manager->getStorage('commerce_product_variation_type');
+  if (!$variation_type_storage->load('ticket_variation')) {
+    $variation_type = $variation_type_storage->create([
+      'id' => 'ticket_variation',
+      'label' => 'Ticket Variation',
+      'orderItemType' => 'default',
+      'generateTitle' => TRUE,
+      'traits' => [],
+    ]);
+    $variation_type->save();
+  }
+
+  // Create ticket product type.
+  $product_type_storage = $entity_type_manager->getStorage('commerce_product_type');
+  if (!$product_type_storage->load('ticket')) {
+    $product_type = $product_type_storage->create([
+      'id' => 'ticket',
+      'label' => 'Event Ticket',
+      'description' => 'Ticket product for MyEventLane events (free RSVP or paid)',
+      'variationType' => 'ticket_variation',
+      'multipleVariations' => TRUE,
+      'injectVariationFields' => TRUE,
+      'traits' => [],
+    ]);
+    $product_type->save();
+  }
+
+  // Create default store if it doesn't exist.
+  $store_storage = $entity_type_manager->getStorage('commerce_store');
+  if (!$store_storage->load('default')) {
+    $store = $store_storage->create([
+      'type' => 'online',
+      'uid' => 1,
+      'name' => 'MyEventLane Store',
+      'mail' => 'noreply@myeventlane.com',
+      'default_currency' => 'USD',
+      'timezone' => 'America/New_York',
+      'address' => [
+        'country_code' => 'US',
+        'administrative_area' => '',
+        'locality' => '',
+        'postal_code' => '',
+        'address_line1' => '',
+        'organization' => 'MyEventLane',
+      ],
+      'billing_countries' => [],
+      'is_default' => TRUE,
+    ]);
+    $store->save();
+  }
+
+  // Now import field configs using config import.
+  $config_path = \Drupal::service('extension.list.module')->getPath('myeventlane_schema') . '/config/install';
+
+  // Import field storage for product variation.
+  $config_name = 'field.storage.commerce_product_variation.field_event';
+  $config_file = $config_path . '/' . $config_name . '.yml';
+  if (file_exists($config_file)) {
+    $config_data = \Drupal\Component\Serialization\Yaml::decode(file_get_contents($config_file));
+    \Drupal::configFactory()->getEditable($config_name)->setData($config_data)->save(TRUE);
+  }
+
+  // Import field instance for ticket variation.
+  $config_name = 'field.field.commerce_product_variation.ticket_variation.field_event';
+  $config_file = $config_path . '/' . $config_name . '.yml';
+  if (file_exists($config_file)) {
+    $config_data = \Drupal\Component\Serialization\Yaml::decode(file_get_contents($config_file));
+    \Drupal::configFactory()->getEditable($config_name)->setData($config_data)->save(TRUE);
+  }
+
+  // Import field instance for ticket product.
+  $config_name = 'field.field.commerce_product.ticket.field_event';
+  $config_file = $config_path . '/' . $config_name . '.yml';
+  if (file_exists($config_file)) {
+    $config_data = \Drupal\Component\Serialization\Yaml::decode(file_get_contents($config_file));
+    \Drupal::configFactory()->getEditable($config_name)->setData($config_data)->save(TRUE);
+  }
+
+  drupal_flush_all_caches();
+
+  return 'Created ticket product type, variation type, and default store. Imported field configurations.';
+}

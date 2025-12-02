@@ -1,0 +1,11 @@
+# Dashboard library - used by both admin and vendor dashboards.
+dashboard:
+  version: VERSION
+  css:
+    theme:
+      css/dashboard.css: {}
+  js:
+    js/dashboard.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

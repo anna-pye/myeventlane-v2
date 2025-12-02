@@ -1,0 +1,8 @@
+# Admin permission.
+administer myeventlane wallet:
+  title: 'Administer wallet settings'
+  description: 'Configure Apple Wallet and Google Wallet integration.'
+  restrict access: TRUE
+
+
+

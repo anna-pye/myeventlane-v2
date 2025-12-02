@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Background rounded square -->
+  <rect width="64" height="64" rx="12" fill="#ff6f61"/>
+  
+  <!-- Person silhouette (waving) - simplified -->
+  <path d="M16 64 C16 64 16 44 24 36 C28 32 34 34 38 32 C44 29 42 22 38 18 C34 14 28 16 24 22 C20 28 20 36 20 36" fill="#faf7fb"/>
+  
+  <!-- Celebration lines (yellow) -->
+  <line x1="40" y1="14" x2="48" y2="6" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+  <line x1="46" y1="20" x2="56" y2="16" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+  <line x1="48" y1="28" x2="58" y2="28" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+</svg>
+
+
+

@@ -1,0 +1,5 @@
+services:
+  myeventlane_theme.asset_resolver:
+    class: Drupal\myeventlane_theme\Service\AssetResolver
+    arguments: ['@extension.list.theme']
+    tags: ['myeventlane_theme.service']

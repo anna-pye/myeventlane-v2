@@ -1,0 +1,32 @@
+services:
+  # Logger channel for boost module.
+  logger.channel.myeventlane_boost:
+    parent: logger.channel_base
+    arguments: ['myeventlane_boost']
+
+  # Main boost manager service.
+  myeventlane_boost.manager:
+    class: Drupal\myeventlane_boost\BoostManager
+    arguments:
+      - '@entity_type.manager'
+      - '@datetime.time'
+      - '@logger.channel.myeventlane_boost'
+
+  # Order/checkout event subscriber for applying boosts on payment.
+  myeventlane_boost.order_subscriber:
+    class: Drupal\myeventlane_boost\EventSubscriber\BoostOrderSubscriber
+    arguments:
+      - '@myeventlane_boost.manager'
+      - '@logger.channel.myeventlane_boost'
+      - '@request_stack'
+    tags:
+      - { name: event_subscriber }
+
+  # Refund/void subscriber to revoke boosts.
+  myeventlane_boost.refund_subscriber:
+    class: Drupal\myeventlane_boost\EventSubscriber\BoostRefundSubscriber
+    arguments:
+      - '@entity_type.manager'
+      - '@logger.channel.myeventlane_boost'
+    tags:
+      - { name: event_subscriber }

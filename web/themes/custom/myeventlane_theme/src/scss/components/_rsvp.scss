@@ -1,0 +1,431 @@
+// ==========================================================================
+// RSVP & Ticket Forms
+// ==========================================================================
+// Styles for RSVP forms and ticket selection.
+
+@use 'sass:color';
+@use '../tokens/colors';
+@use '../tokens/typography';
+@use '../tokens/spacing';
+@use '../tokens/radii';
+@use '../tokens/shadows';
+@use '../tokens/breakpoints';
+
+// ---------------------------------------------------------------------------
+// RSVP Form Container
+// ---------------------------------------------------------------------------
+
+.mel-rsvp-form,
+.mel-ticket-form {
+  background: colors.$mel-color-surface;
+  border-radius: radii.$mel-radius-xl;
+  padding: spacing.mel-space(5);
+  box-shadow: shadows.$mel-shadow-md;
+  margin-bottom: spacing.mel-space(6);
+
+  @include breakpoints.mel-break(md) {
+    padding: spacing.mel-space(6);
+  }
+}
+
+.mel-rsvp-form-header,
+.mel-ticket-form-header {
+  margin-bottom: spacing.mel-space(5);
+  padding-bottom: spacing.mel-space(4);
+  border-bottom: 1px solid colors.$mel-color-border;
+}
+
+.mel-rsvp-form-title,
+.mel-ticket-form-title {
+  font-size: typography.mel-font-size(xl);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-text;
+  margin: 0 0 spacing.mel-space(2) 0;
+}
+
+.mel-rsvp-form-subtitle {
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text-muted;
+  margin: 0;
+}
+
+// ---------------------------------------------------------------------------
+// Ticket Types
+// ---------------------------------------------------------------------------
+
+.mel-ticket-list {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(4);
+  margin-bottom: spacing.mel-space(5);
+}
+
+.mel-ticket-item {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(3);
+  padding: spacing.mel-space(4);
+  background: colors.$mel-color-bg;
+  border-radius: radii.$mel-radius-lg;
+  border: 2px solid transparent;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  @include breakpoints.mel-break(sm) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &:hover {
+    border-color: colors.$mel-color-border;
+  }
+
+  &.is-selected {
+    border-color: colors.$mel-color-secondary;
+    background: color.adjust(colors.$mel-color-secondary, $lightness: 45%);
+  }
+}
+
+.mel-ticket-info {
+  flex: 1;
+}
+
+.mel-ticket-name {
+  font-size: typography.mel-font-size(md);
+  font-weight: typography.$mel-font-semibold;
+  color: colors.$mel-color-text;
+  margin-bottom: spacing.mel-space(1);
+}
+
+.mel-ticket-description {
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text-muted;
+  margin-bottom: spacing.mel-space(2);
+}
+
+.mel-ticket-price {
+  font-size: typography.mel-font-size(lg);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-primary;
+}
+
+.mel-ticket-price--free {
+  color: colors.$mel-color-success;
+}
+
+.mel-ticket-controls {
+  display: flex;
+  align-items: center;
+  gap: spacing.mel-space(3);
+}
+
+// ---------------------------------------------------------------------------
+// Quantity Selector
+// ---------------------------------------------------------------------------
+
+.mel-quantity-selector {
+  display: inline-flex;
+  align-items: center;
+  background: colors.$mel-color-surface;
+  border: 2px solid colors.$mel-color-border;
+  border-radius: radii.$mel-radius-md;
+}
+
+.mel-quantity-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: colors.$mel-color-text;
+  font-size: typography.mel-font-size(lg);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: colors.$mel-color-bg;
+    color: colors.$mel-color-primary;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+    z-index: 1;
+    position: relative;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.mel-quantity-input {
+  width: 50px;
+  height: 40px;
+  text-align: center;
+  border: none;
+  border-left: 1px solid colors.$mel-color-border;
+  border-right: 1px solid colors.$mel-color-border;
+  font-size: typography.mel-font-size(base);
+  font-weight: typography.$mel-font-semibold;
+  color: colors.$mel-color-text;
+  background: transparent;
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  &:focus {
+    outline: none;
+    background: colors.$mel-color-bg;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Attendee Fields
+// ---------------------------------------------------------------------------
+
+.mel-attendee-fields {
+  margin-bottom: spacing.mel-space(5);
+}
+
+.mel-attendee-group {
+  padding: spacing.mel-space(4);
+  background: colors.$mel-color-bg;
+  border-radius: radii.$mel-radius-lg;
+  margin-bottom: spacing.mel-space(4);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.mel-attendee-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: spacing.mel-space(3);
+  padding-bottom: spacing.mel-space(2);
+  border-bottom: 1px solid colors.$mel-color-border;
+}
+
+.mel-attendee-group-title {
+  font-size: typography.mel-font-size(base);
+  font-weight: typography.$mel-font-semibold;
+  color: colors.$mel-color-text;
+  margin: 0;
+}
+
+.mel-attendee-group-badge {
+  font-size: typography.mel-font-size(xs);
+  font-weight: typography.$mel-font-medium;
+  padding: spacing.mel-space(1) spacing.mel-space(2);
+  background: colors.$mel-color-secondary;
+  color: colors.$mel-color-text-inverse;
+  border-radius: radii.$mel-radius-full;
+}
+
+// ---------------------------------------------------------------------------
+// Order Summary
+// ---------------------------------------------------------------------------
+
+.mel-order-summary {
+  background: colors.$mel-color-bg;
+  border-radius: radii.$mel-radius-lg;
+  padding: spacing.mel-space(4);
+  margin-bottom: spacing.mel-space(5);
+}
+
+.mel-order-summary-title {
+  font-size: typography.mel-font-size(md);
+  font-weight: typography.$mel-font-bold;
+  margin-bottom: spacing.mel-space(3);
+  color: colors.$mel-color-text;
+}
+
+.mel-order-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: spacing.mel-space(2) 0;
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid colors.$mel-color-border;
+  }
+}
+
+.mel-order-line-label {
+  color: colors.$mel-color-text-muted;
+}
+
+.mel-order-line-value {
+  font-weight: typography.$mel-font-semibold;
+}
+
+.mel-order-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: spacing.mel-space(3);
+  margin-top: spacing.mel-space(2);
+  border-top: 2px solid colors.$mel-color-border-strong;
+  font-size: typography.mel-font-size(lg);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-text;
+}
+
+// ---------------------------------------------------------------------------
+// RSVP Response Options
+// ---------------------------------------------------------------------------
+
+.mel-rsvp-options {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(3);
+  margin-bottom: spacing.mel-space(5);
+
+  @include breakpoints.mel-break(sm) {
+    flex-direction: row;
+  }
+}
+
+.mel-rsvp-option {
+  flex: 1;
+  position: relative;
+
+  input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.mel-rsvp-option-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: spacing.mel-space(2);
+  padding: spacing.mel-space(4);
+  background: colors.$mel-color-bg;
+  border: 2px solid colors.$mel-color-border;
+  border-radius: radii.$mel-radius-lg;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+
+  &:hover {
+    border-color: colors.$mel-color-border-strong;
+  }
+
+  input:checked + & {
+    border-color: colors.$mel-color-secondary;
+    background: color.adjust(colors.$mel-color-secondary, $lightness: 45%);
+  }
+
+  input:focus-visible + & {
+    @include colors.mel-focus-ring;
+  }
+}
+
+.mel-rsvp-option-icon {
+  font-size: typography.mel-font-size(2xl);
+}
+
+.mel-rsvp-option-text {
+  font-weight: typography.$mel-font-semibold;
+  color: colors.$mel-color-text;
+}
+
+// ---------------------------------------------------------------------------
+// Guest Count
+// ---------------------------------------------------------------------------
+
+.mel-guest-count {
+  display: flex;
+  align-items: center;
+  gap: spacing.mel-space(4);
+  margin-bottom: spacing.mel-space(5);
+}
+
+.mel-guest-count-label {
+  font-size: typography.mel-font-size(base);
+  font-weight: typography.$mel-font-medium;
+  color: colors.$mel-color-text;
+}
+
+// ---------------------------------------------------------------------------
+// Form Footer
+// ---------------------------------------------------------------------------
+
+.mel-rsvp-form-footer,
+.mel-ticket-form-footer {
+  padding-top: spacing.mel-space(4);
+  border-top: 1px solid colors.$mel-color-border;
+}
+
+.mel-rsvp-form-note {
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text-muted;
+  text-align: center;
+  margin-top: spacing.mel-space(3);
+}
+
+// ---------------------------------------------------------------------------
+// Spots Left Indicator
+// ---------------------------------------------------------------------------
+
+.mel-spots-left {
+  display: inline-flex;
+  align-items: center;
+  gap: spacing.mel-space(2);
+  padding: spacing.mel-space(2) spacing.mel-space(3);
+  background: colors.$mel-color-warning-bg;
+  border-radius: radii.$mel-radius-md;
+  font-size: typography.mel-font-size(sm);
+  font-weight: typography.$mel-font-medium;
+  color: color.adjust(colors.$mel-color-warning, $lightness: -20%);
+  margin-bottom: spacing.mel-space(4);
+}
+
+.mel-spots-left--low {
+  background: colors.$mel-color-error-bg;
+  color: colors.$mel-color-error;
+}
+
+// ---------------------------------------------------------------------------
+// Success State
+// ---------------------------------------------------------------------------
+
+.mel-rsvp-success,
+.mel-ticket-success {
+  text-align: center;
+  padding: spacing.mel-space(6);
+}
+
+.mel-success-icon {
+  font-size: 4rem;
+  margin-bottom: spacing.mel-space(4);
+}
+
+.mel-success-title {
+  font-size: typography.mel-font-size(xl);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-success;
+  margin-bottom: spacing.mel-space(2);
+}
+
+.mel-success-message {
+  font-size: typography.mel-font-size(base);
+  color: colors.$mel-color-text-muted;
+  margin-bottom: spacing.mel-space(5);
+}
+
+
+

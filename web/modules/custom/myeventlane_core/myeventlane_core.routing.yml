@@ -1,0 +1,23 @@
+# Parent configuration section for all MyEventLane settings.
+myeventlane_core.config:
+  path: '/admin/config/myeventlane'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'MyEventLane'
+  requirements:
+    _permission: 'administer myeventlane'
+  options:
+    _admin_route: TRUE
+
+# General platform settings.
+myeventlane_core.settings:
+  path: '/admin/config/myeventlane/general'
+  defaults:
+    _form: '\Drupal\myeventlane_core\Form\GeneralSettingsForm'
+    _title: 'General settings'
+  requirements:
+    _permission: 'administer myeventlane'
+  options:
+    _admin_route: TRUE
+
+

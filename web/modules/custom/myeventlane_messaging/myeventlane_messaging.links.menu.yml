@@ -1,0 +1,10 @@
+# Admin config menu link.
+myeventlane_messaging.settings:
+  title: 'Messaging'
+  description: 'Configure email notifications, reminders, and sender settings.'
+  route_name: myeventlane_messaging.settings
+  parent: myeventlane_core.config
+  weight: 15
+
+
+

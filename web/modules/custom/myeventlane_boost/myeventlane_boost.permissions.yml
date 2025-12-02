@@ -1,0 +1,10 @@
+# Vendor permission.
+purchase boost for events:
+  title: 'Purchase boost for events'
+  description: 'Allow organisers to purchase featured placement for their events.'
+
+# Admin permission.
+administer myeventlane boost:
+  title: 'Administer boost settings'
+  description: 'Configure boost packages, duration, and display settings.'
+  restrict access: TRUE

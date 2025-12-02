@@ -1,0 +1,14 @@
+name: 'MyEventLane Checkout (Paragraph-based)'
+type: module
+description: 'Checkout pane for MyEventLane that renders attendee forms using Paragraphs. Captures per-ticket attendee information during checkout and creates attendance records.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_commerce:myeventlane_commerce
+  - myeventlane_event_attendees:myeventlane_event_attendees
+  - drupal:commerce_checkout
+  - drupal:commerce
+  - paragraphs:paragraphs
+  - entity:entity

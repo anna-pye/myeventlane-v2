@@ -1,0 +1,29 @@
+// ==========================================================================
+// CSS Reset
+// ==========================================================================
+// Minimal reset for consistent cross-browser styling.
+
+@use '../tokens/colors';
+@use '../tokens/typography';
+
+// ---------------------------------------------------------------------------
+// Box Sizing
+// ---------------------------------------------------------------------------
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+// ---------------------------------------------------------------------------
+// Body Defaults
+// ---------------------------------------------------------------------------
+// Note: More body styles are in _base.scss
+
+body {
+  margin: 0;
+  background: colors.$mel-color-bg;
+  color: colors.$mel-color-text;
+  font-family: typography.$mel-font-family;
+}

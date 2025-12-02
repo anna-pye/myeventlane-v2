@@ -28,7 +28,7 @@ class RsvpMailer {
 
     $params = [
       'event_title' => $event->label(),
-      'event_date' => $event->get('field_event_date')->value ?? '',
+      'event_date' => $event->get('field_event_start')->value ?? '',
       'event_location' => $event->get('field_location')->value ?? '',
       'name' => $submission['name'],
       'email' => $submission['email'],

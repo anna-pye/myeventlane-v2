@@ -1,33 +1,53 @@
 <?php
 
-public function getEventRsvpCount(int $event_id, string $status): int {
-  return $this->storage->getQuery()
-    ->condition('event_id', $event_id)
-    ->condition('status', $status)
-    ->count()
-    ->execute();
-}
+namespace Drupal\myeventlane_rsvp\Service;
 
-public function getEventRsvps(int $event_id): array {
-  $ids = $this->storage->getQuery()
-    ->condition('event_id', $event_id)
-    ->sort('created', 'DESC')
-    ->execute();
+use Drupal\Core\Database\Connection;
+use Drupal\Core\Session\AccountInterface;
 
-  if (!$ids) {
-    return [];
+/**
+ * Repository service for querying user RSVP submissions.
+ */
+final class UserRsvpRepository {
+
+  /**
+   * @var \Drupal\Core\Database\Connection
+   */
+  private Connection $connection;
+
+  /**
+   * Constructor.
+   */
+  public function __construct(Connection $connection) {
+    $this->connection = $connection;
   }
 
-  $items = [];
-  foreach ($this->storage->loadMultiple($ids) as $entity) {
-    $items[] = [
-      'id' => $entity->id(),
-      'first_name' => $entity->first_name->value,
-      'last_name' => $entity->last_name->value,
-      'email' => $entity->email->value,
-      'status' => $entity->status->value,
-      'created' => (int) $entity->created->value,
-    ];
+  /**
+   * Load RSVP submissions for a specific user.
+   *
+   * @return array
+   *   An array of RSVP submission rows.
+   */
+  public function loadByUser(AccountInterface $account): array {
+    return $this->connection->select('rsvp_submission', 'r')
+      ->fields('r')
+      ->condition('uid', $account->id())
+      ->execute()
+      ->fetchAllAssoc('id');
   }
-  return $items;
+
+  /**
+   * Load RSVP submissions for a specific event node.
+   *
+   * @return array
+   *   An array of RSVP submission rows.
+   */
+  public function loadByEvent(int $nid): array {
+    return $this->connection->select('rsvp_submission', 'r')
+      ->fields('r')
+      ->condition('event_id', $nid)
+      ->execute()
+      ->fetchAllAssoc('id');
+  }
+
 }

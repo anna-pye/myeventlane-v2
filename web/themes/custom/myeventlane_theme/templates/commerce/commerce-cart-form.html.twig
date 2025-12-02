@@ -1,0 +1,70 @@
+{#
+/**
+ * @file
+ * Theme override for the cart form.
+ *
+ * Available variables:
+ * - form: The cart form with all its elements.
+ */
+#}
+
+<div class="mel-cart">
+  {# Cart Items #}
+  <div class="mel-cart-items">
+    <div class="mel-cart-header">
+      <h1 class="mel-cart-title">
+        Your Cart
+        {% if form['#order_items']|length > 0 %}
+          <span class="mel-cart-count">({{ form['#order_items']|length }} items)</span>
+        {% endif %}
+      </h1>
+    </div>
+
+    {% if form['#order_items']|length > 0 %}
+      {{ form.header }}
+      {{ form.output }}
+
+      {% for key, item in form if key matches '/^edit_quantity/' %}
+        {# Individual cart items are rendered by commerce #}
+      {% endfor %}
+    {% else %}
+      <div class="mel-cart-empty">
+        <div class="mel-cart-empty-icon">🛒</div>
+        <h2 class="mel-cart-empty-title">Your cart is empty</h2>
+        <p class="mel-cart-empty-text">Looks like you haven't added any tickets yet.</p>
+        <a href="/events" class="mel-btn mel-btn-primary">Browse Events</a>
+      </div>
+    {% endif %}
+  </div>
+
+  {# Cart Summary Sidebar #}
+  {% if form['#order_items']|length > 0 %}
+    <aside class="mel-cart-summary">
+      <h2 class="mel-cart-summary-title">Order Summary</h2>
+
+      <div class="mel-cart-summary-lines">
+        {% if form.totals is defined %}
+          {{ form.totals }}
+        {% endif %}
+      </div>
+
+      <div class="mel-cart-total">
+        <span class="mel-cart-total-label">Total</span>
+        <span class="mel-cart-total-value">
+          {% if form['#order'] is defined %}
+            {{ form['#order'].getTotalPrice()|commerce_price_format }}
+          {% endif %}
+        </span>
+      </div>
+
+      <div class="mel-cart-actions">
+        {{ form.actions }}
+      </div>
+
+      <p class="mel-checkout-security">Secure checkout</p>
+    </aside>
+  {% endif %}
+</div>
+
+
+

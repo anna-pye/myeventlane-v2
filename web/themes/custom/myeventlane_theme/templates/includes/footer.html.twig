@@ -1,0 +1,55 @@
+{#
+/**
+ * @file
+ * Simple footer inspired by the mockup.
+ * Clean, minimal with essential links.
+ */
+#}
+
+{# Main Footer #}
+<footer class="mel-footer mel-footer--simple">
+  <div class="mel-container">
+    <div class="mel-footer-simple-inner">
+
+      {# Brand & Tagline #}
+      <div class="mel-footer-brand">
+        <span class="mel-footer-logo">MyEventLane</span>
+        <p class="mel-footer-tagline">Empowering event creators everywhere.</p>
+      </div>
+
+      {# Quick Links #}
+      <nav class="mel-footer-nav" aria-label="Footer navigation">
+        <ul class="mel-footer-links-inline">
+          <li><a href="/about">About</a></li>
+          <li><a href="/support">Support</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/privacy">Privacy</a></li>
+          <li><a href="/terms">Terms</a></li>
+        </ul>
+      </nav>
+
+    </div>
+  </div>
+</footer>
+
+{# Post Footer - Copyright #}
+<div class="mel-post-footer mel-post-footer--dark">
+  <div class="mel-container">
+    <div class="mel-post-footer-inner">
+      <span class="mel-copyright">
+        © {{ "now"|date("Y") }} MyEventLane. All rights reserved.
+      </span>
+      <div class="mel-footer-social-icons">
+        <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook">
+          <span>FB</span>
+        </a>
+        <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
+          <span>IG</span>
+        </a>
+        <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="Twitter">
+          <span>X</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

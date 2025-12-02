@@ -1,0 +1,13 @@
+name: 'MyEventLane Event Attendees'
+type: module
+description: 'Unified attendance tracking for MyEventLane. Manages all attendee records from RSVP submissions and ticket purchases in a single system.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_core:myeventlane_core
+  - myeventlane_schema:myeventlane_schema
+  - drupal:node
+  - drupal:user
+  - drupal:views

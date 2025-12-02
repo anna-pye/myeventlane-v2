@@ -1,0 +1,86 @@
+<?php
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * @file
+ * myeventlane_checkout_paragraph.module
+ *
+ * Attaches checkout paragraph functionality.
+ * Now delegates sanitation to the theme's recursive sanitizer.
+ */
+
+/**
+ * Implements hook_form_alter().
+ */
+function myeventlane_checkout_paragraph_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id): void {
+  if (isset($form['#id']) && str_contains($form['#id'], 'commerce-checkout')) {
+    if (function_exists('_myeventlane_theme_sanitize_recursive')) {
+      _myeventlane_theme_sanitize_recursive($form, ['checkout_paragraph', 'form_alter']);
+    }
+  }
+}
+
+/**
+ * Implements hook_form_after_build().
+ */
+function myeventlane_checkout_paragraph_after_build_normalize($form, \Drupal\Core\Form\FormStateInterface $form_state): array {
+  if (function_exists('_myeventlane_theme_sanitize_recursive')) {
+    _myeventlane_theme_sanitize_recursive($form, ['checkout_paragraph', 'after_build']);
+  }
+  return $form;
+}
+
+/**
+ * Implements hook_entity_access().
+ *
+ * Controls access to checkout-related paragraph types (attendee_answer and
+ * attendee_extra_field). Only vendors who own the related event can access
+ * these paragraphs.
+ */
+function myeventlane_checkout_paragraph_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  // Only process paragraph entities - return neutral for everything else.
+  if ($entity->getEntityTypeId() !== 'paragraph') {
+    return AccessResult::neutral();
+  }
+
+  $bundle = $entity->bundle();
+
+  // Only restrict specific checkout-related paragraph bundles.
+  if (!in_array($bundle, ['attendee_answer', 'attendee_extra_field'], TRUE)) {
+    return AccessResult::neutral();
+  }
+
+  // Admins with paragraph administration permission always have access.
+  if ($account->hasPermission('administer paragraphs')) {
+    return AccessResult::allowed()->cachePerPermissions();
+  }
+
+  // Restrict attendee_answer (used during checkout).
+  if ($bundle === 'attendee_answer') {
+    $parent = $entity->getParentEntity();
+    if ($parent && $parent->getEntityTypeId() === 'commerce_order_item') {
+      $event = $parent->get('field_event')->entity ?? NULL;
+      if ($event && $event->getOwnerId() === $account->id()) {
+        return AccessResult::allowed()->cachePerUser()->addCacheableDependency($event);
+      }
+    }
+    return AccessResult::forbidden()->cachePerUser();
+  }
+
+  // Restrict attendee_extra_field (defined on Event).
+  if ($bundle === 'attendee_extra_field') {
+    $parent = $entity->getParentEntity();
+    if ($parent && $parent->getEntityTypeId() === 'node' && $parent->bundle() === 'event') {
+      if ($parent->getOwnerId() === $account->id()) {
+        return AccessResult::allowed()->cachePerUser()->addCacheableDependency($parent);
+      }
+    }
+    return AccessResult::forbidden()->cachePerUser();
+  }
+
+  // Fallback: neutral for anything else.
+  return AccessResult::neutral();
+}

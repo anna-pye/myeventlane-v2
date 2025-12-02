@@ -1,0 +1,15 @@
+{#
+/**
+ * @file
+ * Theme override for unformatted views rows - Featured Events.
+ * Removes wrapper divs to let CSS grid work properly.
+ */
+#}
+{% if title %}
+  <h3>{{ title }}</h3>
+{% endif %}
+{% for row in rows %}
+  {{ row.content }}
+{% endfor %}
+
+

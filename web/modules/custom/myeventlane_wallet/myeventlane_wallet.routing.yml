@@ -1,3 +1,4 @@
+# Apple Wallet pass download.
 myeventlane_wallet.apple:
   path: '/wallet/apple/{order_item_id}'
   defaults:
@@ -6,6 +7,7 @@ myeventlane_wallet.apple:
   requirements:
     _permission: 'access content'
 
+# Google Wallet pass link.
 myeventlane_wallet.google:
   path: '/wallet/google/{order_item_id}'
   defaults:
@@ -13,3 +15,14 @@ myeventlane_wallet.google:
     _title: 'Google Wallet'
   requirements:
     _permission: 'access content'
+
+# Admin settings page.
+myeventlane_wallet.settings:
+  path: '/admin/config/myeventlane/wallet'
+  defaults:
+    _form: '\Drupal\myeventlane_wallet\Form\WalletSettingsForm'
+    _title: 'Wallet settings'
+  requirements:
+    _permission: 'administer myeventlane wallet'
+  options:
+    _admin_route: TRUE

@@ -1,0 +1,57 @@
+# Project
+This repository is "MyEventLane", a Drupal 11 event and ticketing platform running on DDEV (Docker) on macOS.
+
+# Stack and layout
+- Drupal 11, Composer-based.
+- Docroot: web/
+- Custom modules: web/modules/custom/*
+- Custom theme: web/themes/custom/myeventlane_theme/
+- DDEV CLI is required for all PHP, Composer, Drush, and Node commands.
+
+# Commands
+- Use `ddev composer <args>` for Composer.
+- Use `ddev drush <args>` for Drush (e.g., `ddev drush cr`, `ddev drush cim -y`).
+- Use `ddev exec vendor/bin/phpcs` and `ddev exec vendor/bin/phpstan` for code checks.
+- Use `ddev exec npm run dev` or `ddev exec npm run build` for theme assets.
+
+# Coding standards
+- Follow Drupal coding standards (Drupal + DrupalPractice).
+- Use dependency injection and services; avoid new code using \Drupal::service() or static calls unless legacy.
+- Prefer strict types where practical in custom modules.
+- When editing PHP, keep namespaces and use statements clean and sorted.
+- When editing Twig, preserve accessibility and mobile-first layout.
+
+# MyEventLane architecture notes
+- Respect existing module boundaries:
+  - myeventlane_core: shared services/helpers.
+  - myeventlane_rsvp: RSVP logic and public RSVP forms.
+  - myeventlane_tickets: ticketing, TicketMatrixForm, stock logic.
+  - myeventlane_vendor_dashboard: vendor dashboard, CSV export, analytics.
+  - myeventlane_checkout_* modules: checkout panes and attendee info.
+- Do NOT move logic between modules unless explicitly asked in the prompt.
+- For new features, prefer adding services + plugins rather than dumping logic into controllers.
+
+# Safety / do not touch
+- Do NOT edit files in:
+  - web/core/
+  - web/modules/contrib/
+  - vendor/
+  - .ddev/
+- Do NOT change composer.json or composer.lock unless the user explicitly asks.
+- Do NOT invent new tables or entities without clear migration and schema.
+
+# Editing guidelines
+- When asked to modify a file, prefer rewriting the full file to keep it coherent.
+- Preserve existing docblocks, annotations, and routing/service IDs unless the change is intentional.
+- If code refers to Drupal 10 APIs, assume Drupal 11 compatibility and update deprecations gently.
+
+# Testing and verification
+- After major changes, suggest:
+  - `ddev drush cr`
+  - `ddev exec vendor/bin/phpcs web/modules/custom`
+  - `ddev exec vendor/bin/phpstan web/modules/custom`
+  - Relevant PHPUnit or kernel tests if present.
+
+# Coordination with external design/architecture
+- Treat high-level design from "MyEventLane Studio" (external ChatGPT-based docs) as the source of truth for architecture.
+- Align refactors with the documented architecture; avoid introducing new patterns that conflict with existing design.

@@ -1,0 +1,20 @@
+{#
+/**
+ * @file
+ * Default theme implementation for a Commerce product.
+ *
+ * Available variables:
+ * - attributes: HTML attributes for the wrapper.
+ * - product: The product entity.
+ * - product_entity: The product entity.
+ * - product_id: The product ID.
+ * - product_url: The product URL.
+ * - content: All product items. Use {{ content }} to print them all.
+ *
+ * @ingroup themeable
+ */
+#}
+<article{{ attributes.addClass('commerce-product', 'commerce-product--' ~ product.bundle()|clean_class) }}>
+  {{ content }}
+</article>
+

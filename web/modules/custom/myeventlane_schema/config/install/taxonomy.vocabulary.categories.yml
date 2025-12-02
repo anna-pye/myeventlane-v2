@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+name: Categories
+vid: categories
+description: 'Event categories for organizing and filtering events (e.g., Music, Workshop, Networking).'
+weight: 0

@@ -1,0 +1,16 @@
+# Vendor dashboard route (moved to /vendor/dashboard for consistency).
+myeventlane_dashboard.vendor:
+  path: '/vendor/dashboard'
+  defaults:
+    _controller: '\Drupal\myeventlane_dashboard\Controller\VendorDashboardController::dashboard'
+    _title: 'Vendor Dashboard'
+  requirements:
+    _permission: 'access vendor dashboard'
+
+# Redirect from old /dashboard path to new location.
+myeventlane_dashboard.vendor_redirect:
+  path: '/dashboard'
+  defaults:
+    _controller: '\Drupal\myeventlane_dashboard\Controller\VendorDashboardController::legacyRedirect'
+  requirements:
+    _permission: 'access vendor dashboard'

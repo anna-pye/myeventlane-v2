@@ -1,0 +1,21 @@
+name: 'MyEventLane Schema'
+type: module
+description: 'Defines core fields, content types, taxonomies, and schema for MyEventLane. All other custom modules depend on this for field definitions and entity structures.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_core:myeventlane_core
+  - drupal:node
+  - drupal:taxonomy
+  - drupal:datetime
+  - drupal:options
+  - drupal:image
+  - drupal:link
+  - drupal:field
+  - address:address
+  - paragraphs:paragraphs
+  - entity_reference_revisions:entity_reference_revisions
+  - commerce_product:commerce_product
+  - commerce_order:commerce_order

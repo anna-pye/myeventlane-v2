@@ -1,21 +1,32 @@
 <?php
 
+use Drupal\Core\Render\RendererInterface;
+
 /**
  * Implements hook_mail().
  */
 function myeventlane_rsvp_mail($key, &$message, $params) {
+  $renderer = \Drupal::service('renderer');
+
   $event = $params['event'] ?? NULL;
   $submission = $params['submission'] ?? NULL;
 
   switch ($key) {
 
+    /* ----------------------------
+     * 1. PUBLIC CONFIRMATION EMAIL
+     * ---------------------------- */
     case 'confirmation':
-      $message['subject'] = t('Your RSVP for @event', ['@event' => $event->label()]);
-      $message['body'][] = \Drupal::service('renderer')->renderPlain([
+      $message['subject'] = t('Your RSVP for @event', ['@event' => $event?->label()]);
+
+      $build = [
         '#theme' => 'myeventlane_rsvp_email_confirmation',
         '#event' => $event,
         '#submission' => $submission,
-      ]);
+      ];
+
+      $message['body'][] = $renderer->renderInIsolation($build);
+
       if (!empty($params['ics'])) {
         $message['attachments'][] = [
           'filecontent' => $params['ics'],
@@ -23,95 +34,84 @@ function myeventlane_rsvp_mail($key, &$message, $params) {
           'filemime' => 'text/calendar',
         ];
       }
+
       break;
 
+    /* ----------------------------
+     * 2. CANCEL
+     * ---------------------------- */
     case 'cancel':
-      $message['subject'] = t('Your RSVP was cancelled — @event', ['@event' => $event->label()]);
-      $message['body'][] = \Drupal::service('renderer')->renderPlain([
+      $message['subject'] = t('Your RSVP was cancelled — @event', ['@event' => $event?->label()]);
+
+      $build = [
         '#theme' => 'myeventlane_rsvp_email_cancel',
         '#event' => $event,
         '#submission' => $submission,
-      ]);
+      ];
+
+      $message['body'][] = $renderer->renderInIsolation($build);
       break;
 
+    /* ----------------------------
+     * 3. WAITLIST NOTICE
+     * ---------------------------- */
     case 'waitlist':
-      $message['subject'] = t('You are on the waitlist — @event', ['@event' => $event->label()]);
-      $message['body'][] = \Drupal::service('renderer')->renderPlain([
+      $message['subject'] = t('You are on the waitlist — @event', ['@event' => $event?->label()]);
+
+      $build = [
         '#theme' => 'myeventlane_rsvp_email_waitlist',
         '#event' => $event,
-      ]);
+      ];
+
+      $message['body'][] = $renderer->renderInIsolation($build);
       break;
 
+    /* ----------------------------
+     * 4. PROMOTION FROM WAITLIST
+     * ---------------------------- */
     case 'promotion':
       $message['subject'] = t('A spot opened — You are now confirmed!');
-      $message['body'][] = \Drupal::service('renderer')->renderPlain([
+
+      $build = [
         '#theme' => 'myeventlane_rsvp_email_promotion',
         '#event' => $event,
-      ]);
+      ];
+
+      $message['body'][] = $renderer->renderInIsolation($build);
       break;
 
+    /* ----------------------------
+     * 5. VENDOR NOTIFICATIONS
+     * ---------------------------- */
     case 'vendor_new_rsvp':
-      $message['subject'] = t('New RSVP — @event', ['@event' => $event->label()]);
-      $message['body'][] = t('A new RSVP was received for @event.', ['@event' => $event->label()]);
+      $message['subject'] = t('New RSVP — @event', ['@event' => $event?->label()]);
+      $message['body'][] = t('A new RSVP was received for @event.', ['@event' => $event?->label()]);
       break;
 
     case 'vendor_cancel':
-      $message['subject'] = t('RSVP Cancelled — @event', ['@event' => $event->label()]);
+      $message['subject'] = t('RSVP Cancelled — @event', ['@event' => $event?->label()]);
       $message['body'][] = t('A guest has cancelled their RSVP.');
       break;
 
-        case 'rsvp_confirmation':
-      $message['subject'] = 'Your RSVP is confirmed: ' . $params['event_title'];
-      $message['body'][] = _myeventlane_rsvp_render_email('confirmation', $params);
+    /* ----------------------------
+     * 6. HTML TEMPLATED EMAILS (NEW)
+     * ---------------------------- */
+    case 'rsvp_confirmation':
+      $message['subject'] = $params['subject'] ?? 'Your RSVP is confirmed';
+      $message['body'][] = $params['body'] ?? '';
       $message['headers']['Content-Type'] = 'text/html; charset=UTF-8';
       break;
 
     case 'rsvp_vendor_copy':
-      $message['subject'] = 'New RSVP for your event: ' . $params['event_title'];
-      $message['body'][] = _myeventlane_rsvp_render_email('vendor_copy', $params);
+      $message['subject'] = $params['subject'] ?? 'New RSVP for your event';
+      $message['body'][] = $params['body'] ?? '';
       $message['headers']['Content-Type'] = 'text/html; charset=UTF-8';
       break;
 
     case 'vendor_digest':
       $message['subject'] = $params['subject'] ?? 'Your Daily Event Digest';
-      $message['body'][] = $params['body'];
+      $message['body'][] = $params['body'] ?? '';
       $message['headers']['Content-Type'] = 'text/html; charset=UTF-8';
       break;
-
-    case 'rsvp_confirmation':
-      $message['subject'] = $params['subject'];
-      $message['body'][] = $params['body'];
-      $message['headers']['Content-Type'] = 'text/html; charset=UTF-8';
-      break;
-
   }
-
-  /**
-  * Helper to render an HTML email template.
-  */
-   function _myeventlane_rsvp_render_email($template, array $params) {
-      return \Drupal::service('renderer')->renderPlain([
-        '#theme' => 'myeventlane_rsvp_email_' . $template,
-        '#params' => $params,
-      ]);
-  }
-
-  /**
-   * Implements hook_cron().
-   */
-  function myeventlane_rsvp_cron() {
-    $queue = \Drupal::queue('mel_rsvp_vendor_digest');
-
-    // Query vendors (users who own events).
-    $uids = \Drupal::entityQuery('user')
-      ->condition('roles', 'vendor')
-      ->execute();
-
-    foreach ($uids as $uid) {
-      $queue->createItem(['vendor_uid' => $uid]);
-    }
-  }
-
-
-
 }

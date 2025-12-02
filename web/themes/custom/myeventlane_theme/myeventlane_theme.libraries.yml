@@ -1,0 +1,13 @@
+# MyEventLane Theme Libraries
+#
+# Main theme library loaded globally via myeventlane_theme.info.yml.
+# Assets are built by Vite into the dist/ folder.
+
+global-styling:
+  css:
+    theme:
+      dist/main.css: {}
+  js:
+    dist/main.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal

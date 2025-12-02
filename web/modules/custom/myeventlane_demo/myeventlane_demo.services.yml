@@ -1,0 +1,8 @@
+services:
+  myeventlane_demo.data_manager:
+    class: Drupal\myeventlane_demo\Service\DemoDataManager
+    arguments:
+      - '@entity_type.manager'
+      - '@current_user'
+      - '@logger.factory'
+

@@ -1,0 +1,153 @@
+{#
+/**
+ * @file
+ * Template for the MyEventLane vendor dashboard.
+ *
+ * Available variables:
+ * - welcome_message: Personalized welcome message.
+ * - upcoming_events: Array of upcoming event data.
+ * - past_events: Array of past event data.
+ * - quick_links: Array of quick action links.
+ */
+#}
+<div class="mel-dashboard-wrapper mel-dashboard-wrapper--vendor">
+
+  <h1 class="mel-dashboard-title">{{ 'Vendor Dashboard'|t }}</h1>
+
+  {# Welcome message #}
+  {% if welcome_message %}
+    <div class="mel-dashboard-welcome">
+      <p>{{ welcome_message }}</p>
+    </div>
+  {% endif %}
+
+  {# Quick actions #}
+  {% if quick_links %}
+    <section class="mel-dashboard-section" aria-labelledby="quick-actions-title">
+      <h2 id="quick-actions-title" class="mel-section-title">{{ 'Quick Actions'|t }}</h2>
+      <div class="mel-dashboard-grid">
+        {% for link in quick_links %}
+          <div class="mel-card">
+            <h3>{{ link.title }}</h3>
+            <a href="{{ link.url }}" class="mel-btn mel-btn-primary">{{ link.title }}</a>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {# Upcoming events #}
+  {% if upcoming_events is not empty %}
+    <section class="mel-dashboard-section" aria-labelledby="upcoming-events-title">
+      <h2 id="upcoming-events-title" class="mel-section-title">{{ 'Upcoming Events'|t }}</h2>
+      <div class="mel-events-table">
+        <table class="mel-table">
+          <thead>
+            <tr>
+              <th>{{ 'Event'|t }}</th>
+              <th>{{ 'Date'|t }}</th>
+              <th>{{ 'Mode'|t }}</th>
+              <th>{{ 'Attendees'|t }}</th>
+              <th>{{ 'Revenue'|t }}</th>
+              <th>{{ 'Actions'|t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for event in upcoming_events %}
+              <tr>
+                <td><a href="{{ event.url }}">{{ event.title }}</a></td>
+                <td>
+                  {% if event.start_date %}
+                    <time>{{ event.start_date }}{% if event.start_time %} {{ event.start_time }}{% endif %}</time>
+                  {% else %}
+                    <span class="mel-muted">{{ 'No date'|t }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="mel-badge mel-badge--{{ event.event_mode }}">
+                    {% if event.event_mode == 'rsvp' %}
+                      {{ 'RSVP'|t }}
+                    {% elseif event.event_mode == 'paid' %}
+                      {{ 'Paid'|t }}
+                    {% elseif event.event_mode == 'both' %}
+                      {{ 'Both'|t }}
+                    {% else %}
+                      {{ event.event_mode|capitalize }}
+                    {% endif %}
+                  </span>
+                </td>
+                <td>{{ event.attendee_count }}</td>
+                <td>
+                  {% if event.revenue > 0 %}
+                    ${{ event.revenue|number_format(2) }}
+                  {% else %}
+                    <span class="mel-muted">$0.00</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{{ event.edit_url }}" class="mel-btn mel-btn-small">{{ 'Edit'|t }}</a>
+                  <a href="{{ event.url }}" class="mel-btn mel-btn-small mel-btn-secondary">{{ 'View'|t }}</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% else %}
+    <section class="mel-dashboard-section">
+      <div class="mel-card mel-card--empty">
+        <p>{{ 'You have no upcoming events.'|t }}</p>
+        <a href="{{ path('node.add', {'node_type': 'event'}) }}" class="mel-btn mel-btn-primary">{{ 'Create Your First Event'|t }}</a>
+      </div>
+    </section>
+  {% endif %}
+
+  {# Past events (collapsible) #}
+  {% if past_events is not empty %}
+    <section class="mel-dashboard-section" aria-labelledby="past-events-title">
+      <details class="mel-details">
+        <summary class="mel-section-title">{{ 'Past Events'|t }} ({{ past_events|length }})</summary>
+        <div class="mel-events-table">
+          <table class="mel-table">
+            <thead>
+              <tr>
+                <th>{{ 'Event'|t }}</th>
+                <th>{{ 'Date'|t }}</th>
+                <th>{{ 'Attendees'|t }}</th>
+                <th>{{ 'Revenue'|t }}</th>
+                <th>{{ 'Actions'|t }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for event in past_events %}
+                <tr>
+                  <td><a href="{{ event.url }}">{{ event.title }}</a></td>
+                  <td>
+                    {% if event.start_date %}
+                      <time>{{ event.start_date }}</time>
+                    {% else %}
+                      <span class="mel-muted">{{ 'No date'|t }}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ event.attendee_count }}</td>
+                  <td>
+                    {% if event.revenue > 0 %}
+                      ${{ event.revenue|number_format(2) }}
+                    {% else %}
+                      <span class="mel-muted">$0.00</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <a href="{{ event.url }}" class="mel-btn mel-btn-small mel-btn-secondary">{{ 'View'|t }}</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+  {% endif %}
+
+</div>

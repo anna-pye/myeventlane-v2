@@ -1,0 +1,20 @@
+@use '../tokens/spacing';
+@use '../tokens/breakpoints';
+
+.mel-container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 spacing.mel-space(4);
+
+  @include breakpoints.mel-break(md) {
+    max-width: 720px;
+  }
+
+  @include breakpoints.mel-break(lg) {
+    max-width: 1080px;
+  }
+
+  @include breakpoints.mel-break(xl) {
+    max-width: 1280px;
+  }
+}

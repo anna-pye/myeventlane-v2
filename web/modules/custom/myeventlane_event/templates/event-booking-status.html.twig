@@ -1,0 +1,68 @@
+{#
+/**
+ * @file
+ * Template for event booking configuration status (vendor form).
+ *
+ * Available variables:
+ * - event: The event node entity.
+ * - status: Configuration status array from EventModeManager::getConfigurationStatus().
+ *
+ * @ingroup themeable
+ */
+#}
+<div class="mel-booking-status">
+  <h4 class="mel-booking-status__title">{{ 'Booking Status'|t }}</h4>
+
+  <div class="mel-booking-status__mode">
+    {% if status.effective_mode == 'rsvp' %}
+      <span class="mel-status mel-status--success">{{ 'RSVP Active'|t }}</span>
+    {% elseif status.effective_mode == 'paid' %}
+      <span class="mel-status mel-status--success">{{ 'Paid Tickets Active'|t }}</span>
+    {% elseif status.effective_mode == 'both' %}
+      <span class="mel-status mel-status--success">{{ 'RSVP + Tickets Active'|t }}</span>
+    {% elseif status.effective_mode == 'external' %}
+      <span class="mel-status mel-status--info">{{ 'External Link'|t }}</span>
+    {% else %}
+      <span class="mel-status mel-status--warning">{{ 'Not Configured'|t }}</span>
+    {% endif %}
+  </div>
+
+  <ul class="mel-booking-status__items">
+    {# RSVP Status #}
+    <li class="mel-booking-status__item">
+      {% if status.rsvp.enabled %}
+        <span class="mel-icon mel-icon--check">✓</span>
+      {% else %}
+        <span class="mel-icon mel-icon--dash">–</span>
+      {% endif %}
+      {{ status.rsvp.message }}
+    </li>
+
+    {# Tickets Status #}
+    <li class="mel-booking-status__item">
+      {% if status.tickets.configured %}
+        <span class="mel-icon mel-icon--check">✓</span>
+      {% elseif status.tickets.enabled %}
+        <span class="mel-icon mel-icon--warning">⚠</span>
+      {% else %}
+        <span class="mel-icon mel-icon--dash">–</span>
+      {% endif %}
+      {{ status.tickets.message }}
+    </li>
+
+    {# External Status #}
+    {% if status.external.enabled %}
+      <li class="mel-booking-status__item">
+        {% if status.external.configured %}
+          <span class="mel-icon mel-icon--check">✓</span>
+        {% else %}
+          <span class="mel-icon mel-icon--warning">⚠</span>
+        {% endif %}
+        {{ status.external.message }}
+      </li>
+    {% endif %}
+  </ul>
+</div>
+
+
+

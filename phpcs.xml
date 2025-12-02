@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<ruleset name="MyEventLane Theme">
+  <description>Drupal coding standards for the MyEventLane theme.</description>
+
+  <!-- Only scan PHP files in this theme -->
+  <file>web/themes/custom/myeventlane_theme</file>
+  <arg name="extensions" value="php,module,inc,install,test,profile,theme"/>
+  <!-- Ignore irrelevant files -->
+  <exclude-pattern>*/node_modules/*</exclude-pattern>
+  <exclude-pattern>*/vendor/*</exclude-pattern>
+  <exclude-pattern>*.js</exclude-pattern>
+  <exclude-pattern>*.min.js</exclude-pattern>
+  <exclude-pattern>*.json</exclude-pattern>
+  <exclude-pattern>vite.config.js</exclude-pattern>
+
+  <!-- Apply Drupal PHP standards -->
+  <rule ref="Drupal"/>
+  <rule ref="DrupalPractice"/>
+</ruleset>

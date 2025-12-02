@@ -1,0 +1,32 @@
+event_attendee.event_attendee:
+  type: entity
+  label: 'Event Attendee entity'
+  mapping:
+    id:
+      type: integer
+    uuid:
+      type: string
+    event_id:
+      type: integer
+    user_id:
+      type: integer
+    record_type:
+      type: string
+    status:
+      type: string
+    ticket_type:
+      type: string
+    ticket_variation:
+      type: string
+    first_name:
+      type: string
+    last_name:
+      type: string
+    email:
+      type: string
+    extra_answers:
+      type: text
+    created:
+      type: integer
+    changed:
+      type: integer

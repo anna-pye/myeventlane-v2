@@ -1,0 +1,74 @@
+{#
+/**
+ * @file
+ * Template for the MyEventLane admin dashboard overview page.
+ *
+ * Available variables:
+ * - event_count: Total number of published events.
+ * - vendor_count: Total number of vendors.
+ * - user_count: Total number of active users.
+ * - recent_events: Array of recent events with 'title', 'url', 'created'.
+ * - quick_links: Array of quick links with 'title', 'url', 'description', 'icon'.
+ * - attributes: HTML attributes for the wrapper element.
+ */
+#}
+{{ attach_library('myeventlane_admin_dashboard/admin_dashboard') }}
+
+<div{{ attributes.addClass('admin-dashboard-wrapper') }}>
+
+  {# Stats cards #}
+  <section class="admin-dashboard-stats" aria-label="{{ 'Platform statistics'|t }}">
+    <div class="admin-dashboard-stat-card">
+      <span class="stat-value">{{ event_count }}</span>
+      <span class="stat-label">{{ 'Events'|t }}</span>
+    </div>
+    <div class="admin-dashboard-stat-card">
+      <span class="stat-value">{{ vendor_count }}</span>
+      <span class="stat-label">{{ 'Vendors'|t }}</span>
+    </div>
+    <div class="admin-dashboard-stat-card">
+      <span class="stat-value">{{ user_count }}</span>
+      <span class="stat-label">{{ 'Users'|t }}</span>
+    </div>
+  </section>
+
+  {# Quick links #}
+  {% if quick_links %}
+    <section class="admin-dashboard-section" aria-labelledby="quick-links-title">
+      <h2 id="quick-links-title" class="admin-dashboard-section-title">{{ 'Quick Actions'|t }}</h2>
+      <div class="admin-dashboard-links">
+        {% for link in quick_links %}
+          <a href="{{ link.url }}" class="admin-dashboard-link admin-dashboard-link--{{ link.icon }}">
+            <span class="link-title">{{ link.title }}</span>
+            {% if link.description %}
+              <span class="link-description">{{ link.description }}</span>
+            {% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {# Recent events #}
+  {% if recent_events %}
+    <section class="admin-dashboard-section" aria-labelledby="recent-events-title">
+      <h2 id="recent-events-title" class="admin-dashboard-section-title">{{ 'Recent Events'|t }}</h2>
+      <ul class="admin-dashboard-recent-list">
+        {% for event in recent_events %}
+          <li class="admin-dashboard-recent-item">
+            <a href="{{ event.url }}">{{ event.title }}</a>
+            <time class="event-date" datetime="{{ event.created|date('c') }}">
+              {{ event.created|date('M j, Y') }}
+            </time>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% else %}
+    <section class="admin-dashboard-section">
+      <h2 class="admin-dashboard-section-title">{{ 'Recent Events'|t }}</h2>
+      <p class="admin-dashboard-empty">{{ 'No events yet. Create your first event to get started.'|t }}</p>
+    </section>
+  {% endif %}
+
+</div>

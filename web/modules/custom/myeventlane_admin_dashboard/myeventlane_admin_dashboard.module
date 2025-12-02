@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for MyEventLane Admin Dashboard module.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_theme().
+ */
+function myeventlane_admin_dashboard_theme(): array {
+  return [
+    'admin_dashboard' => [
+      'variables' => [
+        'event_count' => 0,
+        'vendor_count' => 0,
+        'user_count' => 0,
+        'recent_events' => [],
+        'quick_links' => [],
+      ],
+      'template' => 'admin-dashboard',
+    ],
+  ];
+}

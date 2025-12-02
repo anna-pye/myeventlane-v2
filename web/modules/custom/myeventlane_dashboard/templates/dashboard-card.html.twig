@@ -1,0 +1,32 @@
+{#
+/**
+ * @file
+ * Template for a dashboard card component.
+ *
+ * Available variables:
+ * - title: Card title.
+ * - value: Numeric value to display.
+ * - description: Optional description text.
+ * - link_url: Optional URL for a link.
+ * - link_text: Text for the link.
+ * - icon: Optional icon identifier.
+ * - attributes: HTML attributes for the wrapper element.
+ */
+#}
+<div{{ attributes.addClass('mel-card', icon ? 'mel-card--' ~ icon) }}>
+  {% if title %}
+    <h3 class="mel-card-title">{{ title }}</h3>
+  {% endif %}
+
+  {% if value is not null %}
+    <div class="mel-card-value">{{ value }}</div>
+  {% endif %}
+
+  {% if description %}
+    <p class="mel-card-description">{{ description }}</p>
+  {% endif %}
+
+  {% if link_url and link_text %}
+    <a href="{{ link_url }}" class="mel-btn">{{ link_text }}</a>
+  {% endif %}
+</div>

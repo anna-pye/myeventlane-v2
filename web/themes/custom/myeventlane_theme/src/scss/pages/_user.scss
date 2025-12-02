@@ -1,0 +1,538 @@
+// ==========================================================================
+// User Account Pages
+// ==========================================================================
+// Login, register, profile, and user dashboard styles.
+
+@use 'sass:color';
+@use '../tokens/colors';
+@use '../tokens/typography';
+@use '../tokens/spacing';
+@use '../tokens/radii';
+@use '../tokens/shadows';
+@use '../tokens/breakpoints';
+
+// ---------------------------------------------------------------------------
+// Auth Pages (Login, Register, Password Reset)
+// ---------------------------------------------------------------------------
+
+.mel-auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: spacing.mel-space(6) spacing.mel-space(4);
+  background: colors.$mel-color-bg;
+}
+
+.mel-auth-container {
+  width: 100%;
+  max-width: 440px;
+}
+
+.mel-auth-card {
+  background: colors.$mel-color-surface;
+  border-radius: radii.$mel-radius-xl;
+  padding: spacing.mel-space(6);
+  box-shadow: shadows.$mel-shadow-md;
+
+  @include breakpoints.mel-break(md) {
+    padding: spacing.mel-space(8);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Auth Header
+// ---------------------------------------------------------------------------
+
+.mel-auth-header {
+  text-align: center;
+  margin-bottom: spacing.mel-space(6);
+}
+
+.mel-auth-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: spacing.mel-space(2);
+  margin-bottom: spacing.mel-space(4);
+  text-decoration: none;
+
+  svg {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.mel-auth-title {
+  font-size: typography.mel-font-size(2xl);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-text;
+  margin: 0 0 spacing.mel-space(2) 0;
+}
+
+.mel-auth-subtitle {
+  font-size: typography.mel-font-size(base);
+  color: colors.$mel-color-text-muted;
+  margin: 0;
+}
+
+// ---------------------------------------------------------------------------
+// Auth Form
+// ---------------------------------------------------------------------------
+
+.mel-auth-form {
+  .form-item {
+    margin-bottom: spacing.mel-space(4);
+  }
+
+  label {
+    display: block;
+    margin-bottom: spacing.mel-space(2);
+    font-size: typography.mel-font-size(sm);
+    font-weight: typography.$mel-font-semibold;
+    color: colors.$mel-color-text;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: spacing.mel-space(3) spacing.mel-space(4);
+    border: 2px solid colors.$mel-color-border;
+    border-radius: radii.$mel-radius-md;
+    font-size: typography.mel-font-size(base);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:focus {
+      outline: none;
+      border-color: colors.$mel-color-secondary;
+      box-shadow: 0 0 0 3px rgba(colors.$mel-color-secondary, 0.15);
+    }
+  }
+
+  .description {
+    margin-top: spacing.mel-space(2);
+    font-size: typography.mel-font-size(xs);
+    color: colors.$mel-color-text-muted;
+  }
+}
+
+.mel-auth-actions {
+  margin-top: spacing.mel-space(6);
+
+  .mel-btn {
+    width: 100%;
+  }
+}
+
+.mel-auth-remember {
+  display: flex;
+  align-items: center;
+  gap: spacing.mel-space(2);
+  margin-bottom: spacing.mel-space(4);
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+
+  label {
+    margin: 0;
+    font-size: typography.mel-font-size(sm);
+    color: colors.$mel-color-text-muted;
+    font-weight: typography.$mel-font-regular;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Auth Footer
+// ---------------------------------------------------------------------------
+
+.mel-auth-footer {
+  text-align: center;
+  margin-top: spacing.mel-space(6);
+  padding-top: spacing.mel-space(6);
+  border-top: 1px solid colors.$mel-color-border;
+}
+
+.mel-auth-link {
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text-muted;
+
+  a {
+    color: colors.$mel-color-primary;
+    text-decoration: none;
+    font-weight: typography.$mel-font-semibold;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.mel-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: spacing.mel-space(4);
+  margin: spacing.mel-space(6) 0;
+  color: colors.$mel-color-text-light;
+  font-size: typography.mel-font-size(sm);
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: colors.$mel-color-border;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Social Login Buttons
+// ---------------------------------------------------------------------------
+
+.mel-auth-social {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(3);
+}
+
+.mel-auth-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: spacing.mel-space(2);
+  padding: spacing.mel-space(3) spacing.mel-space(4);
+  background: colors.$mel-color-surface;
+  border: 2px solid colors.$mel-color-border;
+  border-radius: radii.$mel-radius-md;
+  font-size: typography.mel-font-size(base);
+  font-weight: typography.$mel-font-medium;
+  color: colors.$mel-color-text;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: colors.$mel-color-bg;
+    border-color: colors.$mel-color-border-strong;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// User Profile Page
+// ---------------------------------------------------------------------------
+
+.mel-profile {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.mel-profile-header {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(4);
+  margin-bottom: spacing.mel-space(6);
+
+  @include breakpoints.mel-break(md) {
+    flex-direction: row;
+    align-items: center;
+    gap: spacing.mel-space(5);
+  }
+}
+
+.mel-profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: radii.$mel-radius-full;
+  background: colors.$mel-color-secondary;
+  color: colors.$mel-color-text-inverse;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: typography.mel-font-size(3xl);
+  font-weight: typography.$mel-font-bold;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.mel-profile-info {
+  flex: 1;
+}
+
+.mel-profile-name {
+  font-size: typography.mel-font-size(2xl);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-text;
+  margin: 0 0 spacing.mel-space(1) 0;
+}
+
+.mel-profile-email {
+  font-size: typography.mel-font-size(base);
+  color: colors.$mel-color-text-muted;
+  margin: 0 0 spacing.mel-space(3) 0;
+}
+
+.mel-profile-actions {
+  display: flex;
+  gap: spacing.mel-space(2);
+}
+
+// ---------------------------------------------------------------------------
+// Profile Stats
+// ---------------------------------------------------------------------------
+
+.mel-profile-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: spacing.mel-space(4);
+  margin-bottom: spacing.mel-space(6);
+
+  @include breakpoints.mel-break(md) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.mel-profile-stat {
+  background: colors.$mel-color-surface;
+  border-radius: radii.$mel-radius-lg;
+  padding: spacing.mel-space(4);
+  text-align: center;
+  box-shadow: shadows.$mel-shadow-sm;
+}
+
+.mel-profile-stat-value {
+  font-size: typography.mel-font-size(2xl);
+  font-weight: typography.$mel-font-extrabold;
+  color: colors.$mel-color-primary;
+  margin-bottom: spacing.mel-space(1);
+}
+
+.mel-profile-stat-label {
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text-muted;
+}
+
+// ---------------------------------------------------------------------------
+// Profile Tabs
+// ---------------------------------------------------------------------------
+
+.mel-profile-tabs {
+  display: flex;
+  gap: spacing.mel-space(1);
+  border-bottom: 1px solid colors.$mel-color-border;
+  margin-bottom: spacing.mel-space(5);
+  overflow-x: auto;
+}
+
+.mel-profile-tab {
+  padding: spacing.mel-space(3) spacing.mel-space(4);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: typography.mel-font-size(sm);
+  font-weight: typography.$mel-font-medium;
+  color: colors.$mel-color-text-muted;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  text-decoration: none;
+
+  &:hover {
+    color: colors.$mel-color-text;
+  }
+
+  &.is-active,
+  &--active {
+    color: colors.$mel-color-primary;
+    border-bottom-color: colors.$mel-color-primary;
+    font-weight: typography.$mel-font-semibold;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// My Tickets Section
+// ---------------------------------------------------------------------------
+
+.mel-my-tickets {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(4);
+}
+
+.mel-ticket-card {
+  display: flex;
+  flex-direction: column;
+  background: colors.$mel-color-surface;
+  border-radius: radii.$mel-radius-xl;
+  overflow: hidden;
+  box-shadow: shadows.$mel-shadow-sm;
+
+  @include breakpoints.mel-break(md) {
+    flex-direction: row;
+  }
+}
+
+.mel-ticket-card-image {
+  width: 100%;
+  height: 140px;
+  background: colors.$mel-color-bg;
+  overflow: hidden;
+
+  @include breakpoints.mel-break(md) {
+    width: 200px;
+    height: auto;
+    min-height: 160px;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.mel-ticket-card-body {
+  flex: 1;
+  padding: spacing.mel-space(4);
+  display: flex;
+  flex-direction: column;
+
+  @include breakpoints.mel-break(md) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.mel-ticket-card-info {
+  flex: 1;
+  margin-bottom: spacing.mel-space(3);
+
+  @include breakpoints.mel-break(md) {
+    margin-bottom: 0;
+  }
+}
+
+.mel-ticket-card-title {
+  font-size: typography.mel-font-size(lg);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-text;
+  margin: 0 0 spacing.mel-space(2) 0;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+      color: colors.$mel-color-primary;
+    }
+  }
+}
+
+.mel-ticket-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: spacing.mel-space(3);
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text-muted;
+}
+
+.mel-ticket-card-actions {
+  display: flex;
+  gap: spacing.mel-space(2);
+}
+
+// ---------------------------------------------------------------------------
+// Ticket QR Code
+// ---------------------------------------------------------------------------
+
+.mel-ticket-qr {
+  text-align: center;
+  padding: spacing.mel-space(4);
+  background: colors.$mel-color-surface;
+  border-radius: radii.$mel-radius-lg;
+}
+
+.mel-ticket-qr-code {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto spacing.mel-space(3);
+  background: colors.$mel-color-text;
+  border-radius: radii.$mel-radius-sm;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.mel-ticket-qr-label {
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text-muted;
+}
+
+// ---------------------------------------------------------------------------
+// Empty States
+// ---------------------------------------------------------------------------
+
+.mel-profile-empty {
+  text-align: center;
+  padding: spacing.mel-space(8) spacing.mel-space(4);
+}
+
+.mel-profile-empty-icon {
+  font-size: 4rem;
+  margin-bottom: spacing.mel-space(4);
+  opacity: 0.5;
+}
+
+.mel-profile-empty-title {
+  font-size: typography.mel-font-size(xl);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-text;
+  margin-bottom: spacing.mel-space(2);
+}
+
+.mel-profile-empty-text {
+  color: colors.$mel-color-text-muted;
+  margin-bottom: spacing.mel-space(5);
+}
+
+// ---------------------------------------------------------------------------
+// Drupal User Form Overrides
+// ---------------------------------------------------------------------------
+
+.user-login-form,
+.user-register-form,
+.user-pass {
+  @extend .mel-auth-form;
+}
+
+// Style the Drupal login/register pages
+.path-user {
+  .mel-content {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: spacing.mel-space(6) spacing.mel-space(4);
+  }
+
+  .page-title {
+    text-align: center;
+    font-size: typography.mel-font-size(2xl);
+    margin-bottom: spacing.mel-space(6);
+  }
+}

@@ -1,0 +1,352 @@
+// ==========================================================================
+// Header Component
+// ==========================================================================
+// Sticky header with logo, navigation and actions.
+
+@use '../tokens/colors';
+@use '../tokens/radii';
+@use '../tokens/shadows';
+@use '../tokens/spacing';
+@use '../tokens/typography';
+@use '../tokens/zindex';
+@use '../tokens/breakpoints';
+
+// ---------------------------------------------------------------------------
+// Header Container
+// ---------------------------------------------------------------------------
+
+.mel-header {
+  position: sticky;
+  top: 0;
+  z-index: zindex.mel-z(header);
+  background: colors.$mel-color-surface;
+  box-shadow: shadows.$mel-shadow-sm;
+}
+
+.mel-header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: spacing.mel-space(3) spacing.mel-space(4);
+  gap: spacing.mel-space(4);
+
+  @include breakpoints.mel-break(md) {
+    padding: spacing.mel-space(3) spacing.mel-space(4);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Logo
+// ---------------------------------------------------------------------------
+
+.mel-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.mel-logo {
+  display: flex;
+  align-items: center;
+  gap: spacing.mel-space(2);
+  text-decoration: none;
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+    border-radius: radii.$mel-radius-sm;
+  }
+}
+
+.mel-logo-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+
+  @include breakpoints.mel-break(md) {
+    width: 44px;
+    height: 44px;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.mel-logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.mel-logo-my {
+  font-size: typography.mel-font-size(sm);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-primary;
+
+  @include breakpoints.mel-break(md) {
+    font-size: typography.mel-font-size(base);
+  }
+}
+
+.mel-logo-eventlane {
+  font-size: typography.mel-font-size(md);
+  font-weight: typography.$mel-font-extrabold;
+  color: colors.$mel-color-primary;
+
+  @include breakpoints.mel-break(md) {
+    font-size: typography.mel-font-size(lg);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Desktop Navigation
+// ---------------------------------------------------------------------------
+
+.mel-nav-desktop {
+  display: none;
+
+  @include breakpoints.mel-break(md) {
+    display: block;
+  }
+}
+
+.mel-nav-list {
+  display: flex;
+  gap: spacing.mel-space(1);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mel-nav-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: colors.$mel-color-text;
+  padding: spacing.mel-space(2) spacing.mel-space(3);
+  border-radius: radii.$mel-radius-md;
+  font-size: typography.mel-font-size(base);
+  font-weight: typography.$mel-font-medium;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: colors.$mel-color-bg;
+    color: colors.$mel-color-primary;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+  }
+
+  &.is-active {
+    background: colors.$mel-color-bg;
+    color: colors.$mel-color-primary;
+    font-weight: typography.$mel-font-semibold;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Header Actions (Desktop)
+// ---------------------------------------------------------------------------
+
+.mel-header-actions {
+  display: none;
+
+  @include breakpoints.mel-break(md) {
+    display: flex;
+    align-items: center;
+    gap: spacing.mel-space(2);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Mobile Toggle
+// ---------------------------------------------------------------------------
+
+.mel-nav-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  border-radius: radii.$mel-radius-md;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  @include breakpoints.mel-break(md) {
+    display: none;
+  }
+
+  &:hover {
+    background: colors.$mel-color-bg;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+  }
+}
+
+.mel-nav-toggle-box {
+  width: 24px;
+  height: 18px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.mel-nav-toggle-line {
+  width: 100%;
+  height: 2px;
+  background: colors.$mel-color-text;
+  border-radius: 1px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+// Toggle active state
+.mel-nav-toggle.is-active {
+  .mel-nav-toggle-line:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+  }
+
+  .mel-nav-toggle-line:nth-child(2) {
+    opacity: 0;
+  }
+
+  .mel-nav-toggle-line:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Mobile Navigation
+// ---------------------------------------------------------------------------
+
+.mel-nav-mobile-wrapper {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 300px;
+  max-width: 85%;
+  height: 100vh;
+  background: colors.$mel-color-surface;
+  box-shadow: shadows.$mel-shadow-lg;
+  z-index: zindex.mel-z(nav);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+
+  &.is-open {
+    transform: translateX(0);
+  }
+}
+
+.mel-nav-mobile-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: spacing.mel-space(3);
+  border-bottom: 1px solid colors.$mel-color-border;
+}
+
+.mel-nav-mobile-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  border-radius: radii.$mel-radius-md;
+  cursor: pointer;
+  font-size: typography.mel-font-size(2xl);
+  color: colors.$mel-color-text-muted;
+  line-height: 1;
+
+  &:hover {
+    background: colors.$mel-color-bg;
+    color: colors.$mel-color-text;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+  }
+}
+
+.mel-nav-mobile {
+  padding: spacing.mel-space(4);
+}
+
+.mel-nav-mobile-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(1);
+
+  > li > a:not(.mel-btn-mobile-accent) {
+    display: block;
+    padding: spacing.mel-space(3) spacing.mel-space(4);
+    text-decoration: none;
+    color: colors.$mel-color-text;
+    font-size: typography.mel-font-size(md);
+    font-weight: typography.$mel-font-medium;
+    border-radius: radii.$mel-radius-md;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: colors.$mel-color-bg;
+    }
+
+    &:focus-visible {
+      @include colors.mel-focus-ring;
+    }
+  }
+}
+
+.mel-mobile-divider {
+  height: 1px;
+  background: colors.$mel-color-border;
+  margin: spacing.mel-space(3) 0;
+}
+
+.mel-btn-mobile-accent {
+  display: block;
+  padding: spacing.mel-space(3) spacing.mel-space(4);
+  background: colors.$mel-color-primary;
+  border-radius: radii.$mel-radius-md;
+  color: colors.$mel-color-text-inverse;
+  text-align: center;
+  text-decoration: none;
+  font-weight: typography.$mel-font-semibold;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: colors.$mel-color-primary-hover;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Mobile Overlay
+// ---------------------------------------------------------------------------
+
+.mel-nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: zindex.mel-z(nav) - 1;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+
+  &.is-visible {
+    opacity: 1;
+    visibility: visible;
+  }
+}

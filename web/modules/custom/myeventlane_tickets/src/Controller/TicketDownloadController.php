@@ -3,61 +3,65 @@
 namespace Drupal\myeventlane_tickets\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\myeventlane_tickets\Ticket\TicketPdfGenerator;
-use Drupal\myeventlane_tickets\Ticket\TicketCodeGenerator;
+use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Controller for downloading ticket PDFs.
+ */
 class TicketDownloadController extends ControllerBase {
 
-  protected $pdf;
-  protected $codeGen;
+  /**
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
 
-  public function __construct(TicketPdfGenerator $pdf, TicketCodeGenerator $codeGen) {
-    $this->pdf = $pdf;
-    $this->codeGen = $codeGen;
-  }
+  /**
+   * @var \Drupal\myeventlane_tickets\Ticket\TicketPdfGenerator
+   */
+  protected $pdfGenerator;
 
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('myeventlane_tickets.pdf'),
-      $container->get('myeventlane_tickets.code')
-    );
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): self {
+    $instance = new static();
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->pdfGenerator = $container->get('myeventlane_tickets.pdf_generator');
+    return $instance;
   }
 
   /**
-   * PDF Ticket.
+   * Download a ticket PDF.
    */
-  public function download($order_item_id) {
-    $storage = $this->entityTypeManager()->getStorage('commerce_order_item');
-    $order_item = $storage->load($order_item_id);
+  public function download(int $ticket_id): Response {
 
-    $event = $order_item->get('field_event')->entity;
+    $ticket = $this->entityTypeManager
+      ->getStorage('myeventlane_ticket')
+      ->load($ticket_id);
 
-    // Create or load ticket code.
-    $ticket_code = $this->loadOrCreateCode($order_item, $event);
+    if (!$ticket) {
+      return new Response('Ticket not found', 404);
+    }
 
-    // Generate PDF.
-    $pdf_output = $this->pdf->buildPdf($ticket_code->get('code')->value, $event, $order_item);
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $ticket */
 
-    $response = new Response($pdf_output);
+    // FIXED: remove all ->get() calls on the entity.
+    $event = $ticket->get('event_id')->entity ?? NULL;
+    $ticket_code = $ticket->get('ticket_code')->value ?? '';
+    $holder = $ticket->get('holder_name')->value ?? '';
+
+    $pdf_data = $this->pdfGenerator->buildPdf(
+      $ticket_code,
+      $event,
+      $holder
+    );
+
+    $response = new Response($pdf_data);
     $response->headers->set('Content-Type', 'application/pdf');
     $response->headers->set('Content-Disposition', 'attachment; filename="ticket.pdf"');
 
     return $response;
   }
 
-  protected function loadOrCreateCode($order_item, $event) {
-    $storage = $this->entityTypeManager()->getStorage('ticket_code');
-
-    $existing = $storage->loadByProperties([
-      'order_item_id' => $order_item->id(),
-    ]);
-
-    if ($existing) {
-      return reset($existing);
-    }
-
-    return $this->codeGen->create($order_item, $event);
-  }
 }

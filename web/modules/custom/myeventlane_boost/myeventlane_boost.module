@@ -1,0 +1,128 @@
+<?php
+
+/**
+ * @file
+ * MyEventLane Boost module hooks.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Template\Attribute;
+use Drupal\myeventlane_boost\Cron\BoostExpiryCron;
+use Drupal\myeventlane_boost\Cron\BoostExpiryReminderCron;
+
+/**
+ * Implements hook_theme().
+ */
+function myeventlane_boost_theme(): array {
+  $module_path = \Drupal::service('extension.list.module')->getPath('myeventlane_boost');
+
+  return [
+    'boost_cta' => [
+      'variables' => [
+        'event' => NULL,
+        'is_boosted' => FALSE,
+        'expires' => NULL,
+        'cta' => [],
+        'attributes' => NULL,
+      ],
+      'template' => 'boost-cta',
+      'path' => $module_path . '/templates',
+    ],
+    'boost_event_page' => [
+      'variables' => [
+        'form' => NULL,
+        'event' => NULL,
+        'attributes' => NULL,
+      ],
+      'template' => 'boost-event-page',
+      'path' => $module_path . '/templates',
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for boost_cta template.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - event: The event node entity.
+ *   - is_boosted: Whether the event is currently boosted.
+ *   - expires: The expiration date string.
+ *   - cta: The CTA render array.
+ */
+function template_preprocess_boost_cta(array &$variables): void {
+  if (!isset($variables['attributes']) || !$variables['attributes'] instanceof Attribute) {
+    $variables['attributes'] = new Attribute(['class' => ['mel-boost-cta']]);
+  }
+  else {
+    $variables['attributes']->addClass('mel-boost-cta');
+  }
+
+  // Add title_prefix and title_suffix for block compatibility.
+  $variables['title_prefix'] = $variables['title_prefix'] ?? [];
+  $variables['title_suffix'] = $variables['title_suffix'] ?? [];
+}
+
+/**
+ * Prepares variables for boost_event_page template.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - form: The boost selection form.
+ *   - event: The event node entity.
+ */
+function template_preprocess_boost_event_page(array &$variables): void {
+  if (!isset($variables['attributes']) || !$variables['attributes'] instanceof Attribute) {
+    $variables['attributes'] = new Attribute(['class' => ['mel-boost-page']]);
+  }
+  else {
+    $variables['attributes']->addClass('mel-boost-page');
+  }
+}
+
+/**
+ * Implements hook_mail().
+ */
+function myeventlane_boost_mail(string $key, array &$message, array $params): void {
+  switch ($key) {
+    case 'boost_expired':
+      $node = $params['node'] ?? NULL;
+      $vendor_name = $params['vendor_name'] ?? 'there';
+
+      $message['subject'] = t('Your event boost has expired');
+      $message['body'][] = t('Hi @name,', ['@name' => $vendor_name]);
+      if ($node) {
+        $message['body'][] = t('The promotion for your event "@title" has now expired.', [
+          '@title' => $node->label(),
+        ]);
+        $message['body'][] = t('You can boost it again here: @link', [
+          '@link' => $node->toUrl('canonical', ['absolute' => TRUE])->toString(),
+        ]);
+      }
+      break;
+
+    case 'boost_expiring':
+      $message['subject'] = $params['subject'] ?? t('Your event boost expires soon');
+      $message['body'][] = $params['message'] ?? '';
+      break;
+  }
+
+  // Set HTML content type for all boost emails.
+  $message['headers']['Content-Type'] = 'text/html; charset=UTF-8';
+}
+
+/**
+ * Implements hook_cron().
+ */
+function myeventlane_boost_cron(): void {
+  // Process expired boosts.
+  \Drupal::service('class_resolver')
+    ->getInstanceFromDefinition(BoostExpiryCron::class)
+    ->process();
+
+  // Send expiry reminder emails.
+  \Drupal::service('class_resolver')
+    ->getInstanceFromDefinition(BoostExpiryReminderCron::class)
+    ->process();
+}

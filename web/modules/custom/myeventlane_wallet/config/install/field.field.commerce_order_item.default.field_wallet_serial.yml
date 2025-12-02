@@ -1,12 +1,19 @@
 langcode: en
 status: true
 dependencies:
-  enforced: {  }
+  config:
+    - field.storage.commerce_order_item.field_wallet_serial
+  module:
+    - commerce_order
 id: commerce_order_item.default.field_wallet_serial
 field_name: field_wallet_serial
 entity_type: commerce_order_item
 bundle: default
 label: 'Wallet pass serial'
+description: 'Unique serial number for Apple/Google Wallet passes.'
 required: false
 translatable: false
-settings: {  }
+default_value: []
+default_value_callback: ''
+settings: {}
+field_type: string

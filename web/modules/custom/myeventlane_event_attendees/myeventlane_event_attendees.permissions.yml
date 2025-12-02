@@ -1,0 +1,14 @@
+# Full administrative access.
+administer event attendees:
+  title: 'Administer all event attendees'
+  description: 'View, edit, and delete all event attendee records across the platform.'
+  restrict access: TRUE
+
+# Vendor permissions.
+view own event attendees:
+  title: 'View attendees for own events'
+  description: 'Allow organisers to see the attendee list for events they created.'
+
+manage own event attendees:
+  title: 'Manage attendees for own events'
+  description: 'Allow organisers to check in attendees and export lists for events they created.'

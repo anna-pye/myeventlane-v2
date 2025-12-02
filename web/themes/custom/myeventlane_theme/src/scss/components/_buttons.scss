@@ -1,0 +1,237 @@
+// ==========================================================================
+// Button Components
+// ==========================================================================
+// Full button system with variants, sizes, and states.
+
+@use 'sass:color';
+@use '../tokens/colors';
+@use '../tokens/typography';
+@use '../tokens/spacing';
+@use '../tokens/radii';
+@use '../tokens/shadows';
+
+// ---------------------------------------------------------------------------
+// Base Button
+// ---------------------------------------------------------------------------
+
+.mel-btn {
+  // Display
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: spacing.mel-space(2);
+
+  // Sizing (default: medium)
+  padding: spacing.mel-space(2) spacing.mel-space(4);
+  min-height: 44px; // Touch-friendly minimum
+
+  // Typography
+  font-family: typography.$mel-font-family;
+  font-size: typography.mel-font-size(base);
+  font-weight: typography.$mel-font-semibold;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+
+  // Appearance
+  border: 2px solid transparent;
+  border-radius: radii.$mel-radius-md;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  // Focus
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+  }
+
+  // Disabled
+  &:disabled,
+  &.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Button Variants
+// ---------------------------------------------------------------------------
+
+// Primary (Coral) - Main CTAs
+.mel-btn-primary {
+  background-color: colors.$mel-color-primary;
+  color: colors.$mel-color-text-inverse;
+
+  &:hover {
+    background-color: colors.$mel-color-primary-hover;
+  }
+
+  &:active {
+    background-color: colors.$mel-color-primary-active;
+  }
+}
+
+// Secondary (Lavender) - Secondary actions
+.mel-btn-secondary {
+  background-color: colors.$mel-color-secondary;
+  color: colors.$mel-color-text-inverse;
+
+  &:hover {
+    background-color: colors.$mel-color-secondary-hover;
+  }
+
+  &:active {
+    background-color: colors.$mel-color-secondary-active;
+  }
+}
+
+// Accent (Yellow) - Highlights, special actions
+.mel-btn-accent {
+  background-color: colors.$mel-color-accent;
+  color: colors.$mel-color-text;
+
+  &:hover {
+    background-color: color.adjust(colors.$mel-color-accent, $lightness: -8%);
+  }
+
+  &:active {
+    background-color: color.adjust(colors.$mel-color-accent, $lightness: -12%);
+  }
+}
+
+// Ghost - Subtle, outlined
+.mel-btn-ghost {
+  background-color: transparent;
+  color: colors.$mel-color-text;
+  border-color: colors.$mel-color-border-strong;
+
+  &:hover {
+    background-color: colors.$mel-color-bg;
+    border-color: colors.$mel-color-text-muted;
+  }
+
+  &:active {
+    background-color: colors.$mel-color-surface-alt;
+  }
+}
+
+// Text - No background or border
+.mel-btn-text {
+  background-color: transparent;
+  color: colors.$mel-color-primary;
+  padding-left: spacing.mel-space(2);
+  padding-right: spacing.mel-space(2);
+
+  &:hover {
+    color: colors.$mel-color-primary-hover;
+    text-decoration: underline;
+  }
+}
+
+// Danger - Destructive actions
+.mel-btn-danger {
+  background-color: colors.$mel-color-error;
+  color: colors.$mel-color-text-inverse;
+
+  &:hover {
+    background-color: color.adjust(colors.$mel-color-error, $lightness: -10%);
+  }
+}
+
+// Success - Positive confirmations
+.mel-btn-success {
+  background-color: colors.$mel-color-success;
+  color: colors.$mel-color-text-inverse;
+
+  &:hover {
+    background-color: color.adjust(colors.$mel-color-success, $lightness: -10%);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Button Sizes
+// ---------------------------------------------------------------------------
+
+.mel-btn-sm {
+  padding: spacing.mel-space(1) spacing.mel-space(3);
+  min-height: 36px;
+  font-size: typography.mel-font-size(sm);
+  border-radius: radii.$mel-radius-sm;
+}
+
+.mel-btn-lg {
+  padding: spacing.mel-space(3) spacing.mel-space(6);
+  min-height: 52px;
+  font-size: typography.mel-font-size(md);
+  border-radius: radii.$mel-radius-lg;
+}
+
+// ---------------------------------------------------------------------------
+// Button Modifiers
+// ---------------------------------------------------------------------------
+
+// Full width
+.mel-btn-block {
+  display: flex;
+  width: 100%;
+}
+
+// Pill shape
+.mel-btn-pill {
+  border-radius: radii.$mel-radius-full;
+}
+
+// Icon only (square)
+.mel-btn-icon {
+  padding: spacing.mel-space(2);
+  min-width: 44px;
+}
+
+// ---------------------------------------------------------------------------
+// Button Group
+// ---------------------------------------------------------------------------
+
+.mel-btn-group {
+  display: inline-flex;
+  gap: spacing.mel-space(2);
+}
+
+.mel-btn-group-attached {
+  display: inline-flex;
+
+  .mel-btn {
+    border-radius: 0;
+
+    &:first-child {
+      border-radius: radii.$mel-radius-md 0 0 radii.$mel-radius-md;
+    }
+
+    &:last-child {
+      border-radius: 0 radii.$mel-radius-md radii.$mel-radius-md 0;
+    }
+
+    &:not(:last-child) {
+      border-right-width: 1px;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Button with Icon
+// ---------------------------------------------------------------------------
+
+.mel-btn-icon-left {
+  svg, .mel-icon {
+    margin-right: spacing.mel-space(1);
+  }
+}
+
+.mel-btn-icon-right {
+  svg, .mel-icon {
+    margin-left: spacing.mel-space(1);
+  }
+}

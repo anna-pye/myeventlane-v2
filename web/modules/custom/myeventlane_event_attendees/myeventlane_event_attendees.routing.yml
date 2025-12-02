@@ -1,0 +1,66 @@
+# Admin collection list.
+myeventlane_event_attendees.collection:
+  path: '/admin/structure/event-attendees'
+  defaults:
+    _entity_list: 'event_attendee'
+    _title: 'Event Attendees'
+  requirements:
+    _permission: 'administer event attendees'
+  options:
+    _admin_route: TRUE
+
+# Admin view single attendee.
+myeventlane_event_attendees.view:
+  path: '/admin/structure/event-attendees/{event_attendee}'
+  defaults:
+    _controller: '\Drupal\myeventlane_event_attendees\Controller\EventAttendeeController::view'
+    _title: 'Attendee'
+  requirements:
+    _permission: 'administer event attendees'
+  options:
+    _admin_route: TRUE
+    parameters:
+      event_attendee:
+        type: entity:event_attendee
+
+# Vendor: list all attendees for an event.
+myeventlane_event_attendees.vendor_list:
+  path: '/vendor/event/{node}/attendees'
+  defaults:
+    _controller: '\Drupal\myeventlane_event_attendees\Controller\VendorAttendeeController::list'
+    _title_callback: '\Drupal\myeventlane_event_attendees\Controller\VendorAttendeeController::listTitle'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_event_attendees\Controller\VendorAttendeeController::access'
+    node: '\d+'
+  options:
+    parameters:
+      node:
+        type: entity:node
+
+# Vendor: export attendees as CSV.
+myeventlane_event_attendees.vendor_export:
+  path: '/vendor/event/{node}/attendees/export'
+  defaults:
+    _controller: '\Drupal\myeventlane_event_attendees\Controller\VendorAttendeeController::export'
+    _title: 'Export Attendees'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_event_attendees\Controller\VendorAttendeeController::access'
+    node: '\d+'
+  options:
+    parameters:
+      node:
+        type: entity:node
+
+# Vendor: check-in an attendee.
+myeventlane_event_attendees.vendor_checkin:
+  path: '/vendor/attendee/{event_attendee}/checkin'
+  defaults:
+    _controller: '\Drupal\myeventlane_event_attendees\Controller\VendorAttendeeController::checkIn'
+    _title: 'Check In'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_event_attendees\Controller\VendorAttendeeController::accessAttendee'
+  methods: [POST]
+  options:
+    parameters:
+      event_attendee:
+        type: entity:event_attendee

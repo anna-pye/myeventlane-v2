@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies: {  }
+name: Event
+type: event
+description: 'MyEventLane Event - a ticketed or RSVP-based event with date, location, and capacity.'
+help: 'Create events for your venue or organization. Events can be free (RSVP) or paid (ticketed via Commerce).'
+new_revision: true
+preview_mode: 1
+display_submitted: true

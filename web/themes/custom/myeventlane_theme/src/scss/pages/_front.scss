@@ -1,0 +1,441 @@
+// ==========================================================================
+// Front Page Styles
+// ==========================================================================
+// Homepage layout with event sections, similar to Humanitix.
+
+@use 'sass:color';
+@use '../tokens/colors';
+@use '../tokens/typography';
+@use '../tokens/spacing';
+@use '../tokens/radii';
+@use '../tokens/shadows';
+@use '../tokens/breakpoints';
+
+// ---------------------------------------------------------------------------
+// Page Sections
+// ---------------------------------------------------------------------------
+
+.mel-section {
+  margin-bottom: spacing.mel-space(8);
+
+  @include breakpoints.mel-break(md) {
+    margin-bottom: spacing.mel-space(10);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Section Header
+// ---------------------------------------------------------------------------
+
+.mel-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: spacing.mel-space(3);
+  margin-bottom: spacing.mel-space(5);
+}
+
+.mel-section-title {
+  font-size: typography.mel-font-size(xl);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-text;
+  margin: 0;
+
+  @include breakpoints.mel-break(md) {
+    font-size: typography.mel-font-size(2xl);
+  }
+}
+
+.mel-section-link {
+  display: inline-flex;
+  align-items: center;
+  gap: spacing.mel-space(1);
+  font-size: typography.mel-font-size(sm);
+  font-weight: typography.$mel-font-semibold;
+  color: colors.$mel-color-primary;
+  text-decoration: none;
+  padding: spacing.mel-space(2) spacing.mel-space(3);
+  border: 2px solid colors.$mel-color-primary;
+  border-radius: radii.$mel-radius-full;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: colors.$mel-color-primary;
+    color: colors.$mel-color-text-inverse;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Featured Events Section
+// ---------------------------------------------------------------------------
+
+.mel-featured-events {
+  // Uses standard section styles
+}
+
+// ---------------------------------------------------------------------------
+// Trending Events Section
+// ---------------------------------------------------------------------------
+
+.mel-trending-events {
+  background: colors.$mel-color-surface;
+  margin-left: -(spacing.mel-space(4));
+  margin-right: -(spacing.mel-space(4));
+  padding: spacing.mel-space(6) spacing.mel-space(4);
+  border-radius: radii.$mel-radius-xl;
+
+  @include breakpoints.mel-break(md) {
+    margin-left: 0;
+    margin-right: 0;
+    padding: spacing.mel-space(8);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Event Section Tabs
+// ---------------------------------------------------------------------------
+
+.mel-section-tabs {
+  display: flex;
+  gap: spacing.mel-space(1);
+  margin-bottom: spacing.mel-space(5);
+  border-bottom: 1px solid colors.$mel-color-border;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mel-section-tab {
+  padding: spacing.mel-space(3) spacing.mel-space(4);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: typography.mel-font-size(sm);
+  font-weight: typography.$mel-font-medium;
+  color: colors.$mel-color-text-muted;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: colors.$mel-color-text;
+  }
+
+  &.is-active {
+    color: colors.$mel-color-primary;
+    border-bottom-color: colors.$mel-color-primary;
+    font-weight: typography.$mel-font-semibold;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Calendar Widget Section
+// ---------------------------------------------------------------------------
+
+.mel-calendar-section {
+  background: colors.$mel-color-surface;
+  border-radius: radii.$mel-radius-xl;
+  padding: spacing.mel-space(5);
+  box-shadow: shadows.$mel-shadow-sm;
+
+  @include breakpoints.mel-break(md) {
+    padding: spacing.mel-space(6);
+  }
+}
+
+.mel-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: spacing.mel-space(4);
+}
+
+.mel-calendar-title {
+  font-size: typography.mel-font-size(lg);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-text;
+  margin: 0;
+}
+
+.mel-calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: spacing.mel-space(3);
+}
+
+.mel-calendar-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: radii.$mel-radius-md;
+  color: colors.$mel-color-text-muted;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: colors.$mel-color-bg;
+    color: colors.$mel-color-text;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+  }
+}
+
+.mel-calendar-month {
+  font-size: typography.mel-font-size(base);
+  font-weight: typography.$mel-font-semibold;
+  color: colors.$mel-color-text;
+}
+
+// ---------------------------------------------------------------------------
+// Mini Calendar Grid
+// ---------------------------------------------------------------------------
+
+.mel-mini-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: spacing.mel-space(1);
+  text-align: center;
+}
+
+.mel-mini-calendar-day-header {
+  padding: spacing.mel-space(2);
+  font-size: typography.mel-font-size(xs);
+  font-weight: typography.$mel-font-semibold;
+  color: colors.$mel-color-text-muted;
+  text-transform: uppercase;
+}
+
+.mel-mini-calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text;
+  border-radius: radii.$mel-radius-md;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: colors.$mel-color-bg;
+  }
+
+  &--today {
+    background: colors.$mel-color-secondary;
+    color: colors.$mel-color-text-inverse;
+    font-weight: typography.$mel-font-bold;
+  }
+
+  &--has-event {
+    position: relative;
+    font-weight: typography.$mel-font-semibold;
+    color: colors.$mel-color-primary;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      background: colors.$mel-color-primary;
+      border-radius: radii.$mel-radius-full;
+    }
+  }
+
+  &--other-month {
+    color: colors.$mel-color-text-light;
+  }
+
+  &--selected {
+    background: color.adjust(colors.$mel-color-secondary, $lightness: 40%);
+    color: colors.$mel-color-secondary;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// CTA Banner
+// ---------------------------------------------------------------------------
+
+.mel-cta-banner {
+  background: linear-gradient(
+    135deg,
+    colors.$mel-color-secondary 0%,
+    color.adjust(colors.$mel-color-secondary, $hue: 20deg) 100%
+  );
+  border-radius: radii.$mel-radius-xl;
+  padding: spacing.mel-space(6);
+  text-align: center;
+  margin-bottom: spacing.mel-space(8);
+
+  @include breakpoints.mel-break(md) {
+    padding: spacing.mel-space(8);
+  }
+}
+
+.mel-cta-title {
+  font-size: typography.mel-font-size(xl);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-text-inverse;
+  margin-bottom: spacing.mel-space(2);
+
+  @include breakpoints.mel-break(md) {
+    font-size: typography.mel-font-size(2xl);
+  }
+}
+
+.mel-cta-text {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: typography.mel-font-size(base);
+  margin-bottom: spacing.mel-space(5);
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mel-cta-actions {
+  display: flex;
+  justify-content: center;
+  gap: spacing.mel-space(3);
+  flex-wrap: wrap;
+}
+
+// ---------------------------------------------------------------------------
+// Stats / Impact Section
+// ---------------------------------------------------------------------------
+
+.mel-impact-section {
+  background: colors.$mel-color-surface;
+  border-radius: radii.$mel-radius-xl;
+  padding: spacing.mel-space(6);
+  text-align: center;
+  margin-bottom: spacing.mel-space(8);
+
+  @include breakpoints.mel-break(md) {
+    padding: spacing.mel-space(8);
+  }
+}
+
+.mel-impact-title {
+  font-size: typography.mel-font-size(lg);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-text;
+  margin-bottom: spacing.mel-space(5);
+}
+
+.mel-impact-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: spacing.mel-space(4);
+
+  @include breakpoints.mel-break(md) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.mel-impact-stat {
+  padding: spacing.mel-space(3);
+}
+
+.mel-impact-stat-value {
+  font-size: typography.mel-font-size(2xl);
+  font-weight: typography.$mel-font-extrabold;
+  color: colors.$mel-color-primary;
+  margin-bottom: spacing.mel-space(1);
+
+  @include breakpoints.mel-break(md) {
+    font-size: typography.mel-font-size(3xl);
+  }
+}
+
+.mel-impact-stat-label {
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text-muted;
+}
+
+// ---------------------------------------------------------------------------
+// Categories Grid
+// ---------------------------------------------------------------------------
+
+.mel-categories-section {
+  margin-bottom: spacing.mel-space(8);
+}
+
+.mel-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: spacing.mel-space(3);
+
+  @include breakpoints.mel-break(sm) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @include breakpoints.mel-break(md) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  @include breakpoints.mel-break(lg) {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.mel-category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: spacing.mel-space(4);
+  background: colors.$mel-color-surface;
+  border-radius: radii.$mel-radius-xl;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: shadows.$mel-shadow-sm;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: shadows.$mel-shadow-md;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+  }
+}
+
+.mel-category-icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: spacing.mel-space(3);
+  font-size: typography.mel-font-size(2xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: colors.$mel-color-bg;
+  border-radius: radii.$mel-radius-lg;
+}
+
+.mel-category-name {
+  font-size: typography.mel-font-size(sm);
+  font-weight: typography.$mel-font-semibold;
+  color: colors.$mel-color-text;
+  text-align: center;
+}
+
+.mel-category-count {
+  font-size: typography.mel-font-size(xs);
+  color: colors.$mel-color-text-muted;
+  margin-top: spacing.mel-space(1);
+}

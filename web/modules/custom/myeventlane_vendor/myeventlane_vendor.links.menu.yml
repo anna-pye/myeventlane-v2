@@ -1,0 +1,15 @@
+# Admin content menu link for vendor list.
+myeventlane_vendor.collection:
+  title: 'Organisers'
+  description: 'Manage event organisers on the platform.'
+  parent: system.admin_content
+  route_name: myeventlane_vendor.collection
+  weight: 10
+
+# Link in MyEventLane admin section.
+myeventlane_vendor.admin_link:
+  title: 'Vendors'
+  description: 'Configure vendor entity settings and field display.'
+  route_name: myeventlane_vendor.settings
+  parent: myeventlane_core.config
+  weight: 25

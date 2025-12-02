@@ -1,0 +1,7 @@
+# Admin config menu link.
+myeventlane_boost.settings:
+  title: 'Boost'
+  description: 'Configure event promotion and featured placement settings.'
+  route_name: myeventlane_boost.settings
+  parent: myeventlane_core.config
+  weight: 10

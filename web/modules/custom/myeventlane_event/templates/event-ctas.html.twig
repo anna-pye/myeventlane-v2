@@ -1,0 +1,62 @@
+{#
+/**
+ * @file
+ * Template for event CTAs.
+ *
+ * Available variables:
+ * - event: The event node entity.
+ * - mode: The effective booking mode ('rsvp', 'paid', 'both', 'external', 'none').
+ * - primary_cta: Render array for the primary CTA.
+ * - all_ctas: Array of all available CTA render arrays, keyed by type.
+ * - is_bookable: Whether the event is currently bookable.
+ *
+ * @ingroup themeable
+ */
+#}
+<div class="mel-event-ctas mel-event-ctas--{{ mode }}"{% if not is_bookable %} data-bookable="false"{% endif %}>
+
+  {# Show all CTAs when both modes are active #}
+  {% if mode == 'both' and all_ctas|length > 1 %}
+    <div class="mel-event-ctas__group">
+      {% if all_ctas.tickets is defined %}
+        <div class="mel-event-ctas__item mel-event-ctas__item--primary">
+          {{ all_ctas.tickets }}
+        </div>
+      {% endif %}
+      {% if all_ctas.rsvp is defined %}
+        <div class="mel-event-ctas__item mel-event-ctas__item--secondary">
+          {{ all_ctas.rsvp }}
+        </div>
+      {% endif %}
+    </div>
+    <p class="mel-event-ctas__hint">{{ 'Purchase tickets or RSVP for free.'|t }}</p>
+
+  {# Single CTA modes #}
+  {% elseif primary_cta %}
+    <div class="mel-event-ctas__single">
+      {{ primary_cta }}
+    </div>
+
+    {# Mode-specific hints #}
+    {% if mode == 'rsvp' %}
+      <p class="mel-event-ctas__hint">{{ 'Free admission. Reserve your spot.'|t }}</p>
+    {% elseif mode == 'paid' %}
+      <p class="mel-event-ctas__hint">{{ 'Secure your tickets now.'|t }}</p>
+    {% elseif mode == 'external' %}
+      <p class="mel-event-ctas__hint">{{ 'Opens in a new window.'|t }}</p>
+    {% elseif mode == 'none' %}
+      <p class="mel-event-ctas__hint">{{ 'Tickets will be available soon.'|t }}</p>
+    {% endif %}
+
+  {# Waitlist mode #}
+  {% elseif all_ctas.waitlist is defined %}
+    <div class="mel-event-ctas__single">
+      {{ all_ctas.waitlist }}
+    </div>
+    <p class="mel-event-ctas__hint">{{ 'This event is full. Join the waitlist to be notified if spots open up.'|t }}</p>
+  {% endif %}
+
+</div>
+
+
+

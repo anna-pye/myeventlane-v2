@@ -1,0 +1,86 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for myeventlane_vendor module.
+ */
+
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
+/**
+ * Install new base fields (uid, created, changed) and remove old slug field.
+ */
+function myeventlane_vendor_update_10001(): void {
+  $entity_type_id = 'myeventlane_vendor';
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+
+  // Remove the old 'slug' base field if it exists.
+  $slug_field = $definition_update_manager->getFieldStorageDefinition('slug', $entity_type_id);
+  if ($slug_field) {
+    $definition_update_manager->uninstallFieldStorageDefinition($slug_field);
+  }
+
+  // Install the 'uid' (owner) field.
+  $uid_field = $definition_update_manager->getFieldStorageDefinition('uid', $entity_type_id);
+  if (!$uid_field) {
+    $uid_field = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Owner'))
+      ->setDescription(new TranslatableMarkup('The user who owns this vendor.'))
+      ->setSetting('target_type', 'user')
+      ->setSetting('handler', 'default');
+    $definition_update_manager->installFieldStorageDefinition('uid', $entity_type_id, 'myeventlane_vendor', $uid_field);
+  }
+
+  // Install the 'created' field.
+  $created_field = $definition_update_manager->getFieldStorageDefinition('created', $entity_type_id);
+  if (!$created_field) {
+    $created_field = BaseFieldDefinition::create('created')
+      ->setLabel(new TranslatableMarkup('Created'))
+      ->setDescription(new TranslatableMarkup('The time that the vendor was created.'));
+    $definition_update_manager->installFieldStorageDefinition('created', $entity_type_id, 'myeventlane_vendor', $created_field);
+  }
+
+  // Install the 'changed' field.
+  $changed_field = $definition_update_manager->getFieldStorageDefinition('changed', $entity_type_id);
+  if (!$changed_field) {
+    $changed_field = BaseFieldDefinition::create('changed')
+      ->setLabel(new TranslatableMarkup('Changed'))
+      ->setDescription(new TranslatableMarkup('The time that the vendor was last updated.'));
+    $definition_update_manager->installFieldStorageDefinition('changed', $entity_type_id, 'myeventlane_vendor', $changed_field);
+  }
+}
+
+/**
+ * Populate timestamps for existing vendors that have NULL values.
+ */
+function myeventlane_vendor_update_10002(): void {
+  $database = \Drupal::database();
+  $now = \Drupal::time()->getRequestTime();
+
+  // Update the base table with current timestamps where NULL.
+  // The entity uses 'myeventlane_vendor' as its base table.
+  if ($database->schema()->tableExists('myeventlane_vendor')) {
+    // Check if the columns exist before updating.
+    if ($database->schema()->fieldExists('myeventlane_vendor', 'created')) {
+      $database->update('myeventlane_vendor')
+        ->fields([
+          'created' => $now,
+          'changed' => $now,
+        ])
+        ->isNull('created')
+        ->execute();
+    }
+  }
+}
+
+/**
+ * Update the Vendor entity type definition to include the owner key.
+ */
+function myeventlane_vendor_update_10003(&$sandbox): void {
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type = \Drupal::entityTypeManager()->getDefinition('myeventlane_vendor');
+  $field_storage_definitions = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('myeventlane_vendor');
+
+  $definition_update_manager->updateFieldableEntityType($entity_type, $field_storage_definitions, $sandbox);
+}

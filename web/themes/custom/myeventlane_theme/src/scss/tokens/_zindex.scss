@@ -1,0 +1,12 @@
+@use 'sass:map';
+
+$mel-z: (
+  base: 1,
+  header: 100,
+  nav: 200,
+  modal: 1000
+);
+
+@function mel-z($key) {
+  @return map.get($mel-z, $key);
+}

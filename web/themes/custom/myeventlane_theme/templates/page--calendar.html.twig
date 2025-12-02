@@ -1,0 +1,222 @@
+{#
+/**
+ * @file
+ * Theme override for the calendar page.
+ * Uses FullCalendar from CDN for reliable calendar display.
+ */
+#}
+
+<div class="mel-page mel-page--calendar">
+
+  {# ==================== HEADER ==================== #}
+  <div class="mel-region-header">
+    <header class="mel-header">
+      <div class="mel-header-inner mel-container">
+        <div class="mel-header-left">
+          <a href="{{ path('<front>') }}" class="mel-logo">
+            <span class="mel-logo-icon">
+              <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect width="64" height="64" rx="12" fill="#ff6f61"/>
+                <path d="M16 64 C16 64 16 44 24 36 C28 32 34 34 38 32 C44 29 42 22 38 18 C34 14 28 16 24 22 C20 28 20 36 20 36" fill="#faf7fb"/>
+                <line x1="40" y1="14" x2="48" y2="6" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+                <line x1="46" y1="20" x2="56" y2="16" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+                <line x1="48" y1="28" x2="58" y2="28" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <span class="mel-logo-text">
+              <span class="mel-logo-my">My</span>
+              <span class="mel-logo-eventlane">EventLane</span>
+            </span>
+          </a>
+        </div>
+        <nav class="mel-nav-desktop" aria-label="Main navigation">
+          <ul class="mel-nav-list">
+            <li><a href="/events" class="mel-nav-link">Events</a></li>
+            <li><a href="/categories" class="mel-nav-link">Categories</a></li>
+            <li><a href="/calendar" class="mel-nav-link">Calendar</a></li>
+            <li><a href="/vendors" class="mel-nav-link">Organisers</a></li>
+          </ul>
+        </nav>
+        <div class="mel-header-actions">
+          {% if logged_in %}
+            <a href="/dashboard" class="mel-btn mel-btn-ghost">Dashboard</a>
+          {% else %}
+            <a href="/user/login" class="mel-btn mel-btn-ghost">Log in</a>
+          {% endif %}
+          <a href="/node/add/event" class="mel-btn mel-btn-primary">Create Event</a>
+        </div>
+        <button class="mel-nav-toggle" aria-label="Open menu" aria-expanded="false">
+          <span class="mel-nav-toggle-box">
+            <span class="mel-nav-toggle-line"></span>
+            <span class="mel-nav-toggle-line"></span>
+            <span class="mel-nav-toggle-line"></span>
+          </span>
+        </button>
+      </div>
+      <div class="mel-nav-mobile-wrapper" aria-hidden="true">
+        <div class="mel-nav-mobile-header">
+          <button class="mel-nav-mobile-close" aria-label="Close menu">×</button>
+        </div>
+        <nav class="mel-nav-mobile" aria-label="Mobile navigation">
+          <ul class="mel-nav-mobile-list">
+            <li><a href="/events">Browse Events</a></li>
+            <li><a href="/categories">Categories</a></li>
+            <li><a href="/calendar">Calendar</a></li>
+            <li><a href="/vendors">Organisers</a></li>
+            <li class="mel-mobile-divider"></li>
+            {% if logged_in %}
+              <li><a href="/dashboard">Dashboard</a></li>
+              <li><a href="/user/logout">Log out</a></li>
+            {% else %}
+              <li><a href="/user/login">Log in</a></li>
+              <li><a href="/user/register">Sign up</a></li>
+            {% endif %}
+            <li class="mel-mobile-divider"></li>
+            <li><a href="/node/add/event" class="mel-btn-mobile-accent">Create Event</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <div class="mel-nav-overlay"></div>
+  </div>
+
+  {# ==================== MAIN CONTENT ==================== #}
+  <main id="main-content" class="mel-main">
+    <div class="mel-container" style="padding: 2rem 1rem;">
+      
+      <div style="margin-bottom: 2rem;">
+        <h1 style="font-size: 2rem; font-weight: 700; color: #1a1a2e; margin: 0 0 0.5rem;">Events Calendar</h1>
+        <p style="color: #666; margin: 0;">Browse all upcoming events</p>
+      </div>
+
+      {# FullCalendar Container #}
+      <div id="fullcalendar" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"></div>
+
+    </div>
+  </main>
+
+  {# ==================== FOOTER ==================== #}
+  <footer class="mel-footer mel-footer--simple">
+    <div class="mel-container">
+      <div class="mel-footer-simple-inner">
+        <div class="mel-footer-brand">
+          <span class="mel-footer-logo">MyEventLane</span>
+          <p class="mel-footer-tagline">Empowering event creators everywhere.</p>
+        </div>
+        <nav class="mel-footer-nav" aria-label="Footer navigation">
+          <ul class="mel-footer-links-inline">
+            <li><a href="/about">About</a></li>
+            <li><a href="/support">Support</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><a href="/privacy">Privacy</a></li>
+            <li><a href="/terms">Terms</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </footer>
+  <div class="mel-post-footer mel-post-footer--dark">
+    <div class="mel-container">
+      <div class="mel-post-footer-inner">
+        <span class="mel-copyright">
+          © {{ "now"|date("Y") }} MyEventLane. All rights reserved.
+        </span>
+        <div class="mel-footer-social-icons">
+          <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook">
+            <span>FB</span>
+          </a>
+          <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
+            <span>IG</span>
+          </a>
+          <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="Twitter">
+            <span>X</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{# Load FullCalendar from CDN #}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+
+<style>
+  #fullcalendar {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .fc .fc-toolbar-title {
+    font-size: 1.5rem !important;
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+  .fc .fc-button-primary {
+    background-color: #ff6f61 !important;
+    border-color: #ff6f61 !important;
+  }
+  .fc .fc-button-primary:hover {
+    background-color: #e55a4d !important;
+    border-color: #e55a4d !important;
+  }
+  .fc .fc-button-primary:not(:disabled).fc-button-active {
+    background-color: #7c5cff !important;
+    border-color: #7c5cff !important;
+  }
+  .fc-event {
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 4px;
+  }
+  .fc-daygrid-event {
+    background-color: #7c5cff;
+    border-color: #7c5cff;
+  }
+  .fc-timegrid-event {
+    background-color: #7c5cff;
+    border-color: #7c5cff;
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var calendarEl = document.getElementById('fullcalendar');
+  
+  // Events data from Drupal
+  var events = [
+    {% for event in calendar_events %}
+    {
+      title: {{ event.title|json_encode|raw }},
+      start: '{{ event.start }}',
+      {% if event.end %}end: '{{ event.end }}',{% endif %}
+      url: '{{ event.url }}',
+      color: '{{ event.color|default("#7c5cff") }}'
+    },
+    {% endfor %}
+  ];
+
+  var calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+    },
+    events: events,
+    eventClick: function(info) {
+      if (info.event.url) {
+        window.location.href = info.event.url;
+        info.jsEvent.preventDefault();
+      }
+    },
+    height: 'auto',
+    navLinks: true,
+    editable: false,
+    dayMaxEvents: 3
+  });
+
+  calendar.render();
+});
+</script>
+

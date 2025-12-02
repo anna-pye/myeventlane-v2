@@ -1,6 +1,7 @@
-myeventlane_tickets.admin:
-  title: 'Ticket settings'
-  description: 'Configure ticket generation and download settings.'
-  parent: system.admin_config_services
+# Admin config menu link (under MyEventLane section).
+myeventlane_tickets.settings:
+  title: 'Tickets'
+  description: 'Configure ticket generation, PDF settings, and download options.'
   route_name: myeventlane_tickets.settings
-  weight: 10
+  parent: myeventlane_core.config
+  weight: 5

@@ -1,0 +1,72 @@
+{#
+/**
+ * @file
+ * Template for the MyEventLane admin dashboard.
+ *
+ * Available variables:
+ * - is_admin: Boolean indicating this is admin view.
+ * - is_admin_viewing_as_vendor: Boolean for vendor view mode.
+ * - event_count: Total number of published events.
+ * - vendor_count: Total number of vendors.
+ * - user_count: Total number of active users.
+ * - attributes: HTML attributes for the wrapper element.
+ */
+#}
+<div{{ attributes.addClass('mel-dashboard-wrapper', 'mel-dashboard-wrapper--admin') }}>
+
+  {# Toggle view button for admins #}
+  {% if is_admin %}
+    <div class="mel-admin-toggle">
+      <a href="{{ path('myeventlane_dashboard.toggle') }}" class="mel-toggle-button">
+        {% if is_admin_viewing_as_vendor %}
+          {{ 'Switch to Admin View'|t }}
+        {% else %}
+          {{ 'View as Vendor'|t }}
+        {% endif %}
+      </a>
+    </div>
+  {% endif %}
+
+  <h1 class="mel-dashboard-title">{{ 'Platform Dashboard'|t }}</h1>
+
+  {# Stats cards #}
+  <section class="mel-dashboard-stats" aria-label="{{ 'Platform statistics'|t }}">
+    <div class="mel-stat-card">
+      <span class="mel-stat-value">{{ event_count }}</span>
+      <span class="mel-stat-label">{{ 'Events'|t }}</span>
+    </div>
+    <div class="mel-stat-card">
+      <span class="mel-stat-value">{{ vendor_count|default(0) }}</span>
+      <span class="mel-stat-label">{{ 'Vendors'|t }}</span>
+    </div>
+    <div class="mel-stat-card">
+      <span class="mel-stat-value">{{ user_count|default(0) }}</span>
+      <span class="mel-stat-label">{{ 'Users'|t }}</span>
+    </div>
+  </section>
+
+  {# Quick actions grid #}
+  <section class="mel-dashboard-section" aria-labelledby="admin-actions-title">
+    <h2 id="admin-actions-title" class="mel-section-title">{{ 'Quick Actions'|t }}</h2>
+    <div class="mel-dashboard-grid">
+      <div class="mel-card">
+        <h3>{{ 'Events'|t }}</h3>
+        <p>{{ 'Manage all events on the platform.'|t }}</p>
+        <a href="{{ path('system.admin_content') }}" class="mel-btn">{{ 'Manage Events'|t }}</a>
+      </div>
+
+      <div class="mel-card">
+        <h3>{{ 'Vendors'|t }}</h3>
+        <p>{{ 'Review vendor accounts and stores.'|t }}</p>
+        <a href="{{ path('myeventlane_vendor.collection') }}" class="mel-btn">{{ 'Manage Vendors'|t }}</a>
+      </div>
+
+      <div class="mel-card">
+        <h3>{{ 'Reports'|t }}</h3>
+        <p>{{ 'View platform reports and analytics.'|t }}</p>
+        <a href="{{ path('system.admin_reports') }}" class="mel-btn">{{ 'View Reports'|t }}</a>
+      </div>
+    </div>
+  </section>
+
+</div>

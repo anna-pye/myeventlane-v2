@@ -1,0 +1,358 @@
+// ==========================================================================
+// Hero Component
+// ==========================================================================
+// Hero section with branding, search, and category filters.
+// Inspired by Humanitix's friendly, accessible design.
+
+@use 'sass:color';
+@use '../tokens/colors';
+@use '../tokens/radii';
+@use '../tokens/spacing';
+@use '../tokens/typography';
+@use '../tokens/shadows';
+@use '../tokens/breakpoints';
+
+// ---------------------------------------------------------------------------
+// Hero Container
+// ---------------------------------------------------------------------------
+
+.mel-hero {
+  background: colors.$mel-color-bg;
+  padding: spacing.mel-space(6) 0 spacing.mel-space(8);
+  position: relative;
+  overflow: hidden;
+
+  @include breakpoints.mel-break(md) {
+    padding: spacing.mel-space(8) 0;
+  }
+}
+
+.mel-hero-inner {
+  position: relative;
+  z-index: 1;
+}
+
+// ---------------------------------------------------------------------------
+// Hero Header (Brand + Illustration)
+// ---------------------------------------------------------------------------
+
+.mel-hero-header {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(4);
+  margin-bottom: spacing.mel-space(6);
+
+  @include breakpoints.mel-break(md) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+}
+
+.mel-hero-brand {
+  flex: 1;
+}
+
+// ---------------------------------------------------------------------------
+// Hero Logo (Large version for hero)
+// ---------------------------------------------------------------------------
+
+.mel-hero-logo {
+  display: flex;
+  align-items: center;
+  gap: spacing.mel-space(3);
+  margin-bottom: spacing.mel-space(3);
+}
+
+.mel-hero-logo-icon {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+
+  @include breakpoints.mel-break(md) {
+    width: 80px;
+    height: 80px;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.mel-hero-logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.mel-hero-logo-my {
+  font-size: typography.mel-font-size(lg);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-primary;
+
+  @include breakpoints.mel-break(md) {
+    font-size: typography.mel-font-size(xl);
+  }
+}
+
+.mel-hero-logo-eventlane {
+  font-size: typography.mel-font-size(2xl);
+  font-weight: typography.$mel-font-extrabold;
+  color: colors.$mel-color-primary;
+
+  @include breakpoints.mel-break(md) {
+    font-size: typography.mel-font-size(3xl);
+  }
+}
+
+.mel-hero-tagline {
+  font-size: typography.mel-font-size(md);
+  font-weight: typography.$mel-font-semibold;
+  color: colors.$mel-color-text;
+  margin: 0;
+
+  @include breakpoints.mel-break(md) {
+    font-size: typography.mel-font-size(lg);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Hero Illustration (Decorative Pie/Wheel)
+// ---------------------------------------------------------------------------
+
+.mel-hero-illustration {
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+  display: none;
+
+  @include breakpoints.mel-break(sm) {
+    display: block;
+  }
+
+  @include breakpoints.mel-break(md) {
+    width: 140px;
+    height: 140px;
+  }
+}
+
+.mel-hero-pie {
+  width: 100%;
+  height: 100%;
+  border-radius: radii.$mel-radius-full;
+  background: conic-gradient(
+    colors.$mel-color-primary 0deg 90deg,
+    #a8d4f0 90deg 180deg,             // Light blue
+    colors.$mel-color-accent 180deg 270deg,
+    colors.$mel-color-secondary 270deg 360deg
+  );
+  position: relative;
+  box-shadow: shadows.$mel-shadow-md;
+
+  // Subtle inner shadow for depth
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.08);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Category Chips
+// ---------------------------------------------------------------------------
+
+.mel-hero-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: spacing.mel-space(2);
+  margin-bottom: spacing.mel-space(5);
+}
+
+.mel-category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: spacing.mel-space(1);
+  padding: spacing.mel-space(2) spacing.mel-space(4);
+  background: colors.$mel-color-surface;
+  border: 2px solid colors.$mel-color-border;
+  border-radius: radii.$mel-radius-full;
+  font-size: typography.mel-font-size(sm);
+  font-weight: typography.$mel-font-semibold;
+  color: colors.$mel-color-text;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: colors.$mel-color-primary;
+    color: colors.$mel-color-primary;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+  }
+
+  &.is-active {
+    background: colors.$mel-color-primary;
+    border-color: colors.$mel-color-primary;
+    color: colors.$mel-color-text-inverse;
+  }
+}
+
+// Category chip color variants
+.mel-category-chip--coral {
+  background: color.adjust(colors.$mel-color-primary, $lightness: 32%);
+  border-color: color.adjust(colors.$mel-color-primary, $lightness: 32%);
+  color: color.adjust(colors.$mel-color-primary, $lightness: -10%);
+
+  &:hover, &.is-active {
+    background: colors.$mel-color-primary;
+    border-color: colors.$mel-color-primary;
+    color: colors.$mel-color-text-inverse;
+  }
+}
+
+.mel-category-chip--purple {
+  background: color.adjust(colors.$mel-color-secondary, $lightness: 32%);
+  border-color: color.adjust(colors.$mel-color-secondary, $lightness: 32%);
+  color: colors.$mel-color-secondary;
+
+  &:hover, &.is-active {
+    background: colors.$mel-color-secondary;
+    border-color: colors.$mel-color-secondary;
+    color: colors.$mel-color-text-inverse;
+  }
+}
+
+.mel-category-chip--blue {
+  background: #dbeafe;
+  border-color: #dbeafe;
+  color: #2563eb;
+
+  &:hover, &.is-active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: colors.$mel-color-text-inverse;
+  }
+}
+
+.mel-category-chip--teal {
+  background: color.adjust(colors.$mel-color-accent-alt, $lightness: 25%);
+  border-color: color.adjust(colors.$mel-color-accent-alt, $lightness: 25%);
+  color: color.adjust(colors.$mel-color-accent-alt, $lightness: -25%);
+
+  &:hover, &.is-active {
+    background: colors.$mel-color-accent-alt;
+    border-color: colors.$mel-color-accent-alt;
+    color: colors.$mel-color-text;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Search Bar
+// ---------------------------------------------------------------------------
+
+.mel-hero-search {
+  max-width: 600px;
+}
+
+.mel-hero-search-box {
+  display: flex;
+  background: colors.$mel-color-surface;
+  border: 2px solid colors.$mel-color-border;
+  border-radius: radii.$mel-radius-full;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus-within {
+    border-color: colors.$mel-color-secondary;
+    box-shadow: 0 0 0 3px rgba(colors.$mel-color-secondary, 0.15);
+  }
+
+  input {
+    flex: 1;
+    border: none;
+    padding: spacing.mel-space(3) spacing.mel-space(5);
+    font-size: typography.mel-font-size(base);
+    background: transparent;
+    min-width: 0;
+
+    &::placeholder {
+      color: colors.$mel-color-text-light;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.mel-hero-search-btn {
+  padding: spacing.mel-space(3) spacing.mel-space(6);
+  background: colors.$mel-color-primary;
+  color: colors.$mel-color-text-inverse;
+  font-weight: typography.$mel-font-bold;
+  font-size: typography.mel-font-size(base);
+  border: none;
+  border-radius: radii.$mel-radius-full;
+  margin: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: colors.$mel-color-primary-hover;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Hero Variants
+// ---------------------------------------------------------------------------
+
+// Compact hero for inner pages
+.mel-hero--compact {
+  padding: spacing.mel-space(5) 0;
+
+  .mel-hero-logo-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .mel-hero-logo-my {
+    font-size: typography.mel-font-size(base);
+  }
+
+  .mel-hero-logo-eventlane {
+    font-size: typography.mel-font-size(xl);
+  }
+}
+
+// Centered hero (alternative layout)
+.mel-hero--centered {
+  text-align: center;
+
+  .mel-hero-header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .mel-hero-logo {
+    justify-content: center;
+  }
+
+  .mel-hero-categories {
+    justify-content: center;
+  }
+
+  .mel-hero-search {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}

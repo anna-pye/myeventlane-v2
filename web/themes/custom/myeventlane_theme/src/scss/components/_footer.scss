@@ -1,0 +1,245 @@
+// ==========================================================================
+// Footer Component
+// ==========================================================================
+// Site footer with links and branding.
+// Includes simple variant for cleaner look.
+
+@use '../tokens/colors';
+@use '../tokens/spacing';
+@use '../tokens/typography';
+@use '../tokens/shadows';
+@use '../tokens/radii';
+@use '../tokens/breakpoints';
+
+// ---------------------------------------------------------------------------
+// Standard Footer
+// ---------------------------------------------------------------------------
+
+.mel-footer {
+  background: colors.$mel-color-surface;
+  padding: spacing.mel-space(8) 0;
+  border-top: 1px solid colors.$mel-color-border;
+}
+
+// ---------------------------------------------------------------------------
+// Footer Grid (Full version)
+// ---------------------------------------------------------------------------
+
+.mel-footer-grid {
+  display: grid;
+  gap: spacing.mel-space(6);
+  grid-template-columns: 1fr;
+
+  @include breakpoints.mel-break(sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include breakpoints.mel-break(md) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.mel-footer-col {
+  margin-bottom: spacing.mel-space(2);
+}
+
+.mel-footer-title {
+  font-size: typography.mel-font-size(xl);
+  font-weight: typography.$mel-font-extrabold;
+  line-height: typography.$mel-leading-snug;
+  margin-bottom: spacing.mel-space(3);
+  color: colors.$mel-color-text;
+}
+
+.mel-footer-subtitle {
+  font-size: typography.mel-font-size(md);
+  font-weight: typography.$mel-font-bold;
+  line-height: typography.$mel-leading-snug;
+  margin-bottom: spacing.mel-space(3);
+  color: colors.$mel-color-text;
+}
+
+.mel-footer-text {
+  color: colors.$mel-color-text-muted;
+  font-size: typography.mel-font-size(sm);
+  line-height: typography.$mel-leading-relaxed;
+  max-width: 280px;
+}
+
+.mel-footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    margin-bottom: spacing.mel-space(2);
+  }
+
+  a {
+    text-decoration: none;
+    color: colors.$mel-color-text-muted;
+    font-size: typography.mel-font-size(sm);
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: colors.$mel-color-primary;
+    }
+
+    &:focus-visible {
+      @include colors.mel-focus-ring;
+      border-radius: radii.$mel-radius-sm;
+    }
+  }
+}
+
+.mel-footer-social li a {
+  font-weight: typography.$mel-font-medium;
+}
+
+// ---------------------------------------------------------------------------
+// Simple Footer (Minimal version)
+// ---------------------------------------------------------------------------
+
+.mel-footer--simple {
+  padding: spacing.mel-space(6) 0;
+}
+
+.mel-footer-simple-inner {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(4);
+  align-items: center;
+  text-align: center;
+
+  @include breakpoints.mel-break(md) {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+}
+
+.mel-footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(1);
+}
+
+.mel-footer-logo {
+  font-size: typography.mel-font-size(lg);
+  font-weight: typography.$mel-font-extrabold;
+  color: colors.$mel-color-primary;
+}
+
+.mel-footer-tagline {
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text-muted;
+  margin: 0;
+}
+
+.mel-footer-nav {
+  // Footer navigation
+}
+
+.mel-footer-links-inline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: spacing.mel-space(4);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  @include breakpoints.mel-break(md) {
+    justify-content: flex-end;
+  }
+
+  a {
+    font-size: typography.mel-font-size(sm);
+    font-weight: typography.$mel-font-medium;
+    color: colors.$mel-color-text;
+    text-decoration: none;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: colors.$mel-color-primary;
+    }
+
+    &:focus-visible {
+      @include colors.mel-focus-ring;
+      border-radius: radii.$mel-radius-sm;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Post Footer (Copyright bar)
+// ---------------------------------------------------------------------------
+
+.mel-post-footer {
+  background: colors.$mel-color-bg;
+  padding: spacing.mel-space(4) 0;
+  text-align: center;
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text-light;
+  border-top: 1px solid colors.$mel-color-border;
+}
+
+.mel-post-footer--dark {
+  background: #1e293b; // Slate-800
+  border-top: none;
+  color: rgba(255, 255, 255, 0.7);
+
+  a {
+    color: rgba(255, 255, 255, 0.7);
+
+    &:hover {
+      color: white;
+    }
+  }
+}
+
+.mel-post-footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(3);
+  align-items: center;
+
+  @include breakpoints.mel-break(md) {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.mel-copyright {
+  font-size: typography.mel-font-size(sm);
+}
+
+.mel-footer-social-icons {
+  display: flex;
+  gap: spacing.mel-space(3);
+
+  a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: radii.$mel-radius-md;
+    text-decoration: none;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    &:focus-visible {
+      @include colors.mel-focus-ring;
+    }
+
+    span {
+      font-size: typography.mel-font-size(xs);
+      font-weight: typography.$mel-font-bold;
+    }
+  }
+}

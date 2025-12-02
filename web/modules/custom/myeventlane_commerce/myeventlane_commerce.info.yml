@@ -1,0 +1,17 @@
+name: 'MyEventLane Commerce'
+type: module
+description: 'Commerce integration for MyEventLane. Provides the event booking page, ticket product handling, and integrates attendee data with Commerce orders.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_core:myeventlane_core
+  - myeventlane_schema:myeventlane_schema
+  - myeventlane_event:myeventlane_event
+  - drupal:commerce
+  - drupal:commerce_product
+  - drupal:commerce_cart
+  - drupal:commerce_checkout
+  - drupal:commerce_order
+  - paragraphs:paragraphs

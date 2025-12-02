@@ -1,0 +1,53 @@
+# Admin vendor list.
+myeventlane_vendor.collection:
+  path: '/admin/content/organisers'
+  defaults:
+    _entity_list: 'myeventlane_vendor'
+    _title: 'Organisers'
+  requirements:
+    _permission: 'administer myeventlane vendor'
+  options:
+    _admin_route: TRUE
+
+# Add vendor form.
+myeventlane_vendor.add:
+  path: '/admin/content/organisers/add'
+  defaults:
+    _entity_form: 'myeventlane_vendor.add'
+    _title: 'Add organiser'
+  requirements:
+    _permission: 'administer myeventlane vendor'
+  options:
+    _admin_route: TRUE
+
+# Edit vendor form.
+myeventlane_vendor.edit:
+  path: '/admin/content/organisers/{myeventlane_vendor}/edit'
+  defaults:
+    _entity_form: 'myeventlane_vendor.edit'
+  requirements:
+    _permission: 'administer myeventlane vendor'
+  options:
+    _admin_route: TRUE
+
+# Delete vendor form.
+myeventlane_vendor.delete:
+  path: '/admin/content/organisers/{myeventlane_vendor}/delete'
+  defaults:
+    _entity_form: 'myeventlane_vendor.delete'
+  requirements:
+    _permission: 'administer myeventlane vendor'
+  options:
+    _admin_route: TRUE
+
+# Vendor settings page (Field UI base route).
+# Field UI will add /fields, /form-display, /display as child routes.
+myeventlane_vendor.settings:
+  path: '/admin/structure/myeventlane-vendor/settings'
+  defaults:
+    _form: '\Drupal\myeventlane_vendor\Form\VendorSettingsForm'
+    _title: 'Vendor settings'
+  requirements:
+    _permission: 'administer myeventlane vendor'
+  options:
+    _admin_route: TRUE

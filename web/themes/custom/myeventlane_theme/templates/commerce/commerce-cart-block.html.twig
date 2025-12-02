@@ -1,0 +1,31 @@
+{#
+/**
+ * @file
+ * Theme override for the cart block.
+ *
+ * Available variables:
+ * - count: The number of items in the cart.
+ * - count_text: The textual representation of the cart count.
+ * - url: The cart page URL.
+ * - content: The cart block content (dropdown).
+ */
+#}
+
+<div{{ attributes.addClass('mel-cart-block') }}>
+  <a href="{{ url }}" class="mel-cart-block-link mel-cart-badge">
+    <span class="mel-cart-block-icon">🛒</span>
+    {% if count > 0 %}
+      <span class="mel-cart-badge-count">{{ count }}</span>
+    {% endif %}
+    <span class="visually-hidden">{{ count_text }}</span>
+  </a>
+
+  {% if content %}
+    <div class="mel-mini-cart">
+      {{ content }}
+    </div>
+  {% endif %}
+</div>
+
+
+

@@ -1,0 +1,8 @@
+# MyEventLane Theme rules
+
+- Respect pastel palette and spacing tokens already defined in SCSS.
+- Keep layout mobile-first and avoid hard-coded pixel widths for large screens.
+- When editing Twig in this theme, ensure:
+  - No inline styles unless absolutely necessary.
+  - Buttons and touch targets are at least 44x44px.
+  - Markup remains compatible with Drupal's theme system (use attributes, title_prefix/title_suffix, etc.).

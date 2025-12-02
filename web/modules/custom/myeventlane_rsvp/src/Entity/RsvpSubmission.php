@@ -56,7 +56,7 @@ class RsvpSubmission extends ContentEntityBase implements RsvpSubmissionInterfac
     $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('User'))
       ->setSetting('target_type', 'user')
-      ->setDefaultValueCallback('Drupal\user\EntityOwner::getCurrentUserId');
+      ->setDefaultValueCallback('Drupal\user\Entity\User::getCurrentUserId');
 
     $fields['changed'] = BaseFieldDefinition::create('changed');
 

@@ -1,0 +1,249 @@
+// ==========================================================================
+// Chips / Pills Component
+// ==========================================================================
+// Category pills, tags, and filter chips.
+
+@use 'sass:color';
+@use '../tokens/colors';
+@use '../tokens/typography';
+@use '../tokens/spacing';
+@use '../tokens/radii';
+@use '../tokens/shadows';
+
+// ---------------------------------------------------------------------------
+// Base Chip
+// ---------------------------------------------------------------------------
+
+.mel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: spacing.mel-space(1);
+  padding: spacing.mel-space(2) spacing.mel-space(4);
+  background: colors.$mel-color-surface;
+  border-radius: radii.$mel-radius-full;
+  font-size: typography.mel-font-size(sm);
+  font-weight: typography.$mel-font-medium;
+  color: colors.$mel-color-text;
+  text-decoration: none;
+  border: 1px solid colors.$mel-color-border;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: colors.$mel-color-bg;
+    border-color: colors.$mel-color-border-strong;
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Chip Sizes
+// ---------------------------------------------------------------------------
+
+.mel-chip--xs {
+  padding: spacing.mel-space(1) spacing.mel-space(2);
+  font-size: typography.mel-font-size(xs);
+}
+
+.mel-chip--sm {
+  padding: spacing.mel-space(1) spacing.mel-space(3);
+  font-size: typography.mel-font-size(sm);
+}
+
+.mel-chip--lg {
+  padding: spacing.mel-space(3) spacing.mel-space(5);
+  font-size: typography.mel-font-size(base);
+}
+
+// ---------------------------------------------------------------------------
+// Chip Variants
+// ---------------------------------------------------------------------------
+
+// Filled (solid background)
+.mel-chip--filled {
+  background: colors.$mel-color-bg;
+  border-color: transparent;
+
+  &:hover {
+    background: colors.$mel-color-surface-alt;
+  }
+}
+
+// Active / Selected state
+.mel-chip--active,
+.mel-chip.is-active {
+  background: colors.$mel-color-secondary;
+  border-color: colors.$mel-color-secondary;
+  color: colors.$mel-color-text-inverse;
+
+  &:hover {
+    background: colors.$mel-color-secondary-hover;
+    border-color: colors.$mel-color-secondary-hover;
+  }
+}
+
+// Primary accent
+.mel-chip--primary {
+  background: colors.$mel-color-primary;
+  border-color: colors.$mel-color-primary;
+  color: colors.$mel-color-text-inverse;
+
+  &:hover {
+    background: colors.$mel-color-primary-hover;
+    border-color: colors.$mel-color-primary-hover;
+  }
+}
+
+// Accent (yellow)
+.mel-chip--accent {
+  background: colors.$mel-color-accent;
+  border-color: colors.$mel-color-accent;
+  color: colors.$mel-color-text;
+
+  &:hover {
+    background: color.adjust(colors.$mel-color-accent, $lightness: -5%);
+  }
+}
+
+// Success
+.mel-chip--success {
+  background: colors.$mel-color-success-bg;
+  border-color: colors.$mel-color-success;
+  color: colors.$mel-color-success;
+}
+
+// Warning
+.mel-chip--warning {
+  background: colors.$mel-color-warning-bg;
+  border-color: colors.$mel-color-warning;
+  color: color.adjust(colors.$mel-color-warning, $lightness: -15%);
+}
+
+// Error / Danger
+.mel-chip--error {
+  background: colors.$mel-color-error-bg;
+  border-color: colors.$mel-color-error;
+  color: colors.$mel-color-error;
+}
+
+// Info
+.mel-chip--info {
+  background: colors.$mel-color-info-bg;
+  border-color: colors.$mel-color-info;
+  color: colors.$mel-color-info;
+}
+
+// ---------------------------------------------------------------------------
+// Chip with Icon
+// ---------------------------------------------------------------------------
+
+.mel-chip-icon {
+  font-size: 1em;
+  flex-shrink: 0;
+}
+
+// ---------------------------------------------------------------------------
+// Chip with Remove Button
+// ---------------------------------------------------------------------------
+
+.mel-chip--removable {
+  padding-right: spacing.mel-space(2);
+}
+
+.mel-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: spacing.mel-space(1);
+  background: transparent;
+  border: none;
+  border-radius: radii.$mel-radius-full;
+  color: currentColor;
+  opacity: 0.6;
+  cursor: pointer;
+  transition: opacity 0.15s ease, background 0.15s ease;
+  font-size: typography.mel-font-size(sm);
+  line-height: 1;
+
+  &:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  &::before {
+    content: '×';
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Chip Group
+// ---------------------------------------------------------------------------
+
+.mel-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: spacing.mel-space(2);
+}
+
+// Scrollable chip group (for horizontal scroll on mobile)
+.mel-chip-group--scroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: spacing.mel-space(2);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Filter Chips (with checkbox behavior)
+// ---------------------------------------------------------------------------
+
+.mel-chip-filter {
+  input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  input:checked + .mel-chip {
+    background: colors.$mel-color-secondary;
+    border-color: colors.$mel-color-secondary;
+    color: colors.$mel-color-text-inverse;
+  }
+
+  input:focus-visible + .mel-chip {
+    @include colors.mel-focus-ring;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Count Badge in Chip
+// ---------------------------------------------------------------------------
+
+.mel-chip-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 spacing.mel-space(1);
+  margin-left: spacing.mel-space(1);
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: radii.$mel-radius-full;
+  font-size: typography.mel-font-size(xs);
+  font-weight: typography.$mel-font-bold;
+}
+
+
+

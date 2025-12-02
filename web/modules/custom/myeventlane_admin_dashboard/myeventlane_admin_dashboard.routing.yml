@@ -1,0 +1,10 @@
+# Admin overview page - serves as landing page for /admin/myeventlane section.
+myeventlane_admin_dashboard.overview:
+  path: '/admin/myeventlane'
+  defaults:
+    _controller: '\Drupal\myeventlane_admin_dashboard\Controller\AdminDashboardController::overview'
+    _title: 'MyEventLane Overview'
+  requirements:
+    _permission: 'access admin dashboard'
+  options:
+    _admin_route: TRUE

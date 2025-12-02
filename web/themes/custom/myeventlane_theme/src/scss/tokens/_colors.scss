@@ -1,0 +1,95 @@
+// ==========================================================================
+// Color Tokens
+// ==========================================================================
+// Central color palette for MyEventLane.
+// Pastel-forward with high contrast for text and CTAs.
+
+@use 'sass:color';
+
+// ---------------------------------------------------------------------------
+// Background & Surface
+// ---------------------------------------------------------------------------
+
+$mel-color-bg: #faf7fb;              // Page background - soft lavender tint
+$mel-color-surface: #ffffff;          // Cards, modals, elevated surfaces
+$mel-color-surface-alt: #f5f0f7;      // Alternate surface - slightly darker
+
+// ---------------------------------------------------------------------------
+// Accent Colors
+// ---------------------------------------------------------------------------
+// Primary palette - warm and inviting
+
+$mel-color-primary: #ff6f61;          // Coral - primary CTA, brand accent
+$mel-color-primary-hover: #e85a4d;    // Darker coral for hover
+$mel-color-primary-active: #d14a3d;   // Even darker for active/pressed
+
+$mel-color-secondary: #8d79f6;        // Lavender purple - secondary actions
+$mel-color-secondary-hover: #7a65e8;  // Darker lavender for hover
+$mel-color-secondary-active: #6852d9; // Even darker for active
+
+$mel-color-accent: #ffd46f;           // Soft yellow - highlights, badges
+$mel-color-accent-alt: #70d6c4;       // Aqua/teal - optional accent
+
+// Legacy aliases (for backward compatibility)
+$mel-color-accent-1: $mel-color-primary;
+$mel-color-accent-2: $mel-color-secondary;
+$mel-color-accent-3: $mel-color-accent;
+$mel-color-accent-4: $mel-color-accent-alt;
+
+// ---------------------------------------------------------------------------
+// Text Colors
+// ---------------------------------------------------------------------------
+
+$mel-color-text: #1a1a2e;             // Primary text - near black with warmth
+$mel-color-text-muted: #5c5c6f;       // Secondary/meta text
+$mel-color-text-light: #8888a0;       // Tertiary/placeholder text
+$mel-color-text-inverse: #ffffff;     // Text on dark/colored backgrounds
+
+// ---------------------------------------------------------------------------
+// Border Colors
+// ---------------------------------------------------------------------------
+
+$mel-color-border: rgba(0, 0, 0, 0.1);
+$mel-color-border-strong: rgba(0, 0, 0, 0.2);
+
+// ---------------------------------------------------------------------------
+// State Colors
+// ---------------------------------------------------------------------------
+
+$mel-color-success: #22c55e;          // Green - success messages
+$mel-color-success-bg: #dcfce7;       // Light green background
+$mel-color-error: #ef4444;            // Red - errors, destructive
+$mel-color-error-bg: #fee2e2;         // Light red background
+$mel-color-warning: #f59e0b;          // Amber - warnings
+$mel-color-warning-bg: #fef3c7;       // Light amber background
+$mel-color-info: #3b82f6;             // Blue - informational
+$mel-color-info-bg: #dbeafe;          // Light blue background
+
+// ---------------------------------------------------------------------------
+// Focus & Accessibility
+// ---------------------------------------------------------------------------
+
+$mel-focus-ring-color: $mel-color-secondary;
+$mel-focus-ring-offset: 2px;
+$mel-focus-ring-width: 3px;
+$mel-focus-ring: 0 0 0 $mel-focus-ring-offset $mel-color-surface,
+                 0 0 0 ($mel-focus-ring-offset + $mel-focus-ring-width) $mel-focus-ring-color;
+
+// ---------------------------------------------------------------------------
+// Focus Mixin
+// ---------------------------------------------------------------------------
+
+@mixin mel-focus-ring {
+  outline: none;
+  box-shadow: $mel-focus-ring;
+}
+
+@mixin mel-focus-visible {
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    @include mel-focus-ring;
+  }
+}

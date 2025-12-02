@@ -1,0 +1,17 @@
+services:
+  # Event mode manager - determines booking mode and builds CTAs.
+  myeventlane_event.mode_manager:
+    class: Drupal\myeventlane_event\Service\EventModeManager
+    arguments:
+      - '@entity_type.manager'
+      - '@myeventlane_event_attendees.manager'
+      - '@url_generator'
+      - '@datetime.time'
+
+  # Event product manager - auto-creates and syncs RSVP products.
+  myeventlane_event.product_manager:
+    class: Drupal\myeventlane_event\Service\EventProductManager
+    arguments:
+      - '@entity_type.manager'
+      - '@logger.factory'
+      - '@messenger'

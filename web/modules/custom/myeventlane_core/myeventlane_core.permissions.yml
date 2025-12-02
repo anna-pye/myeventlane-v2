@@ -1,0 +1,8 @@
+# Core platform permissions.
+administer myeventlane:
+  title: 'Administer MyEventLane'
+  description: 'Access all MyEventLane configuration pages and settings.'
+  restrict access: TRUE
+
+
+

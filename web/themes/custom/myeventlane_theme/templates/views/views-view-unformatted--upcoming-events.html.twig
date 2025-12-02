@@ -1,0 +1,9 @@
+{#
+/**
+ * @file
+ * Theme override - outputs event cards without row wrappers for CSS grid.
+ */
+#}
+{% for row in rows %}
+  {{- row.content -}}
+{% endfor %}

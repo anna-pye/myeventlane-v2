@@ -1,0 +1,15 @@
+name: 'MyEventLane Messaging'
+type: module
+description: 'Email and notification system for MyEventLane. Sends templated messages for bookings, reminders, cart abandonment, and other platform communications.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_core:myeventlane_core
+  - myeventlane_event:myeventlane_event
+  - myeventlane_event_attendees:myeventlane_event_attendees
+  - drupal:system
+  - drupal:user
+  - drupal:node
+  - drupal:datetime

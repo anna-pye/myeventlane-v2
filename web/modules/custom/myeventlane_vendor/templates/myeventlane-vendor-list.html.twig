@@ -1,0 +1,31 @@
+{#
+/**
+ * @file
+ * Vendor directory list template.
+ *
+ * Variables:
+ * - vendors: Array of Vendor entities.
+ */
+#}
+<div class="mel-vendor-directory">
+  {% if vendors is not empty %}
+    <div class="mel-vendor-grid">
+      {% for vendor in vendors %}
+        <article class="mel-vendor-card">
+          <h2 class="mel-vendor-name">
+            <a href="{{ path('entity.myeventlane_vendor.canonical', {'myeventlane_vendor': vendor.id}) }}">
+              {{ vendor.label }}
+            </a>
+          </h2>
+          {% if vendor.description.value %}
+            <p class="mel-vendor-description">
+              {{ vendor.description.value|striptags|truncate(200, true, '…') }}
+            </p>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>{{ 'No organisers found.'|t }}</p>
+  {% endif %}
+</div>

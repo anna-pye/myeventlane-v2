@@ -1,0 +1,28 @@
+{#
+/**
+ * @file
+ * Vendor detail template.
+ *
+ * Variables:
+ * - vendor: Vendor entity.
+ */
+#}
+<article class="mel-vendor-detail">
+  <header class="mel-vendor-header">
+    <h1 class="mel-vendor-title">{{ vendor.label }}</h1>
+  </header>
+
+  {% if vendor.description.value %}
+    <div class="mel-vendor-body">
+      {{ vendor.description.value|raw }}
+    </div>
+  {% endif %}
+
+  {% if vendor.website.uri %}
+    <p class="mel-vendor-website">
+      <a href="{{ vendor.website.uri }}" rel="noopener noreferrer" target="_blank">
+        {{ vendor.website.title ?: vendor.website.uri }}
+      </a>
+    </p>
+  {% endif %}
+</article>

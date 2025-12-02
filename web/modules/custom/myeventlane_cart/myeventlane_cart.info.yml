@@ -1,0 +1,11 @@
+name: 'MyEventLane Cart'
+type: module
+description: 'Cart enhancements for MyEventLane. Provides forms for capturing per-ticket attendee details during the shopping cart phase.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_commerce:myeventlane_commerce
+  - drupal:commerce_cart
+  - paragraphs:paragraphs

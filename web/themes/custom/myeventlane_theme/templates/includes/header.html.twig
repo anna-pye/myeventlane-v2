@@ -1,0 +1,89 @@
+{#
+/**
+ * @file
+ * Header component with logo and navigation.
+ */
+#}
+
+<header class="mel-header">
+  <div class="mel-header-inner mel-container">
+
+    {# Logo #}
+    <div class="mel-header-left">
+      <a href="{{ path('<front>') }}" class="mel-logo">
+        <span class="mel-logo-icon">
+          {# Inline SVG for the icon #}
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="64" height="64" rx="12" fill="#ff6f61"/>
+            <path d="M16 64 C16 64 16 44 24 36 C28 32 34 34 38 32 C44 29 42 22 38 18 C34 14 28 16 24 22 C20 28 20 36 20 36" fill="#faf7fb"/>
+            <line x1="40" y1="14" x2="48" y2="6" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+            <line x1="46" y1="20" x2="56" y2="16" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+            <line x1="48" y1="28" x2="58" y2="28" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="mel-logo-text">
+          <span class="mel-logo-my">My</span>
+          <span class="mel-logo-eventlane">EventLane</span>
+        </span>
+      </a>
+    </div>
+
+    {# Desktop Navigation #}
+    <nav class="mel-nav-desktop" aria-label="Main navigation">
+      <ul class="mel-nav-list">
+        <li><a href="/events" class="mel-nav-link">Events</a></li>
+        <li><a href="/categories" class="mel-nav-link">Categories</a></li>
+        <li><a href="/calendar" class="mel-nav-link">Calendar</a></li>
+        <li><a href="/vendors" class="mel-nav-link">Organisers</a></li>
+      </ul>
+    </nav>
+
+    {# Header Actions #}
+    <div class="mel-header-actions">
+      {% if logged_in %}
+        <a href="/dashboard" class="mel-btn mel-btn-ghost">Dashboard</a>
+      {% else %}
+        <a href="/user/login" class="mel-btn mel-btn-ghost">Log in</a>
+      {% endif %}
+      <a href="/node/add/event" class="mel-btn mel-btn-primary">Create Event</a>
+    </div>
+
+    {# Mobile Toggle #}
+    <button class="mel-nav-toggle" aria-label="Open menu" aria-expanded="false">
+      <span class="mel-nav-toggle-box">
+        <span class="mel-nav-toggle-line"></span>
+        <span class="mel-nav-toggle-line"></span>
+        <span class="mel-nav-toggle-line"></span>
+      </span>
+    </button>
+
+  </div>
+
+  {# Mobile Navigation Drawer #}
+  <div class="mel-nav-mobile-wrapper" aria-hidden="true">
+    <div class="mel-nav-mobile-header">
+      <button class="mel-nav-mobile-close" aria-label="Close menu">×</button>
+    </div>
+    <nav class="mel-nav-mobile" aria-label="Mobile navigation">
+      <ul class="mel-nav-mobile-list">
+        <li><a href="/events">Browse Events</a></li>
+        <li><a href="/categories">Categories</a></li>
+        <li><a href="/calendar">Calendar</a></li>
+        <li><a href="/vendors">Organisers</a></li>
+        <li class="mel-mobile-divider"></li>
+        {% if logged_in %}
+          <li><a href="/dashboard">Dashboard</a></li>
+          <li><a href="/user/logout">Log out</a></li>
+        {% else %}
+          <li><a href="/user/login">Log in</a></li>
+          <li><a href="/user/register">Sign up</a></li>
+        {% endif %}
+        <li class="mel-mobile-divider"></li>
+        <li><a href="/node/add/event" class="mel-btn-mobile-accent">Create Event</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+{# Mobile overlay #}
+<div class="mel-nav-overlay"></div>

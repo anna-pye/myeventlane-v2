@@ -1,1 +1,16 @@
-{}
+{
+  "name": "myeventlane_theme",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0",
+    "sass": "^1.77.0",
+    "postcss": "^8.4.33",
+    "autoprefixer": "^10.4.20"
+  }
+}

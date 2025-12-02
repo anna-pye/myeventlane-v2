@@ -1,0 +1,8 @@
+# Admin permission.
+administer myeventlane tickets:
+  title: 'Administer ticket settings'
+  description: 'Configure ticket PDF generation and download settings.'
+  restrict access: TRUE
+
+
+

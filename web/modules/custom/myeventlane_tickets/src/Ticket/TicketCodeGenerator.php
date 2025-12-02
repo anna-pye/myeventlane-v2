@@ -14,7 +14,7 @@ class TicketCodeGenerator {
   }
 
   public function create($order_item, $event) {
-    $code = strtoupper(substr(Uuid::generate(), 0, 10));
+    $code = \Drupal::service('uuid')->generate();
 
     $storage = $this->entityTypeManager->getStorage('ticket_code');
 

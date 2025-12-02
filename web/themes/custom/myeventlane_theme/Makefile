@@ -1,0 +1,2 @@
+build:
+	echo Building theme

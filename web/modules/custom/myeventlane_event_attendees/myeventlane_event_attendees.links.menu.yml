@@ -1,0 +1,7 @@
+# Admin structure menu link for attendee entity list.
+myeventlane_event_attendees.admin:
+  title: 'Event Attendees'
+  description: 'View and manage all event attendee records.'
+  route_name: myeventlane_event_attendees.collection
+  parent: system.admin_structure
+  weight: 20

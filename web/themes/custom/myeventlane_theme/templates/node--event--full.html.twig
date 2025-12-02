@@ -1,0 +1,219 @@
+{#
+/**
+ * @file
+ * Theme override to display an Event node in full view mode.
+ *
+ * Available variables:
+ * - node: The node entity.
+ * - label: The title of the node.
+ * - content: All node items (fields).
+ * - url: Direct URL of the current node.
+ *
+ * @see template_preprocess_node()
+ */
+#}
+
+{{ attach_library('myeventlane_theme/global-styling') }}
+
+<article{{ attributes.addClass('mel-event-full') }}>
+
+  {{ title_prefix }}
+  {{ title_suffix }}
+
+  {# Hero Section with Image #}
+  <div class="mel-event-hero">
+    {% if node.field_event_image.entity %}
+      <div class="mel-event-hero-image">
+        <img 
+          src="{{ file_url(node.field_event_image.entity.uri.value) }}"
+          alt="{{ node.field_event_image.alt }}"
+          loading="eager"
+        >
+      </div>
+    {% else %}
+      <div class="mel-event-hero-image mel-event-hero-image--placeholder">
+        <span class="mel-event-hero-icon">📅</span>
+      </div>
+    {% endif %}
+
+    <div class="mel-event-hero-overlay"></div>
+  </div>
+
+  {# Main Content #}
+  <div class="mel-container">
+    <div class="mel-event-layout">
+
+      {# Left Column: Main Info #}
+      <div class="mel-event-main">
+
+        {# Date Badge #}
+        {% if node.field_event_start[0] is defined and node.field_event_start[0].value is not empty %}
+          {% set start_ts = node.field_event_start[0].value|date('U') %}
+          <div class="mel-event-date-badge">
+            <span class="mel-event-date-day">{{ start_ts|date('d') }}</span>
+            <span class="mel-event-date-month">{{ start_ts|date('M') }}</span>
+            <span class="mel-event-date-year">{{ start_ts|date('Y') }}</span>
+          </div>
+        {% endif %}
+
+        {# Title #}
+        <h1 class="mel-event-title">{{ label }}</h1>
+
+        {# Category Tags #}
+        {% if node.field_category is defined and node.field_category|length %}
+          <div class="mel-event-categories">
+            {% for term in node.field_category %}
+              <a href="/events?category={{ term.entity.id }}" class="mel-chip mel-chip--sm">
+                {{ term.entity.label }}
+              </a>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {# Meta Row: Date/Time and Location #}
+        <div class="mel-event-meta">
+          {# Date & Time #}
+          {% if node.field_event_start[0] is defined %}
+            {% set start_ts = node.field_event_start[0].value|date('U') %}
+            <div class="mel-event-meta-item">
+              <span class="mel-event-meta-icon">📅</span>
+              <div class="mel-event-meta-content">
+                <strong>{{ start_ts|date('l, F j, Y') }}</strong>
+                <span class="mel-event-meta-secondary">
+                  {{ start_ts|date('g:i A') }}
+                  {% if node.field_event_end[0] is defined and node.field_event_end[0].value is not empty %}
+                    {% set end_ts = node.field_event_end[0].value|date('U') %}
+                    – {{ end_ts|date('g:i A') }}
+                  {% endif %}
+                </span>
+              </div>
+            </div>
+          {% endif %}
+
+          {# Location #}
+          {% if node.field_location.value is not empty %}
+            {% set loc = node.field_location.value %}
+            <div class="mel-event-meta-item">
+              <span class="mel-event-meta-icon">📍</span>
+              <div class="mel-event-meta-content">
+                <strong>{{ loc.address_line1 }}</strong>
+                <span class="mel-event-meta-secondary">
+                  {{ loc.locality }}{% if loc.administrative_area %}, {{ loc.administrative_area }}{% endif %} {{ loc.postal_code }}
+                </span>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        {# Description #}
+        {% if content.body %}
+          <div class="mel-event-description">
+            <h2 class="mel-event-section-title">About this event</h2>
+            {{ content.body }}
+          </div>
+        {% endif %}
+
+        {# Additional Fields (if any) #}
+        {% if content.field_event_details %}
+          <div class="mel-event-details">
+            {{ content.field_event_details }}
+          </div>
+        {% endif %}
+
+      </div>
+
+      {# Right Column: Actions Sidebar #}
+      <aside class="mel-event-sidebar">
+        <div class="mel-event-actions-card">
+
+          {# Price / Free Badge #}
+          {% if node.field_event_price is defined and node.field_event_price.value is not empty %}
+            <div class="mel-event-price">
+              <span class="mel-event-price-label">From</span>
+              <span class="mel-event-price-value">${{ node.field_event_price.value|number_format(2) }}</span>
+            </div>
+          {% else %}
+            <div class="mel-event-price mel-event-price--free">
+              <span class="mel-event-price-value">Free</span>
+            </div>
+          {% endif %}
+
+          {# CTA Buttons #}
+          <div class="mel-event-cta-buttons">
+            {# Prefer the unified Event CTAs provided by myeventlane_event. #}
+            {% if content.event_ctas is defined and content.event_ctas %}
+              {{ content.event_ctas }}
+            {% elseif event_rsvp_enabled or event_tickets_enabled %}
+              {# Fallback: Use preprocess variables to build CTA. #}
+              {% if event_tickets_enabled %}
+                <a href="{{ url('myeventlane_commerce.event_book', {'node': node.id}) }}" class="mel-btn mel-btn-primary mel-btn-lg mel-btn-block">
+                  Buy Tickets
+                </a>
+              {% elseif event_rsvp_enabled %}
+                <a href="{{ url('myeventlane_commerce.event_book', {'node': node.id}) }}" class="mel-btn mel-btn-primary mel-btn-lg mel-btn-block">
+                  RSVP Now
+                </a>
+              {% endif %}
+            {% else %}
+              {# Final fallback: simple register button. #}
+              <a href="{{ url }}#register" class="mel-btn mel-btn-primary mel-btn-lg mel-btn-block">
+                Register
+              </a>
+            {% endif %}
+
+            <button type="button" class="mel-btn mel-btn-ghost mel-btn-block mel-event-share-btn">
+              <span>Share Event</span>
+            </button>
+          </div>
+
+          {# Organizer Info #}
+          {% if node.uid.entity %}
+            <div class="mel-event-organizer">
+              <h3 class="mel-event-organizer-label">Organised by</h3>
+              <div class="mel-event-organizer-info">
+                <div class="mel-event-organizer-avatar">
+                  {{ node.uid.entity.name.value|first|upper }}
+                </div>
+                <div class="mel-event-organizer-name">
+                  {{ node.uid.entity.name.value }}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          {# Capacity / Spots Left #}
+          {% if node.field_capacity.value is not empty %}
+            <div class="mel-event-capacity">
+              <span class="mel-event-capacity-icon">👥</span>
+              <span class="mel-event-capacity-text">
+                {{ node.field_capacity.value }} spots available
+              </span>
+            </div>
+          {% endif %}
+
+        </div>
+
+        {# Map Placeholder #}
+        {% if node.field_location.value is not empty %}
+          <div class="mel-event-map-card">
+            <h3 class="mel-event-section-title">Location</h3>
+            <div class="mel-event-map-placeholder">
+              <span class="mel-event-map-icon">🗺️</span>
+              <span>View on Map</span>
+            </div>
+            <address class="mel-event-address">
+              {% set loc = node.field_location.value %}
+              {{ loc.address_line1 }}<br>
+              {{ loc.locality }}{% if loc.administrative_area %}, {{ loc.administrative_area }}{% endif %} {{ loc.postal_code }}
+            </address>
+          </div>
+        {% endif %}
+
+      </aside>
+
+    </div>
+  </div>
+
+</article>
+
+

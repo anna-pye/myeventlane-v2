@@ -1,0 +1,66 @@
+// ==========================================================================
+// Drupal Regions
+// ==========================================================================
+// Styles for theme regions.
+
+@use '../tokens/colors';
+@use '../tokens/spacing';
+@use '../tokens/typography';
+@use '../tokens/breakpoints';
+
+// ---------------------------------------------------------------------------
+// Utility Bar
+// ---------------------------------------------------------------------------
+
+.mel-region-utility {
+  background: colors.$mel-color-accent;
+  padding: spacing.mel-space(2) 0;
+  font-size: typography.mel-font-size(sm);
+  text-align: center;
+}
+
+// ---------------------------------------------------------------------------
+// Header Region
+// ---------------------------------------------------------------------------
+
+.mel-region-header {
+  background: colors.$mel-color-surface;
+}
+
+// ---------------------------------------------------------------------------
+// Hero Region
+// ---------------------------------------------------------------------------
+
+.mel-region-hero {
+  margin-bottom: spacing.mel-space(6);
+}
+
+// ---------------------------------------------------------------------------
+// Pre-Content Region
+// ---------------------------------------------------------------------------
+
+.mel-region-pre-content {
+  margin-bottom: spacing.mel-space(6);
+}
+
+// ---------------------------------------------------------------------------
+// Pre-Footer Region
+// ---------------------------------------------------------------------------
+
+.mel-pre-footer {
+  margin-top: spacing.mel-space(8);
+  padding: spacing.mel-space(6) 0;
+  background: colors.$mel-color-secondary;
+  color: colors.$mel-color-text-inverse;
+  text-align: center;
+}
+
+// ---------------------------------------------------------------------------
+// Footer Region
+// ---------------------------------------------------------------------------
+// Main footer styling is in components/_footer.scss
+
+// ---------------------------------------------------------------------------
+// Post-Footer Region
+// ---------------------------------------------------------------------------
+// Post-footer styling is in components/_footer.scss

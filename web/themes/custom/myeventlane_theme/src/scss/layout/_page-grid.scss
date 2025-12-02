@@ -1,0 +1,30 @@
+@use '../tokens/breakpoints';
+@use '../tokens/spacing';
+
+.mel-page-grid {
+  display: block;
+  padding-bottom: spacing.mel-space(8);
+
+  @include breakpoints.mel-break(md) {
+    display: grid;
+    grid-template-columns: 240px 1fr 240px;
+    gap: spacing.mel-space(6);
+  }
+
+  @include breakpoints.mel-break(lg) {
+    grid-template-columns: 260px 1fr 260px;
+  }
+}
+
+.mel-sidebar-left,
+.mel-sidebar-right {
+  display: none;
+
+  @include breakpoints.mel-break(md) {
+    display: block;
+  }
+}
+
+.mel-content {
+  min-height: 300px;
+}

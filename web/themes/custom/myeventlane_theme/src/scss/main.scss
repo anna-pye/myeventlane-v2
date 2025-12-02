@@ -1,0 +1,86 @@
+// ==========================================================================
+// MyEventLane Theme - Main Stylesheet
+// ==========================================================================
+// Entry point for Vite. Imports all partials in dependency order.
+//
+// Build: ddev npm run build (from theme directory)
+// Dev:   ddev npm run dev
+
+// ---------------------------------------------------------------------------
+// 1. Design Tokens
+// ---------------------------------------------------------------------------
+// Core values: colors, typography, spacing, etc.
+
+@use 'tokens/colors';
+@use 'tokens/typography' as type-tokens;
+@use 'tokens/spacing' as space-tokens;
+@use 'tokens/radii';
+@use 'tokens/shadows';
+@use 'tokens/breakpoints';
+@use 'tokens/zindex';
+
+// ---------------------------------------------------------------------------
+// 2. Abstracts
+// ---------------------------------------------------------------------------
+// Functions and mixins (no CSS output).
+
+@use 'abstracts/functions';
+@use 'abstracts/mixins';
+
+// ---------------------------------------------------------------------------
+// 3. Base Styles
+// ---------------------------------------------------------------------------
+// Reset, element defaults, typography, forms.
+
+@use 'base/reset';
+@use 'base/base';
+@use 'base/typography' as type-styles;
+@use 'base/forms';
+
+// ---------------------------------------------------------------------------
+// 4. Layout
+// ---------------------------------------------------------------------------
+// Page structure, grid, containers.
+
+@use 'layout/container';
+@use 'layout/grid';
+@use 'layout/flex';
+@use 'layout/page-grid';
+@use 'layout/regions';
+@use 'layout/event-grid';
+
+// ---------------------------------------------------------------------------
+// 5. Components
+// ---------------------------------------------------------------------------
+// Reusable UI components.
+
+@use 'components/buttons';
+@use 'components/cards';
+@use 'components/chips';
+@use 'components/alerts';
+@use 'components/tables';
+@use 'components/header';
+@use 'components/hero';
+@use 'components/event-card';
+@use 'components/rsvp';
+@use 'components/cart';
+@use 'components/checkout';
+@use 'components/footer';
+
+// ---------------------------------------------------------------------------
+// 6. Pages
+// ---------------------------------------------------------------------------
+// Page-specific styles.
+
+@use 'pages/front';
+@use 'pages/event';
+@use 'pages/dashboard';
+@use 'pages/user';
+@use 'pages/search';
+
+// ---------------------------------------------------------------------------
+// 7. Utilities
+// ---------------------------------------------------------------------------
+// Helper classes (spacing, visibility, etc.).
+
+@use 'utilities/spacing' as space-utils;

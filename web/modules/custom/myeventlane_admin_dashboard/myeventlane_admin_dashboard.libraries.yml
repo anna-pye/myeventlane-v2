@@ -1,0 +1,6 @@
+# Library for admin dashboard styling.
+admin_dashboard:
+  version: VERSION
+  css:
+    theme:
+      css/admin-dashboard.css: {}

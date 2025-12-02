@@ -1,13 +1,17 @@
 name: 'MyEventLane RSVP'
 type: module
-description: 'Custom RSVP submissions, waitlist, cancellations, ICS export, and vendor management.'
+description: 'RSVP workflow management for MyEventLane. Handles RSVP forms, waitlist logic, cancellations, ICS calendar exports, check-in, and vendor RSVP management.'
+package: MyEventLane
 core_version_requirement: ^11
-package: 'MyEventLane'
+lifecycle: stable
+
 dependencies:
+  - myeventlane_core:myeventlane_core
+  - myeventlane_schema:myeventlane_schema
+  - myeventlane_event_attendees:myeventlane_event_attendees
   - drupal:node
   - drupal:user
   - drupal:views
-  - drupal:system
   - drupal:datetime
   - drupal:options
   - drupal:link

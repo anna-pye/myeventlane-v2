@@ -1,3 +1,4 @@
+# User account menu link.
 myeventlane_rsvp.my_rsvps:
   title: 'My RSVPs'
   description: 'View your RSVP submissions'
@@ -5,16 +6,25 @@ myeventlane_rsvp.my_rsvps:
   menu_name: account
   weight: 5
 
-myeventlane_rsvp.sms_settings:
-  title: 'SMS Settings'
-  description: 'Configure SMS provider'
-  route_name: myeventlane_rsvp.sms_settings
-  parent: system.admin_config_services
-  weight: 50
+# Admin config menu links (under MyEventLane section).
+myeventlane_rsvp.settings:
+  title: 'RSVP'
+  description: 'Configure how RSVPs are handled and notification settings.'
+  route_name: myeventlane_rsvp.settings
+  parent: myeventlane_core.config
+  weight: 0
 
+myeventlane_rsvp.sms_settings:
+  title: 'SMS'
+  description: 'Configure SMS provider and sending settings.'
+  route_name: myeventlane_rsvp.sms_settings
+  parent: myeventlane_core.config
+  weight: 20
+
+# Profile download link.
 myeventlane_rsvp.ics_bundle_link:
   title: 'Download all my RSVPs (.ics)'
   description: 'Export every upcoming RSVP into one calendar file'
   route_name: myeventlane_rsvp.ics_bundle
-  parent: myeventlane_profile.dashboard
+  menu_name: account
   weight: 20

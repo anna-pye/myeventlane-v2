@@ -1,14 +1,20 @@
+# Vendor permissions.
 manage own event rsvps:
   title: 'Manage RSVPs for own events'
-  description: 'Allows vendors to view and update RSVP submissions for events they authored.'
-  restrict: true
+  description: 'Allows organisers to view and update RSVP submissions for events they created.'
 
+# Admin permissions.
 administer rsvps:
   title: 'Administer all RSVP submissions'
-  description: 'Full access to manage all RSVPs.'
-  restrict: true
+  description: 'Full access to view, edit, and delete all RSVPs across the platform.'
+  restrict access: TRUE
 
-administer sms settings:
+administer myeventlane rsvp:
+  title: 'Administer RSVP settings'
+  description: 'Configure RSVP notifications, waitlist behaviour, and cancellation settings.'
+  restrict access: TRUE
+
+administer myeventlane sms:
   title: 'Administer SMS settings'
-  description: 'Configure SMS providers and sending rules.'
-  restrict: true
+  description: 'Configure SMS providers and sending rules for RSVP notifications.'
+  restrict access: TRUE
