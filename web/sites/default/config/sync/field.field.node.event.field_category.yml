@@ -11,9 +11,9 @@ field_name: field_category
 entity_type: node
 bundle: event
 label: Category
-description: ''
+description: 'Select one or more categories for this event.'
 required: false
-translatable: true
+translatable: false
 default_value: {  }
 default_value_callback: ''
 settings:
@@ -21,4 +21,9 @@ settings:
   handler_settings:
     target_bundles:
       categories: categories
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
 field_type: entity_reference

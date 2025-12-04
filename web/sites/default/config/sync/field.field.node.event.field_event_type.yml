@@ -12,10 +12,12 @@ field_name: field_event_type
 entity_type: node
 bundle: event
 label: 'Event Type'
-description: ''
-required: false
-translatable: true
-default_value: {  }
+description: 'How attendees register: RSVP (free), Paid (ticketed), or External link.'
+required: true
+translatable: false
+default_value:
+  -
+    value: rsvp
 default_value_callback: ''
 settings: {  }
 field_type: list_string

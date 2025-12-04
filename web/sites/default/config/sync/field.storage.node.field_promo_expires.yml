@@ -5,8 +5,6 @@ dependencies:
   module:
     - datetime
     - node
-_core:
-  default_config_hash: oQ7rX1oIdC8RRg3A9sKEM9Y3TdVCL6vRwOMZd0TjM_s
 id: node.field_promo_expires
 field_name: field_promo_expires
 entity_type: node

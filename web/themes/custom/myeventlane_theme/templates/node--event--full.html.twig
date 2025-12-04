@@ -193,14 +193,13 @@
 
         </div>
 
-        {# Map Placeholder #}
-        {% if node.field_location.value is not empty %}
+        {# Map - rendered by myeventlane_location module if coordinates exist #}
+        {% if content.event_location_map %}
+          {{ content.event_location_map }}
+        {% elseif node.field_location.value is not empty %}
+          {# Fallback: show address without map if no coordinates #}
           <div class="mel-event-map-card">
             <h3 class="mel-event-section-title">Location</h3>
-            <div class="mel-event-map-placeholder">
-              <span class="mel-event-map-icon">🗺️</span>
-              <span>View on Map</span>
-            </div>
             <address class="mel-event-address">
               {% set loc = node.field_location.value %}
               {{ loc.address_line1 }}<br>

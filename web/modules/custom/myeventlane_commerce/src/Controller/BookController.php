@@ -119,25 +119,45 @@ final class BookController extends ControllerBase {
             $build['#matrix_form'] = $this->buildRsvpForm($node, $product, $default_variation);
           }
           else {
-            // Build standard add-to-cart form.
-            /** @var \Drupal\commerce_order\OrderItemStorageInterface $order_item_storage */
-            $order_item_storage = $this->entityTypeManager()->getStorage('commerce_order_item');
-            $order_item = $order_item_storage->createFromPurchasableEntity($default_variation);
-            
-            /** @var \Drupal\commerce_cart\Form\AddToCartFormInterface $form_object */
-            $form_object = $this->entityTypeManager()->getFormObject('commerce_order_item', 'add_to_cart');
-            $form_object->setEntity($order_item);
-            $form_object->setFormId($form_object->getBaseFormId() . '_commerce_product_' . $product->id());
-            
-            $form_state = (new FormState())->setFormState([
-              'product' => $product,
-              'view_mode' => 'default',
-              'settings' => [
-                'combine' => TRUE,
-              ],
-            ]);
-            
-            $build['#matrix_form'] = $this->formBuilder()->buildForm($form_object, $form_state);
+            // Check if product has multiple variations.
+            $variations = $product->getVariations();
+            $published_variations = [];
+            foreach ($variations as $variation) {
+              if ($variation->isPublished()) {
+                $published_variations[] = $variation;
+              }
+            }
+
+            // If multiple variations, use custom ticket selection form.
+            // Otherwise, use standard add-to-cart form.
+            if (count($published_variations) > 1) {
+              $build['#matrix_form'] = $this->formBuilder()->getForm(
+                'Drupal\myeventlane_commerce\Form\TicketSelectionForm',
+                $node,
+                $product
+              );
+            }
+            else {
+              // Single variation - use standard add-to-cart form.
+              /** @var \Drupal\commerce_order\OrderItemStorageInterface $order_item_storage */
+              $order_item_storage = $this->entityTypeManager()->getStorage('commerce_order_item');
+              $order_item = $order_item_storage->createFromPurchasableEntity($default_variation);
+              
+              /** @var \Drupal\commerce_cart\Form\AddToCartFormInterface $form_object */
+              $form_object = $this->entityTypeManager()->getFormObject('commerce_order_item', 'add_to_cart');
+              $form_object->setEntity($order_item);
+              $form_object->setFormId($form_object->getBaseFormId() . '_commerce_product_' . $product->id());
+              
+              $form_state = (new FormState())->setFormState([
+                'product' => $product,
+                'view_mode' => 'default',
+                'settings' => [
+                  'combine' => TRUE,
+                ],
+              ]);
+              
+              $build['#matrix_form'] = $this->formBuilder()->buildForm($form_object, $form_state);
+            }
           }
         }
       }

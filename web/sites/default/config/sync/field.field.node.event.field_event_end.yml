@@ -12,9 +12,9 @@ field_name: field_event_end
 entity_type: node
 bundle: event
 label: 'Event End'
-description: ''
+description: 'When the event ends. Leave blank for single-time events.'
 required: false
-translatable: true
+translatable: false
 default_value: {  }
 default_value_callback: ''
 settings: {  }

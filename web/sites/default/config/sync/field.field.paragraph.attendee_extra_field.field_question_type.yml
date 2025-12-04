@@ -7,8 +7,6 @@ dependencies:
     - paragraphs.paragraphs_type.attendee_extra_field
   module:
     - options
-_core:
-  default_config_hash: qrVI8YiNgiQY1-7XFKKRyMQcduQoEbp8Q9D5UaRHcaU
 id: paragraph.attendee_extra_field.field_question_type
 field_name: field_question_type
 entity_type: paragraph

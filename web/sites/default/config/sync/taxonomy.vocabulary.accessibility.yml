@@ -4,6 +4,6 @@ status: true
 dependencies: {  }
 name: Accessibility
 vid: accessibility
-description: null
-weight: 0
+description: 'Accessibility options and features available at events (e.g., Wheelchair Access, Sign Language Interpreter, Quiet Room).'
+weight: 1
 new_revision: false

@@ -1,0 +1,15 @@
+services:
+  # Location provider manager - handles provider selection and configuration.
+  myeventlane_location.provider_manager:
+    class: Drupal\myeventlane_location\Service\LocationProviderManager
+    arguments:
+      - '@config.factory'
+      - '@logger.factory'
+
+  # MapKit token generator - generates JWT tokens for Apple Maps.
+  myeventlane_location.mapkit_token_generator:
+    class: Drupal\myeventlane_location\Service\MapKitTokenGenerator
+    arguments:
+      - '@config.factory'
+      - '@logger.factory'
+

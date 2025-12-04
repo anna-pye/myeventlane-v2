@@ -28,9 +28,9 @@ class EventAttendeeListBuilder extends EntityListBuilder {
    */
   public function buildRow(EntityInterface $entity): array {
     /** @var \Drupal\myeventlane_event_attendees\Entity\EventAttendee $entity */
-
-    $event = $entity->get('event_id')->entity;
-    $user = $entity->get('user_id')->entity;
+    // Updated to match the current EventAttendee base fields.
+    $event = $entity->get('event')->entity;
+    $user = $entity->getOwner();
 
     $row['id'] = $entity->id();
 
@@ -42,7 +42,7 @@ class EventAttendeeListBuilder extends EntityListBuilder {
 
     $row['user'] = $user
       ? $user->label()
-      : $entity->get('first_name')->value . ' ' . $entity->get('last_name')->value;
+      : $entity->get('name')->value;
 
     $row['status'] = $entity->get('status')->value;
     $row['created'] = \Drupal::service('date.formatter')->format(
@@ -51,6 +51,16 @@ class EventAttendeeListBuilder extends EntityListBuilder {
     );
 
     return $row + parent::buildRow($entity);
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Disable default operations (Edit/Delete) to avoid relying on routes we
+   * don't currently expose in the admin UI.
+   */
+  public function getOperations(EntityInterface $entity): array {
+    return [];
   }
 
 }

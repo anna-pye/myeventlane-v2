@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+id: paragraph.field_ticket_label_mode
+field_name: field_ticket_label_mode
+entity_type: paragraph
+field_type: list_string
+settings:
+  allowed_values:
+    preset: 'Use preset label'
+    custom: 'Use custom label'
+module: options
+locked: false
+cardinality: 1
+translatable: false
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
+

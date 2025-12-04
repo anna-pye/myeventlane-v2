@@ -8,6 +8,7 @@ use Drupal\commerce_product\Entity\ProductInterface;
 use Drupal\commerce_product\Entity\ProductVariationInterface;
 use Drupal\node\NodeInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Helper: find the quantity number element in ATC form (various widget shapes).
@@ -244,5 +245,49 @@ function myeventlane_commerce_commerce_order_item_presave(EntityInterface $entit
       '@item' => $entity->id(),
       '@event' => $eventId,
     ]);
+  }
+}
+
+/**
+ * Implements hook_commerce_checkout_pane_info_alter().
+ *
+ * Restores the billing_information pane that commerce_payment removes.
+ * This allows us to have a separate "Billing Information" section in checkout
+ * even when payment gateways are enabled.
+ * 
+ * This hook runs after commerce_payment's hook (due to module dependencies),
+ * so we can restore the pane after it's been removed.
+ */
+function myeventlane_commerce_commerce_checkout_pane_info_alter(array &$definitions): void {
+  // Restore billing_information pane if it was removed by commerce_payment.
+  // We check if it exists first to avoid duplicates.
+  if (!isset($definitions['billing_information'])) {
+    // Manually restore the billing_information pane definition.
+    // Based on the CommerceCheckoutPane attribute in BillingInformation class.
+    // This matches what the plugin discovery system would provide.
+    $definitions['billing_information'] = [
+      'id' => 'billing_information',
+      'label' => new TranslatableMarkup('Billing information'),
+      'default_step' => 'order_information',
+      'wrapper_element' => 'fieldset',
+      'class' => 'Drupal\commerce_checkout\Plugin\Commerce\CheckoutPane\BillingInformation',
+      'provider' => 'commerce_checkout',
+    ];
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Remove the duplicated billing address widget that Commerce Payment injects
+ * into the `payment_information` pane so that billing is only collected once
+ * in the dedicated `billing_information` pane.
+ */
+function myeventlane_commerce_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  // Apply only on Commerce checkout forms.
+  // The checkout form IDs vary per flow (e.g. commerce_checkout_flow_default),
+  // so we rely on the presence of the payment pane instead.
+  if (isset($form['payment_information']['billing_information'])) {
+    unset($form['payment_information']['billing_information']);
   }
 }

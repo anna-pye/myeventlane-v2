@@ -21,7 +21,7 @@
 <body>
   <div class="ticket">
     <h1>{{ event.label }}</h1>
-    <p>{{ event.field_start_date.value|date("d M Y, g:ia") }}</p>
+    <p>{% if event.field_event_start.value %}{{ event.field_event_start.value|date("d M Y, g:ia") }}{% endif %}</p>
     <p>{{ event.field_location.value }}</p>
 
     <div class="code">

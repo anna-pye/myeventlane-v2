@@ -1,0 +1,20 @@
+myeventlane_location.settings:
+  type: config_object
+  label: 'MyEventLane location settings'
+  mapping:
+    default_provider:
+      type: string
+      label: 'Default map provider'
+    google_maps_api_key:
+      type: string
+      label: 'Google Maps API key'
+    apple_maps_team_id:
+      type: string
+      label: 'Apple Maps Team ID'
+    apple_maps_key_id:
+      type: string
+      label: 'Apple Maps Key ID'
+    apple_maps_private_key:
+      type: string
+      label: 'Apple Maps private key (PEM format)'
+

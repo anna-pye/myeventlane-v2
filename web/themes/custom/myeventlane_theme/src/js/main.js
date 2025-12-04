@@ -9,17 +9,24 @@
 import '../scss/main.scss';
 
 // Import components
-import { initMobileNav } from './header.js';
+import { initMobileNav, initAccountDropdown } from './header.js';
 
 /**
  * Initialize theme functionality.
  */
 function init() {
+  console.log('MyEventLane theme JS initializing...');
+  
   // Initialize mobile navigation
   initMobileNav();
 
+  // Initialize account dropdown
+  initAccountDropdown();
+
   // Add loaded class for CSS transitions
   document.documentElement.classList.add('js-loaded');
+  
+  console.log('MyEventLane theme JS initialized');
 }
 
 // Run on DOM ready

@@ -4,8 +4,6 @@ status: true
 dependencies:
   module:
     - paragraphs
-_core:
-  default_config_hash: F-vLR_AfneAm-vOq59dMj50eHW8SHrTXpqkFm6vRBhM
 id: paragraph.field_question_options
 field_name: field_question_options
 entity_type: paragraph

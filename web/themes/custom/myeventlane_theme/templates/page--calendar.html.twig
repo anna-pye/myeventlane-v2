@@ -30,16 +30,55 @@
           </a>
         </div>
         <nav class="mel-nav-desktop" aria-label="Main navigation">
-          <ul class="mel-nav-list">
-            <li><a href="/events" class="mel-nav-link">Events</a></li>
-            <li><a href="/categories" class="mel-nav-link">Categories</a></li>
-            <li><a href="/calendar" class="mel-nav-link">Calendar</a></li>
-            <li><a href="/vendors" class="mel-nav-link">Organisers</a></li>
-          </ul>
+          {{ main_menu }}
         </nav>
         <div class="mel-header-actions">
           {% if logged_in %}
-            <a href="/dashboard" class="mel-btn mel-btn-ghost">Dashboard</a>
+            {# Account Dropdown #}
+            <div class="mel-account-dropdown">
+              <button type="button" class="mel-btn mel-btn-ghost mel-account-toggle" aria-label="{{ 'Account menu'|t }}" aria-expanded="false">
+                <span class="mel-account-icon">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="10" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                    <path d="M3 18c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <span class="mel-account-text">{{ user.display_name }}</span>
+                <svg class="mel-dropdown-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <div class="mel-account-menu" aria-hidden="true">
+                <a href="{{ path('myeventlane_dashboard.customer') }}" class="mel-account-menu-item">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M2 6h12M6 2v12" stroke="currentColor" stroke-width="1.5"/>
+                  </svg>
+                  {{ 'My Events'|t }}
+                </a>
+                <a href="{{ path('entity.user.canonical', {'user': user.id}) }}" class="mel-account-menu-item">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M3 14c0-2.5 2.5-4.5 5-4.5s5 2 5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                  {{ 'My Account'|t }}
+                </a>
+                <a href="{{ path('myeventlane_dashboard.vendor') }}" class="mel-account-menu-item">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.5"/>
+                  </svg>
+                  {{ 'Vendor Dashboard'|t }}
+                </a>
+                <div class="mel-account-menu-divider"></div>
+                <a href="{{ path('user.logout') }}" class="mel-account-menu-item">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M6 14H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3M10 12l4-4-4-4M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  {{ 'Log out'|t }}
+                </a>
+              </div>
+            </div>
           {% else %}
             <a href="/user/login" class="mel-btn mel-btn-ghost">Log in</a>
           {% endif %}
@@ -65,7 +104,9 @@
             <li><a href="/vendors">Organisers</a></li>
             <li class="mel-mobile-divider"></li>
             {% if logged_in %}
-              <li><a href="/dashboard">Dashboard</a></li>
+              <li><a href="{{ path('myeventlane_dashboard.customer') }}">My Events</a></li>
+              <li><a href="{{ path('myeventlane_dashboard.vendor') }}">Vendor Dashboard</a></li>
+              <li><a href="{{ path('entity.user.canonical', {'user': user.id}) }}">My Account</a></li>
               <li><a href="/user/logout">Log out</a></li>
             {% else %}
               <li><a href="/user/login">Log in</a></li>

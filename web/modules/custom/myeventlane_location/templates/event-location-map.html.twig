@@ -1,0 +1,48 @@
+{#
+/**
+ * @file
+ * Template for rendering an embedded map on Event pages.
+ *
+ * Available variables:
+ * - event: The event node entity.
+ * - latitude: The latitude coordinate.
+ * - longitude: The longitude coordinate.
+ * - address: The formatted address string.
+ * - provider: The map provider ('google_maps' or 'apple_maps').
+ */
+#}
+
+{% if latitude and longitude %}
+  <div class="myeventlane-event-location-map">
+    <h3 class="myeventlane-event-section-title">Location</h3>
+    
+    <div class="myeventlane-event-map-container myeventlane-event-map-container" 
+         data-latitude="{{ latitude }}" 
+         data-longitude="{{ longitude }}"
+         data-title="{{ event.label }}">
+    </div>
+
+    <div class="myeventlane-event-map-actions">
+      {# Apple Maps link #}
+      <a href="https://maps.apple.com/?ll={{ latitude }},{{ longitude }}&q={{ event.label|url_encode }}" 
+         target="_blank" 
+         rel="noopener noreferrer">
+        Open in Apple Maps
+      </a>
+      
+      {# Google Maps link #}
+      <a href="https://www.google.com/maps/search/?api=1&query={{ latitude }},{{ longitude }}" 
+         target="_blank" 
+         rel="noopener noreferrer">
+        Open in Google Maps
+      </a>
+    </div>
+
+    {% if address %}
+      <address class="myeventlane-event-address">
+        {{ address }}
+      </address>
+    {% endif %}
+  </div>
+{% endif %}
+

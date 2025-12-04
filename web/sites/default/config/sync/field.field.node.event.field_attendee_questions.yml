@@ -8,8 +8,6 @@ dependencies:
     - paragraphs.paragraphs_type.attendee_extra_field
   module:
     - entity_reference_revisions
-_core:
-  default_config_hash: 4D9tpvChezLh9yWkWAaTzsiV64MRCKINsVuZ2UI-190
 id: node.event.field_attendee_questions
 field_name: field_attendee_questions
 entity_type: node
@@ -23,11 +21,11 @@ default_value_callback: ''
 settings:
   handler: 'default:paragraph'
   handler_settings:
-    negate: 0
     target_bundles:
       attendee_extra_field: attendee_extra_field
+    negate: 0
     target_bundles_drag_drop:
       attendee_extra_field:
-        enabled: true
         weight: 0
+        enabled: true
 field_type: entity_reference_revisions

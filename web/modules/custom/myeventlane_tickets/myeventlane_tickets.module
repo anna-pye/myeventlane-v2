@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Module file for MyEventLane Tickets.
+ */
+
+use Drupal\Core\Render\Element;
+
+/**
+ * Implements hook_theme().
+ */
+function myeventlane_tickets_theme(array $existing, $type, $theme, $path): array {
+  return [
+    'ticket_pdf' => [
+      'variables' => [
+        'event' => NULL,
+        'holder' => NULL,
+        'code' => NULL,
+      ],
+      'template' => 'ticket-pdf',
+    ],
+  ];
+}
+
+

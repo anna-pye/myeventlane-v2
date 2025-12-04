@@ -6,8 +6,6 @@ dependencies:
     - commerce_product.commerce_product_type.default
     - field.storage.commerce_product.field_event
     - node.type.event
-_core:
-  default_config_hash: V95meH2xpwoT2r-8cKVmVEOPfsTe0NOu1pg4z1NZeF0
 id: commerce_product.default.field_event
 field_name: field_event
 entity_type: commerce_product

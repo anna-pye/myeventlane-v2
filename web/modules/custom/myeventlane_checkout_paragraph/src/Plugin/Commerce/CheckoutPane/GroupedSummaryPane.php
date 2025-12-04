@@ -37,15 +37,13 @@ class GroupedSummaryPane extends CheckoutPaneBase {
         $pane_form['summary'] = $rendered;
       }
       else {
-        $pane_form['summary'] = [
-          '#markup' => $this->t('Order summary is currently empty.'),
-        ];
+        // Return empty array to hide the pane when view is empty.
+        return [];
       }
     }
     else {
-      $pane_form['summary'] = [
-        '#markup' => $this->t('Could not load order summary view or access denied.'),
-      ];
+      // Return empty array to hide the pane when view doesn't exist or access denied.
+      return [];
     }
 
     return $pane_form;

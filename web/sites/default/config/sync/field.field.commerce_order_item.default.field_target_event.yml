@@ -6,8 +6,6 @@ dependencies:
     - commerce_order.commerce_order_item_type.default
     - field.storage.commerce_order_item.field_target_event
     - node.type.event
-_core:
-  default_config_hash: GAytUFY6p4QY2I0GtPcC_UVT-KP6akCUr-XrcaF7X3U
 id: commerce_order_item.default.field_target_event
 field_name: field_target_event
 entity_type: commerce_order_item

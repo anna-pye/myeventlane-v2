@@ -32,13 +32,13 @@ final class EventReminderScheduler {
     $nowIso = gmdate('Y-m-d\TH:i:s', $now);
     $in24Iso = gmdate('Y-m-d\TH:i:s', $in24);
 
-    // Load events starting within 24h (expects field_start_date on event).
+    // Load events starting within 24h (uses field_event_start on event).
     $eids = $this->etm->getStorage('node')->getQuery()
       ->condition('type', 'event')
       ->condition('status', 1)
-      ->exists('field_start_date')
-      ->condition('field_start_date', $nowIso, '>=')
-      ->condition('field_start_date', $in24Iso, '<=')
+      ->exists('field_event_start')
+      ->condition('field_event_start', $nowIso, '>=')
+      ->condition('field_event_start', $in24Iso, '<=')
       ->accessCheck(FALSE)
       ->execute();
 
@@ -77,7 +77,9 @@ final class EventReminderScheduler {
           continue; // already notified
         }
 
-        $startVal = (string) $event->get('field_start_date')->value; // UTC ISO
+        $startVal = $event->hasField('field_event_start') && !$event->get('field_event_start')->isEmpty()
+          ? (string) $event->get('field_event_start')->value
+          : ''; // UTC ISO
         $startTs = $startVal ? strtotime($startVal . ' UTC') : NULL;
 
         $ctx = [

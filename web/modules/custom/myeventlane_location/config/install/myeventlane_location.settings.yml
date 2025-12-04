@@ -1,0 +1,6 @@
+default_provider: google_maps
+google_maps_api_key: ''
+apple_maps_team_id: ''
+apple_maps_key_id: ''
+apple_maps_private_key: ''
+

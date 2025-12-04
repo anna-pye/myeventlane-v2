@@ -11,9 +11,9 @@ field_name: field_accessibility
 entity_type: node
 bundle: event
 label: Accessibility
-description: ''
+description: 'Select accessibility options available at this event.'
 required: false
-translatable: true
+translatable: false
 default_value: {  }
 default_value_callback: ''
 settings:
@@ -21,4 +21,9 @@ settings:
   handler_settings:
     target_bundles:
       accessibility: accessibility
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
 field_type: entity_reference

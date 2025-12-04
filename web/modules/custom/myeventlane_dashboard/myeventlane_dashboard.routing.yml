@@ -14,3 +14,12 @@ myeventlane_dashboard.vendor_redirect:
     _controller: '\Drupal\myeventlane_dashboard\Controller\VendorDashboardController::legacyRedirect'
   requirements:
     _permission: 'access vendor dashboard'
+
+# Customer "My Events" dashboard.
+myeventlane_dashboard.customer:
+  path: '/my-events'
+  defaults:
+    _controller: '\Drupal\myeventlane_dashboard\Controller\CustomerDashboardController::myEvents'
+    _title: 'My Events'
+  requirements:
+    _permission: 'access content'

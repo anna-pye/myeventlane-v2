@@ -10,7 +10,19 @@ field_name: field_event_type
 entity_type: node
 type: list_string
 settings:
-  allowed_values: {  }
+  allowed_values:
+    -
+      value: rsvp
+      label: 'RSVP (Free)'
+    -
+      value: paid
+      label: 'Paid (Ticketed)'
+    -
+      value: both
+      label: 'Both (Free + Paid)'
+    -
+      value: external
+      label: 'External Link'
   allowed_values_function: ''
 module: options
 locked: false

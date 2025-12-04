@@ -7,8 +7,6 @@ dependencies:
     - node.type.event
   module:
     - address
-_core:
-  default_config_hash: fK7P8H-iuC5xk03ukId-gxWK0RBCEIA6xsdMUn8B1Tc
 id: node.event.field_location
 field_name: field_location
 entity_type: node
@@ -31,20 +29,20 @@ settings:
     familyName:
       override: hidden
     organization:
-      override: hidden
+      override: optional
     addressLine1:
       override: required
     addressLine2:
       override: optional
     postalCode:
-      override: required
+      override: optional
     sortingCode:
       override: hidden
     dependentLocality:
       override: hidden
     locality:
-      override: required
+      override: optional
     administrativeArea:
-      override: required
+      override: optional
   fields: {  }
 field_type: address

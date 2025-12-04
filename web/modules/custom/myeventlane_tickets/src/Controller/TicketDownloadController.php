@@ -27,39 +27,100 @@ class TicketDownloadController extends ControllerBase {
   public static function create(ContainerInterface $container): self {
     $instance = new static();
     $instance->entityTypeManager = $container->get('entity_type.manager');
-    $instance->pdfGenerator = $container->get('myeventlane_tickets.pdf_generator');
+    $instance->pdfGenerator = $container->get('myeventlane_tickets.pdf');
     return $instance;
   }
 
   /**
    * Download a ticket PDF.
+   *
+   * @param int $order_item_id
+   *   The order item ID.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The PDF response.
    */
-  public function download(int $ticket_id): Response {
+  public function download(int $order_item_id): Response {
+    // Load the order item.
+    $orderItem = $this->entityTypeManager
+      ->getStorage('commerce_order_item')
+      ->load($order_item_id);
 
-    $ticket = $this->entityTypeManager
-      ->getStorage('myeventlane_ticket')
-      ->load($ticket_id);
-
-    if (!$ticket) {
-      return new Response('Ticket not found', 404);
+    if (!$orderItem) {
+      return new Response('Order item not found', 404);
     }
 
-    /** @var \Drupal\Core\Entity\ContentEntityInterface $ticket */
+    // Get event from order item.
+    $event = NULL;
+    if ($orderItem->hasField('field_target_event') && !$orderItem->get('field_target_event')->isEmpty()) {
+      $event = $orderItem->get('field_target_event')->entity;
+    }
 
-    // FIXED: remove all ->get() calls on the entity.
-    $event = $ticket->get('event_id')->entity ?? NULL;
-    $ticket_code = $ticket->get('ticket_code')->value ?? '';
-    $holder = $ticket->get('holder_name')->value ?? '';
+    // Fallback: try to get event from product variation.
+    if (!$event) {
+      $purchasedEntity = $orderItem->getPurchasedEntity();
+      if ($purchasedEntity && $purchasedEntity->hasField('field_event') && !$purchasedEntity->get('field_event')->isEmpty()) {
+        $event = $purchasedEntity->get('field_event')->entity;
+      }
+    }
 
+    if (!$event) {
+      return new Response('Event not found', 404);
+    }
+
+    // Try to find the associated event attendee record first.
+    $attendeeStorage = $this->entityTypeManager->getStorage('event_attendee');
+    $attendeeIds = $attendeeStorage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('order_item', $order_item_id)
+      ->range(0, 1)
+      ->execute();
+
+    $ticketCode = '';
+    $holderName = '';
+
+    if (!empty($attendeeIds)) {
+      /** @var \Drupal\myeventlane_event_attendees\Entity\EventAttendee $attendee */
+      $attendee = $attendeeStorage->load(reset($attendeeIds));
+      $ticketCode = $attendee->get('ticket_code')->value ?? '';
+      $holderName = $attendee->get('name')->value ?? '';
+    }
+
+    // Fallback: get info from order item ticket holder paragraphs.
+    if (empty($ticketCode) || empty($holderName)) {
+      if ($orderItem->hasField('field_ticket_holder') && !$orderItem->get('field_ticket_holder')->isEmpty()) {
+        $ticketHolders = $orderItem->get('field_ticket_holder')->referencedEntities();
+        if (!empty($ticketHolders)) {
+          $holder = reset($ticketHolders);
+          $firstName = $holder->get('field_first_name')->value ?? '';
+          $lastName = $holder->get('field_last_name')->value ?? '';
+          $holderName = trim($firstName . ' ' . $lastName);
+        }
+      }
+
+      // Generate ticket code if not found.
+      if (empty($ticketCode)) {
+        $order = $orderItem->getOrder();
+        $ticketCode = sprintf('MEL-%d-%d-%d-%s',
+          $event->id(),
+          $order ? $order->id() : 0,
+          $orderItem->id(),
+          strtoupper(substr(md5(uniqid((string) mt_rand(), TRUE)), 0, 6))
+        );
+      }
+    }
+
+    // Generate PDF.
     $pdf_data = $this->pdfGenerator->buildPdf(
-      $ticket_code,
+      $ticketCode,
       $event,
-      $holder
+      $holderName
     );
 
     $response = new Response($pdf_data);
     $response->headers->set('Content-Type', 'application/pdf');
-    $response->headers->set('Content-Disposition', 'attachment; filename="ticket.pdf"');
+    $filename = $ticketCode ? "ticket-{$ticketCode}.pdf" : "ticket-{$order_item_id}.pdf";
+    $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
 
     return $response;
   }

@@ -5,18 +5,25 @@ dependencies:
   config:
     - field.storage.node.field_product_target
     - node.type.event
+  module:
+    - commerce_product
 id: node.event.field_product_target
 field_name: field_product_target
 entity_type: node
 bundle: event
-label: 'Product Target'
-description: ''
+label: 'Ticket Product'
+description: 'Link to a Commerce product for paid ticketing. Required when Event Type is "Paid". For RSVP events, this is auto-created.'
 required: false
-translatable: true
+translatable: false
 default_value: {  }
 default_value_callback: ''
 settings:
-  handler: 'default:node'
+  handler: 'default:commerce_product'
   handler_settings:
-    target_type: commerce_product
+    target_bundles:
+      ticket: ticket
+    sort:
+      field: title
+      direction: asc
+    auto_create: false
 field_type: entity_reference

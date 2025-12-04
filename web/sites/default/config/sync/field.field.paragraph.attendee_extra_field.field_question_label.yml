@@ -5,8 +5,6 @@ dependencies:
   config:
     - field.storage.paragraph.field_question_label
     - paragraphs.paragraphs_type.attendee_extra_field
-_core:
-  default_config_hash: Nq__RxGNZlX61Dfk0scuFsJL8Q9R8KYN7ImuXXdP2J4
 id: paragraph.attendee_extra_field.field_question_label
 field_name: field_question_label
 entity_type: paragraph

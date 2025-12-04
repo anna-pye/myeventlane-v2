@@ -52,6 +52,14 @@ function myeventlane_dashboard_theme(): array {
       ],
       'template' => 'dashboard-card',
     ],
+    'myeventlane_customer_dashboard' => [
+      'variables' => [
+        'upcoming_events' => [],
+        'past_events' => [],
+        'welcome_message' => NULL,
+      ],
+      'template' => 'myeventlane-customer-dashboard',
+    ],
   ];
 }
 

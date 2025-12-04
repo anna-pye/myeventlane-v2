@@ -54,15 +54,15 @@ final class VendorDashboardController extends ControllerBase {
    *   Array with 'attendee_count', 'revenue', and 'mode'.
    */
   private function getEventStats(int $eventId): array {
-    $database = \Drupal::database();
-
-    // Get attendee count from event_attendee table.
-    $attendeeCount = $database->select('event_attendee', 'ea')
-      ->condition('ea.event_id', $eventId)
-      ->condition('ea.status', 'confirmed')
-      ->countQuery()
-      ->execute()
-      ->fetchField();
+    // Get attendee count using entity query API.
+    $attendeeCount = $this->entityTypeManager()
+      ->getStorage('event_attendee')
+      ->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('event', $eventId)
+      ->condition('status', 'confirmed')
+      ->count()
+      ->execute();
 
     // Get revenue from Commerce orders.
     // Find all order items linked to this event.
@@ -123,7 +123,7 @@ final class VendorDashboardController extends ControllerBase {
       }
 
       // Get attendee counts and revenue for this event.
-      $stats = $this->getEventStats($event->id());
+      $stats = $this->getEventStats((int) $event->id());
 
       $eventData = [
         'id' => $event->id(),

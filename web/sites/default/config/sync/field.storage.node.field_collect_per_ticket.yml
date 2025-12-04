@@ -4,8 +4,6 @@ status: true
 dependencies:
   module:
     - node
-_core:
-  default_config_hash: NJMqRvwX4DEoOKoaEdYtkFQjfq64Id6QoINb31msal8
 id: node.field_collect_per_ticket
 field_name: field_collect_per_ticket
 entity_type: node

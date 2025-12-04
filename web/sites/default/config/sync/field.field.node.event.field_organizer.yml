@@ -10,13 +10,19 @@ field_name: field_organizer
 entity_type: node
 bundle: event
 label: Organizer
-description: ''
+description: 'The user account responsible for this event.'
 required: false
-translatable: true
+translatable: false
 default_value: {  }
 default_value_callback: ''
 settings:
-  handler: 'default:node'
+  handler: 'default:user'
   handler_settings:
-    target_type: user
+    target_bundles: null
+    sort:
+      field: _none
+    auto_create: false
+    filter:
+      type: _none
+    include_anonymous: false
 field_type: entity_reference

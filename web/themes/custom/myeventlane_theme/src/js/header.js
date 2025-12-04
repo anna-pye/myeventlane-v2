@@ -89,7 +89,93 @@ export function initMobileNav() {
   });
 }
 
+/**
+ * Initialize account dropdown.
+ */
+export function initAccountDropdown() {
+  console.log('initAccountDropdown called');
+  
+  function setupDropdowns() {
+    console.log('Setting up account dropdowns...');
+    const dropdowns = document.querySelectorAll('.mel-account-dropdown');
+    console.log(`Found ${dropdowns.length} dropdown(s)`);
+    
+    if (dropdowns.length === 0) {
+      console.warn('No account dropdowns found on page');
+      return;
+    }
+
+    dropdowns.forEach((dropdown) => {
+      const toggle = dropdown.querySelector('.mel-account-toggle');
+      const menu = dropdown.querySelector('.mel-account-menu');
+
+      if (!toggle || !menu) {
+        return;
+      }
+
+      // Direct click handler on toggle
+      toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const isOpen = dropdown.classList.contains('is-open');
+        
+        if (isOpen) {
+          // Close
+          dropdown.classList.remove('is-open');
+          toggle.setAttribute('aria-expanded', 'false');
+          menu.setAttribute('aria-hidden', 'true');
+        } else {
+          // Close all other dropdowns
+          document.querySelectorAll('.mel-account-dropdown.is-open').forEach((other) => {
+            if (other !== dropdown) {
+              other.classList.remove('is-open');
+              const otherToggle = other.querySelector('.mel-account-toggle');
+              const otherMenu = other.querySelector('.mel-account-menu');
+              if (otherToggle) otherToggle.setAttribute('aria-expanded', 'false');
+              if (otherMenu) otherMenu.setAttribute('aria-hidden', 'true');
+            }
+          });
+          
+          // Open this one
+          dropdown.classList.add('is-open');
+          toggle.setAttribute('aria-expanded', 'true');
+          menu.setAttribute('aria-hidden', 'false');
+        }
+      });
+
+      // Close on outside click - use capture phase to catch it early
+      document.addEventListener('click', function closeOnOutside(e) {
+        if (!dropdown.contains(e.target) && dropdown.classList.contains('is-open')) {
+          dropdown.classList.remove('is-open');
+          toggle.setAttribute('aria-expanded', 'false');
+          menu.setAttribute('aria-hidden', 'true');
+        }
+      }, true);
+
+      // Escape key
+      document.addEventListener('keydown', function escapeHandler(e) {
+        if (e.key === 'Escape' && dropdown.classList.contains('is-open')) {
+          dropdown.classList.remove('is-open');
+          toggle.setAttribute('aria-expanded', 'false');
+          menu.setAttribute('aria-hidden', 'true');
+          toggle.focus();
+        }
+      });
+    });
+  }
+
+  // Run when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupDropdowns);
+  } else {
+    // Small delay to ensure elements are rendered
+    setTimeout(setupDropdowns, 50);
+  }
+}
+
 // Legacy export for backward compatibility
 export function melHeaderInit() {
   initMobileNav();
+  initAccountDropdown();
 }

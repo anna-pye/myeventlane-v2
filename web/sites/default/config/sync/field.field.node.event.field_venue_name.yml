@@ -10,7 +10,7 @@ field_name: field_venue_name
 entity_type: node
 bundle: event
 label: 'Venue Name'
-description: ''
+description: 'A friendly name for the venue (e.g., "The Grand Ballroom").'
 required: false
 translatable: true
 default_value: {  }

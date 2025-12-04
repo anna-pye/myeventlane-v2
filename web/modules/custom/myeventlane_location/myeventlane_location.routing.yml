@@ -1,0 +1,8 @@
+myeventlane_location.settings:
+  path: '/admin/config/myeventlane/location'
+  defaults:
+    _form: '\Drupal\myeventlane_location\Form\LocationSettingsForm'
+    _title: 'MyEventLane location settings'
+  requirements:
+    _permission: 'administer site configuration'
+

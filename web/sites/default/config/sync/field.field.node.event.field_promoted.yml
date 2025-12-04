@@ -5,8 +5,6 @@ dependencies:
   config:
     - field.storage.node.field_promoted
     - node.type.event
-_core:
-  default_config_hash: kGWUbalR53HbwMs46CwupqtWpNXDZUCyKokc_OQ5TAg
 id: node.event.field_promoted
 field_name: field_promoted
 entity_type: node

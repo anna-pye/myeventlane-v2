@@ -1,0 +1,13 @@
+name: 'MyEventLane Location'
+type: module
+description: 'Location and mapping functionality for Events. Provides address autocomplete with Google Maps and Apple Maps support, and embedded map rendering on Event pages.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_core:myeventlane_core
+  - drupal:address
+  - drupal:node
+  - drupal:field
+

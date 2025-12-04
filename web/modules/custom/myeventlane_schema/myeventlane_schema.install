@@ -154,3 +154,151 @@ function myeventlane_schema_update_9001(): string {
 
   return 'Created ticket product type, variation type, and default store. Imported field configurations.';
 }
+
+/**
+ * Creates ticket type fields for event-driven ticket management.
+ */
+function myeventlane_schema_update_9002(): string {
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $field_storage_storage = $entity_type_manager->getStorage('field_storage_config');
+  $field_config_storage = $entity_type_manager->getStorage('field_config');
+  $paragraph_type_storage = $entity_type_manager->getStorage('paragraphs_type');
+
+  // Create paragraph type if it doesn't exist.
+  if (!$paragraph_type_storage->load('ticket_type_config')) {
+    $paragraph_type = $paragraph_type_storage->create([
+      'id' => 'ticket_type_config',
+      'label' => 'Ticket Type Configuration',
+      'description' => 'Defines a single ticket type (e.g., Full Price, Concession) with price, capacity, and sales window settings.',
+    ]);
+    $paragraph_type->save();
+  }
+
+  // Define field storages to create.
+  $field_storages = [
+    'paragraph.field_ticket_label_mode' => [
+      'field_name' => 'field_ticket_label_mode',
+      'entity_type' => 'paragraph',
+      'type' => 'list_string',
+      'module' => 'options',
+      'settings' => [
+        'allowed_values' => [
+          'preset' => 'Use preset label',
+          'custom' => 'Use custom label',
+        ],
+      ],
+    ],
+    'paragraph.field_ticket_label_preset' => [
+      'field_name' => 'field_ticket_label_preset',
+      'entity_type' => 'paragraph',
+      'type' => 'list_string',
+      'module' => 'options',
+      'settings' => [
+        'allowed_values' => [
+          'full_price' => 'Full Price',
+          'concession' => 'Concession',
+          'child' => 'Child',
+          'member' => 'Member',
+          'free' => 'Free',
+          'student' => 'Student',
+          'senior' => 'Senior',
+          'early_bird' => 'Early Bird',
+          'vip' => 'VIP',
+        ],
+      ],
+    ],
+    'paragraph.field_ticket_label_custom' => [
+      'field_name' => 'field_ticket_label_custom',
+      'entity_type' => 'paragraph',
+      'type' => 'string',
+      'module' => 'core',
+      'settings' => ['max_length' => 255],
+    ],
+    'paragraph.field_ticket_price' => [
+      'field_name' => 'field_ticket_price',
+      'entity_type' => 'paragraph',
+      'type' => 'decimal',
+      'module' => 'decimal',
+      'settings' => ['precision' => 10, 'scale' => 2],
+    ],
+    'paragraph.field_ticket_capacity' => [
+      'field_name' => 'field_ticket_capacity',
+      'entity_type' => 'paragraph',
+      'type' => 'integer',
+      'module' => 'core',
+      'settings' => ['unsigned' => TRUE],
+    ],
+    'paragraph.field_ticket_sales_start' => [
+      'field_name' => 'field_ticket_sales_start',
+      'entity_type' => 'paragraph',
+      'type' => 'datetime',
+      'module' => 'datetime',
+      'settings' => ['datetime_type' => 'datetime'],
+    ],
+    'paragraph.field_ticket_sales_end' => [
+      'field_name' => 'field_ticket_sales_end',
+      'entity_type' => 'paragraph',
+      'type' => 'datetime',
+      'module' => 'datetime',
+      'settings' => ['datetime_type' => 'datetime'],
+    ],
+    'paragraph.field_ticket_variation_uuid' => [
+      'field_name' => 'field_ticket_variation_uuid',
+      'entity_type' => 'paragraph',
+      'type' => 'string',
+      'module' => 'core',
+      'settings' => ['max_length' => 36],
+    ],
+    'node.field_ticket_types' => [
+      'field_name' => 'field_ticket_types',
+      'entity_type' => 'node',
+      'type' => 'entity_reference_revisions',
+      'module' => 'entity_reference_revisions',
+      'settings' => ['target_type' => 'paragraph'],
+    ],
+  ];
+
+  // Create field storages.
+  foreach ($field_storages as $id => $config) {
+    if (!$field_storage_storage->load($id)) {
+      $storage = $field_storage_storage->create($config);
+      $storage->save();
+    }
+  }
+
+  // Import field instances from config files.
+  $config_path = \Drupal::service('extension.list.module')->getPath('myeventlane_schema') . '/config/install';
+  $yaml = \Drupal\Component\Serialization\Yaml::class;
+
+  // Import paragraph field instances.
+  $paragraph_field_files = [
+    'field.field.paragraph.ticket_type_config.field_ticket_label_mode',
+    'field.field.paragraph.ticket_type_config.field_ticket_label_preset',
+    'field.field.paragraph.ticket_type_config.field_ticket_label_custom',
+    'field.field.paragraph.ticket_type_config.field_ticket_price',
+    'field.field.paragraph.ticket_type_config.field_ticket_capacity',
+    'field.field.paragraph.ticket_type_config.field_ticket_sales_start',
+    'field.field.paragraph.ticket_type_config.field_ticket_sales_end',
+    'field.field.paragraph.ticket_type_config.field_ticket_variation_uuid',
+  ];
+
+  foreach ($paragraph_field_files as $config_name) {
+    $config_file = $config_path . '/' . $config_name . '.yml';
+    if (file_exists($config_file)) {
+      $config_data = $yaml::decode(file_get_contents($config_file));
+      \Drupal::configFactory()->getEditable($config_name)->setData($config_data)->save(TRUE);
+    }
+  }
+
+  // Import node field instance.
+  $config_name = 'field.field.node.event.field_ticket_types';
+  $config_file = $config_path . '/' . $config_name . '.yml';
+  if (file_exists($config_file)) {
+    $config_data = $yaml::decode(file_get_contents($config_file));
+    \Drupal::configFactory()->getEditable($config_name)->setData($config_data)->save(TRUE);
+  }
+
+  drupal_flush_all_caches();
+
+  return 'Created ticket type paragraph type and all related fields for event-driven ticket management.';
+}

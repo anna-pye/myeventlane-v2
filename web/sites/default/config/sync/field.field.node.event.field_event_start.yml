@@ -12,9 +12,9 @@ field_name: field_event_start
 entity_type: node
 bundle: event
 label: 'Event Start'
-description: ''
-required: false
-translatable: true
+description: 'When the event begins.'
+required: true
+translatable: false
 default_value: {  }
 default_value_callback: ''
 settings: {  }

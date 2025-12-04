@@ -1,0 +1,92 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for myeventlane_location module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+
+/**
+ * Implements hook_install().
+ */
+function myeventlane_location_install(): void {
+  // Create latitude and longitude fields for Event content type.
+  _myeventlane_location_create_coordinate_fields();
+}
+
+/**
+ * Creates latitude and longitude fields for Event nodes.
+ */
+function _myeventlane_location_create_coordinate_fields(): void {
+  $entity_type = 'node';
+  $bundle = 'event';
+
+  // Create field storage for latitude.
+  $field_storage_lat = FieldStorageConfig::load("{$entity_type}.field_location_latitude");
+  if (!$field_storage_lat) {
+    $field_storage_lat = FieldStorageConfig::create([
+      'field_name' => 'field_location_latitude',
+      'entity_type' => $entity_type,
+      'type' => 'decimal',
+      'settings' => [
+        'precision' => 10,
+        'scale' => 7,
+      ],
+    ]);
+    $field_storage_lat->save();
+  }
+
+  // Create field instance for latitude.
+  $field_lat = FieldConfig::load("{$entity_type}.{$bundle}.field_location_latitude");
+  if (!$field_lat) {
+    $field_lat = FieldConfig::create([
+      'field_name' => 'field_location_latitude',
+      'entity_type' => $entity_type,
+      'bundle' => $bundle,
+      'label' => 'Latitude',
+      'description' => 'Latitude coordinate for the event location. Automatically populated when selecting an address.',
+      'required' => FALSE,
+    ]);
+    $field_lat->save();
+  }
+
+  // Create field storage for longitude.
+  $field_storage_lng = FieldStorageConfig::load("{$entity_type}.field_location_longitude");
+  if (!$field_storage_lng) {
+    $field_storage_lng = FieldStorageConfig::create([
+      'field_name' => 'field_location_longitude',
+      'entity_type' => $entity_type,
+      'type' => 'decimal',
+      'settings' => [
+        'precision' => 10,
+        'scale' => 7,
+      ],
+    ]);
+    $field_storage_lng->save();
+  }
+
+  // Create field instance for longitude.
+  $field_lng = FieldConfig::load("{$entity_type}.{$bundle}.field_location_longitude");
+  if (!$field_lng) {
+    $field_lng = FieldConfig::create([
+      'field_name' => 'field_location_longitude',
+      'entity_type' => $entity_type,
+      'bundle' => $bundle,
+      'label' => 'Longitude',
+      'description' => 'Longitude coordinate for the event location. Automatically populated when selecting an address.',
+      'required' => FALSE,
+    ]);
+    $field_lng->save();
+  }
+
+  // Update form display to hide these fields (they're populated by JavaScript).
+  // We don't add them to the form display - they'll be added as hidden fields via form_alter.
+  // This keeps them out of the visible form UI while still allowing them to be saved.
+}
+

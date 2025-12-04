@@ -108,6 +108,12 @@ final class TicketHolderParagraphPane extends CheckoutPaneBase {
           '#default_value' => $paragraph->get('field_email')->value ?? '',
           '#required' => TRUE,
         ];
+        $fieldset['field_phone'] = [
+          '#type' => 'tel',
+          '#title' => $this->t('Phone number'),
+          '#default_value' => $paragraph->hasField('field_phone') ? ($paragraph->get('field_phone')->value ?? '') : '',
+          '#required' => TRUE,
+        ];
 
         // Dynamic extra questions (child paragraphs of this holder).
         if ($paragraph->hasField('field_attendee_questions') && !$paragraph->get('field_attendee_questions')->isEmpty()) {
@@ -205,6 +211,9 @@ final class TicketHolderParagraphPane extends CheckoutPaneBase {
         if (empty($entry['field_email'])) {
           $form_state->setErrorByName("{$this->getPluginId()}][order_items][$index][$delta][field_email", $this->t('Email is required.'));
         }
+        if (empty($entry['field_phone'])) {
+          $form_state->setErrorByName("{$this->getPluginId()}][order_items][$index][$delta][field_phone", $this->t('Phone number is required.'));
+        }
       }
     }
   }
@@ -255,6 +264,9 @@ final class TicketHolderParagraphPane extends CheckoutPaneBase {
         $paragraph->set('field_first_name', $entry['field_first_name'] ?? '');
         $paragraph->set('field_last_name', $entry['field_last_name'] ?? '');
         $paragraph->set('field_email', $entry['field_email'] ?? '');
+        if ($paragraph->hasField('field_phone')) {
+          $paragraph->set('field_phone', $entry['field_phone'] ?? '');
+        }
         $log->notice('💾 Saved parent fields for paragraph @id (first=@f, last=@l, email=@e).', [
           '@id' => $paragraph->id(),
           '@f' => $entry['field_first_name'] ?? '',

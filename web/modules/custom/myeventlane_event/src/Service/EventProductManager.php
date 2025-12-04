@@ -231,12 +231,16 @@ final class EventProductManager {
       }
     }
 
-    // Paid and Both events: ensure product link exists (vendor manages
-    // manually).
+    // Paid and Both events: ensure product link exists.
+    // For events with ticket types, the product will be auto-created by
+    // TicketTypeManager, so we don't show a warning if ticket types exist.
     if (in_array($eventType, ['paid', 'both'], TRUE)) {
-      if ($event->get('field_product_target')->isEmpty()) {
+      $hasTicketTypes = $event->hasField('field_ticket_types') 
+        && !$event->get('field_ticket_types')->isEmpty();
+      
+      if ($event->get('field_product_target')->isEmpty() && !$hasTicketTypes) {
         $this->messenger->addWarning(
-          $this->t('Please link a ticket product for this @type event.', [
+          $this->t('Please link a ticket product for this @type event, or define ticket types below.', [
             '@type' => $eventType === 'paid' ? 'paid' : 'hybrid',
           ])
         );

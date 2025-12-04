@@ -27,7 +27,17 @@ final class TicketVariationManager {
       /** @var \Drupal\commerce_product\Entity\ProductVariation $v */
       $v = reset($found);
       if ((int) $v->getProductId() !== (int) $product->id()) {
-        $v->setProductId($product->id())->save();
+        // Update product_id by updating the variation and adding to product.
+        $v->set('product_id', $product->id());
+        $v->save();
+        
+        // Ensure variation is in product's variations collection.
+        $variations = $product->getVariations();
+        if (!in_array($v->id(), array_map(function($var) { return $var->id(); }, $variations->toArray()))) {
+          $variations[] = $v;
+          $product->set('variations', $variations);
+          $product->save();
+        }
       }
       return $v;
     }
@@ -37,6 +47,7 @@ final class TicketVariationManager {
       'sku' => $sku,
       'title' => $values['title'] ?? 'Ticket',
       'status' => $values['status'] ?? 1,
+      'product_id' => $product->id(),
     ];
     if (!empty($values['price']) && $values['price'] instanceof Price) {
       $data['price'] = $values['price'];
@@ -44,9 +55,14 @@ final class TicketVariationManager {
 
     /** @var \Drupal\commerce_product\Entity\ProductVariation $v */
     $v = ProductVariation::create($data);
-    // DO NOT set UUID. Let Drupal generate it; our subscriber will also guard.
-    $v->setProductId($product->id());
     $v->save();
+    
+    // Add variation to product's variations collection.
+    $variations = $product->getVariations();
+    $variations[] = $v;
+    $product->set('variations', $variations);
+    $product->save();
+    
     return $v;
   }
 }

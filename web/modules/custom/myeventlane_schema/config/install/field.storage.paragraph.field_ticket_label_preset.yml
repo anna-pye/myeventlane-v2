@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+id: paragraph.field_ticket_label_preset
+field_name: field_ticket_label_preset
+entity_type: paragraph
+field_type: list_string
+settings:
+  allowed_values:
+    full_price: 'Full Price'
+    concession: 'Concession'
+    child: 'Child'
+    member: 'Member'
+    free: 'Free'
+    student: 'Student'
+    senior: 'Senior'
+    early_bird: 'Early Bird'
+    vip: 'VIP'
+module: options
+locked: false
+cardinality: 1
+translatable: false
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
+

@@ -1,0 +1,382 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for myeventlane_location module.
+ *
+ * Provides address autocomplete with Google Maps and Apple Maps support,
+ * and embedded map rendering on Event pages.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function myeventlane_location_theme(): array {
+  return [
+    'event_location_map' => [
+      'variables' => [
+        'event' => NULL,
+        'latitude' => NULL,
+        'longitude' => NULL,
+        'address' => NULL,
+        'provider' => NULL,
+      ],
+      'template' => 'event-location-map',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for node_event_form.
+ */
+function myeventlane_location_form_node_event_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  _myeventlane_location_alter_event_form($form, $form_state);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for node_event_edit_form.
+ */
+function myeventlane_location_form_node_event_edit_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  _myeventlane_location_alter_event_form($form, $form_state);
+}
+
+/**
+ * Alters the event node form to add address autocomplete widget.
+ *
+ * @param array $form
+ *   The form array.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state.
+ */
+function _myeventlane_location_alter_event_form(array &$form, FormStateInterface $form_state): void {
+  // Only alter if field_location exists.
+  if (!isset($form['field_location'])) {
+    return;
+  }
+
+  // Store the original weight to maintain position.
+  $location_weight = $form['field_location']['#weight'] ?? 8;
+  
+  // Add search field right before field_location in the form.
+  // This keeps it visually together with the location fields.
+  $form['field_location_search'] = [
+    '#type' => 'textfield',
+    '#title' => t('Search for address or venue'),
+    '#description' => t('Start typing to search for an address. Select from the suggestions to populate the address fields below.'),
+    '#attributes' => [
+      'class' => ['myeventlane-location-address-search'],
+      'autocomplete' => 'off',
+      'placeholder' => t('Type address or venue name...'),
+    ],
+    '#weight' => $location_weight - 0.1, // Just before location field.
+    '#group' => $form['field_location']['#group'] ?? 'content',
+  ];
+  
+  // Add map preview right after field_location.
+  $form['field_location_map_preview'] = [
+    '#type' => 'container',
+    '#attributes' => [
+      'class' => ['myeventlane-location-map-preview'],
+      'style' => 'width: 100%; height: 200px; margin-top: 1em; border: 1px solid #ccc; display: none;',
+    ],
+    '#weight' => $location_weight + 0.1, // Just after location field.
+    '#group' => $form['field_location']['#group'] ?? 'content',
+  ];
+  
+  // Add wrapper class to field_location for JavaScript targeting.
+  if (!isset($form['field_location']['#attributes'])) {
+    $form['field_location']['#attributes'] = [];
+  }
+  if (!isset($form['field_location']['#attributes']['class'])) {
+    $form['field_location']['#attributes']['class'] = [];
+  }
+  $form['field_location']['#attributes']['class'][] = 'myeventlane-location-address-widget';
+  
+  // Update field_location title to be more descriptive.
+  if (isset($form['field_location']['#title'])) {
+    $form['field_location']['#title'] = t('Address Details');
+    $form['field_location']['#description'] = t('Address fields will be automatically filled when you select from the search above.');
+  }
+  
+  // Optionally hide venue name field - uncomment to hide it:
+  if (isset($form['field_venue_name'])) {
+    // Keep it visible but you can hide it if preferred:
+    // $form['field_venue_name']['#access'] = FALSE;
+    // Or move it near location:
+    $form['field_venue_name']['#weight'] = $location_weight + 0.2;
+  }
+
+  // Add hidden fields for coordinates (these will be populated by JavaScript).
+  // We'll add them to the form but outside the field_location structure
+  // so they can be saved to dedicated fields.
+  // Check if dedicated coordinate fields exist on the entity.
+  $node = $form_state->getFormObject()->getEntity();
+  if ($node->hasField('field_location_latitude') && !isset($form['field_location_latitude'])) {
+    $form['field_location_latitude'] = [
+      '#type' => 'hidden',
+      '#attributes' => [
+        'class' => ['myeventlane-location-latitude-field'],
+      ],
+      '#default_value' => $node->hasField('field_location_latitude') && !$node->get('field_location_latitude')->isEmpty() 
+        ? $node->get('field_location_latitude')->value 
+        : '',
+    ];
+  }
+
+  if ($node->hasField('field_location_longitude') && !isset($form['field_location_longitude'])) {
+    $form['field_location_longitude'] = [
+      '#type' => 'hidden',
+      '#attributes' => [
+        'class' => ['myeventlane-location-longitude-field'],
+      ],
+      '#default_value' => $node->hasField('field_location_longitude') && !$node->get('field_location_longitude')->isEmpty() 
+        ? $node->get('field_location_longitude')->value 
+        : '',
+    ];
+  }
+
+  // The wrapper already has the class for JavaScript targeting.
+
+  // Attach our library for autocomplete functionality.
+  $form['#attached']['library'][] = 'myeventlane_location/address_autocomplete';
+
+  // Get provider settings for JavaScript.
+  /** @var \Drupal\myeventlane_location\Service\LocationProviderManager $provider_manager */
+  $provider_manager = \Drupal::service('myeventlane_location.provider_manager');
+  $settings = $provider_manager->getFrontendSettings();
+
+  // For Apple Maps, we need to generate a token server-side.
+  if ($settings['provider'] === 'apple_maps') {
+    /** @var \Drupal\myeventlane_location\Service\MapKitTokenGenerator $token_generator */
+    $token_generator = \Drupal::service('myeventlane_location.mapkit_token_generator');
+    $token = $token_generator->generateToken();
+    if (!empty($token)) {
+      $settings['apple_maps_token'] = $token;
+    }
+  }
+
+  $form['#attached']['drupalSettings']['myeventlaneLocation'] = $settings;
+
+  // Add submit handler to save coordinates.
+  $form['actions']['submit']['#submit'][] = '_myeventlane_location_save_coordinates';
+}
+
+
+
+/**
+ * Form submit handler to save latitude and longitude from address widget.
+ */
+function _myeventlane_location_save_coordinates(array &$form, FormStateInterface $form_state): void {
+  $node = $form_state->getFormObject()->getEntity();
+  if (!$node instanceof NodeInterface || $node->bundle() !== 'event') {
+    return;
+  }
+
+  $lat = NULL;
+  $lng = NULL;
+
+  // Get coordinates from hidden fields added by form_alter.
+  // These are simple hidden fields, so the value is directly in form_state.
+  $lat_value = $form_state->getValue('field_location_latitude');
+  if (!empty($lat_value) && is_numeric($lat_value)) {
+    $lat = (float) $lat_value;
+  }
+
+  $lng_value = $form_state->getValue('field_location_longitude');
+  if (!empty($lng_value) && is_numeric($lng_value)) {
+    $lng = (float) $lng_value;
+  }
+
+  // Also check for dedicated coordinate fields (field_location_latitude/longitude or field_event_lat/lng).
+  if ($lat === NULL && $form_state->hasValue(['field_location_latitude', 0, 'value'])) {
+    $lat_value = $form_state->getValue(['field_location_latitude', 0, 'value']);
+    if (!empty($lat_value) && is_numeric($lat_value)) {
+      $lat = (float) $lat_value;
+    }
+  }
+
+  if ($lng === NULL && $form_state->hasValue(['field_location_longitude', 0, 'value'])) {
+    $lng_value = $form_state->getValue(['field_location_longitude', 0, 'value']);
+    if (!empty($lng_value) && is_numeric($lng_value)) {
+      $lng = (float) $lng_value;
+    }
+  }
+
+  // Check for legacy field_event_lat/lng fields.
+  if ($lat === NULL && $form_state->hasValue(['field_event_lat', 0, 'value'])) {
+    $lat_value = $form_state->getValue(['field_event_lat', 0, 'value']);
+    if (!empty($lat_value) && is_numeric($lat_value)) {
+      $lat = (float) $lat_value;
+    }
+  }
+
+  if ($lng === NULL && $form_state->hasValue(['field_event_lng', 0, 'value'])) {
+    $lng_value = $form_state->getValue(['field_event_lng', 0, 'value']);
+    if (!empty($lng_value) && is_numeric($lng_value)) {
+      $lng = (float) $lng_value;
+    }
+  }
+
+  // Save coordinates to dedicated fields if they exist and we have values.
+  if ($lat !== NULL && $node->hasField('field_location_latitude')) {
+    $node->set('field_location_latitude', $lat);
+  }
+  elseif ($lat !== NULL && $node->hasField('field_event_lat')) {
+    $node->set('field_event_lat', (string) $lat);
+  }
+
+  if ($lng !== NULL && $node->hasField('field_location_longitude')) {
+    $node->set('field_location_longitude', $lng);
+  }
+  elseif ($lng !== NULL && $node->hasField('field_event_lng')) {
+    $node->set('field_event_lng', (string) $lng);
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function myeventlane_location_page_attachments(array &$attachments): void {
+  // Only attach on Event node view pages.
+  $route = \Drupal::routeMatch();
+  if ($route->getRouteName() !== 'entity.node.canonical') {
+    return;
+  }
+
+  $node = $route->getParameter('node');
+  if (!$node instanceof NodeInterface || $node->bundle() !== 'event') {
+    return;
+  }
+
+  // Check if event has location coordinates.
+  $lat = NULL;
+  $lng = NULL;
+
+  // Try to get coordinates from dedicated fields first.
+  if ($node->hasField('field_location_latitude') && !$node->get('field_location_latitude')->isEmpty()) {
+    $lat = (float) $node->get('field_location_latitude')->value;
+  }
+  elseif ($node->hasField('field_event_lat') && !$node->get('field_event_lat')->isEmpty()) {
+    $lat = (float) $node->get('field_event_lat')->value;
+  }
+
+  if ($node->hasField('field_location_longitude') && !$node->get('field_location_longitude')->isEmpty()) {
+    $lng = (float) $node->get('field_location_longitude')->value;
+  }
+  elseif ($node->hasField('field_event_lng') && !$node->get('field_event_lng')->isEmpty()) {
+    $lng = (float) $node->get('field_event_lng')->value;
+  }
+
+  // Only attach if we have coordinates.
+  if ($lat !== NULL && $lng !== NULL) {
+    // Attach map rendering library.
+    $attachments['#attached']['library'][] = 'myeventlane_location/event_map';
+
+    // Get provider settings.
+    /** @var \Drupal\myeventlane_location\Service\LocationProviderManager $provider_manager */
+    $provider_manager = \Drupal::service('myeventlane_location.provider_manager');
+    $settings = $provider_manager->getFrontendSettings();
+
+    // For Apple Maps, generate token.
+    if ($settings['provider'] === 'apple_maps') {
+      /** @var \Drupal\myeventlane_location\Service\MapKitTokenGenerator $token_generator */
+      $token_generator = \Drupal::service('myeventlane_location.mapkit_token_generator');
+      $token = $token_generator->generateToken();
+      if (!empty($token)) {
+        $settings['apple_maps_token'] = $token;
+      }
+    }
+
+    $attachments['#attached']['drupalSettings']['myeventlaneLocation'] = $settings;
+    $attachments['#attached']['drupalSettings']['myeventlaneLocationEvent'] = [
+      'latitude' => $lat,
+      'longitude' => $lng,
+      'title' => $node->getTitle(),
+    ];
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view() for node entities.
+ *
+ * Adds map rendering to Event node views.
+ */
+function myeventlane_location_node_view(array &$build, EntityInterface $entity, $view_mode): void {
+  // Only process event nodes in full/default view modes.
+  if (!$entity instanceof NodeInterface || $entity->bundle() !== 'event') {
+    return;
+  }
+
+  if (!in_array($view_mode, ['full', 'default'], TRUE)) {
+    return;
+  }
+
+  // Get coordinates.
+  $lat = NULL;
+  $lng = NULL;
+
+  if ($entity->hasField('field_location_latitude') && !$entity->get('field_location_latitude')->isEmpty()) {
+    $lat = (float) $entity->get('field_location_latitude')->value;
+  }
+  elseif ($entity->hasField('field_event_lat') && !$entity->get('field_event_lat')->isEmpty()) {
+    $lat = (float) $entity->get('field_event_lat')->value;
+  }
+
+  if ($entity->hasField('field_location_longitude') && !$entity->get('field_location_longitude')->isEmpty()) {
+    $lng = (float) $entity->get('field_location_longitude')->value;
+  }
+  elseif ($entity->hasField('field_event_lng') && !$entity->get('field_event_lng')->isEmpty()) {
+    $lng = (float) $entity->get('field_event_lng')->value;
+  }
+
+  // Only add map if coordinates exist.
+  if ($lat !== NULL && $lng !== NULL) {
+    // Get address string from field_location.
+    $address = '';
+    if ($entity->hasField('field_location') && !$entity->get('field_location')->isEmpty()) {
+      $location = $entity->get('field_location')->value;
+      if (is_array($location)) {
+        $parts = [];
+        if (!empty($location['address_line1'])) {
+          $parts[] = $location['address_line1'];
+        }
+        if (!empty($location['locality'])) {
+          $parts[] = $location['locality'];
+        }
+        if (!empty($location['administrative_area'])) {
+          $parts[] = $location['administrative_area'];
+        }
+        if (!empty($location['postal_code'])) {
+          $parts[] = $location['postal_code'];
+        }
+        $address = implode(', ', $parts);
+      }
+    }
+
+    /** @var \Drupal\myeventlane_location\Service\LocationProviderManager $provider_manager */
+    $provider_manager = \Drupal::service('myeventlane_location.provider_manager');
+    $provider = $provider_manager->getDefaultProvider();
+
+    // Add map to build array.
+    $build['event_location_map'] = [
+      '#theme' => 'event_location_map',
+      '#event' => $entity,
+      '#latitude' => $lat,
+      '#longitude' => $lng,
+      '#address' => $address,
+      '#provider' => $provider,
+      '#weight' => 100,
+      '#cache' => [
+        'tags' => $entity->getCacheTags(),
+        'contexts' => ['url.path'],
+      ],
+    ];
+  }
+}
+

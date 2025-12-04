@@ -68,3 +68,4 @@ content:
 hidden:
   adjustments: true
   field_target_event: true
+  field_ticket_holder: true

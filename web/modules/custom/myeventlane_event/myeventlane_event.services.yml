@@ -15,3 +15,10 @@ services:
       - '@entity_type.manager'
       - '@logger.factory'
       - '@messenger'
+
+  # Ticket type manager - syncs ticket type paragraphs to Commerce Variations.
+  myeventlane_event.ticket_type_manager:
+    class: Drupal\myeventlane_event\Service\TicketTypeManager
+    arguments:
+      - '@entity_type.manager'
+      - '@logger.factory'

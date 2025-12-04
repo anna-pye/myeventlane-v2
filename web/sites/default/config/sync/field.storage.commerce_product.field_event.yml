@@ -5,8 +5,6 @@ dependencies:
   module:
     - commerce_product
     - node
-_core:
-  default_config_hash: wRSgPoD6fAe5aZrPsBVbodmRxdGaa7S04zceyTzVP4M
 id: commerce_product.field_event
 field_name: field_event
 entity_type: commerce_product

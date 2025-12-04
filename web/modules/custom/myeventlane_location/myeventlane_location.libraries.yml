@@ -1,0 +1,21 @@
+address_autocomplete:
+  js:
+    js/address-autocomplete.js: {}
+  css:
+    component:
+      css/address-autocomplete.css: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+
+event_map:
+  js:
+    js/event-map.js: {}
+  css:
+    component:
+      css/event-map.css: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+
+

@@ -1,0 +1,38 @@
+/**
+ * @file
+ * Styles for address autocomplete widget.
+ */
+
+.myeventlane-location-address-widget {
+  margin-bottom: 1em;
+}
+
+.myeventlane-location-address-search {
+  width: 100%;
+  padding: 0.5em;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.myeventlane-location-suggestions {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  margin-top: 2px;
+}
+
+.myeventlane-location-suggestion-item:hover {
+  background-color: #f5f5f5;
+}
+
+.myeventlane-location-map-preview {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.myeventlane-location-map-preview img {
+  max-width: 100%;
+  height: auto;
+}
+
+

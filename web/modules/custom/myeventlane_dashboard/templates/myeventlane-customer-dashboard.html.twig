@@ -1,0 +1,132 @@
+{#
+/**
+ * @file
+ * Template for the MyEventLane customer "My Events" dashboard.
+ *
+ * Available variables:
+ * - welcome_message: Personalized welcome message.
+ * - upcoming_events: Array of upcoming event data.
+ * - past_events: Array of past event data.
+ */
+#}
+<div class="mel-dashboard-wrapper mel-dashboard-wrapper--customer">
+
+  <h1 class="mel-dashboard-title">{{ 'My Events'|t }}</h1>
+
+  {# Welcome message #}
+  {% if welcome_message %}
+    <div class="mel-dashboard-welcome">
+      <p>{{ welcome_message }}</p>
+    </div>
+  {% endif %}
+
+  {# Upcoming events #}
+  {% if upcoming_events is not empty %}
+    <section class="mel-dashboard-section" aria-labelledby="upcoming-events-title">
+      <h2 id="upcoming-events-title" class="mel-section-title">{{ 'Upcoming Events'|t }} ({{ upcoming_events|length }})</h2>
+      <div class="mel-events-table">
+        <table class="mel-table">
+          <thead>
+            <tr>
+              <th>{{ 'Event'|t }}</th>
+              <th>{{ 'Date & Time'|t }}</th>
+              <th>{{ 'Type'|t }}</th>
+              <th>{{ 'Actions'|t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for event in upcoming_events %}
+              <tr>
+                <td>
+                  <a href="{{ event.url }}">{{ event.title }}</a>
+                </td>
+                <td>
+                  {% if event.start_date %}
+                    <time>{{ event.start_date }}{% if event.start_time %} at {{ event.start_time }}{% endif %}</time>
+                  {% else %}
+                    <span class="mel-muted">{{ 'Date TBD'|t }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if event.source == 'rsvp' %}
+                    <span class="mel-badge mel-badge--info">{{ 'RSVP'|t }}</span>
+                  {% else %}
+                    <span class="mel-badge mel-badge--success">{{ 'Ticket'|t }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{{ event.url }}" class="mel-btn mel-btn-small mel-btn-secondary">{{ 'View Event'|t }}</a>
+                  {% if event.order_item_id %}
+                    <a href="{{ path('myeventlane_tickets.download_pdf', {'order_item_id': event.order_item_id}) }}" class="mel-btn mel-btn-small">{{ 'View Ticket'|t }}</a>
+                  {% endif %}
+                  {% if event.ticket_code %}
+                    <span class="mel-ticket-code" title="{{ 'Ticket Code'|t }}: {{ event.ticket_code }}">{{ event.ticket_code }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% else %}
+    <section class="mel-dashboard-section">
+      <div class="mel-card mel-card--empty">
+        <p>{{ 'You have no upcoming events.'|t }}</p>
+        <a href="{{ path('<front>') }}" class="mel-btn mel-btn-primary">{{ 'Browse Events'|t }}</a>
+      </div>
+    </section>
+  {% endif %}
+
+  {# Past events (collapsible) #}
+  {% if past_events is not empty %}
+    <section class="mel-dashboard-section" aria-labelledby="past-events-title">
+      <details class="mel-details">
+        <summary class="mel-section-title">{{ 'Past Events'|t }} ({{ past_events|length }})</summary>
+        <div class="mel-events-table">
+          <table class="mel-table">
+            <thead>
+              <tr>
+                <th>{{ 'Event'|t }}</th>
+                <th>{{ 'Date'|t }}</th>
+                <th>{{ 'Type'|t }}</th>
+                <th>{{ 'Actions'|t }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for event in past_events %}
+                <tr>
+                  <td>
+                    <a href="{{ event.url }}">{{ event.title }}</a>
+                  </td>
+                  <td>
+                    {% if event.start_date %}
+                      <time>{{ event.start_date }}</time>
+                    {% else %}
+                      <span class="mel-muted">{{ 'No date'|t }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if event.source == 'rsvp' %}
+                      <span class="mel-badge mel-badge--info">{{ 'RSVP'|t }}</span>
+                    {% else %}
+                      <span class="mel-badge mel-badge--success">{{ 'Ticket'|t }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <a href="{{ event.url }}" class="mel-btn mel-btn-small mel-btn-secondary">{{ 'View Event'|t }}</a>
+                    {% if event.order_item_id %}
+                      <a href="{{ path('myeventlane_tickets.download_pdf', {'order_item_id': event.order_item_id}) }}" class="mel-btn mel-btn-small">{{ 'View Ticket'|t }}</a>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+  {% endif %}
+
+</div>
+

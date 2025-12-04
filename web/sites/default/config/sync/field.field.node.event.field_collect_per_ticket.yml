@@ -5,8 +5,6 @@ dependencies:
   config:
     - field.storage.node.field_collect_per_ticket
     - node.type.event
-_core:
-  default_config_hash: 5wlOq7mtJ99S9ercMp9QXVTLgpJfqPiMC24ezWe36Sg
 id: node.event.field_collect_per_ticket
 field_name: field_collect_per_ticket
 entity_type: node

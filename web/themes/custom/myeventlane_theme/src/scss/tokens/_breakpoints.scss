@@ -8,8 +8,18 @@ $mel-breakpoints: (
   xl: 1280px
 );
 
-@mixin mel-break($size) {
-  @media (min-width: map.get($mel-breakpoints, $size)) {
-    @content;
+@mixin mel-break($size, $direction: min) {
+  $breakpoint: map.get($mel-breakpoints, $size);
+  
+  @if $direction == max {
+    // For max-width, subtract 1px to avoid overlap
+    $max-width: $breakpoint - 1px;
+    @media (max-width: $max-width) {
+      @content;
+    }
+  } @else {
+    @media (min-width: $breakpoint) {
+      @content;
+    }
   }
 }

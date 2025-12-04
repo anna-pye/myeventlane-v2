@@ -80,7 +80,7 @@ final class OrderCompletedSubscriber implements EventSubscriberInterface {
       // Fallback: try to get event from product variation.
       $purchasedEntity = $orderItem->getPurchasedEntity();
       if ($purchasedEntity && $purchasedEntity->hasField('field_event') && !$purchasedEntity->get('field_event')->isEmpty()) {
-        $eventId = $purchasedEntity->get('field_event')->target_id;
+        $eventId = (int) $purchasedEntity->get('field_event')->target_id;
       }
       else {
         $logger->warning('Order item @id has no event reference. Skipping.', [
@@ -90,7 +90,7 @@ final class OrderCompletedSubscriber implements EventSubscriberInterface {
       }
     }
     else {
-      $eventId = $orderItem->get('field_target_event')->target_id;
+      $eventId = (int) $orderItem->get('field_target_event')->target_id;
     }
 
     // Get ticket holders (attendee info) from paragraphs.
@@ -131,10 +131,10 @@ final class OrderCompletedSubscriber implements EventSubscriberInterface {
   private function createAttendeeRecord(object $holder, int $eventId, object $order, object $orderItem, bool $isRsvp, string $variationTitle): void {
     $logger = $this->loggerFactory->get('myeventlane_commerce');
 
-    // Extract attendee data from paragraph.
+    // Extract ticket holder data from paragraph.
     $firstName = $holder->get('field_first_name')->value ?? '';
     $lastName = $holder->get('field_last_name')->value ?? '';
-    $email = $holder->get('field_email')->value ?? '';
+    $holderEmail = $holder->get('field_email')->value ?? '';
     $phone = $holder->hasField('field_phone') ? ($holder->get('field_phone')->value ?? '') : '';
     $fullName = trim($firstName . ' ' . $lastName);
 
@@ -151,8 +151,27 @@ final class OrderCompletedSubscriber implements EventSubscriberInterface {
       }
     }
 
+    // Determine purchaser identity (used for linking to "My Events").
+    $purchaserUid = (int) ($order->getCustomerId() ?? 0);
+    $purchaserEmail = '';
+    if (method_exists($order, 'getEmail')) {
+      $purchaserEmail = (string) ($order->getEmail() ?? '');
+    }
+    elseif ($order->hasField('mail')) {
+      $purchaserEmail = (string) ($order->get('mail')->value ?? '');
+    }
+
+    // Fallbacks: ensure there's always an email stored, even if purchaser
+    // email is missing.
+    $storedEmail = $purchaserEmail ?: $holderEmail;
+
     // Generate unique ticket code.
-    $ticketCode = $this->generateTicketCode($eventId, $order->id(), $orderItem->id());
+    // Cast IDs to int to satisfy strict types and avoid accidental strings.
+    $ticketCode = $this->generateTicketCode(
+      $eventId,
+      (int) $order->id(),
+      (int) $orderItem->id()
+    );
 
     // Create EventAttendee entity.
     try {
@@ -161,9 +180,11 @@ final class OrderCompletedSubscriber implements EventSubscriberInterface {
         ->getStorage('event_attendee')
         ->create([
           'event' => $eventId,
-          'uid' => $order->getCustomerId(),
-          'name' => $fullName,
-          'email' => $email,
+          // Link attendance to purchaser for dashboard lookups.
+          'uid' => $purchaserUid,
+          // Store purchaser email (or holder email as a fallback) so "My Events"
+          // can be resolved from the buyer account.
+          'email' => $storedEmail,
           'phone' => $phone,
           'status' => EventAttendee::STATUS_CONFIRMED,
           'source' => $isRsvp ? EventAttendee::SOURCE_RSVP : EventAttendee::SOURCE_TICKET,
@@ -176,7 +197,7 @@ final class OrderCompletedSubscriber implements EventSubscriberInterface {
 
       $logger->notice('Created attendee record for @name (@email) - Event @event_id', [
         '@name' => $fullName,
-        '@email' => $email,
+        '@email' => $storedEmail,
         '@event_id' => $eventId,
       ]);
 

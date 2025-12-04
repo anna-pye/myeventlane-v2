@@ -1,0 +1,7 @@
+myeventlane_location.settings:
+  title: 'Location settings'
+  description: 'Configure map providers (Google Maps, Apple Maps) and API keys.'
+  parent: system.admin_config
+  route_name: myeventlane_location.settings
+  weight: 10
+

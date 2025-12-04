@@ -32,11 +32,18 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  quantity:
+    type: number
+    weight: 1
+    region: content
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
 hidden:
   adjustments: true
   created: true
   field_target_event: true
-  quantity: true
+  field_ticket_holder: true
   status: true
   total_price: true
   uid: true

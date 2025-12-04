@@ -4,8 +4,6 @@ status: true
 dependencies:
   module:
     - node
-_core:
-  default_config_hash: 9lT5C03cD0oIFEXQba0_P2I6_241A1x0Fifp5fkOdjk
 id: node.field_promoted
 field_name: field_promoted
 entity_type: node

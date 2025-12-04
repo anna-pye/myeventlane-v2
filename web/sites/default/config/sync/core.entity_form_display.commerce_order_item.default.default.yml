@@ -53,6 +53,7 @@ hidden:
   adjustments: true
   created: true
   field_target_event: true
+  field_ticket_holder: true
   status: true
   total_price: true
   uid: true

@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - integer
+id: paragraph.field_ticket_capacity
+field_name: field_ticket_capacity
+entity_type: paragraph
+field_type: integer
+settings:
+  unsigned: true
+module: integer
+locked: false
+cardinality: 1
+translatable: false
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
+

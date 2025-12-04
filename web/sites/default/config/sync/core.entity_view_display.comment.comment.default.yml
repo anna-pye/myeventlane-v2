@@ -22,6 +22,7 @@ content:
     weight: 0
     region: content
   links:
+    third_party_settings: {  }
     weight: 100
     region: content
 hidden: {  }

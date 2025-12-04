@@ -1,9 +1,9 @@
 uuid: 4c988d32-b9f1-4eae-9434-8ae2e32c6780
 langcode: en
 status: true
-dependencies: {  }
-_core:
-  default_config_hash: _p0LTN9Yk53Y4pSVQwm9KB2vQr5pVavLJYR6c0jFE3E
+dependencies:
+  module:
+    - paragraphs
 id: attendee_extra_field
 label: 'Attendee Extra Field'
 icon_uuid: null
