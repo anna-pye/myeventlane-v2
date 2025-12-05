@@ -246,6 +246,8 @@ final class OrderCompletedSubscriber implements EventSubscriberInterface {
    *   The event ID.
    */
   private function generateTicketPdf(object $orderItem, object $holder, string $ticketCode, int $eventId): void {
+    $logger = $this->loggerFactory->get('myeventlane_commerce');
+    
     // Check if myeventlane_tickets.pdf service exists.
     if (!\Drupal::hasService('myeventlane_tickets.pdf')) {
       return;
@@ -255,12 +257,12 @@ final class OrderCompletedSubscriber implements EventSubscriberInterface {
       $pdfService = \Drupal::service('myeventlane_tickets.pdf');
       // Call service to generate PDF (actual implementation in myeventlane_tickets).
       // For now, just log intent.
-      \Drupal::logger('myeventlane_commerce')->notice('Ticket PDF generation called for code @code', [
+      $logger->notice('Ticket PDF generation called for code @code', [
         '@code' => $ticketCode,
       ]);
     }
     catch (\Exception $e) {
-      \Drupal::logger('myeventlane_commerce')->error('Ticket PDF generation failed: @message', [
+      $logger->error('Ticket PDF generation failed: @message', [
         '@message' => $e->getMessage(),
       ]);
     }
@@ -279,6 +281,8 @@ final class OrderCompletedSubscriber implements EventSubscriberInterface {
    *   The event ID.
    */
   private function generateWalletPasses(object $orderItem, object $holder, string $ticketCode, int $eventId): void {
+    $logger = $this->loggerFactory->get('myeventlane_commerce');
+    
     // Check if wallet services exist.
     if (!\Drupal::hasService('myeventlane_wallet.pk_pass') && !\Drupal::hasService('myeventlane_wallet.google_wallet')) {
       return;
@@ -288,7 +292,7 @@ final class OrderCompletedSubscriber implements EventSubscriberInterface {
       // Apple Wallet.
       if (\Drupal::hasService('myeventlane_wallet.pk_pass')) {
         $pkPassService = \Drupal::service('myeventlane_wallet.pk_pass');
-        \Drupal::logger('myeventlane_commerce')->notice('Apple Wallet pass generation called for code @code', [
+        $logger->notice('Apple Wallet pass generation called for code @code', [
           '@code' => $ticketCode,
         ]);
       }
@@ -296,13 +300,13 @@ final class OrderCompletedSubscriber implements EventSubscriberInterface {
       // Google Wallet.
       if (\Drupal::hasService('myeventlane_wallet.google_wallet')) {
         $googleWalletService = \Drupal::service('myeventlane_wallet.google_wallet');
-        \Drupal::logger('myeventlane_commerce')->notice('Google Wallet pass generation called for code @code', [
+        $logger->notice('Google Wallet pass generation called for code @code', [
           '@code' => $ticketCode,
         ]);
       }
     }
     catch (\Exception $e) {
-      \Drupal::logger('myeventlane_commerce')->error('Wallet pass generation failed: @message', [
+      $logger->error('Wallet pass generation failed: @message', [
         '@message' => $e->getMessage(),
       ]);
     }
