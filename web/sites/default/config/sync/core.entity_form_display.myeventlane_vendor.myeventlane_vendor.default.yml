@@ -15,18 +15,11 @@ dependencies:
     - field.field.myeventlane_vendor.myeventlane_vendor.field_website
     - image.style.thumbnail
   module:
-    - field_layout
     - image
-    - layout_discovery
     - link
     - myeventlane_vendor
     - telephone
     - text
-third_party_settings:
-  field_layout:
-    id: layout_onecol
-    settings:
-      label: ''
 id: myeventlane_vendor.myeventlane_vendor.default
 targetEntityType: myeventlane_vendor
 bundle: myeventlane_vendor

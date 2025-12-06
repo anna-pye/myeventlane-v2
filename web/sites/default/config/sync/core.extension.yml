@@ -15,6 +15,7 @@ module:
   commerce: 0
   commerce_cart: 0
   commerce_checkout: 0
+  commerce_log: 0
   commerce_number_pattern: 0
   commerce_order: 0
   commerce_payment: 0
@@ -41,7 +42,6 @@ module:
   entity_reference_revisions: 0
   field: 0
   field_group: 0
-  field_layout: 0
   field_ui: 0
   file: 0
   filter: 0
@@ -51,7 +51,6 @@ module:
   gin_toolbar: 0
   help: 0
   history: 0
-  honeypot: 0
   image: 0
   image_widget_crop: 0
   inline_entity_form: 0

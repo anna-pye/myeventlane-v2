@@ -6,13 +6,6 @@ dependencies:
     - commerce_product.commerce_product_variation_type.default
   module:
     - commerce_price
-    - field_layout
-    - layout_discovery
-third_party_settings:
-  field_layout:
-    id: layout_onecol
-    settings:
-      label: ''
 _core:
   default_config_hash: dDLA40Axom_QFA79EWUpe_bWXWE8I_7MijzPkslbVfA
 id: commerce_product_variation.default.default

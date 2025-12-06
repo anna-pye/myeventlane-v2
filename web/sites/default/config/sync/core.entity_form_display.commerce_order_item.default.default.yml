@@ -5,18 +5,12 @@ dependencies:
   config:
     - commerce_order.commerce_order_item_type.default
     - field.field.commerce_order_item.default.field_target_event
+    - field.field.commerce_order_item.default.field_ticket_holder
   module:
     - commerce_order
-    - field_layout
-    - layout_discovery
   enforced:
     module:
       - commerce_product
-third_party_settings:
-  field_layout:
-    id: layout_onecol
-    settings:
-      label: ''
 _core:
   default_config_hash: OLyelsZyDDqQPIGVz4oz8VpJvddm6C0heZtFpIHjEcI
 id: commerce_order_item.default.default

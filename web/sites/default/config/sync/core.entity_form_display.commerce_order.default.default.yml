@@ -6,13 +6,6 @@ dependencies:
     - commerce_order.commerce_order_type.default
   module:
     - commerce_order
-    - field_layout
-    - layout_discovery
-third_party_settings:
-  field_layout:
-    id: layout_onecol
-    settings:
-      label: ''
 _core:
   default_config_hash: s4FbgSrQc8fUd82E7CcpNFiBfsEvplnm8l5D0F92cjc
 id: commerce_order.default.default

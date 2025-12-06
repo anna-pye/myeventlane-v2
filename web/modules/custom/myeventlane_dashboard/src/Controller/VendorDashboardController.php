@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\myeventlane_dashboard\Controller;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Datetime\TimeInterface;
 use Drupal\Core\Url;
 use Drupal\myeventlane_dashboard\Service\DashboardAccess;
 use Drupal\myeventlane_dashboard\Service\DashboardEventLoader;
@@ -122,12 +122,20 @@ final class VendorDashboardController extends ControllerBase {
     foreach ($events as $event) {
       $startTime = NULL;
 
+      // Get start time from datetime field.
       if ($event->hasField('field_event_start') && !$event->get('field_event_start')->isEmpty()) {
-        try {
-          $startTime = strtotime($event->get('field_event_start')->value);
+        $dateItem = $event->get('field_event_start');
+        if ($dateItem->date) {
+          $startTime = $dateItem->date->getTimestamp();
         }
-        catch (\Exception) {
-          // Ignore date parsing errors.
+        // Fallback to value parsing if date object not available.
+        elseif (!empty($dateItem->value)) {
+          try {
+            $startTime = strtotime($dateItem->value);
+          }
+          catch (\Exception) {
+            // Ignore date parsing errors.
+          }
         }
       }
 
@@ -146,6 +154,8 @@ final class VendorDashboardController extends ControllerBase {
         'event_mode' => $stats['mode'],
       ];
 
+      // Categorize events: upcoming if start time is in the future, otherwise past.
+      // Events without dates go to past events.
       if ($startTime && $startTime > $now) {
         $upcomingEvents[] = $eventData;
       }

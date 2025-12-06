@@ -8,16 +8,9 @@ dependencies:
     - profile.type.customer
   module:
     - address
-    - field_layout
-    - layout_discovery
   enforced:
     module:
       - commerce_order
-third_party_settings:
-  field_layout:
-    id: layout_onecol
-    settings:
-      label: ''
 _core:
   default_config_hash: 3LyHGK7R4HxqejbxONet1S9j9ekqLJuFpwT-MNJygvo
 id: profile.customer.default

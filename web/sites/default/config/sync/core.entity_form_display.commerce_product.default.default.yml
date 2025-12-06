@@ -8,15 +8,8 @@ dependencies:
     - field.field.commerce_product.default.field_event
   module:
     - commerce
-    - field_layout
-    - layout_discovery
     - path
     - text
-third_party_settings:
-  field_layout:
-    id: layout_onecol
-    settings:
-      label: ''
 _core:
   default_config_hash: bVqhDE0CBvUi4RPHqKu4sBhUOUwOTgcHVhn5PkfngLU
 id: commerce_product.default.default

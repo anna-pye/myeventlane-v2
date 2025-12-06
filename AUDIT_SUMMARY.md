@@ -183,3 +183,4 @@ ddev drush cim -y
 **Auditor:** MyEventLane Studios – Full Audit Mode  
 **Status:** Critical fixes applied, remaining issues documented
 
+

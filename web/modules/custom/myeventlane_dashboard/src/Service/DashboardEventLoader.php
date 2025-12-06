@@ -59,7 +59,7 @@ class DashboardEventLoader {
       $storage = $this->entityTypeManager->getStorage('node');
 
       $query = $storage->getQuery()
-        ->accessCheck(TRUE)
+        ->accessCheck($admin)
         ->condition('type', 'event')
         ->condition('status', NodeInterface::PUBLISHED)
         ->sort('created', 'DESC')
@@ -96,7 +96,7 @@ class DashboardEventLoader {
       $query = $this->entityTypeManager
         ->getStorage('node')
         ->getQuery()
-        ->accessCheck(TRUE)
+        ->accessCheck($admin)
         ->condition('type', 'event')
         ->condition('status', NodeInterface::PUBLISHED);
 
