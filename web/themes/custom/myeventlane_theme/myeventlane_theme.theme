@@ -463,7 +463,7 @@ function myeventlane_theme_form_alter(array &$form, \Drupal\Core\Form\FormStateI
       if (isset($form['payment_information']['stripe_payment_element'])) {
         $has_payment_element = TRUE;
       }
-      // Check if old Card Element is being used (legacy method).
+    // Check if old Card Element is being used (legacy method).
       // The stripe-form class can be on payment_information or nested in payment_details.
       elseif (isset($form['payment_information']['add_payment_method']['payment_details'])) {
         $payment_details = &$form['payment_information']['add_payment_method']['payment_details'];

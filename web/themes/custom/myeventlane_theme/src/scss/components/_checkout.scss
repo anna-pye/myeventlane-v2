@@ -397,6 +397,8 @@
   box-sizing: border-box !important;
   opacity: 1 !important;
   visibility: visible !important;
+  position: relative !important;
+  z-index: 1 !important;
   
   // Ensure Stripe iframes inside are visible
   iframe {
@@ -407,6 +409,46 @@
     opacity: 1 !important;
     visibility: visible !important;
     border: none !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+}
+
+// Ensure form errors don't cover payment input fields
+.commerce-payment-form__payment-details,
+.commerce-payment-form__payment-method,
+.payment_information {
+  // Error messages should appear below fields, not covering them
+  .form-item--error-message {
+    position: relative !important;
+    z-index: 0 !important;
+    margin-top: spacing.mel-space(2) !important;
+    margin-bottom: spacing.mel-space(2) !important;
+    display: block !important;
+    // Don't position errors absolutely over input fields
+    position: static !important;
+  }
+  
+  // Ensure input fields are visible and above error messages
+  .form-text,
+  #card-number-element,
+  #expiration-element,
+  #security-code-element,
+  [id*="stripe-payment-element"],
+  [id*="card-number"],
+  [id*="card-expiry"],
+  [id*="card-cvc"] {
+    position: relative !important;
+    z-index: 1 !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  // Hide error messages that are positioned over input fields
+  .form-item--error-message[style*="position: absolute"],
+  .form-item--error-message[style*="position:absolute"] {
+    display: none !important;
   }
 }
 

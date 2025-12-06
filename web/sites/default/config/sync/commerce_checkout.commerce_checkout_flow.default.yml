@@ -14,8 +14,8 @@ label: Default
 id: default
 plugin: multistep_default
 configuration:
-  display_checkout_progress: true
-  display_checkout_progress_breadcrumb_links: true
+  display_checkout_progress: false
+  display_checkout_progress_breadcrumb_links: false
   display_sidebar_checkout_complete: true
   guest_order_assign: false
   guest_new_account: true
@@ -42,20 +42,28 @@ configuration:
       weight: 2
       wrapper_element: fieldset
       always_display: true
-    payment_information:
+    ticket_holder_paragraph:
       display_label: null
       step: order_information
       weight: 3
+      wrapper_element: container
+    myeventlane_attendee_info_per_ticket:
+      display_label: null
+      step: order_information
+      weight: 4
+      wrapper_element: container
+    payment_information:
+      display_label: null
+      step: order_information
+      weight: 5
       wrapper_element: fieldset
       always_display: true
       require_payment_method: false
     review:
-      display_label: null
       step: review
       weight: 6
       wrapper_element: null
     stripe_review:
-      display_label: null
       step: review
       weight: 7
       wrapper_element: container
@@ -68,16 +76,6 @@ configuration:
       weight: 8
       wrapper_element: container
       capture: true
-    myeventlane_attendee_info_per_ticket:
-      display_label: null
-      step: order_information
-      weight: 5
-      wrapper_element: container
-    ticket_holder_paragraph:
-      display_label: null
-      step: order_information
-      weight: 4
-      wrapper_element: container
     completion_message:
       display_label: null
       step: complete

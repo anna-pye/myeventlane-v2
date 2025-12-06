@@ -271,7 +271,20 @@ class PaymentInformation extends PaymentCheckoutPaneBase {
     // Check if the billing profile form should be rendered for the payment
     // gateway to collect billing information.
     elseif ($payment_gateway_plugin->collectsBillingInformation()) {
-      $pane_form = $this->buildBillingProfileForm($pane_form, $form_state);
+      // For Payment Element gateways, the actual payment form appears in stripe_review pane.
+      // But we still show a message here to indicate the gateway is selected.
+      if ($payment_gateway_plugin instanceof \Drupal\commerce_stripe\Plugin\Commerce\PaymentGateway\StripePaymentElementInterface) {
+        // Payment Element form will appear in stripe_review pane on review step
+        $pane_form['payment_element_notice'] = [
+          '#type' => 'markup',
+          '#markup' => '<div class="payment-element-notice" style="padding: 1rem; background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; margin: 1rem 0;"><p><strong>' . $this->t('Stripe Payment Element selected') . '</strong></p><p>' . $this->t('Payment details will be collected on the review step. Please proceed to continue.') . '</p></div>',
+          '#weight' => 5,
+        ];
+      }
+      else {
+        // For other gateways that collect billing info, show the billing profile form
+        $pane_form = $this->buildBillingProfileForm($pane_form, $form_state);
+      }
     }
 
     return $pane_form;
@@ -350,6 +363,11 @@ class PaymentInformation extends PaymentCheckoutPaneBase {
       '#weight' => 10,
     ];
     $pane_form['billing_information'] = $inline_form->buildInlineForm($pane_form['billing_information'], $form_state);
+    
+    // DEBUG: Log that billing_information element was added
+    \Drupal::logger('payment_info_debug')->notice('billing_information element added to pane_form. Keys after: @keys', [
+      '@keys' => implode(', ', array_keys($pane_form)),
+    ]);
 
     return $pane_form;
   }
@@ -431,6 +449,18 @@ class PaymentInformation extends PaymentCheckoutPaneBase {
     $payment_gateway_plugin = $payment_gateway->getPlugin();
     if ($payment_gateway_plugin instanceof SupportsCreatingPaymentMethodsInterface) {
       if (!empty($selected_option->getPaymentMethodTypeId())) {
+        // Check if add_payment_method form element exists before accessing it
+        // Must check parent key first to avoid "Undefined array key" warnings
+        if (!isset($pane_form['add_payment_method'])) {
+          // Form element doesn't exist, skip payment method creation
+          // This can happen for offsite gateways like Payment Element that don't
+          // actually create payment methods in the payment_information pane
+          return;
+        }
+        if (!isset($pane_form['add_payment_method']['#inline_form'])) {
+          // Inline form doesn't exist, skip payment method creation
+          return;
+        }
         /** @var \Drupal\commerce\Plugin\Commerce\InlineForm\EntityInlineFormInterface $inline_form */
         $inline_form = $pane_form['add_payment_method']['#inline_form'];
         // The payment method was just created.

@@ -40,6 +40,18 @@
         </section>
       {% endif %}
     {% endfor %}
+    
+    {# Display form errors at top level, not inline with fields #}
+    {% if form['#errors'] %}
+      <div class="messages messages--error" role="alert">
+        <h2 class="visually-hidden">{{ 'Error message'|t }}</h2>
+        <ul>
+          {% for error in form['#errors'] %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
 
     {# Actions #}
     <div class="mel-checkout-actions">
@@ -61,8 +73,236 @@
   </aside>
 </div>
 
-
-
-
-
-
+{# CRITICAL: Ensure Stripe.js loads and initializes payment fields #}
+<script>
+(function() {
+  'use strict';
+  
+  console.log('🔍 Stripe Loader: Starting on checkout page');
+  console.log('Current URL:', window.location.href);
+  
+  function checkAndInit() {
+    // Check 1: Stripe.js must be loaded
+    if (typeof window.Stripe === 'undefined') {
+      console.log('⏳ Waiting for Stripe.js...');
+      return false;
+    }
+    console.log('✅ Stripe.js is loaded');
+    
+    // Check 2: Drupal must be ready
+    if (typeof Drupal === 'undefined' || !Drupal.behaviors) {
+      console.log('⏳ Waiting for Drupal...');
+      return false;
+    }
+    console.log('✅ Drupal is ready');
+    
+    // Check 3: drupalSettings must be available
+    if (typeof drupalSettings === 'undefined') {
+      console.log('⏳ Waiting for drupalSettings...');
+      return false;
+    }
+    console.log('✅ drupalSettings is available');
+    
+    // Check 4: Commerce Stripe settings must exist
+    var hasPaymentElement = drupalSettings.commerceStripePaymentElement && 
+                            drupalSettings.commerceStripePaymentElement.publishableKey;
+    var hasForm = drupalSettings.commerceStripe && 
+                  drupalSettings.commerceStripe.publishableKey;
+    
+    if (!hasPaymentElement && !hasForm) {
+      console.log('⏳ Waiting for Commerce Stripe settings...');
+      console.log('drupalSettings.commerceStripePaymentElement:', drupalSettings.commerceStripePaymentElement);
+      console.log('drupalSettings.commerceStripe:', drupalSettings.commerceStripe);
+      console.log('All drupalSettings keys:', Object.keys(drupalSettings));
+      return false;
+    }
+    console.log('✅ Commerce Stripe settings found');
+    if (hasPaymentElement) {
+      console.log('  - Payment Element mode');
+      console.log('  - Element ID:', drupalSettings.commerceStripePaymentElement.elementId);
+      console.log('  - Publishable Key:', drupalSettings.commerceStripePaymentElement.publishableKey ? 'SET' : 'MISSING');
+      console.log('  - Client Secret:', drupalSettings.commerceStripePaymentElement.clientSecret ? 'SET' : 'MISSING');
+    }
+    if (hasForm) {
+      console.log('  - Form mode (Card Element)');
+    }
+    
+    // All checks passed - initialize
+    initPaymentFields();
+    return true;
+  }
+  
+  function initPaymentFields() {
+    console.log('🔄 Initializing payment fields...');
+    
+    // Wait a moment for DOM to be fully ready
+    setTimeout(function() {
+      console.log('Running Commerce Stripe behaviors...');
+      
+      // Check if payment element container exists (Payment Element mode)
+      if (drupalSettings.commerceStripePaymentElement) {
+        var elementId = drupalSettings.commerceStripePaymentElement.elementId;
+        var container = document.getElementById(elementId);
+        console.log('Payment Element container (' + elementId + '):', container ? 'FOUND ✅' : 'MISSING ❌');
+        
+        if (container) {
+          console.log('Container HTML:', container.outerHTML.substring(0, 200));
+          console.log('Running commerceStripePaymentElement behavior');
+          Drupal.behaviors.commerceStripePaymentElement.attach(document);
+          
+          // Also check after a delay if element mounted
+          setTimeout(function() {
+            var iframe = container.querySelector('iframe');
+            console.log('Payment Element iframe:', iframe ? 'MOUNTED ✅' : 'NOT MOUNTED ❌');
+            if (!iframe) {
+              console.warn('⚠️ Payment Element not mounted - re-running behavior');
+              Drupal.behaviors.commerceStripePaymentElement.attach(document);
+            }
+          }, 1000);
+        } else {
+          console.error('❌ Payment Element container not found: #' + elementId);
+          console.log('Available elements with "stripe" or "payment" in ID:');
+          var allElements = document.querySelectorAll('[id*="stripe"], [id*="payment"]');
+          allElements.forEach(function(el) {
+            console.log('  - #' + el.id);
+          });
+        }
+      }
+      
+      // Check for Card Element form (stripe-form class)
+      if (drupalSettings.commerceStripe) {
+        console.log('Running commerceStripeForm behavior');
+        console.log('  - Publishable Key:', drupalSettings.commerceStripe.publishableKey ? 'SET ✅' : 'MISSING ❌');
+        console.log('  - Client Secret:', drupalSettings.commerceStripe.clientSecret ? 'SET' : 'NULL');
+        
+        // Check if .stripe-form exists
+        var stripeForm = document.querySelector('.stripe-form');
+        console.log('  - .stripe-form element:', stripeForm ? 'FOUND ✅' : 'MISSING ❌');
+        
+        // Check if mount points exist
+        var cardNumberEl = document.getElementById('card-number-element');
+        var expirationEl = document.getElementById('expiration-element');
+        var securityCodeEl = document.getElementById('security-code-element');
+        console.log('  - #card-number-element:', cardNumberEl ? 'FOUND ✅' : 'MISSING ❌');
+        console.log('  - #expiration-element:', expirationEl ? 'FOUND ✅' : 'MISSING ❌');
+        console.log('  - #security-code-element:', securityCodeEl ? 'FOUND ✅' : 'MISSING ❌');
+        
+        if (stripeForm && cardNumberEl && expirationEl && securityCodeEl) {
+          // Check if publishable key is available
+          if (!drupalSettings.commerceStripe.publishableKey) {
+            console.error('❌ drupalSettings.commerceStripe.publishableKey is missing!');
+            console.log('Full drupalSettings.commerceStripe:', drupalSettings.commerceStripe);
+            return;
+          }
+          
+          console.log('✅ All Card Element mount points found - attaching behavior');
+          
+          // Remove once() marker if present to force re-attachment
+          if (stripeForm.classList.contains('js-once-processed')) {
+            console.log('  - Removing js-once-processed class to force re-attach');
+            stripeForm.classList.remove('js-once-processed');
+            // Also remove data-once attribute if present
+            if (stripeForm.hasAttribute('data-once')) {
+              stripeForm.removeAttribute('data-once');
+            }
+          }
+          
+          // Attach the behavior
+          Drupal.behaviors.commerceStripeForm.attach(document);
+          
+          // Check after a delay if elements mounted
+          setTimeout(function() {
+            var cardNumberIframe = cardNumberEl.querySelector('iframe');
+            var expirationIframe = expirationEl.querySelector('iframe');
+            var securityCodeIframe = securityCodeEl.querySelector('iframe');
+            console.log('Card Element iframes:');
+            console.log('  - Card Number:', cardNumberIframe ? 'MOUNTED ✅' : 'NOT MOUNTED ❌');
+            console.log('  - Expiration:', expirationIframe ? 'MOUNTED ✅' : 'NOT MOUNTED ❌');
+            console.log('  - Security Code:', securityCodeIframe ? 'MOUNTED ✅' : 'NOT MOUNTED ❌');
+            
+            if (!cardNumberIframe || !expirationIframe || !securityCodeIframe) {
+              console.warn('⚠️ Some Card Elements not mounted - attempting manual mount');
+              
+              // Try manual mount if Stripe is available
+              if (typeof window.Stripe !== 'undefined' && drupalSettings.commerceStripe.publishableKey) {
+                console.log('  - Attempting manual Stripe Elements mount...');
+                try {
+                  var stripe = window.Stripe(drupalSettings.commerceStripe.publishableKey);
+                  var elements = stripe.elements();
+                  
+                  // Unmount any existing elements first
+                  if (Drupal.behaviors.commerceStripeForm.cardNumber) {
+                    try { Drupal.behaviors.commerceStripeForm.cardNumber.unmount(); } catch(e) {}
+                  }
+                  if (Drupal.behaviors.commerceStripeForm.cardExpiry) {
+                    try { Drupal.behaviors.commerceStripeForm.cardExpiry.unmount(); } catch(e) {}
+                  }
+                  if (Drupal.behaviors.commerceStripeForm.cardCvc) {
+                    try { Drupal.behaviors.commerceStripeForm.cardCvc.unmount(); } catch(e) {}
+                  }
+                  
+                  // Create and mount elements
+                  var classes = { base: 'form-text', invalid: 'error' };
+                  Drupal.behaviors.commerceStripeForm.cardNumber = elements.create('cardNumber', {
+                    showIcon: drupalSettings.commerceStripe.enable_credit_card_logos || false,
+                    classes: classes,
+                    placeholder: '',
+                  });
+                  Drupal.behaviors.commerceStripeForm.cardExpiry = elements.create('cardExpiry', { classes: classes });
+                  Drupal.behaviors.commerceStripeForm.cardCvc = elements.create('cardCvc', { classes: classes });
+                  
+                  Drupal.behaviors.commerceStripeForm.cardNumber.mount('#card-number-element');
+                  Drupal.behaviors.commerceStripeForm.cardExpiry.mount('#expiration-element');
+                  Drupal.behaviors.commerceStripeForm.cardCvc.mount('#security-code-element');
+                  
+                  console.log('✅ Manual mount successful!');
+                } catch (e) {
+                  console.error('❌ Manual mount failed:', e);
+                }
+              }
+            }
+          }, 1000);
+        } else {
+          console.warn('⚠️ Missing required elements for Card Element form');
+        }
+      } else {
+        console.warn('⚠️ drupalSettings.commerceStripe not found');
+        console.log('Available drupalSettings keys:', Object.keys(drupalSettings));
+      }
+    }, 500);
+  }
+  
+  // Poll until all conditions are met
+  var attempts = 0;
+  var maxAttempts = 200; // 20 seconds - give more time for drupalSettings
+  
+  var checkInterval = setInterval(function() {
+    attempts++;
+    if (checkAndInit()) {
+      clearInterval(checkInterval);
+      console.log('✅ Initialization complete after ' + attempts + ' attempts');
+    } else if (attempts >= maxAttempts) {
+      clearInterval(checkInterval);
+      console.error('❌ Failed to initialize after ' + maxAttempts + ' attempts');
+      console.error('Final state:');
+      console.error('  window.Stripe:', typeof window.Stripe);
+      console.error('  Drupal:', typeof Drupal);
+      console.error('  drupalSettings:', typeof drupalSettings);
+      if (typeof drupalSettings !== 'undefined') {
+        console.error('  All drupalSettings keys:', Object.keys(drupalSettings));
+      }
+    }
+  }, 100);
+  
+  // Also run immediately
+  checkAndInit();
+  
+  // Also run after Drupal behaviors (in case they attach settings)
+  if (typeof Drupal !== 'undefined' && Drupal.behaviors) {
+    setTimeout(function() {
+      console.log('🔄 Re-checking after Drupal behaviors...');
+      checkAndInit();
+    }, 1000);
+  }
+})();
+</script>
