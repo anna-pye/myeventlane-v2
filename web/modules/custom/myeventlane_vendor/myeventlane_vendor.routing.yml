@@ -1,49 +1,63 @@
 # Admin vendor list.
-myeventlane_vendor.collection:
-  path: '/admin/content/organisers'
+entity.myeventlane_vendor.collection:
+  path: '/admin/structure/myeventlane/vendor'
   defaults:
     _entity_list: 'myeventlane_vendor'
-    _title: 'Organisers'
+    _title: 'Vendors'
   requirements:
     _permission: 'administer myeventlane vendor'
   options:
     _admin_route: TRUE
 
 # Add vendor form.
-myeventlane_vendor.add:
-  path: '/admin/content/organisers/add'
+entity.myeventlane_vendor.add_form:
+  path: '/admin/structure/myeventlane/vendor/add'
   defaults:
     _entity_form: 'myeventlane_vendor.add'
-    _title: 'Add organiser'
+    _title: 'Add vendor'
   requirements:
     _permission: 'administer myeventlane vendor'
   options:
     _admin_route: TRUE
 
 # Edit vendor form.
-myeventlane_vendor.edit:
-  path: '/admin/content/organisers/{myeventlane_vendor}/edit'
+entity.myeventlane_vendor.edit_form:
+  path: '/admin/structure/myeventlane/vendor/{myeventlane_vendor}/edit'
   defaults:
     _entity_form: 'myeventlane_vendor.edit'
+    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::editTitle'
   requirements:
     _permission: 'administer myeventlane vendor'
   options:
     _admin_route: TRUE
 
 # Delete vendor form.
-myeventlane_vendor.delete:
-  path: '/admin/content/organisers/{myeventlane_vendor}/delete'
+entity.myeventlane_vendor.delete_form:
+  path: '/admin/structure/myeventlane/vendor/{myeventlane_vendor}/delete'
   defaults:
     _entity_form: 'myeventlane_vendor.delete'
+    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::deleteTitle'
   requirements:
     _permission: 'administer myeventlane vendor'
   options:
     _admin_route: TRUE
 
+# Vendor canonical (public) route.
+entity.myeventlane_vendor.canonical:
+  path: '/vendor/{myeventlane_vendor}'
+  defaults:
+    _entity_view: 'myeventlane_vendor.full'
+    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title'
+  requirements:
+    _entity_access: 'myeventlane_vendor.view'
+  options:
+    parameters:
+      myeventlane_vendor:
+        type: entity:myeventlane_vendor
+
 # Vendor settings page (Field UI base route).
-# Field UI will add /fields, /form-display, /display as child routes.
 myeventlane_vendor.settings:
-  path: '/admin/structure/myeventlane-vendor/settings'
+  path: '/admin/structure/myeventlane/vendor/settings'
   defaults:
     _form: '\Drupal\myeventlane_vendor\Form\VendorSettingsForm'
     _title: 'Vendor settings'
@@ -51,3 +65,80 @@ myeventlane_vendor.settings:
     _permission: 'administer myeventlane vendor'
   options:
     _admin_route: TRUE
+
+# Public vendor directory listing.
+myeventlane_vendor.public_list:
+  path: '/vendor'
+  defaults:
+    _controller: '\Drupal\myeventlane_vendor\Controller\VendorPublicController::list'
+    _title: 'Organisers'
+  requirements:
+    _permission: 'access content'
+  options:
+    _maintenance_access: FALSE
+
+# Alias for /organisers (points to same controller).
+myeventlane_vendor.organisers:
+  path: '/organisers'
+  defaults:
+    _controller: '\Drupal\myeventlane_vendor\Controller\VendorPublicController::list'
+    _title: 'Organisers'
+  requirements:
+    _permission: 'access content'
+  options:
+    _maintenance_access: FALSE
+
+# Stripe Connect onboarding.
+myeventlane_vendor.stripe_connect:
+  path: '/vendor/stripe/connect'
+  defaults:
+    _controller: '\Drupal\myeventlane_vendor\Controller\StripeConnectController::connect'
+    _title: 'Connect Stripe'
+  requirements:
+    _permission: 'access vendor dashboard'
+  options:
+    _maintenance_access: FALSE
+
+# Stripe Connect callback.
+myeventlane_vendor.stripe_callback:
+  path: '/stripe/connect/callback'
+  defaults:
+    _controller: '\Drupal\myeventlane_vendor\Controller\StripeConnectController::callback'
+    _title: 'Stripe Connect Callback'
+  requirements:
+    _permission: 'access vendor dashboard'
+  options:
+    _maintenance_access: FALSE
+
+# Stripe dashboard login link.
+myeventlane_vendor.stripe_manage:
+  path: '/vendor/stripe/manage'
+  defaults:
+    _controller: '\Drupal\myeventlane_vendor\Controller\StripeConnectController::manage'
+    _title: 'Manage Stripe'
+  requirements:
+    _permission: 'access vendor dashboard'
+  options:
+    _maintenance_access: FALSE
+
+# Create Event gateway - enforces vendor onboarding.
+myeventlane_vendor.create_event_gateway:
+  path: '/create-event'
+  defaults:
+    _controller: '\Drupal\myeventlane_vendor\Controller\CreateEventGatewayController::gateway'
+    _title: 'Create Event'
+  requirements:
+    _permission: 'access content'
+  options:
+    _maintenance_access: FALSE
+
+# Vendor onboarding route.
+myeventlane_vendor.onboard:
+  path: '/vendor/onboard'
+  defaults:
+    _controller: '\Drupal\myeventlane_vendor\Controller\VendorOnboardController::onboard'
+    _title: 'Create your organiser profile'
+  requirements:
+    _permission: 'access content'
+  options:
+    _maintenance_access: FALSE

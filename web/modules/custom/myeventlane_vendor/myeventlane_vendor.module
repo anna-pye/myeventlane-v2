@@ -5,6 +5,11 @@
  * Primary module file for MyEventLane Vendor v3.
  */
 
+declare(strict_types=1);
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\myeventlane_vendor\Entity\Vendor;
+
 /**
  * Implements hook_theme().
  */
@@ -19,4 +24,79 @@ function myeventlane_vendor_theme($existing, $type, $theme, $path) {
       'template' => 'myeventlane-vendor-detail',
     ],
   ];
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function myeventlane_vendor_entity_insert(EntityInterface $entity): void {
+  if ($entity instanceof Vendor) {
+    \Drupal::service('myeventlane_vendor.vendor_store_subscriber')->onVendorInsertFromHook($entity);
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function myeventlane_vendor_form_alter(array &$form, \Drupal\Core\Form\FormStateInterface $form_state, string $form_id): void {
+  // Pre-fill vendor field on event creation form if vendor is provided in query.
+  if ($form_id === 'node_event_form' || $form_id === 'node_event_edit_form') {
+    $request = \Drupal::request();
+    $vendor_id = $request->query->get('vendor');
+
+    if ($vendor_id && isset($form['field_event_vendor'])) {
+      $current_user = \Drupal::currentUser();
+      
+      // Only pre-fill if the user is associated with this vendor.
+      $vendor_ids = _myeventlane_vendor_get_user_vendors($current_user->id());
+      
+      if (in_array((int) $vendor_id, $vendor_ids, TRUE)) {
+        // Set default value if the field is empty (new event).
+        $entity = $form_state->getFormObject()->getEntity();
+        if ($entity->isNew() && $entity->get('field_event_vendor')->isEmpty()) {
+          $vendor = \Drupal::entityTypeManager()
+            ->getStorage('myeventlane_vendor')
+            ->load($vendor_id);
+          if ($vendor) {
+            // Set the vendor on the entity.
+            $entity->set('field_event_vendor', $vendor);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Helper function to get vendor IDs associated with a user.
+ *
+ * @param int $uid
+ *   The user ID.
+ *
+ * @return array
+ *   Array of vendor IDs (as integers).
+ */
+function _myeventlane_vendor_get_user_vendors(int $uid): array {
+  $storage = \Drupal::entityTypeManager()->getStorage('myeventlane_vendor');
+  
+  // Check vendors where user is the owner (uid field).
+  $owner_ids = $storage->getQuery()
+    ->accessCheck(TRUE)
+    ->condition('uid', $uid)
+    ->execute();
+
+  // Check vendors where user is in field_vendor_users.
+  $users_ids = $storage->getQuery()
+    ->accessCheck(TRUE)
+    ->condition('field_vendor_users', $uid)
+    ->execute();
+
+  // Merge and return unique IDs, converting to integers.
+  $all_ids = array_merge(
+    $owner_ids ?: [],
+    $users_ids ?: []
+  );
+  
+  // Convert string keys to integer values and ensure uniqueness.
+  return array_values(array_unique(array_map('intval', $all_ids)));
 }
