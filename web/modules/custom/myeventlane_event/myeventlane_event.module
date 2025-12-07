@@ -94,25 +94,111 @@ function myeventlane_event_node_view(array &$build, EntityInterface $entity, Ent
  * Enhances the Event node form with booking configuration UX for vendors.
  */
 function myeventlane_event_form_node_event_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
-  _myeventlane_event_alter_event_form($form, $form_state);
+  /** @var \Drupal\myeventlane_event\Form\EventFormAlter $form_alter */
+  $form_alter = \Drupal::service('myeventlane_event.form_alter');
+  $form_alter->alterForm($form, $form_state);
+  
+  // Preserve existing submit handlers and validation
+  _myeventlane_event_preserve_existing_handlers($form, $form_state);
 }
 
 /**
  * Implements hook_form_FORM_ID_alter() for node_event_edit_form.
  */
 function myeventlane_event_form_node_event_edit_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
-  _myeventlane_event_alter_event_form($form, $form_state);
+  /** @var \Drupal\myeventlane_event\Form\EventFormAlter $form_alter */
+  $form_alter = \Drupal::service('myeventlane_event.form_alter');
+  $form_alter->alterForm($form, $form_state);
+  
+  // Preserve existing submit handlers and validation
+  _myeventlane_event_preserve_existing_handlers($form, $form_state);
 }
 
 /**
- * Alters the event node form to improve vendor UX.
+ * Preserves existing submit handlers and validation from legacy form alter.
  *
  * @param array $form
  *   The form array.
  * @param \Drupal\Core\Form\FormStateInterface $form_state
  *   The form state.
  */
+function _myeventlane_event_preserve_existing_handlers(array &$form, FormStateInterface $form_state): void {
+  // Add custom submit handler to create RSVP product before save
+  if (isset($form['actions']['submit'])) {
+    array_unshift($form['actions']['submit']['#submit'], '_myeventlane_event_form_submit');
+    // Add submit handler to sync ticket types after save.
+    $form['actions']['submit']['#submit'][] = '_myeventlane_event_sync_ticket_types';
+  }
+
+  // Add a status message area for existing events.
+  $node = $form_state->getFormObject()->getEntity();
+  if ($node instanceof NodeInterface && !$node->isNew()) {
+    /** @var \Drupal\myeventlane_event\Service\EventModeManager $modeManager */
+    $modeManager = \Drupal::service('myeventlane_event.mode_manager');
+    $status = $modeManager->getConfigurationStatus($node);
+
+    $form['booking_status'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['mel-booking-status']],
+      '#weight' => -10,
+    ];
+
+    $form['booking_status']['info'] = [
+      '#theme' => 'status_messages',
+      '#message_list' => _myeventlane_event_build_status_messages($status),
+      '#status_headings' => [
+        'status' => t('Configuration Status'),
+        'warning' => t('Action Needed'),
+      ],
+    ];
+  }
+
+  // Add custom validation.
+  $form['#validate'][] = '_myeventlane_event_form_validate';
+}
+
+/**
+ * Legacy form alter function - now replaced by EventFormAlter class.
+ *
+ * @param array $form
+ *   The form array.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state.
+ *
+ * @deprecated Use EventFormAlter service instead.
+ */
 function _myeventlane_event_alter_event_form(array &$form, FormStateInterface $form_state): void {
+  // Create vendor and store fieldset.
+  if (isset($form['field_event_vendor']) || isset($form['field_event_store'])) {
+    $form['vendor_store'] = [
+      '#type' => 'fieldset',
+      '#title' => t('Vendor and store'),
+      '#weight' => -5,
+      '#collapsible' => FALSE,
+      '#group' => 'content',
+    ];
+
+    if (isset($form['field_event_vendor'])) {
+      $form['field_event_vendor']['#group'] = 'vendor_store';
+      $form['field_event_vendor']['widget'][0]['target_id']['#description'] = t('Select the vendor/organiser for this event. The store will be automatically set to match the vendor\'s store.');
+      
+      // Add AJAX callback to auto-populate store when vendor changes.
+      $form['field_event_vendor']['widget'][0]['target_id']['#ajax'] = [
+        'callback' => '_myeventlane_event_ajax_update_store',
+        'event' => 'change',
+        'wrapper' => 'event-store-wrapper',
+        'progress' => ['type' => 'throbber'],
+      ];
+    }
+
+    if (isset($form['field_event_store'])) {
+      $form['field_event_store']['#group'] = 'vendor_store';
+      $form['field_event_store']['widget'][0]['target_id']['#description'] = t('The Commerce store for this event (automatically set from vendor).');
+      $form['field_event_store']['#prefix'] = '<div id="event-store-wrapper">';
+      $form['field_event_store']['#suffix'] = '</div>';
+    }
+  }
+
   // Create a booking configuration fieldset in the main content area.
   $form['booking_configuration'] = [
     '#type' => 'details',
@@ -217,6 +303,9 @@ function _myeventlane_event_alter_event_form(array &$form, FormStateInterface $f
 
   // Show ticket types only for paid and both event types.
   if (isset($form['field_ticket_types'])) {
+    // Make ticket types not required
+    $form['field_ticket_types']['#required'] = FALSE;
+    
     $form['field_ticket_types']['#states'] = [
       'visible' => [
         'or' => [
@@ -225,6 +314,11 @@ function _myeventlane_event_alter_event_form(array &$form, FormStateInterface $f
         ],
       ],
     ];
+  }
+  
+  // Make attendee questions not required (paragraph field)
+  if (isset($form['field_attendee_questions'])) {
+    $form['field_attendee_questions']['#required'] = FALSE;
   }
   
   // Add custom submit handler to create RSVP product before save
@@ -258,6 +352,39 @@ function _myeventlane_event_alter_event_form(array &$form, FormStateInterface $f
 
   // Add custom validation.
   $form['#validate'][] = '_myeventlane_event_form_validate';
+}
+
+/**
+ * AJAX callback to update store field when vendor changes.
+ *
+ * @param array $form
+ *   The form array.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state.
+ *
+ * @return array
+ *   The store field render array.
+ */
+function _myeventlane_event_ajax_update_store(array &$form, FormStateInterface $form_state): array {
+  $vendor_id = $form_state->getValue(['field_event_vendor', 0, 'target_id']);
+  $store_id = NULL;
+
+  if ($vendor_id) {
+    $vendor_storage = \Drupal::entityTypeManager()->getStorage('myeventlane_vendor');
+    $vendor = $vendor_storage->load($vendor_id);
+
+    if ($vendor && $vendor->hasField('field_vendor_store') && !$vendor->get('field_vendor_store')->isEmpty()) {
+      $store = $vendor->get('field_vendor_store')->entity;
+      if ($store) {
+        $store_id = $store->id();
+        $form_state->setValue(['field_event_store', 0, 'target_id'], $store_id);
+      }
+    }
+  }
+
+  // Rebuild the form to show updated store value.
+  $form_state->setRebuild();
+  return $form['vendor_store']['field_event_store'];
 }
 
 /**
@@ -491,10 +618,49 @@ function myeventlane_event_preprocess_node(array &$variables): void {
  * Implements hook_ENTITY_TYPE_presave() for node entities.
  *
  * Syncs Commerce products for RSVP events before save.
+ * Auto-populates store field from vendor.
  */
 function myeventlane_event_node_presave(EntityInterface $entity): void {
   if ($entity->bundle() !== 'event') {
     return;
+  }
+
+  /** @var \Drupal\node\NodeInterface $entity */
+  // Auto-populate store from vendor if vendor is set and store is empty.
+  if ($entity->hasField('field_event_vendor') && $entity->hasField('field_event_store')) {
+    if (!$entity->get('field_event_vendor')->isEmpty() && $entity->get('field_event_store')->isEmpty()) {
+      $vendor_id = $entity->get('field_event_vendor')->target_id;
+      if ($vendor_id) {
+        $vendor_storage = \Drupal::entityTypeManager()->getStorage('myeventlane_vendor');
+        $vendor = $vendor_storage->load($vendor_id);
+
+        if ($vendor && $vendor->hasField('field_vendor_store') && !$vendor->get('field_vendor_store')->isEmpty()) {
+          $store = $vendor->get('field_vendor_store')->entity;
+          if ($store) {
+            $entity->set('field_event_store', $store);
+          }
+        }
+      }
+    }
+
+    // If vendor is changed, update store to match.
+    if (!$entity->get('field_event_vendor')->isEmpty() && !$entity->isNew()) {
+      $vendor_id = $entity->get('field_event_vendor')->target_id;
+      if ($vendor_id) {
+        $vendor_storage = \Drupal::entityTypeManager()->getStorage('myeventlane_vendor');
+        $vendor = $vendor_storage->load($vendor_id);
+
+        if ($vendor && $vendor->hasField('field_vendor_store') && !$vendor->get('field_vendor_store')->isEmpty()) {
+          $store = $vendor->get('field_vendor_store')->entity;
+          $current_store_id = $entity->get('field_event_store')->target_id ?? NULL;
+
+          // Update store if it doesn't match vendor's store.
+          if ($store && $current_store_id !== $store->id()) {
+            $entity->set('field_event_store', $store);
+          }
+        }
+      }
+    }
   }
 
   // Skip if already synced in this request to prevent recursion.
@@ -505,6 +671,24 @@ function myeventlane_event_node_presave(EntityInterface $entity): void {
   /** @var \Drupal\myeventlane_event\Service\EventProductManager $productManager */
   $productManager = \Drupal::service('myeventlane_event.product_manager');
   $productManager->syncProductToEvent($entity);
+}
+
+/**
+ * Submit handler for save draft button.
+ *
+ * @param array $form
+ *   The form array.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state.
+ */
+function _myeventlane_event_save_draft(array &$form, FormStateInterface $form_state): void {
+  $node = $form_state->getFormObject()->getEntity();
+  if ($node instanceof NodeInterface) {
+    // Set status to unpublished (draft) before save
+    $node->setUnpublished();
+    // The normal submit handler will save the node
+    // Redirect will be handled by the node form after save
+  }
 }
 
 /**
