@@ -18,23 +18,33 @@
 // ---------------------------------------------------------------------------
 
 .mel-page-wrapper--form {
-  padding: spacing.mel-space(6) 0 spacing.mel-space(8);
-  background: colors.$mel-color-bg;
+  padding: spacing.mel-space(4) 0 spacing.mel-space(6);
+  background: #f5f5f5;
   min-height: 60vh;
 
   @include breakpoints.mel-break(md) {
-    padding: spacing.mel-space(8) 0 spacing.mel-space(10);
+    padding: spacing.mel-space(5) 0 spacing.mel-space(7);
   }
 }
 
-// Container for form pages - wider and centered
+// Container for form pages - wider and centered (70-80% viewport)
 .mel-container--form {
-  max-width: 1200px;
+  width: 100%;
+  max-width: 90%;
   margin: 0 auto;
   padding: 0 spacing.mel-space(4);
 
   @include breakpoints.mel-break(md) {
+    max-width: 80%;
     padding: 0 spacing.mel-space(6);
+  }
+
+  @include breakpoints.mel-break(lg) {
+    max-width: 75%;
+  }
+
+  @include breakpoints.mel-break(xl) {
+    max-width: 70%;
   }
 }
 
