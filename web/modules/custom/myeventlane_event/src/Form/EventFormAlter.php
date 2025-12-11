@@ -25,26 +25,30 @@ final class EventFormAlter {
     $this->currentUser = $current_user;
   }
 
+  /**
+   *
+   */
   public function alterForm(array &$form, FormStateInterface $form_state): void {
-    // Validate form is not null or empty - but don't return early as we modify by reference
+    // Validate form is not null or empty - but don't return early as we modify by reference.
     if (empty($form) || !is_array($form)) {
       \Drupal::logger('myeventlane_event')->error('EventFormAlter: Form is empty or not an array');
-      // Don't return - ensure form has minimum structure
+      // Don't return - ensure form has minimum structure.
       $form = ['#type' => 'form', '#attributes' => []];
       return;
     }
 
+    $form_id = $form_state->getFormObject()->getFormId();
     $node = $form_state->getFormObject()->getEntity();
     if (!$node) {
       \Drupal::logger('myeventlane_event')->error('EventFormAlter: Node entity is null');
-      // Don't return - just skip node-specific logic
+      // Don't return - just skip node-specific logic.
       return;
     }
-    
+
     $is_new = $node->isNew();
 
     // Ensure form has attributes array before adding class
-    // Critical: form must have #attributes for template_preprocess_form to work
+    // Critical: form must have #attributes for template_preprocess_form to work.
     if (!isset($form['#attributes'])) {
       $form['#attributes'] = [];
     }
@@ -62,37 +66,65 @@ final class EventFormAlter {
     $this->handleVendorStore($form, $form_state, $is_new);
     $this->buildEventBasics($form, $form_state);
     $this->buildDateTime($form, $form_state);
-    
-    // Debug: Log before building sections
+
+    // Debug: Log before building sections.
     \Drupal::logger('myeventlane_event')->debug('EventFormAlter: Building location section');
     $this->buildLocation($form, $form_state);
     \Drupal::logger('myeventlane_event')->debug('EventFormAlter: Location section built. Exists: @exists', ['@exists' => isset($form['location']) ? 'yes' : 'no']);
-    
+
     \Drupal::logger('myeventlane_event')->debug('EventFormAlter: Building booking_config section');
     $this->buildBookingConfig($form, $form_state);
     \Drupal::logger('myeventlane_event')->debug('EventFormAlter: Booking_config section built. Exists: @exists', ['@exists' => isset($form['booking_config']) ? 'yes' : 'no']);
-    
+
     \Drupal::logger('myeventlane_event')->debug('EventFormAlter: Building visibility section');
     $this->buildVisibility($form, $form_state);
     \Drupal::logger('myeventlane_event')->debug('EventFormAlter: Visibility section built. Exists: @exists', ['@exists' => isset($form['visibility']) ? 'yes' : 'no']);
-    
+
     $this->buildAttendeeQuestions($form, $form_state);
     $this->buildStickyFooter($form, $form_state, $node, $is_new);
-    
-    // Final debug: Log all top-level form keys
+
+    // Final debug: Log all top-level form keys and verify sections exist.
     $top_level_keys = array_keys($form);
-    \Drupal::logger('myeventlane_event')->debug('EventFormAlter: Final form keys: @keys', ['@keys' => implode(', ', array_filter($top_level_keys, function($key) { return !str_starts_with($key, '#'); }))]);
+    $filtered_keys = array_filter($top_level_keys, function ($key) {
+      return !str_starts_with($key, '#');
+    });
+    \Drupal::logger('myeventlane_event')->debug('EventFormAlter: Final form keys: @keys', ['@keys' => implode(', ', $filtered_keys)]);
+
+    // Verify sections still exist and check their structure.
+    $loc_exists = isset($form['location']);
+    $book_exists = isset($form['booking_config']);
+    $vis_exists = isset($form['visibility']);
+
+    $loc_in_keys = in_array('location', $top_level_keys);
+    $book_in_keys = in_array('booking_config', $top_level_keys);
+    $vis_in_keys = in_array('visibility', $top_level_keys);
+
+    \Drupal::logger('myeventlane_event')->debug('EventFormAlter: Final check - location: @loc (in_keys: @loc_keys), booking_config: @book (in_keys: @book_keys), visibility: @vis (in_keys: @vis_keys)', [
+      '@loc' => $loc_exists ? 'YES' : 'NO',
+      '@loc_keys' => $loc_in_keys ? 'YES' : 'NO',
+      '@book' => $book_exists ? 'YES' : 'NO',
+      '@book_keys' => $book_in_keys ? 'YES' : 'NO',
+      '@vis' => $vis_exists ? 'YES' : 'NO',
+      '@vis_keys' => $vis_in_keys ? 'YES' : 'NO',
+    ]);
+
+    // If sections exist but aren't in keys, there's a structural issue.
+    if ($loc_exists && !$loc_in_keys) {
+      \Drupal::logger('myeventlane_event')->error('EventFormAlter: location exists but not in array_keys! Type: @type', [
+        '@type' => gettype($form['location']),
+      ]);
+    }
 
     // Attach libraries in the same order as Gin admin theme for compatibility
     // 1. Core Drupal form libraries (required for #states API)
-    // These MUST be attached first for #states to work
+    // These MUST be attached first for #states to work.
     if (!in_array('core/drupal.form', $form['#attached']['library'] ?? [])) {
       $form['#attached']['library'][] = 'core/drupal.form';
     }
     if (!in_array('core/drupal.states', $form['#attached']['library'] ?? [])) {
       $form['#attached']['library'][] = 'core/drupal.states';
     }
-    
+
     // 2. Conditional Fields library (must come after drupal.states)
     // This provides enhanced conditional field behavior beyond basic #states
     if (\Drupal::moduleHandler()->moduleExists('conditional_fields')) {
@@ -100,33 +132,32 @@ final class EventFormAlter {
         $form['#attached']['library'][] = 'conditional_fields/conditional_fields';
       }
     }
-    
+
     // 3. Location autocomplete library
     if (!in_array('myeventlane_location/address_autocomplete', $form['#attached']['library'] ?? [])) {
       $form['#attached']['library'][] = 'myeventlane_location/address_autocomplete';
     }
-    
+
     // 4. Custom event form enhancements (last, so it can override if needed)
     if (!in_array('myeventlane_theme/event-form', $form['#attached']['library'] ?? [])) {
       $form['#attached']['library'][] = 'myeventlane_theme/event-form';
     }
-    
+
     // Note: myeventlane_location module (runs alphabetically first) already sets
     // drupalSettings['myeventlaneLocation'] with properly generated Apple Maps tokens.
     // We should NOT overwrite this here as it would destroy the generated token.
     // The location module's hook_form_node_event_form_alter() handles all location
     // settings including token generation via MapKitTokenGenerator::generateToken().
-    
     // Final validation: ensure form is still valid after all alterations
-    // CRITICAL: Form must always be a valid array for template_preprocess_form
+    // CRITICAL: Form must always be a valid array for template_preprocess_form.
     if (empty($form) || !is_array($form)) {
       \Drupal::logger('myeventlane_event')->error('EventFormAlter: Form became invalid after alterations - restoring minimum structure');
-      // Restore minimum form structure - this should never happen but prevents fatal errors
+      // Restore minimum form structure - this should never happen but prevents fatal errors.
       $form = array_merge(['#type' => 'form', '#attributes' => []], is_array($form) ? $form : []);
     }
-    
+
     // Ensure form has required properties for template preprocessing
-    // This is critical - template_preprocess_form requires #attributes to exist
+    // This is critical - template_preprocess_form requires #attributes to exist.
     if (!isset($form['#attributes'])) {
       $form['#attributes'] = [];
     }
@@ -135,6 +166,9 @@ final class EventFormAlter {
     }
   }
 
+  /**
+   *
+   */
   private function handleVendorStore(array &$form, FormStateInterface $form_state, bool $is_new): void {
     if (isset($form['field_event_vendor'])) {
       $vendor_id = $this->getCurrentUserVendorId();
@@ -142,9 +176,9 @@ final class EventFormAlter {
         // Set the value in form state (uses integer ID)
         $form_state->setValue(['field_event_vendor', 0, 'target_id'], $vendor_id);
         // For hidden fields, we don't need to set #default_value on the widget
-        // The form state value will be used when the form is submitted
+        // The form state value will be used when the form is submitted.
       }
-      // Hide the field completely - it's auto-populated
+      // Hide the field completely - it's auto-populated.
       $form['field_event_vendor']['#access'] = FALSE;
     }
 
@@ -154,30 +188,26 @@ final class EventFormAlter {
         // Set the value in form state (uses integer ID)
         $form_state->setValue(['field_event_store', 0, 'target_id'], $store_id);
         // For hidden fields, we don't need to set #default_value on the widget
-        // The form state value will be used when the form is submitted
+        // The form state value will be used when the form is submitted.
       }
-      // Hide the field completely - it's auto-populated
+      // Hide the field completely - it's auto-populated.
       $form['field_event_store']['#access'] = FALSE;
     }
   }
 
+  /**
+   *
+   */
   private function buildEventBasics(array &$form, FormStateInterface $form_state): void {
-    // Ensure form is still valid
+    // Ensure form is still valid.
     if (empty($form) || !is_array($form)) {
       return;
     }
 
     $form['event_basics'] = [
       '#type' => 'container',
-      '#attributes' => ['class' => ['mel-form-card']],
+      '#attributes' => ['class' => ['mel-form-group', 'mel-form-card']],
       '#weight' => -10,
-    ];
-    $form['event_basics']['header'] = [
-      '#type' => 'container',
-      '#attributes' => ['class' => ['mel-form-header']],
-    ];
-    $form['event_basics']['header']['title'] = [
-      '#markup' => '<h2 class="mel-form-title">' . t('Event Basics') . '</h2>',
     ];
     $form['event_basics']['content'] = [
       '#type' => 'container',
@@ -189,9 +219,9 @@ final class EventFormAlter {
       unset($form['title']);
     }
     if (isset($form['body']) && is_array($form['body'])) {
-      // Safely add attributes to body widget if it exists
+      // Safely add attributes to body widget if it exists.
       if (isset($form['body']['widget']) && is_array($form['body']['widget'])) {
-        // Handle both widget[0] structure and direct widget structure
+        // Handle both widget[0] structure and direct widget structure.
         if (isset($form['body']['widget'][0]) && is_array($form['body']['widget'][0])) {
           if (!isset($form['body']['widget'][0]['#attributes'])) {
             $form['body']['widget'][0]['#attributes'] = [];
@@ -211,23 +241,19 @@ final class EventFormAlter {
     }
   }
 
+  /**
+   *
+   */
   private function buildDateTime(array &$form, FormStateInterface $form_state): void {
-    // Ensure form is still valid
+    // Ensure form is still valid.
     if (empty($form) || !is_array($form)) {
       return;
     }
 
     $form['date_time'] = [
       '#type' => 'container',
-      '#attributes' => ['class' => ['mel-form-card']],
+      '#attributes' => ['class' => ['mel-form-group', 'mel-form-card']],
       '#weight' => -9,
-    ];
-    $form['date_time']['header'] = [
-      '#type' => 'container',
-      '#attributes' => ['class' => ['mel-form-header']],
-    ];
-    $form['date_time']['header']['title'] = [
-      '#markup' => '<h2 class="mel-form-title">' . t('Date & Time') . '</h2>',
     ];
     $form['date_time']['content'] = [
       '#type' => 'container',
@@ -244,8 +270,11 @@ final class EventFormAlter {
     }
   }
 
+  /**
+   *
+   */
   private function buildLocation(array &$form, FormStateInterface $form_state): void {
-    // Ensure form is still valid
+    // Ensure form is still valid.
     if (empty($form) || !is_array($form)) {
       \Drupal::logger('myeventlane_event')->error('buildLocation: Form is empty or not an array');
       return;
@@ -254,81 +283,76 @@ final class EventFormAlter {
     try {
       $form['location'] = [
         '#type' => 'container',
-        '#attributes' => ['class' => ['mel-form-card']],
+        '#attributes' => ['class' => ['mel-form-group', 'mel-form-card']],
         '#weight' => -8,
-      ];
-      $form['location']['header'] = [
-        '#type' => 'container',
-        '#attributes' => ['class' => ['mel-form-header']],
-      ];
-      $form['location']['header']['title'] = [
-        '#markup' => '<h2 class="mel-form-title">' . t('Location') . '</h2>',
+        '#access' => TRUE,
       ];
       $form['location']['content'] = [
         '#type' => 'container',
         '#attributes' => ['class' => ['mel-form-content']],
       ];
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       \Drupal::logger('myeventlane_event')->error('buildLocation: Exception creating container: @message', ['@message' => $e->getMessage()]);
       return;
     }
 
-    // STEP 1: Venue name field first
-    if (isset($form['field_venue_name']) && is_array($form['field_venue_name'])) {
-      $form['location']['content']['field_venue_name'] = $form['field_venue_name'];
-      $form['location']['content']['field_venue_name']['#weight'] = 1;
-      unset($form['field_venue_name']);
-    }
-    
-    // STEP 2: Address field with search and form fields
+    // STEP 1: Address field with search (comes first)
     if (isset($form['field_location']) && is_array($form['field_location'])) {
-      // Set default country to Australia and hide it
+      // Set default country to Australia and hide it.
       if (isset($form['field_location']['widget'][0]['address']['country_code']) && is_array($form['field_location']['widget'][0]['address']['country_code'])) {
         $form['field_location']['widget'][0]['address']['country_code']['#default_value'] = 'AU';
         $form['field_location']['widget'][0]['address']['country_code']['#access'] = FALSE;
       }
-      // Ensure all address fields are enabled for manual entry
+      // Ensure all address fields are enabled for manual entry.
       if (isset($form['field_location']['widget'][0]['address']) && is_array($form['field_location']['widget'][0]['address'])) {
         foreach ($form['field_location']['widget'][0]['address'] as $key => &$element) {
           if (is_array($element) && isset($element['#type'])) {
             $element['#disabled'] = FALSE;
           }
         }
-        unset($element); // Break reference
+        // Break reference.
+        unset($element);
       }
-      
-      // The AddressAutocompleteWidget structure:
-      // - widget[0]['address_search'] - the searchable address input (weight: -10)
-      // - widget[0]['address'] - the address form fields (address_line1, locality/suburb, administrative_area/state, postal_code)
-      // - widget[0]['map_preview'] - the map preview container (weight: 100)
-      // - widget[0]['latitude'] and widget[0]['longitude'] - hidden coordinate fields
-      
-      // Ensure proper ordering within the widget:
-      // The widget already has correct internal ordering:
-      // 1. address_search (weight: -10) - appears first within widget
-      // 2. address fields (weight: 0, default) - address_line1, locality, administrative_area, postal_code
-      // 3. map_preview (weight: 100) - appears last
-      
-      // We just need to ensure the widget itself comes after venue name
-      // The internal weights are already correct, so we don't need to change them
-      
-      // Move the entire field_location (including all widget elements) to the location container
+
+      // Move the entire field_location to the location container.
       $form['location']['content']['field_location'] = $form['field_location'];
-      $form['location']['content']['field_location']['#weight'] = 2;
+      $form['location']['content']['field_location']['#weight'] = 1;
+
+      // Ensure the address autocomplete library is attached.
+      if (!isset($form['#attached']['library'])) {
+        $form['#attached']['library'] = [];
+      }
+      if (!in_array('myeventlane_location/address_autocomplete', $form['#attached']['library'])) {
+        $form['#attached']['library'][] = 'myeventlane_location/address_autocomplete';
+      }
+
       unset($form['field_location']);
+    }
+
+    // STEP 2: Venue name field AFTER address (self-populating from autocomplete)
+    if (isset($form['field_venue_name']) && is_array($form['field_venue_name'])) {
+      $form['location']['content']['field_venue_name'] = $form['field_venue_name'];
+      $form['location']['content']['field_venue_name']['#weight'] = 10;
+      unset($form['field_venue_name']);
     }
   }
 
+  /**
+   *
+   */
   private function buildBookingConfig(array &$form, FormStateInterface $form_state): void {
-    // Ensure form is still valid
+    // Ensure form is still valid.
     if (empty($form) || !is_array($form)) {
       return;
     }
 
     $form['booking_config'] = [
       '#type' => 'container',
-      '#attributes' => ['class' => ['mel-form-card', 'mel-form-card-highlight']],
+      '#attributes' => ['class' => ['mel-form-group', 'mel-form-card', 'mel-form-card--highlight', 'mel-pill-buttons']],
       '#weight' => -7,
+    // Explicitly allow access.
+      '#access' => TRUE,
     ];
     $form['booking_config']['header'] = [
       '#type' => 'container',
@@ -343,8 +367,9 @@ final class EventFormAlter {
     ];
 
     // STEP 1: Move field_event_type FIRST - before any other fields
+    // CRITICAL: This field must ALWAYS be visible and required for proper event saving.
     if (isset($form['field_event_type']) && is_array($form['field_event_type'])) {
-      // Remove ALL existing states/conditional_fields
+      // Remove ALL existing states/conditional_fields that might hide this field.
       if (isset($form['field_event_type']['#states'])) {
         unset($form['field_event_type']['#states']);
       }
@@ -352,21 +377,74 @@ final class EventFormAlter {
         if (isset($form['field_event_type']['widget']['#states'])) {
           unset($form['field_event_type']['widget']['#states']);
         }
-        // Also clear from widget[0] if it exists
+        // Also clear from widget[0] if it exists.
         if (isset($form['field_event_type']['widget'][0]) && is_array($form['field_event_type']['widget'][0])) {
           if (isset($form['field_event_type']['widget'][0]['#states'])) {
             unset($form['field_event_type']['widget'][0]['#states']);
           }
         }
       }
-      
-      // Force it to be first
+
+      // CRITICAL: Ensure the field is required and always visible.
+      $form['field_event_type']['#required'] = TRUE;
+      $form['field_event_type']['#access'] = TRUE;
+
+      // Set default value to 'rsvp' for new events if not already set.
+      // This handles different widget structures (options_select, options_buttons, etc.)
+      $node = $form_state->getFormObject()->getEntity();
+      if ($node && $node->isNew()) {
+        $currentValue = $form_state->getValue(['field_event_type', 0, 'value']);
+        if (empty($currentValue)) {
+          $defaultSet = FALSE;
+
+          // Try widget[0]['value']['#default_value'] (common for select/radios).
+          if (isset($form['field_event_type']['widget'][0]['value'])) {
+            if (empty($form['field_event_type']['widget'][0]['value']['#default_value'])) {
+              $form['field_event_type']['widget'][0]['value']['#default_value'] = 'rsvp';
+              $defaultSet = TRUE;
+            }
+          }
+
+          // Try widget['#default_value'] (used by some widget types).
+          if (!$defaultSet && isset($form['field_event_type']['widget'])) {
+            if (empty($form['field_event_type']['widget']['#default_value'])) {
+              $form['field_event_type']['widget']['#default_value'] = 'rsvp';
+              $defaultSet = TRUE;
+            }
+          }
+
+          // Try widget[0]['#default_value'] (another common structure).
+          if (!$defaultSet && isset($form['field_event_type']['widget'][0])) {
+            if (empty($form['field_event_type']['widget'][0]['#default_value'])) {
+              $form['field_event_type']['widget'][0]['#default_value'] = 'rsvp';
+              $defaultSet = TRUE;
+            }
+          }
+
+          // Fallback: Set in form_state to ensure it's used during submission.
+          if (!$defaultSet) {
+            $form_state->setValue(['field_event_type', 0, 'value'], 'rsvp');
+          }
+        }
+      }
+
+      // Force it to be first.
       $form['field_event_type']['#weight'] = -10000;
       if (isset($form['field_event_type']['widget']) && is_array($form['field_event_type']['widget'])) {
         $form['field_event_type']['widget']['#weight'] = -10000;
+        // Apply pill button classes to options if using radios.
+        if (isset($form['field_event_type']['widget'][0]) && is_array($form['field_event_type']['widget'][0])) {
+          $form['field_event_type']['widget'][0]['#attributes']['class'][] = 'mel-pill-group';
+          if (isset($form['field_event_type']['widget'][0]['value']) && is_array($form['field_event_type']['widget'][0]['value'])) {
+            $form['field_event_type']['widget'][0]['value']['#attributes']['class'][] = 'mel-pill-button';
+          }
+        }
       }
-      
-      // Move it
+
+      // Add helpful description.
+      $form['field_event_type']['#description'] = t('Choose how attendees will register for this event.');
+
+      // Move it.
       $form['booking_config']['content']['field_event_type'] = $form['field_event_type'];
       unset($form['field_event_type']);
     }
@@ -374,15 +452,19 @@ final class EventFormAlter {
     // STEP 2: Build conditional containers with proper #states
     // Use the exact selector that options_select generates
     // Drupal generates select[name="field_event_type[0][value]"] for options_select widget
-    // We need to ensure the selector works with both #states API and conditional_fields
+    // We need to ensure the selector works with both #states API and conditional_fields.
     $selector = ':input[name="field_event_type[0][value]"]';
-    
-    // Also add data attribute to the select for easier JavaScript targeting
+
+    // Also add data attribute to the select for easier JavaScript targeting.
     if (isset($form['booking_config']['content']['field_event_type']['widget'][0]['value'])) {
+      if (!isset($form['booking_config']['content']['field_event_type']['widget'][0]['value']['#attributes'])) {
+        $form['booking_config']['content']['field_event_type']['widget'][0]['value']['#attributes'] = [];
+      }
       $form['booking_config']['content']['field_event_type']['widget'][0]['value']['#attributes']['data-booking-type-select'] = 'true';
+      $form['booking_config']['content']['field_event_type']['widget'][0]['value']['#attributes']['class'][] = 'mel-booking-type-select';
     }
 
-    // RSVP container
+    // RSVP container.
     if (isset($form['field_capacity']) || isset($form['field_rsvp_target'])) {
       $form['booking_config']['content']['rsvp_fields'] = [
         '#type' => 'container',
@@ -400,7 +482,7 @@ final class EventFormAlter {
           ],
         ],
       ];
-      
+
       if (isset($form['field_capacity']) && is_array($form['field_capacity'])) {
         if (isset($form['field_capacity']['#states'])) {
           unset($form['field_capacity']['#states']);
@@ -410,7 +492,7 @@ final class EventFormAlter {
         $form['booking_config']['content']['rsvp_fields']['field_capacity'] = $form['field_capacity'];
         unset($form['field_capacity']);
       }
-      
+
       if (isset($form['field_rsvp_target']) && is_array($form['field_rsvp_target'])) {
         if (isset($form['field_rsvp_target']['#states'])) {
           unset($form['field_rsvp_target']['#states']);
@@ -422,7 +504,7 @@ final class EventFormAlter {
       }
     }
 
-    // Paid container
+    // Paid container.
     if (isset($form['field_product_target']) || isset($form['field_ticket_types'])) {
       $form['booking_config']['content']['paid_fields'] = [
         '#type' => 'container',
@@ -440,7 +522,7 @@ final class EventFormAlter {
           ],
         ],
       ];
-      
+
       if (isset($form['field_product_target']) && is_array($form['field_product_target'])) {
         if (isset($form['field_product_target']['#states'])) {
           unset($form['field_product_target']['#states']);
@@ -450,13 +532,13 @@ final class EventFormAlter {
         $form['booking_config']['content']['paid_fields']['field_product_target'] = $form['field_product_target'];
         unset($form['field_product_target']);
       }
-      
+
       if (isset($form['field_ticket_types']) && is_array($form['field_ticket_types'])) {
-        // Remove any existing #states from ticket_types - the parent container handles visibility
+        // Remove any existing #states from ticket_types - the parent container handles visibility.
         if (isset($form['field_ticket_types']['#states'])) {
           unset($form['field_ticket_types']['#states']);
         }
-        // Also check widget level
+        // Also check widget level.
         if (isset($form['field_ticket_types']['widget']) && is_array($form['field_ticket_types']['widget'])) {
           if (isset($form['field_ticket_types']['widget']['#states'])) {
             unset($form['field_ticket_types']['widget']['#states']);
@@ -464,13 +546,13 @@ final class EventFormAlter {
         }
         $form['field_ticket_types']['#required'] = FALSE;
         $form['field_ticket_types']['#weight'] = 2;
-        // Move ticket types into paid_fields container - visibility is controlled by container's #states
+        // Move ticket types into paid_fields container - visibility is controlled by container's #states.
         $form['booking_config']['content']['paid_fields']['field_ticket_types'] = $form['field_ticket_types'];
         unset($form['field_ticket_types']);
       }
     }
 
-    // External container
+    // External container.
     if (isset($form['field_external_url']) && is_array($form['field_external_url'])) {
       if (isset($form['field_external_url']['#states'])) {
         unset($form['field_external_url']['#states']);
@@ -493,16 +575,21 @@ final class EventFormAlter {
     }
   }
 
+  /**
+   *
+   */
   private function buildVisibility(array &$form, FormStateInterface $form_state): void {
-    // Ensure form is still valid
+    // Ensure form is still valid.
     if (empty($form) || !is_array($form)) {
       return;
     }
 
     $form['visibility'] = [
       '#type' => 'container',
-      '#attributes' => ['class' => ['mel-form-card']],
+      '#attributes' => ['class' => ['mel-form-group', 'mel-form-card']],
       '#weight' => -6,
+    // Explicitly allow access.
+      '#access' => TRUE,
     ];
     $form['visibility']['header'] = [
       '#type' => 'container',
@@ -525,8 +612,11 @@ final class EventFormAlter {
     }
   }
 
+  /**
+   *
+   */
   private function buildAttendeeQuestions(array &$form, FormStateInterface $form_state): void {
-    // Ensure form is still valid
+    // Ensure form is still valid.
     if (empty($form) || !is_array($form)) {
       return;
     }
@@ -537,7 +627,7 @@ final class EventFormAlter {
 
     $form['attendee_questions'] = [
       '#type' => 'container',
-      '#attributes' => ['class' => ['mel-form-card']],
+      '#attributes' => ['class' => ['mel-form-group', 'mel-form-card', 'mel-pill-buttons']],
       '#weight' => -5,
     ];
     $form['attendee_questions']['header'] = [
@@ -549,7 +639,7 @@ final class EventFormAlter {
     ];
     $form['attendee_questions']['content'] = [
       '#type' => 'container',
-      '#attributes' => ['class' => ['mel-form-content']],
+      '#attributes' => ['class' => ['mel-form-content', 'mel-pill-buttons']],
     ];
 
     if (is_array($form['field_attendee_questions'])) {
@@ -557,10 +647,19 @@ final class EventFormAlter {
       $form['attendee_questions']['content']['field_attendee_questions'] = $form['field_attendee_questions'];
       unset($form['field_attendee_questions']);
     }
+
+    // Move ask-all-attendees toggle (if present) into this tab.
+    if (isset($form['field_ask_all_attendees']) && is_array($form['field_ask_all_attendees'])) {
+      $form['attendee_questions']['content']['field_ask_all_attendees'] = $form['field_ask_all_attendees'];
+      unset($form['field_ask_all_attendees']);
+    }
   }
 
+  /**
+   *
+   */
   private function buildStickyFooter(array &$form, FormStateInterface $form_state, NodeInterface $node, bool $is_new): void {
-    // Ensure form is still valid
+    // Ensure form is still valid.
     if (empty($form) || !is_array($form)) {
       return;
     }
@@ -596,6 +695,9 @@ final class EventFormAlter {
     }
   }
 
+  /**
+   *
+   */
   private function getCurrentUserVendorId(): ?int {
     $uid = (int) $this->currentUser->id();
     if ($uid === 0) {
@@ -612,6 +714,9 @@ final class EventFormAlter {
     return !empty($vendor_ids) ? (int) reset($vendor_ids) : NULL;
   }
 
+  /**
+   *
+   */
   private function getCurrentUserStoreId(): ?int {
     $vendor_id = $this->getCurrentUserVendorId();
     if (!$vendor_id) {

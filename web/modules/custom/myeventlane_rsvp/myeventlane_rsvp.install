@@ -53,6 +53,14 @@ function myeventlane_rsvp_schema() {
         'size' => 'big',
         'not null' => FALSE,
       ],
+      'donation' => [
+        'type' => 'decimal',
+        'precision' => 10,
+        'scale' => 2,
+        'not null' => FALSE,
+        'default' => 0,
+        'description' => 'Optional donation amount in AUD',
+      ],
     ],
     'primary key' => ['id'],
     'indexes' => [
@@ -87,4 +95,119 @@ function myeventlane_rsvp_update_9001() {
       'label' => 'Checked In',
     ])
     ->save();
+}
+
+/**
+ * Add donation column to myeventlane_rsvp table.
+ */
+function myeventlane_rsvp_update_9002() {
+  $schema = \Drupal::database()->schema();
+  $table = 'myeventlane_rsvp';
+  
+  if ($schema->tableExists($table) && !$schema->fieldExists($table, 'donation')) {
+    $spec = [
+      'type' => 'numeric',
+      'precision' => 10,
+      'scale' => 2,
+      'not null' => FALSE,
+      'default' => 0,
+    ];
+    $schema->addField($table, 'donation', $spec);
+  }
+}
+
+/**
+ * Add new fields to rsvp_submission entity table.
+ */
+function myeventlane_rsvp_update_9003() {
+  $schema = \Drupal::database()->schema();
+  $table = 'rsvp_submission';
+
+  // Skip if table doesn't exist (entity not yet installed).
+  if (!$schema->tableExists($table)) {
+    return t('Entity table does not exist. Run entity updates first.');
+  }
+
+  // Add email field.
+  if (!$schema->fieldExists($table, 'email')) {
+    $schema->addField($table, 'email', [
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    ]);
+  }
+
+  // Add name field (alias for attendee_name).
+  if (!$schema->fieldExists($table, 'name')) {
+    $schema->addField($table, 'name', [
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    ]);
+  }
+
+  // Add guests field.
+  if (!$schema->fieldExists($table, 'guests')) {
+    $schema->addField($table, 'guests', [
+      'type' => 'int',
+      'not null' => FALSE,
+      'default' => 1,
+    ]);
+  }
+
+  // Add phone field.
+  if (!$schema->fieldExists($table, 'phone')) {
+    $schema->addField($table, 'phone', [
+      'type' => 'varchar',
+      'length' => 32,
+      'not null' => FALSE,
+    ]);
+  }
+
+  // Add created field.
+  if (!$schema->fieldExists($table, 'created')) {
+    $schema->addField($table, 'created', [
+      'type' => 'int',
+      'not null' => FALSE,
+    ]);
+  }
+
+  // Add checked_in field.
+  if (!$schema->fieldExists($table, 'checked_in')) {
+    $schema->addField($table, 'checked_in', [
+      'type' => 'int',
+      'size' => 'tiny',
+      'not null' => FALSE,
+      'default' => 0,
+    ]);
+  }
+
+  // Add checked_in_at field.
+  if (!$schema->fieldExists($table, 'checked_in_at')) {
+    $schema->addField($table, 'checked_in_at', [
+      'type' => 'int',
+      'not null' => FALSE,
+    ]);
+  }
+
+  // Update entity field definitions.
+  \Drupal::entityDefinitionUpdateManager()->applyUpdates();
+
+  return t('Added new fields to rsvp_submission entity table.');
+}
+
+/**
+ * Fix event_id field to be entity reference format.
+ */
+function myeventlane_rsvp_update_9004() {
+  // Update entity definitions to apply the new field definitions.
+  $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  
+  // Check if entity type needs update.
+  if ($entity_definition_update_manager->needsUpdates()) {
+    $entity_definition_update_manager->applyUpdates();
+    return t('Applied entity definition updates for rsvp_submission.');
+  }
+  
+  return t('No entity definition updates needed.');
 }

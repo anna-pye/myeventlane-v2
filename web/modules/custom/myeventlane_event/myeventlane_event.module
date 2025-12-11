@@ -11,6 +11,7 @@
 
 declare(strict_types=1);
 
+use Drupal\myeventlane_event\Form\TicketTypeFormAlter;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -45,7 +46,7 @@ function myeventlane_event_theme(): array {
  * Implements hook_form_FORM_ID_alter() for paragraph forms.
  */
 function myeventlane_event_form_paragraph_ticket_type_config_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
-  \Drupal\myeventlane_event\Form\TicketTypeFormAlter::alterForm($form, $form_state);
+  TicketTypeFormAlter::alterForm($form, $form_state);
 }
 
 /**
@@ -108,10 +109,10 @@ function myeventlane_event_module_implements_alter(&$implementations, $hook): vo
  * This runs AFTER conditional_fields module to override its behavior.
  */
 function myeventlane_event_form_node_event_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
-  // Validate form before processing - but ensure it's always valid
+  // Validate form before processing - but ensure it's always valid.
   if (empty($form) || !is_array($form)) {
     \Drupal::logger('myeventlane_event')->error('myeventlane_event_form_node_event_form_alter: Form is empty or not an array - restoring');
-    // Restore minimum valid form structure
+    // Restore minimum valid form structure.
     $form = ['#type' => 'form', '#attributes' => []];
     return;
   }
@@ -120,30 +121,32 @@ function myeventlane_event_form_node_event_form_alter(array &$form, FormStateInt
     /** @var \Drupal\myeventlane_event\Form\EventFormAlter $form_alter */
     $form_alter = \Drupal::service('myeventlane_event.form_alter');
     $form_alter->alterForm($form, $form_state);
-    
-    // Final validation: ensure form is still valid - CRITICAL for template_preprocess_form
+
+    // Final validation: ensure form is still valid - CRITICAL for template_preprocess_form.
     if (empty($form) || !is_array($form)) {
       \Drupal::logger('myeventlane_event')->error('myeventlane_event_form_node_event_form_alter: Form became invalid - restoring minimum structure');
-      // Restore minimum valid form structure
+      // Restore minimum valid form structure.
       $form = ['#type' => 'form', '#attributes' => []];
       return;
     }
-    
-    // Ensure #attributes exists - required by template_preprocess_form
+
+    // Ensure #attributes exists - required by template_preprocess_form.
     if (!isset($form['#attributes']) || !is_array($form['#attributes'])) {
       $form['#attributes'] = [];
     }
-  } catch (\Exception $e) {
+  }
+  catch (\Exception $e) {
     \Drupal::logger('myeventlane_event')->error('myeventlane_event_form_node_event_form_alter: Exception: @message', ['@message' => $e->getMessage()]);
-    // Ensure form is still valid even after exception
+    // Ensure form is still valid even after exception.
     if (empty($form) || !is_array($form)) {
       $form = ['#type' => 'form', '#attributes' => []];
-    } elseif (!isset($form['#attributes']) || !is_array($form['#attributes'])) {
+    }
+    elseif (!isset($form['#attributes']) || !is_array($form['#attributes'])) {
       $form['#attributes'] = [];
     }
   } finally {
     // Always preserve existing submit handlers and validation, even if alterForm() threw an exception
-    // This ensures form submission functionality is not broken by form alteration errors
+    // This ensures form submission functionality is not broken by form alteration errors.
     _myeventlane_event_preserve_existing_handlers($form, $form_state);
   }
 }
@@ -153,10 +156,10 @@ function myeventlane_event_form_node_event_form_alter(array &$form, FormStateInt
  * Weight 100 ensures this runs AFTER conditional_fields module.
  */
 function myeventlane_event_form_node_event_edit_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
-  // Validate form before processing - but ensure it's always valid
+  // Validate form before processing - but ensure it's always valid.
   if (empty($form) || !is_array($form)) {
     \Drupal::logger('myeventlane_event')->error('myeventlane_event_form_node_event_edit_form_alter: Form is empty or not an array - restoring');
-    // Restore minimum valid form structure
+    // Restore minimum valid form structure.
     $form = ['#type' => 'form', '#attributes' => []];
     return;
   }
@@ -165,30 +168,32 @@ function myeventlane_event_form_node_event_edit_form_alter(array &$form, FormSta
     /** @var \Drupal\myeventlane_event\Form\EventFormAlter $form_alter */
     $form_alter = \Drupal::service('myeventlane_event.form_alter');
     $form_alter->alterForm($form, $form_state);
-    
-    // Final validation: ensure form is still valid - CRITICAL for template_preprocess_form
+
+    // Final validation: ensure form is still valid - CRITICAL for template_preprocess_form.
     if (empty($form) || !is_array($form)) {
       \Drupal::logger('myeventlane_event')->error('myeventlane_event_form_node_event_edit_form_alter: Form became invalid - restoring minimum structure');
-      // Restore minimum valid form structure
+      // Restore minimum valid form structure.
       $form = ['#type' => 'form', '#attributes' => []];
       return;
     }
-    
-    // Ensure #attributes exists - required by template_preprocess_form
+
+    // Ensure #attributes exists - required by template_preprocess_form.
     if (!isset($form['#attributes']) || !is_array($form['#attributes'])) {
       $form['#attributes'] = [];
     }
-  } catch (\Exception $e) {
+  }
+  catch (\Exception $e) {
     \Drupal::logger('myeventlane_event')->error('myeventlane_event_form_node_event_edit_form_alter: Exception: @message', ['@message' => $e->getMessage()]);
-    // Ensure form is still valid even after exception
+    // Ensure form is still valid even after exception.
     if (empty($form) || !is_array($form)) {
       $form = ['#type' => 'form', '#attributes' => []];
-    } elseif (!isset($form['#attributes']) || !is_array($form['#attributes'])) {
+    }
+    elseif (!isset($form['#attributes']) || !is_array($form['#attributes'])) {
       $form['#attributes'] = [];
     }
   } finally {
     // Always preserve existing submit handlers and validation, even if alterForm() threw an exception
-    // This ensures form submission functionality is not broken by form alteration errors
+    // This ensures form submission functionality is not broken by form alteration errors.
     _myeventlane_event_preserve_existing_handlers($form, $form_state);
   }
 }
@@ -202,12 +207,12 @@ function myeventlane_event_form_node_event_edit_form_alter(array &$form, FormSta
  *   The form state.
  */
 function _myeventlane_event_preserve_existing_handlers(array &$form, FormStateInterface $form_state): void {
-  // Validate form is still valid
+  // Validate form is still valid.
   if (empty($form) || !is_array($form)) {
     return;
   }
 
-  // Add custom submit handler to create RSVP product before save
+  // Add custom submit handler to create RSVP product before save.
   if (isset($form['actions']['submit']) && is_array($form['actions']['submit'])) {
     if (!isset($form['actions']['submit']['#submit']) || !is_array($form['actions']['submit']['#submit'])) {
       $form['actions']['submit']['#submit'] = [];
@@ -245,8 +250,8 @@ function _myeventlane_event_preserve_existing_handlers(array &$form, FormStateIn
     $form['#validate'] = [];
   }
   $form['#validate'][] = '_myeventlane_event_form_validate';
-  
-  // Final check: ensure form is still valid
+
+  // Final check: ensure form is still valid.
   if (empty($form) || !is_array($form)) {
     \Drupal::logger('myeventlane_event')->error('_myeventlane_event_preserve_existing_handlers: Form became invalid');
     return;
@@ -277,7 +282,7 @@ function _myeventlane_event_alter_event_form(array &$form, FormStateInterface $f
     if (isset($form['field_event_vendor'])) {
       $form['field_event_vendor']['#group'] = 'vendor_store';
       $form['field_event_vendor']['widget'][0]['target_id']['#description'] = t('Select the vendor/organiser for this event. The store will be automatically set to match the vendor\'s store.');
-      
+
       // Add AJAX callback to auto-populate store when vendor changes.
       $form['field_event_vendor']['widget'][0]['target_id']['#ajax'] = [
         'callback' => '_myeventlane_event_ajax_update_store',
@@ -313,7 +318,7 @@ function _myeventlane_event_alter_event_form(array &$form, FormStateInterface $f
     'field_ticket_types',
     'field_external_url',
   ];
-  
+
   // Ensure capacity field is in the booking configuration group.
   if (isset($form['field_capacity']) && !isset($form['field_capacity']['#group'])) {
     $form['field_capacity']['#group'] = 'booking_configuration';
@@ -361,7 +366,7 @@ function _myeventlane_event_alter_event_form(array &$form, FormStateInterface $f
         ],
       ],
     ];
-    
+
     // Update description dynamically based on event type.
     if (isset($form['field_capacity']['widget'][0]['value'])) {
       // Set a general description that works for both RSVP and Both events.
@@ -370,12 +375,12 @@ function _myeventlane_event_alter_event_form(array &$form, FormStateInterface $f
   }
 
   if (isset($form['field_product_target'])) {
-    // Make field not required - we'll handle RSVP auto-creation
+    // Make field not required - we'll handle RSVP auto-creation.
     $form['field_product_target']['#required'] = FALSE;
     if (isset($form['field_product_target']['widget'][0]['target_id'])) {
       $form['field_product_target']['widget'][0]['target_id']['#required'] = FALSE;
     }
-    
+
     $form['field_product_target']['#states'] = [
       'visible' => [
         'or' => [
@@ -384,8 +389,8 @@ function _myeventlane_event_alter_event_form(array &$form, FormStateInterface $f
         ],
       ],
     ];
-    
-    // Add description for RSVP events
+
+    // Add description for RSVP events.
     $form['field_product_target']['#description'] = t('For RSVP events, a free product is auto-created. For paid/both events, link your ticket product here.');
   }
 
@@ -399,9 +404,9 @@ function _myeventlane_event_alter_event_form(array &$form, FormStateInterface $f
 
   // Show ticket types only for paid and both event types.
   if (isset($form['field_ticket_types'])) {
-    // Make ticket types not required
+    // Make ticket types not required.
     $form['field_ticket_types']['#required'] = FALSE;
-    
+
     $form['field_ticket_types']['#states'] = [
       'visible' => [
         'or' => [
@@ -411,15 +416,15 @@ function _myeventlane_event_alter_event_form(array &$form, FormStateInterface $f
       ],
     ];
   }
-  
+
   // Make attendee questions not required (paragraph field)
   if (isset($form['field_attendee_questions'])) {
     $form['field_attendee_questions']['#required'] = FALSE;
   }
-  
-  // Add custom submit handler to create RSVP product before save
+
+  // Add custom submit handler to create RSVP product before save.
   array_unshift($form['actions']['submit']['#submit'], '_myeventlane_event_form_submit');
-  
+
   // Add submit handler to sync ticket types after save.
   $form['actions']['submit']['#submit'][] = '_myeventlane_event_sync_ticket_types';
 
@@ -451,8 +456,8 @@ function _myeventlane_event_alter_event_form(array &$form, FormStateInterface $f
     $form['#validate'] = [];
   }
   $form['#validate'][] = '_myeventlane_event_form_validate';
-  
-  // Final check: ensure form is still valid
+
+  // Final check: ensure form is still valid.
   if (empty($form) || !is_array($form)) {
     \Drupal::logger('myeventlane_event')->error('_myeventlane_event_alter_event_form: Form became invalid');
     return;
@@ -497,28 +502,28 @@ function _myeventlane_event_ajax_update_store(array &$form, FormStateInterface $
  */
 function _myeventlane_event_form_submit(array &$form, FormStateInterface $form_state): void {
   $eventType = $form_state->getValue(['field_event_type', 0, 'value']);
-  
+
   // Only auto-create product for pure RSVP events.
   if ($eventType !== 'rsvp') {
     return;
   }
-  
+
   // Check if product already linked.
   $productTarget = $form_state->getValue(['field_product_target', 0, 'target_id']);
   if (!empty($productTarget)) {
     return;
   }
-  
+
   // Get the event title from form values.
   $eventTitle = $form_state->getValue(['title', 0, 'value']);
   if (empty($eventTitle)) {
     $eventTitle = 'Untitled Event';
   }
-  
+
   // Create RSVP product now (before save).
   /** @var \Drupal\myeventlane_event\Service\EventProductManager $productManager */
   $productManager = \Drupal::service('myeventlane_event.product_manager');
-  
+
   $entity = $form_state->getFormObject()->getEntity();
   if ($entity->isNew()) {
     // For new events, create the product and link it.
@@ -609,7 +614,6 @@ function _myeventlane_event_form_validate(array &$form, FormStateInterface $form
 
   // RSVP events: product will be auto-created, so no validation needed
   // (the submit handler creates it before save)
-
   // Validate external events have a URL.
   if ($eventType === 'external') {
     $externalUrl = $form_state->getValue(['field_external_url', 0, 'uri']);
@@ -625,7 +629,7 @@ function _myeventlane_event_form_validate(array &$form, FormStateInterface $form
   if (in_array($eventType, ['paid', 'both'], TRUE)) {
     $productTarget = $form_state->getValue(['field_product_target', 0, 'target_id']);
     $ticketTypes = $form_state->getValue('field_ticket_types', []);
-    
+
     // Only require ticket types if no product is linked.
     if (empty($productTarget)) {
       // Count non-empty ticket types.
@@ -641,7 +645,7 @@ function _myeventlane_event_form_validate(array &$form, FormStateInterface $form
           }
         }
       }
-      
+
       if ($validTicketTypes === 0) {
         $form_state->setErrorByName(
           'field_ticket_types',
@@ -649,7 +653,7 @@ function _myeventlane_event_form_validate(array &$form, FormStateInterface $form
         );
       }
     }
-    
+
     // Validate each ticket type has required fields (if ticket types exist).
     if (!empty($ticketTypes) && is_array($ticketTypes)) {
       foreach ($ticketTypes as $delta => $ticketType) {
@@ -663,11 +667,11 @@ function _myeventlane_event_form_validate(array &$form, FormStateInterface $form
           // Existing paragraph - skip validation as it's already saved.
           continue;
         }
-        
+
         if (!empty($subform)) {
           $labelMode = $subform['field_ticket_label_mode'][0]['value'] ?? '';
           $price = $subform['field_ticket_price'][0]['value'] ?? '';
-          
+
           // Validate label is set.
           if ($labelMode === 'preset') {
             $preset = $subform['field_ticket_label_preset'][0]['value'] ?? '';
@@ -687,7 +691,7 @@ function _myeventlane_event_form_validate(array &$form, FormStateInterface $form
               );
             }
           }
-          
+
           // Validate price is set.
           if (empty($price) || !is_numeric($price)) {
             $form_state->setErrorByName(
@@ -704,7 +708,8 @@ function _myeventlane_event_form_validate(array &$form, FormStateInterface $form
 /**
  * Implements hook_preprocess_node() for event nodes.
  *
- * Makes CTA variables available in node templates.
+ * Makes event type and CTA variables available in ALL node templates,
+ * including teasers, full pages, and listings.
  */
 function myeventlane_event_preprocess_node(array &$variables): void {
   /** @var \Drupal\node\NodeInterface $node */
@@ -714,19 +719,20 @@ function myeventlane_event_preprocess_node(array &$variables): void {
     return;
   }
 
-  // Only process full view modes.
-  if (!in_array($variables['view_mode'], ['full', 'default'], TRUE)) {
-    return;
+  /** @var \Drupal\myeventlane_event\Service\EventTypeService $typeService */
+  $typeService = \Drupal::service('myeventlane_event.type_service');
+
+  // Add all template variables from EventTypeService.
+  // This includes: event_type, event_type_label, event_cta_label, etc.
+  $eventVars = $typeService->getTemplateVariables($node);
+  foreach ($eventVars as $key => $value) {
+    $variables[$key] = $value;
   }
 
-  /** @var \Drupal\myeventlane_event\Service\EventModeManager $modeManager */
-  $modeManager = \Drupal::service('myeventlane_event.mode_manager');
-
-  // Add convenience variables for templates.
-  $variables['event_mode'] = $modeManager->getEffectiveMode($node);
-  $variables['event_is_bookable'] = $modeManager->isBookable($node);
-  $variables['event_rsvp_enabled'] = $modeManager->isRsvpEnabled($node);
-  $variables['event_tickets_enabled'] = $modeManager->isTicketsEnabled($node);
+  // Legacy aliases for backward compatibility.
+  $variables['event_mode'] = $eventVars['event_type'];
+  $variables['event_rsvp_enabled'] = $eventVars['event_is_rsvp'];
+  $variables['event_tickets_enabled'] = $eventVars['event_is_paid'];
 }
 
 /**
@@ -734,6 +740,7 @@ function myeventlane_event_preprocess_node(array &$variables): void {
  *
  * Syncs Commerce products for RSVP events before save.
  * Auto-populates store field from vendor.
+ * Auto-creates RSVP product for RSVP events.
  */
 function myeventlane_event_node_presave(EntityInterface $entity): void {
   if ($entity->bundle() !== 'event') {
@@ -783,6 +790,39 @@ function myeventlane_event_node_presave(EntityInterface $entity): void {
     return;
   }
 
+  // Mark as synced to prevent recursion.
+  $entity->_myeventlane_product_synced = TRUE;
+
+  // CRITICAL: Auto-create RSVP product for RSVP events that don't have one.
+  // This ensures the booking page can show the RSVP form with Commerce integration.
+  $eventType = $entity->hasField('field_event_type') && !$entity->get('field_event_type')->isEmpty()
+    ? $entity->get('field_event_type')->value
+    : NULL;
+
+  if ($eventType === 'rsvp') {
+    // Check if product is already linked.
+    $hasProduct = $entity->hasField('field_product_target')
+      && !$entity->get('field_product_target')->isEmpty();
+
+    if (!$hasProduct) {
+      // Auto-create RSVP product.
+      /** @var \Drupal\myeventlane_event\Service\EventProductManager $productManager */
+      $productManager = \Drupal::service('myeventlane_event.product_manager');
+
+      // For existing events, use ensureRsvpProduct. For new events, use the form submit handler.
+      if (!$entity->isNew()) {
+        $product = $productManager->ensureRsvpProduct($entity);
+        if ($product) {
+          $entity->set('field_product_target', ['target_id' => $product->id()]);
+          \Drupal::logger('myeventlane_event')->notice(
+            'Auto-linked RSVP product @pid to event @eid during presave',
+            ['@pid' => $product->id(), '@eid' => $entity->id()]
+          );
+        }
+      }
+    }
+  }
+
   /** @var \Drupal\myeventlane_event\Service\EventProductManager $productManager */
   $productManager = \Drupal::service('myeventlane_event.product_manager');
   $productManager->syncProductToEvent($entity);
@@ -799,10 +839,10 @@ function myeventlane_event_node_presave(EntityInterface $entity): void {
 function _myeventlane_event_save_draft(array &$form, FormStateInterface $form_state): void {
   $node = $form_state->getFormObject()->getEntity();
   if ($node instanceof NodeInterface) {
-    // Set status to unpublished (draft) before save
+    // Set status to unpublished (draft) before save.
     $node->setUnpublished();
     // The normal submit handler will save the node
-    // Redirect will be handled by the node form after save
+    // Redirect will be handled by the node form after save.
   }
 }
 

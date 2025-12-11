@@ -18,8 +18,8 @@ class CreateEventGatewayController extends ControllerBase {
    *
    * Logic:
    * - Anonymous users → login with destination back to /create-event
-   * - Logged-in users without vendor → /vendor/onboard
-   * - Logged-in users with vendor → /node/add/event (with vendor pre-filled)
+   * - Logged-in users without vendor → /vendor/onboard (vendor setup)
+   * - Logged-in users with vendor → /vendor/dashboard
    *
    * @return \Symfony\Component\HttpFoundation\RedirectResponse
    *   A redirect response.
@@ -29,8 +29,16 @@ class CreateEventGatewayController extends ControllerBase {
 
     // Anonymous users: redirect to login with destination.
     if ($current_user->isAnonymous()) {
+      // Use the request's current path to preserve any query parameters.
+      $request = \Drupal::request();
+      $destination = $request->getRequestUri();
+
+      // Add a message explaining why login is needed.
+      $this->messenger()->addWarning($this->t('To create events, you need to log in with a vendor/organiser account. If you don\'t have an account yet, you can create one after logging in.'));
+
       $login_url = Url::fromRoute('user.login', [], [
-        'query' => ['destination' => '/create-event'],
+        'query' => ['destination' => $destination],
+        'absolute' => TRUE,
       ]);
       return new RedirectResponse($login_url->toString());
     }
@@ -38,28 +46,15 @@ class CreateEventGatewayController extends ControllerBase {
     // Find vendors associated with the current user.
     $vendor_ids = $this->getUserVendors((int) $current_user->id());
 
-    // No vendor found: redirect to onboarding.
+    // No vendor found: redirect to onboarding (vendor setup).
     if (empty($vendor_ids)) {
-      $onboard_url = Url::fromRoute('myeventlane_vendor.onboard');
+      $onboard_url = Url::fromRoute('myeventlane_vendor.onboard.profile');
       return new RedirectResponse($onboard_url->toString());
     }
 
-    // One vendor: redirect to event creation with vendor pre-filled.
-    if (count($vendor_ids) === 1) {
-      $vendor_id = reset($vendor_ids);
-      $event_url = Url::fromRoute('node.add', ['node_type' => 'event'], [
-        'query' => ['vendor' => $vendor_id],
-      ]);
-      return new RedirectResponse($event_url->toString());
-    }
-
-    // Multiple vendors: redirect to vendor selection page.
-    // For now, we'll pick the first one, but could redirect to a selection page.
-    $vendor_id = reset($vendor_ids);
-    $event_url = Url::fromRoute('node.add', ['node_type' => 'event'], [
-      'query' => ['vendor' => $vendor_id],
-    ]);
-    return new RedirectResponse($event_url->toString());
+    // User has a vendor: redirect to vendor dashboard where they can create events.
+    $dashboard_url = Url::fromRoute('myeventlane_vendor.console.dashboard');
+    return new RedirectResponse($dashboard_url->toString());
   }
 
   /**

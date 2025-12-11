@@ -203,6 +203,11 @@ function myeventlane_commerce_theme(): array {
         'venue_text' => '',
         'hero_url' => '',
         'matrix_form' => [],
+        'rsvp_form' => [],
+        'is_rsvp' => FALSE,
+        'is_paid' => FALSE,
+        'event_mode' => 'none',
+        'event' => NULL,
       ],
       'template' => 'myeventlane-event-book',
     ],
@@ -289,18 +294,32 @@ function myeventlane_commerce_form_alter(array &$form, FormStateInterface $form_
   
   // If billing_information exists as a top-level pane, remove it from payment_information.
   // Only do this if payment_information has been built (has #payment_options or other pane structure).
-  // We need to be careful not to interfere with the pane's internal structure.
+  // We need to be careful not to interfere with the pane's internal structure, especially Stripe forms.
   if (isset($form['billing_information']) && is_array($form['billing_information'])) {
     // Only remove billing_information from payment_information if:
     // 1. payment_information exists and is an array
     // 2. payment_information has been built (has #payment_options or payment_method element)
     // 3. billing_information exists within payment_information
+    // 4. We're NOT dealing with a Stripe form (which needs its structure intact)
     if (isset($form['payment_information']) 
         && is_array($form['payment_information'])
         && (isset($form['payment_information']['#payment_options']) || isset($form['payment_information']['payment_method']))
         && isset($form['payment_information']['billing_information'])) {
-      // Safely remove only the billing_information element, not affecting other pane structure.
+      // Check if this is a Stripe form - if so, don't modify structure
+      $is_stripe_form = FALSE;
+      if (isset($form['payment_information']['add_payment_method']['payment_details'])) {
+        $payment_details = $form['payment_information']['add_payment_method']['payment_details'];
+        if (isset($payment_details['#attributes']['class']) && 
+            in_array('stripe-form', $payment_details['#attributes']['class'])) {
+          $is_stripe_form = TRUE;
+        }
+      }
+      
+      // Only remove billing_information if it's not a Stripe form
+      // Stripe forms need their structure intact for proper initialization
+      if (!$is_stripe_form) {
       unset($form['payment_information']['billing_information']);
+      }
     }
   }
 
