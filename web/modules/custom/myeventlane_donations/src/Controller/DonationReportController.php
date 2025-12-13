@@ -6,6 +6,7 @@ namespace Drupal\myeventlane_donations\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\Url;
 use Drupal\myeventlane_donations\Service\DonationService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -67,7 +68,12 @@ final class DonationReportController extends ControllerBase {
       '#total_rsvp' => $totalRsvp,
       '#count_platform' => $countPlatform,
       '#count_rsvp' => $countRsvp,
-      '#export_url' => $this->getUrlGenerator()->generateFromRoute('myeventlane_donations.admin_export'),
+      '#export_url' => Url::fromRoute('myeventlane_donations.admin_export')->toString(),
+      '#attached' => [
+        'library' => [
+          'myeventlane_donations/donation-report',
+        ],
+      ],
     ];
 
     return $build;
@@ -343,3 +349,4 @@ final class DonationReportController extends ControllerBase {
   }
 
 }
+
