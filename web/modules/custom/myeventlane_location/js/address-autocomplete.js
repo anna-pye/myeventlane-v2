@@ -16,18 +16,42 @@
     
     console.log('MyEventLane Location: Settings:', settings);
     console.log('MyEventLane Location: Provider:', provider);
+    console.log('MyEventLane Location: drupalSettings available:', typeof drupalSettings !== 'undefined');
+    console.log('MyEventLane Location: drupalSettings.myeventlaneLocation:', drupalSettings.myeventlaneLocation);
 
     // Check if API key is configured.
     if (provider === 'google_maps' && !settings.google_maps_api_key) {
       console.error('MyEventLane Location: Google Maps API key not configured.');
+      console.error('MyEventLane Location: Settings object:', settings);
       return;
     }
 
-    // Find the address search input.
-    const searchInput = document.querySelector('.myeventlane-location-address-search');
+    // Find the address search input - try multiple selectors
+    let searchInput = document.querySelector('.myeventlane-location-address-search');
     if (!searchInput) {
-      console.warn('MyEventLane Location: Address search input not found. Available inputs:', 
-        Array.from(document.querySelectorAll('input[type="text"]')).map(i => ({ class: i.className, name: i.name })));
+      // Try finding it in the location container
+      const locationContainer = document.querySelector('.location, .mel-form-card:has(.field--name-field-location)');
+      if (locationContainer) {
+        searchInput = locationContainer.querySelector('.myeventlane-location-address-search');
+      }
+    }
+    if (!searchInput) {
+      // Try finding by name attribute
+      searchInput = document.querySelector('input[name*="address_search"]');
+    }
+    
+    if (!searchInput) {
+      console.warn('MyEventLane Location: Address search input not found.');
+      console.warn('MyEventLane Location: Searching for inputs with class "myeventlane-location-address-search":', 
+        document.querySelectorAll('.myeventlane-location-address-search').length);
+      console.warn('MyEventLane Location: Available text inputs:', 
+        Array.from(document.querySelectorAll('input[type="text"]')).map(i => ({ 
+          class: i.className, 
+          name: i.name,
+          id: i.id,
+          placeholder: i.placeholder
+        })));
+      console.warn('MyEventLane Location: Form structure:', document.querySelector('form.node-event-form, form.node-event-edit-form'));
       return;
     }
     
@@ -568,15 +592,19 @@
   function initialize() {
     // Only initialize if we're on an event form (check for the search input or form ID).
     const isEventForm = document.querySelector('.myeventlane-location-address-search') ||
-                        document.querySelector('form.node-event-form, form.node-event-edit-form, form[id*="node-event"]');
+                        document.querySelector('form.node-event-form, form.node-event-edit-form, form[id*="node-event"]') ||
+                        document.querySelector('form.mel-event-form-vendor');
     
     if (!isEventForm) {
       // Not on an event form, don't initialize or interfere.
       return;
     }
     
-    // Small delay to ensure form is fully rendered.
-    setTimeout(initAddressAutocomplete, 100);
+    // Longer delay to ensure form is fully rendered, especially after AJAX or form restructuring
+    // Try multiple times in case form loads asynchronously
+    setTimeout(initAddressAutocomplete, 300);
+    setTimeout(initAddressAutocomplete, 800);
+    setTimeout(initAddressAutocomplete, 1500);
   }
 
   if (document.readyState === 'loading') {
@@ -593,13 +621,33 @@
         // Only re-initialize if this is likely an event form AJAX update.
         // Check if the search input exists or if the form is an event form.
         const isEventForm = document.querySelector('.myeventlane-location-address-search') ||
-                            document.querySelector('form.node-event-form, form.node-event-edit-form, form[id*="node-event"]');
+                            document.querySelector('form.node-event-form, form.node-event-edit-form, form[id*="node-event"]') ||
+                            document.querySelector('form.mel-event-form-vendor');
         
         if (isEventForm) {
-          setTimeout(initAddressAutocomplete, 200);
+          setTimeout(initAddressAutocomplete, 300);
+          setTimeout(initAddressAutocomplete, 800);
         }
       });
     }
+  }
+  
+  // Also use Drupal behaviors for proper integration
+  if (typeof Drupal !== 'undefined' && Drupal.behaviors) {
+    Drupal.behaviors.myeventlaneLocationAutocomplete = {
+      attach: function (context, settings) {
+        // Only initialize on event forms
+        const isEventForm = context.querySelector('.myeventlane-location-address-search') ||
+                            context.querySelector('form.node-event-form, form.node-event-edit-form, form[id*="node-event"]') ||
+                            context.querySelector('form.mel-event-form-vendor');
+        
+        if (isEventForm) {
+          setTimeout(function() {
+            initAddressAutocomplete();
+          }, 200);
+        }
+      }
+    };
   }
 
 })(Drupal, drupalSettings);

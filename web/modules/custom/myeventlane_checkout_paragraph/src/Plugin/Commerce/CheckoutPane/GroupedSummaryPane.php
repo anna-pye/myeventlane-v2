@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\myeventlane_checkout_paragraph\Plugin\Commerce\CheckoutPane;
 
 use Drupal\commerce_checkout\Plugin\Commerce\CheckoutPane\CheckoutPaneBase;
@@ -16,12 +18,12 @@ use Drupal\views\Views;
  *   wrapper_element = "fieldset"
  * )
  */
-class GroupedSummaryPane extends CheckoutPaneBase {
+final class GroupedSummaryPane extends CheckoutPaneBase {
 
   /**
    * {@inheritdoc}
    */
-  public function buildPaneForm(array $pane_form, FormStateInterface $form_state, array &$complete_form) {
+  public function buildPaneForm(array $pane_form, FormStateInterface $form_state, array &$complete_form): array {
     $order = $this->order;
 
     // Load the 'ticket_order_summary' view and display 'embed_1'.
@@ -41,11 +43,6 @@ class GroupedSummaryPane extends CheckoutPaneBase {
         return [];
       }
     }
-    else {
-      // Return empty array to hide the pane when view doesn't exist or access denied.
-      return [];
-    }
-
     return $pane_form;
   }
 

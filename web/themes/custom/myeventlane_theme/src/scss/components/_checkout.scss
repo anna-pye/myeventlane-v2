@@ -420,13 +420,11 @@
 .payment_information {
   // Error messages should appear below fields, not covering them
   .form-item--error-message {
-    position: relative !important;
+    position: static !important;
     z-index: 0 !important;
     margin-top: spacing.mel-space(2) !important;
     margin-bottom: spacing.mel-space(2) !important;
     display: block !important;
-    // Don't position errors absolutely over input fields
-    position: static !important;
   }
   
   // Ensure input fields are visible and above error messages

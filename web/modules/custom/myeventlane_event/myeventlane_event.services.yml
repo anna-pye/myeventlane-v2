@@ -34,3 +34,9 @@ services:
     arguments:
       - '@entity_type.manager'
       - '@current_user'
+
+  # Event type service - simplified type detection for templates.
+  myeventlane_event.type_service:
+    class: Drupal\myeventlane_event\Service\EventTypeService
+    arguments:
+      - '@myeventlane_event.mode_manager'

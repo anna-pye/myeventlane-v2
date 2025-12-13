@@ -1,0 +1,12 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - myeventlane_vendor
+id: myeventlane_vendor
+label: 'Vendor paths'
+type: 'canonical_entities:myeventlane_vendor'
+pattern: 'vendor/[myeventlane_vendor:name]'
+selection_criteria: {  }
+weight: 0
+

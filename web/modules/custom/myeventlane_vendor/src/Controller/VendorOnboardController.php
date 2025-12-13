@@ -23,48 +23,34 @@ class VendorOnboardController extends ControllerBase {
   }
 
   /**
-   * Onboarding page that shows vendor creation form.
+   * Legacy onboarding page - redirects to new step-by-step flow.
    *
-   * @return array|\Symfony\Component\HttpFoundation\RedirectResponse
-   *   A render array or redirect response.
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   *   Redirect to new onboarding flow.
    */
-  public function onboard(): array|RedirectResponse {
+  public function onboard(): RedirectResponse {
     $current_user = $this->currentUser();
 
-    // Anonymous users should not access this page.
+    // Anonymous users go to account step.
     if ($current_user->isAnonymous()) {
-      $login_url = Url::fromRoute('user.login', [], [
-        'query' => ['destination' => '/vendor/onboard'],
-      ]);
-      return new RedirectResponse($login_url->toString());
+      return new RedirectResponse(
+        Url::fromRoute('myeventlane_vendor.onboard.account')->toString()
+      );
     }
 
     // Check if user already has a vendor.
     $vendor_ids = $this->getUserVendors((int) $current_user->id());
     if (!empty($vendor_ids)) {
       // User already has a vendor, redirect to create event.
-      $create_event_url = Url::fromRoute('myeventlane_vendor.create_event_gateway');
-      return new RedirectResponse($create_event_url->toString());
+      return new RedirectResponse(
+        Url::fromRoute('myeventlane_vendor.create_event_gateway')->toString()
+      );
     }
 
-    // Create a new vendor entity and set the current user as owner.
-    $vendor = Vendor::create([
-      'uid' => (int) $current_user->id(),
-    ]);
-
-    // Get the vendor add form.
-    $form_object = $this->entityTypeManager()
-      ->getFormObject('myeventlane_vendor', 'add')
-      ->setEntity($vendor);
-    $form = $this->formBuilder()->getForm($form_object);
-
-    // Add a custom message at the top.
-    $form['#prefix'] = '<div class="vendor-onboard-message"><p>' . $this->t('To create events, you need to set up your organiser profile. Fill out the form below to get started.') . '</p></div>';
-
-    // Override the form submit redirect to go back to /create-event.
-    $form['actions']['submit']['#submit'][] = [$this, 'onboardFormSubmit'];
-
-    return $form;
+    // User is logged in but no vendor - go to profile step.
+    return new RedirectResponse(
+      Url::fromRoute('myeventlane_vendor.onboard.profile')->toString()
+    );
   }
 
   /**

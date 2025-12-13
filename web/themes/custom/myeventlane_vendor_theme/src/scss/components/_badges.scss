@@ -1,0 +1,186 @@
+/**
+ * @file
+ * Badge component styles for MyEventLane Vendor Theme.
+ *
+ * mel-badge: Status indicators and labels.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/radii' as *;
+
+// ============================================================================
+// BASE BADGE (mel-badge)
+// ============================================================================
+
+.mel-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-1;
+  padding: $spacing-1 $spacing-2;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-tight;
+  color: $text-secondary;
+  background: $bg-tertiary;
+  border-radius: $radius-badge;
+  white-space: nowrap;
+}
+
+// ============================================================================
+// BADGE VARIANTS
+// ============================================================================
+
+// Primary
+.mel-badge--primary {
+  color: $primary;
+  background: rgba($primary, 0.1);
+}
+
+// Success / Published
+.mel-badge--success,
+.mel-badge--published {
+  color: $success;
+  background: $success-light;
+}
+
+// Warning / Draft
+.mel-badge--warning,
+.mel-badge--draft {
+  color: $warning;
+  background: $warning-light;
+}
+
+// Danger / Cancelled
+.mel-badge--danger,
+.mel-badge--cancelled {
+  color: $danger;
+  background: $danger-light;
+}
+
+// Info
+.mel-badge--info {
+  color: $info;
+  background: $info-light;
+}
+
+// Coral accent
+.mel-badge--coral {
+  color: $ml-accent-coral;
+  background: $ml-accent-coral-light;
+}
+
+// Neutral / Ended
+.mel-badge--neutral,
+.mel-badge--ended {
+  color: $text-muted;
+  background: $bg-tertiary;
+}
+
+// ============================================================================
+// BADGE SIZES
+// ============================================================================
+
+.mel-badge--sm {
+  padding: 2px $spacing-1;
+  font-size: 10px;
+}
+
+.mel-badge--lg {
+  padding: $spacing-2 $spacing-3;
+  font-size: $font-size-sm;
+}
+
+// ============================================================================
+// BADGE WITH DOT
+// ============================================================================
+
+.mel-badge--dot {
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: $radius-full;
+    background: currentColor;
+  }
+}
+
+// ============================================================================
+// BADGE COUNT
+// ============================================================================
+
+.mel-badge--count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 $spacing-1;
+  justify-content: center;
+  border-radius: $radius-full;
+  font-weight: $font-weight-semibold;
+}
+
+// ============================================================================
+// STATUS BADGE (with explicit status mapping)
+// ============================================================================
+
+.mel-status {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.mel-status__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: $radius-full;
+  flex-shrink: 0;
+}
+
+.mel-status--on-sale {
+  .mel-status__dot {
+    background: $success;
+  }
+  color: $success;
+}
+
+.mel-status--draft {
+  .mel-status__dot {
+    background: $warning;
+  }
+  color: $warning;
+}
+
+.mel-status--ended {
+  .mel-status__dot {
+    background: $text-muted;
+  }
+  color: $text-muted;
+}
+
+.mel-status--sold-out {
+  .mel-status__dot {
+    background: $danger;
+  }
+  color: $danger;
+}
+
+.mel-status--running {
+  .mel-status__dot {
+    background: $success;
+    animation: mel-status-pulse 2s infinite;
+  }
+  color: $success;
+}
+
+@keyframes mel-status-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+

@@ -1,0 +1,231 @@
+/**
+ * @file
+ * Header styles for MyEventLane Vendor Theme.
+ *
+ * mel-header: Page header with context, status, and actions.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/breakpoints' as *;
+
+// ============================================================================
+// HEADER (mel-header)
+// ============================================================================
+
+.mel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-4;
+  flex-wrap: wrap;
+}
+
+.mel-header__left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+}
+
+.mel-header__right,
+.mel-header__actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+}
+
+// Mobile menu toggle
+.mel-header__menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  color: $text-primary;
+  font-size: $font-size-xl;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    background: $bg-secondary;
+    border-color: $border-color-dark;
+  }
+  
+  @include respond-to(lg) {
+    display: none;
+  }
+}
+
+// ============================================================================
+// HEADER BRAND (for event context)
+// ============================================================================
+
+.mel-header__brand {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+}
+
+.mel-header__logo {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: $ml-accent-coral-light;
+  color: $ml-accent-coral;
+  border-radius: $radius-md;
+  font-weight: $font-weight-bold;
+  font-size: $font-size-lg;
+}
+
+.mel-header__titles {
+  display: grid;
+  gap: $spacing-1;
+}
+
+.mel-header__title {
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-lg;
+  color: $text-primary;
+  line-height: $line-height-tight;
+}
+
+.mel-header__subtitle {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+// ============================================================================
+// HEADER STATUS
+// ============================================================================
+
+.mel-header__status {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+.mel-header__status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: $radius-full;
+  
+  &--draft {
+    background: $warning;
+  }
+  
+  &--published {
+    background: $success;
+  }
+  
+  &--ended {
+    background: $text-muted;
+  }
+}
+
+// ============================================================================
+// HEADER ACTION BUTTONS
+// ============================================================================
+
+.mel-header__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-2;
+  padding: $spacing-2 $spacing-4;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+  background: $bg-primary;
+  border: 1px solid $border-color;
+  border-radius: $radius-button;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    background: $bg-secondary;
+    border-color: $border-color-dark;
+    text-decoration: none;
+  }
+}
+
+.mel-header__action--primary {
+  color: $text-inverse;
+  background: $primary;
+  border-color: $primary;
+  
+  &:hover {
+    background: $primary-dark;
+    border-color: $primary-dark;
+    color: $text-inverse;
+  }
+}
+
+.mel-header__action--icon {
+  padding: $spacing-2;
+  width: 36px;
+  height: 36px;
+}
+
+// More actions dropdown trigger
+.mel-header__more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  color: $text-secondary;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    background: $bg-secondary;
+    color: $text-primary;
+  }
+}
+
+// ============================================================================
+// USER MENU
+// ============================================================================
+
+.mel-header__user-menu {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-2;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+  
+  &:hover {
+    background: $bg-secondary;
+  }
+}
+
+.mel-header__user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-full;
+  background: $primary;
+  color: $text-inverse;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+}
+

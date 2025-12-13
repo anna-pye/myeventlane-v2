@@ -1,0 +1,132 @@
+{#
+  Audience management view.
+  Variables: attendees, summary, segments.
+#}
+
+{# Summary Cards #}
+<div class="mel-grid mel-grid--3 mel-mb-xl">
+  <div class="mel-card mel-card--stat">
+    <div class="mel-stat">
+      <div class="mel-stat__value">{{ summary.total|default(0) }}</div>
+      <div class="mel-stat__label">{{ 'Total Attendees'|t }}</div>
+    </div>
+  </div>
+  <div class="mel-card mel-card--stat">
+    <div class="mel-stat">
+      <div class="mel-stat__value">{{ segments|length }}</div>
+      <div class="mel-stat__label">{{ 'Event Categories'|t }}</div>
+    </div>
+  </div>
+  <div class="mel-card mel-card--stat">
+    <div class="mel-stat">
+      <div class="mel-stat__value">—</div>
+      <div class="mel-stat__label">{{ 'Repeat Attendees'|t }}</div>
+      <div class="mel-stat__note mel-text--muted">{{ 'Coming soon'|t }}</div>
+    </div>
+  </div>
+</div>
+
+{# Attendee List #}
+<div class="mel-card mel-mb-lg">
+  <div class="mel-card__header">
+    <div class="mel-card__title">{{ 'All Attendees'|t }}</div>
+    {% if attendees|length > 0 %}
+      <div class="mel-search mel-search--inline">
+        <input type="text" class="mel-input mel-input--sm" placeholder="{{ 'Search attendees...'|t }}" id="audience-search">
+      </div>
+    {% endif %}
+  </div>
+  
+  {% if attendees|length > 0 %}
+    <div class="mel-table-responsive">
+      <table class="mel-table mel-table--striped" id="attendees-table">
+        <thead>
+          <tr>
+            <th>{{ 'Name'|t }}</th>
+            <th>{{ 'Email'|t }}</th>
+            <th>{{ 'Event'|t }}</th>
+            <th>{{ 'Source'|t }}</th>
+            <th>{{ 'Status'|t }}</th>
+            <th>{{ 'Date'|t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for attendee in attendees %}
+            <tr class="attendee-row">
+              <td>{{ attendee.name|default('—') }}</td>
+              <td>
+                {% if attendee.email %}
+                  <a href="mailto:{{ attendee.email }}">{{ attendee.email }}</a>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td>
+                {% if attendee.event_id %}
+                  <a href="/vendor/events/{{ attendee.event_id }}/attendees">{{ attendee.event }}</a>
+                {% else %}
+                  {{ attendee.event|default('—') }}
+                {% endif %}
+              </td>
+              <td>
+                <span class="mel-badge mel-badge--{{ attendee.source|lower|default('unknown') }}">
+                  {{ attendee.source|default('Unknown') }}
+                </span>
+              </td>
+              <td>
+                <span class="mel-badge mel-badge--{{ attendee.status|lower|default('pending') }}">
+                  {{ attendee.status|default('Pending') }}
+                </span>
+              </td>
+              <td>{{ attendee.created|default('—') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="mel-empty">
+      <div class="mel-empty__icon">👥</div>
+      <div class="mel-empty__title">{{ 'No attendees yet'|t }}</div>
+      <div class="mel-empty__description">
+        {{ 'When people RSVP or purchase tickets to your events, they will appear here.'|t }}
+      </div>
+      <a href="/vendor/events/add" class="mel-btn mel-btn--primary">{{ 'Create an event'|t }}</a>
+    </div>
+  {% endif %}
+</div>
+
+{# Category Breakdown (if data exists) #}
+{% if segments|length > 0 %}
+<div class="mel-card">
+  <div class="mel-card__header">
+    <div class="mel-card__title">{{ 'Attendees by Event Category'|t }}</div>
+  </div>
+  <div class="mel-list">
+    {% for segment in segments %}
+      <div class="mel-list__item">
+        <div>{{ segment.label }}</div>
+        <div class="mel-badge">{{ segment.value }} {{ 'events'|t }}</div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{# Search JavaScript #}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('audience-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.attendee-row');
+        
+        rows.forEach(function(row) {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+      });
+    }
+  });
+</script>

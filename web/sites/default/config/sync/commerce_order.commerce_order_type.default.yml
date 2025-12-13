@@ -19,10 +19,10 @@ id: default
 label: Default
 traits: {  }
 locked: false
-workflow: order_default_validation
+workflow: order_default
 numberPattern: order_default
-refresh_mode: customer
+refresh_mode: always
 refresh_frequency: 300
-sendReceipt: true
+sendReceipt: false
 receiptBcc: ''
 receiptSubject: ''

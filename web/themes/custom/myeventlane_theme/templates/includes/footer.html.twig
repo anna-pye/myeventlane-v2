@@ -3,29 +3,39 @@
  * @file
  * Simple footer inspired by the mockup.
  * Clean, minimal with essential links.
+ * 
+ * Supports footer menu blocks via page.footer.footer_menu.
  */
 #}
+{% set footer_attributes = create_attribute() %}
+{% set footer_attributes = footer_attributes.addClass('mel-footer', 'mel-footer--simple') %}
 
 {# Main Footer #}
-<footer class="mel-footer mel-footer--simple">
+<footer{{ footer_attributes }}>
   <div class="mel-container">
     <div class="mel-footer-simple-inner">
 
       {# Brand & Tagline #}
       <div class="mel-footer-brand">
         <span class="mel-footer-logo">MyEventLane</span>
-        <p class="mel-footer-tagline">Empowering event creators everywhere.</p>
+        <p class="mel-footer-tagline">{{ 'Empowering event creators everywhere.'|t }}</p>
       </div>
 
       {# Quick Links #}
-      <nav class="mel-footer-nav" aria-label="Footer navigation">
-        <ul class="mel-footer-links-inline">
-          <li><a href="/about">About</a></li>
-          <li><a href="/support">Support</a></li>
-          <li><a href="/contact">Contact</a></li>
-          <li><a href="/privacy">Privacy</a></li>
-          <li><a href="/terms">Terms</a></li>
-        </ul>
+      <nav class="mel-footer-nav" aria-label="{{ 'Footer navigation'|t }}">
+        {% if page.footer.footer_menu %}
+          {# Use Drupal menu if available #}
+          {{ page.footer.footer_menu }}
+        {% else %}
+          {# Fallback hard-coded links #}
+          <ul class="mel-footer-links-inline">
+            <li><a href="/about">{{ 'About'|t }}</a></li>
+            <li><a href="/support">{{ 'Support'|t }}</a></li>
+            <li><a href="/contact">{{ 'Contact'|t }}</a></li>
+            <li><a href="/privacy">{{ 'Privacy'|t }}</a></li>
+            <li><a href="/terms">{{ 'Terms'|t }}</a></li>
+          </ul>
+        {% endif %}
       </nav>
 
     </div>
@@ -37,17 +47,17 @@
   <div class="mel-container">
     <div class="mel-post-footer-inner">
       <span class="mel-copyright">
-        © {{ "now"|date("Y") }} MyEventLane. All rights reserved.
+        © {{ "now"|date("Y") }} MyEventLane. {{ 'All rights reserved.'|t }}
       </span>
       <div class="mel-footer-social-icons">
-        <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook">
-          <span>FB</span>
+        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="{{ 'Facebook'|t }}">
+          <span aria-hidden="true">FB</span>
         </a>
-        <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
-          <span>IG</span>
+        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="{{ 'Instagram'|t }}">
+          <span aria-hidden="true">IG</span>
         </a>
-        <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="Twitter">
-          <span>X</span>
+        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="{{ 'Twitter'|t }}">
+          <span aria-hidden="true">X</span>
         </a>
       </div>
     </div>

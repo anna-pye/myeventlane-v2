@@ -10,6 +10,26 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\node\NodeInterface;
 
 /**
+ * Implements hook_theme().
+ *
+ * Registers custom theme components.
+ */
+function myeventlane_theme_theme(): array {
+  return [
+    'event_type_pill' => [
+      'variables' => [
+        'type' => 'none',
+        'label' => NULL,
+        'size' => 'sm',
+        'icon' => NULL,
+        'class' => NULL,
+      ],
+      'template' => 'components/event-type-pill',
+    ],
+  ];
+}
+
+/**
  * Implements hook_preprocess_page().
  *
  * Adds cart block and main menu to header if not already placed.
@@ -412,9 +432,20 @@ function myeventlane_theme_preprocess_form(array &$variables): void {
     // Add debug flag
     $variables['debug'] = TRUE;
     
-    \Drupal::logger('myeventlane_theme')->notice('Event form template suggestion added. Form ID: @form_id, Node: @node', [
+    // Debug: Check if sections exist in form at template preprocessing time
+    $has_location = isset($form['location']) ? 'YES' : 'NO';
+    $has_booking = isset($form['booking_config']) ? 'YES' : 'NO';
+    $has_visibility = isset($form['visibility']) ? 'YES' : 'NO';
+    $form_keys = array_keys($form);
+    $filtered_keys = array_filter($form_keys, function($key) { return !str_starts_with($key, '#'); });
+    
+    \Drupal::logger('myeventlane_theme')->notice('Event form template suggestion added. Form ID: @form_id, Node: @node. Sections: location=@loc, booking=@book, visibility=@vis. Keys: @keys', [
       '@form_id' => $form_id,
       '@node' => $node ? $node->id() : 'new',
+      '@loc' => $has_location,
+      '@book' => $has_booking,
+      '@vis' => $has_visibility,
+      '@keys' => implode(', ', array_slice($filtered_keys, 0, 20)), // First 20 keys
     ]);
   }
 }

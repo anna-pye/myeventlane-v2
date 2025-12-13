@@ -13,7 +13,9 @@ dependencies:
     - field.field.node.event.field_event_image
     - field.field.node.event.field_event_location
     - field.field.node.event.field_event_start
+    - field.field.node.event.field_event_store
     - field.field.node.event.field_event_type
+    - field.field.node.event.field_event_vendor
     - field.field.node.event.field_external_url
     - field.field.node.event.field_featured
     - field.field.node.event.field_location
@@ -110,6 +112,14 @@ content:
     third_party_settings: {  }
     weight: 2
     region: content
+  field_event_vendor:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 20
+    region: content
   field_external_url:
     type: link
     label: above
@@ -172,6 +182,7 @@ hidden:
   field_attendee_questions: true
   field_collect_per_ticket: true
   field_event_location: true
+  field_event_store: true
   field_location_latitude: true
   field_location_longitude: true
   field_promo_expires: true

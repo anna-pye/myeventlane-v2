@@ -1,0 +1,256 @@
+/**
+ * @file
+ * Button styles for MyEventLane Vendor Theme.
+ *
+ * mel-button component with variants.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/shadows' as *;
+
+@use 'sass:color';
+
+// ============================================================================
+// BASE BUTTON (mel-btn)
+// ============================================================================
+
+.mel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-2;
+  padding: $spacing-3 $spacing-5;
+  font-family: $font-family-sans;
+  font-size: $font-size-label;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-tight;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: $radius-button;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  white-space: nowrap;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: $shadow-focus;
+  }
+
+  &:disabled,
+  &.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+// ============================================================================
+// BUTTON VARIANTS
+// ============================================================================
+
+// Primary button (coral accent)
+.mel-btn--primary {
+  background-color: $primary;
+  color: $text-inverse;
+  border-color: $primary;
+
+  &:hover {
+    background-color: $primary-dark;
+    border-color: $primary-dark;
+    color: $text-inverse;
+  }
+}
+
+// Coral accent button
+.mel-btn--coral {
+  background-color: $ml-accent-coral;
+  color: $text-inverse;
+  border-color: $ml-accent-coral;
+
+  &:hover {
+    background-color: color.adjust($ml-accent-coral, $lightness: -8%);
+    border-color: color.adjust($ml-accent-coral, $lightness: -8%);
+    color: $text-inverse;
+  }
+}
+
+// Secondary/outline button
+.mel-btn--secondary {
+  background-color: $bg-primary;
+  color: $text-primary;
+  border-color: $border-color;
+
+  &:hover {
+    background-color: $bg-secondary;
+    border-color: $border-color-dark;
+    color: $text-primary;
+  }
+}
+
+// Ghost button
+.mel-btn--ghost {
+  background-color: transparent;
+  color: $text-secondary;
+  border-color: transparent;
+
+  &:hover {
+    background-color: $bg-secondary;
+    color: $text-primary;
+  }
+}
+
+// Danger button
+.mel-btn--danger {
+  background-color: $danger;
+  color: $text-inverse;
+  border-color: $danger;
+
+  &:hover {
+    background-color: color.adjust($danger, $lightness: -10%);
+    border-color: color.adjust($danger, $lightness: -10%);
+  }
+  
+  &:focus {
+    box-shadow: $shadow-focus-danger;
+  }
+}
+
+// Success button
+.mel-btn--success {
+  background-color: $success;
+  color: $text-inverse;
+  border-color: $success;
+
+  &:hover {
+    background-color: color.adjust($success, $lightness: -10%);
+    border-color: color.adjust($success, $lightness: -10%);
+  }
+  
+  &:focus {
+    box-shadow: $shadow-focus-success;
+  }
+}
+
+// ============================================================================
+// BUTTON SIZES
+// ============================================================================
+
+.mel-btn--sm {
+  padding: $spacing-2 $spacing-3;
+  font-size: $font-size-sm;
+}
+
+.mel-btn--lg {
+  padding: $spacing-4 $spacing-6;
+  font-size: $font-size-body;
+}
+
+// ============================================================================
+// BUTTON ICON
+// ============================================================================
+
+.mel-btn--icon-only {
+  padding: $spacing-3;
+  width: 40px;
+  height: 40px;
+  
+  &.mel-btn--sm {
+    padding: $spacing-2;
+    width: 32px;
+    height: 32px;
+  }
+  
+  &.mel-btn--lg {
+    padding: $spacing-4;
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.mel-btn__icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+// ============================================================================
+// BUTTON GROUP
+// ============================================================================
+
+.mel-btn-group {
+  display: inline-flex;
+  
+  .mel-btn {
+    border-radius: 0;
+    
+    &:first-child {
+      border-radius: $radius-button 0 0 $radius-button;
+    }
+    
+    &:last-child {
+      border-radius: 0 $radius-button $radius-button 0;
+    }
+    
+    &:not(:first-child) {
+      margin-left: -1px;
+    }
+  }
+}
+
+// ============================================================================
+// LINK STYLES
+// ============================================================================
+
+.mel-link {
+  color: $primary;
+  text-decoration: none;
+  font-weight: $font-weight-medium;
+
+  &:hover,
+  &:focus {
+    text-decoration: underline;
+    color: $primary-dark;
+  }
+}
+
+.mel-link--muted {
+  color: $text-secondary;
+  
+  &:hover,
+  &:focus {
+    color: $text-primary;
+  }
+}
+
+// ============================================================================
+// LEGACY BUTTON SUPPORT
+// ============================================================================
+
+button,
+.button,
+.form-submit,
+input[type="submit"],
+a.button {
+  @extend .mel-btn;
+  @extend .mel-btn--primary;
+}
+
+.button--secondary,
+.button-secondary {
+  @extend .mel-btn--secondary;
+}
+
+.button--danger,
+.button-danger {
+  @extend .mel-btn--danger;
+}
+

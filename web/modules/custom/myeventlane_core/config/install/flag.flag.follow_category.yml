@@ -1,0 +1,36 @@
+id: follow_category
+label: 'Follow Category'
+entity_type: taxonomy_term
+flag_type: entity:taxonomy_term
+global: false
+types:
+  - categories
+link_type: confirm
+link_text: 'Follow'
+link_text_short: 'Follow'
+unlink_text: 'Unfollow'
+unlink_text_short: 'Unfollow'
+flag_short: 'Follow'
+flag_long: 'Follow this category'
+flag_message: 'You are now following %label'
+unflag_short: 'Unfollow'
+unflag_long: 'Stop following this category'
+unflag_message: 'You are no longer following %label'
+unflag_denied_text: 'You may not unfollow %label'
+flag_denied_text: 'You may not follow %label'
+weight: 0
+show_in_links: true
+show_on_form: false
+show_on_entity: true
+show_contextual_link: true
+show_on_profile: true
+show_on_own_profile: true
+show_count: true
+show_on_teaser: true
+show_on_full: true
+extra_fields:
+  follow_category:
+    weight: 0
+    enabled: true
+    settings: {  }
+

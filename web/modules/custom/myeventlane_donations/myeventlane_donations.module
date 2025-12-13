@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file
+ * Module file for MyEventLane Donations.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function myeventlane_donations_theme(array $existing, string $type, string $theme, string $path): array {
+  return [
+    'myeventlane_donation_platform' => [
+      'variables' => [
+        'form' => NULL,
+      ],
+      'template' => 'myeventlane-donation-platform',
+    ],
+    'myeventlane_donation_report' => [
+      'variables' => [
+        'platform_stats' => [],
+        'rsvp_stats' => [],
+        'total_platform' => 0,
+        'total_rsvp' => 0,
+        'count_platform' => 0,
+        'count_rsvp' => 0,
+        'export_url' => '',
+      ],
+      'template' => 'myeventlane-donation-report',
+    ],
+  ];
+}

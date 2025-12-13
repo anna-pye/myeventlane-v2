@@ -220,7 +220,7 @@ final class EventProductManager {
             if ($productEventId != $event->id()) {
               $product->set('field_event', ['target_id' => $event->id()]);
               $product->save();
-              
+
               $this->loggerFactory->get('myeventlane_event')->notice(
                 'Linked RSVP product @pid to event @eid',
                 ['@pid' => $product->id(), '@eid' => $event->id()]
@@ -235,9 +235,9 @@ final class EventProductManager {
     // For events with ticket types, the product will be auto-created by
     // TicketTypeManager, so we don't show a warning if ticket types exist.
     if (in_array($eventType, ['paid', 'both'], TRUE)) {
-      $hasTicketTypes = $event->hasField('field_ticket_types') 
+      $hasTicketTypes = $event->hasField('field_ticket_types')
         && !$event->get('field_ticket_types')->isEmpty();
-      
+
       if ($event->get('field_product_target')->isEmpty() && !$hasTicketTypes) {
         $this->messenger->addWarning(
           $this->t('Please link a ticket product for this @type event, or define ticket types below.', [

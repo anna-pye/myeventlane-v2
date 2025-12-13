@@ -43,17 +43,25 @@
       if (typeof Drupal !== 'undefined' && Drupal.behaviors) {
         // Give conditional_fields time to initialize after form is fully rendered
         setTimeout(function() {
-          // Trigger change event to ensure #states API evaluates
+          // Use Drupal.states API to trigger evaluation
+          if (typeof Drupal.states !== 'undefined' && Drupal.states.trigger) {
+            // This is the proper way to trigger #states evaluation
+            Drupal.states.trigger(select, 'change');
+          }
+          
+          // Also trigger change event to ensure #states API evaluates
           // This works with both Drupal's native #states and conditional_fields enhancement
           if (typeof jQuery !== 'undefined' && jQuery(select).length) {
             // Trigger both change and input events to ensure all handlers fire
             jQuery(select).trigger('change').trigger('input');
           } else if (select) {
             // Fallback if jQuery not available
-            select.dispatchEvent(new Event('change', { bubbles: true }));
-            select.dispatchEvent(new Event('input', { bubbles: true }));
+            const changeEvent = new Event('change', { bubbles: true, cancelable: true });
+            const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+            select.dispatchEvent(changeEvent);
+            select.dispatchEvent(inputEvent);
           }
-        }, 200);
+        }, 300);
       }
 
       // Skip if already attached to this select
@@ -142,12 +150,17 @@
         }
       }, 500); // Give conditional_fields time to initialize
 
-      // On change - let conditional_fields handle it first, then check
+      // On change - trigger Drupal.states API and let conditional_fields handle it
       select.addEventListener('change', function() {
+        // Trigger Drupal.states API first
+        if (typeof Drupal.states !== 'undefined' && Drupal.states.trigger) {
+          Drupal.states.trigger(select, 'change');
+        }
+        
         // Wait a tick for conditional_fields to process
         setTimeout(function() {
           updateVisibility();
-        }, 100);
+        }, 150);
       });
 
       // Minimal fallback interval - only check if conditional_fields isn't working

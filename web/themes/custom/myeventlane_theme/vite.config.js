@@ -34,8 +34,9 @@ export default defineConfig({
     devSourcemap: true,
     preprocessorOptions: {
       scss: {
-        // Use modern Sass API
+        // Use modern Sass API (silence deprecation warning)
         api: 'modern-compiler',
+        silenceDeprecations: ['legacy-js-api'],
       },
     },
   },

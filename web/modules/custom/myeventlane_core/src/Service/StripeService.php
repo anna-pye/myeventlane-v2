@@ -1,0 +1,424 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Drupal\myeventlane_core\Service;
+
+use Drupal\commerce_payment\Entity\PaymentGatewayInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Stripe\StripeClient;
+use Stripe\Exception\ApiErrorException;
+
+/**
+ * Service for Stripe operations including Connect and platform payments.
+ */
+final class StripeService {
+
+  /**
+   * Constructs a StripeService.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerFactory
+   *   The logger factory.
+   */
+  public function __construct(
+    private readonly ConfigFactoryInterface $configFactory,
+    private readonly EntityTypeManagerInterface $entityTypeManager,
+    private readonly LoggerChannelFactoryInterface $loggerFactory,
+  ) {}
+
+  /**
+   * Gets the logger for this service.
+   *
+   * @return \Psr\Log\LoggerInterface
+   *   The logger.
+   */
+  private function logger(): \Psr\Log\LoggerInterface {
+    return $this->loggerFactory->get('myeventlane_core');
+  }
+
+  /**
+   * Gets the Stripe client for the platform account.
+   *
+   * @return \Stripe\StripeClient
+   *   The Stripe client configured with platform secret key.
+   *
+   * @throws \RuntimeException
+   *   If platform Stripe keys are not configured.
+   */
+  public function getPlatformClient(): StripeClient {
+    $secretKey = $this->getPlatformSecretKey();
+    if (empty($secretKey)) {
+      throw new \RuntimeException('Platform Stripe secret key is not configured.');
+    }
+
+    return new StripeClient($secretKey);
+  }
+
+  /**
+   * Gets the platform Stripe secret key from payment gateway config.
+   *
+   * @return string
+   *   The secret key, or empty string if not found.
+   */
+  private function getPlatformSecretKey(): string {
+    // Try to get from mel_stripe gateway (preferred).
+    $gateway = $this->entityTypeManager
+      ->getStorage('commerce_payment_gateway')
+      ->load('mel_stripe');
+
+    if ($gateway instanceof PaymentGatewayInterface) {
+      $config = $gateway->getPluginConfiguration();
+      if (!empty($config['secret_key'])) {
+        return (string) $config['secret_key'];
+      }
+    }
+
+    // Fallback to stripe gateway.
+    $gateway = $this->entityTypeManager
+      ->getStorage('commerce_payment_gateway')
+      ->load('stripe');
+
+    if ($gateway instanceof PaymentGatewayInterface) {
+      $config = $gateway->getPluginConfiguration();
+      if (!empty($config['secret_key'])) {
+        return (string) $config['secret_key'];
+      }
+    }
+
+    // Try config entity as last resort.
+    $config = $this->configFactory->get('myeventlane_core.stripe_settings');
+    $secretKey = $config->get('platform_secret_key');
+    if (!empty($secretKey)) {
+      return (string) $secretKey;
+    }
+
+    return '';
+  }
+
+  /**
+   * Gets the platform Stripe publishable key.
+   *
+   * @return string
+   *   The publishable key, or empty string if not found.
+   */
+  public function getPlatformPublishableKey(): string {
+    // Try to get from mel_stripe gateway (preferred).
+    $gateway = $this->entityTypeManager
+      ->getStorage('commerce_payment_gateway')
+      ->load('mel_stripe');
+
+    if ($gateway instanceof PaymentGatewayInterface) {
+      $config = $gateway->getPluginConfiguration();
+      if (!empty($config['publishable_key'])) {
+        return (string) $config['publishable_key'];
+      }
+    }
+
+    // Fallback to stripe gateway.
+    $gateway = $this->entityTypeManager
+      ->getStorage('commerce_payment_gateway')
+      ->load('stripe');
+
+    if ($gateway instanceof PaymentGatewayInterface) {
+      $config = $gateway->getPluginConfiguration();
+      if (!empty($config['publishable_key'])) {
+        return (string) $config['publishable_key'];
+      }
+    }
+
+    return '';
+  }
+
+  /**
+   * Creates a Stripe Connect account.
+   *
+   * @param string $email
+   *   The vendor email address.
+   * @param string $country
+   *   The country code (e.g., 'AU', 'US').
+   * @param string $type
+   *   Account type: 'standard' (default) or 'express'.
+   *
+   * @return \Stripe\Account
+   *   The created Stripe account.
+   *
+   * @throws \Stripe\Exception\ApiErrorException
+   *   If account creation fails.
+   */
+  public function createConnectAccount(string $email, string $country = 'AU', string $type = 'standard'): \Stripe\Account {
+    $client = $this->getPlatformClient();
+
+    try {
+      $account = $client->accounts->create([
+        'type' => $type,
+        'country' => $country,
+        'email' => $email,
+        'capabilities' => [
+          'card_payments' => ['requested' => TRUE],
+          'transfers' => ['requested' => TRUE],
+        ],
+      ]);
+
+      $this->logger()->info('Created Stripe Connect account @id for @email', [
+        '@id' => $account->id,
+        '@email' => $email,
+      ]);
+
+      return $account;
+    }
+    catch (ApiErrorException $e) {
+      $this->logger()->error('Failed to create Stripe Connect account: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+      throw $e;
+    }
+  }
+
+  /**
+   * Creates an AccountLink for onboarding a Connect account.
+   *
+   * @param string $accountId
+   *   The Stripe Connect account ID (acct_xxx).
+   * @param string $returnUrl
+   *   URL to redirect to after onboarding.
+   * @param string $refreshUrl
+   *   URL to redirect to if link expires.
+   *
+   * @return \Stripe\AccountLink
+   *   The AccountLink object.
+   *
+   * @throws \Stripe\Exception\ApiErrorException
+   *   If AccountLink creation fails.
+   */
+  public function createAccountLink(string $accountId, string $returnUrl, string $refreshUrl): \Stripe\AccountLink {
+    $client = $this->getPlatformClient();
+
+    try {
+      $link = $client->accountLinks->create([
+        'account' => $accountId,
+        'refresh_url' => $refreshUrl,
+        'return_url' => $returnUrl,
+        'type' => 'account_onboarding',
+      ]);
+
+      $this->logger()->info('Created AccountLink for account @id', [
+        '@id' => $accountId,
+      ]);
+
+      return $link;
+    }
+    catch (ApiErrorException $e) {
+      $this->logger()->error('Failed to create AccountLink: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+      throw $e;
+    }
+  }
+
+  /**
+   * Creates a LoginLink for accessing a Connect account dashboard.
+   *
+   * @param string $accountId
+   *   The Stripe Connect account ID (acct_xxx).
+   *
+   * @return \Stripe\LoginLink
+   *   The LoginLink object.
+   *
+   * @throws \Stripe\Exception\ApiErrorException
+   *   If LoginLink creation fails.
+   */
+  public function createLoginLink(string $accountId): \Stripe\LoginLink {
+    $client = $this->getPlatformClient();
+
+    try {
+      $link = $client->accounts->createLoginLink($accountId);
+
+      $this->logger()->info('Created LoginLink for account @id', [
+        '@id' => $accountId,
+      ]);
+
+      return $link;
+    }
+    catch (ApiErrorException $e) {
+      $this->logger()->error('Failed to create LoginLink: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+      throw $e;
+    }
+  }
+
+  /**
+   * Gets the status of a Stripe Connect account.
+   *
+   * @param string $accountId
+   *   The Stripe Connect account ID (acct_xxx).
+   *
+   * @return array{status: string, charges_enabled: bool, payouts_enabled: bool, details_submitted: bool}
+   *   Account status information.
+   *
+   * @throws \Stripe\Exception\ApiErrorException
+   *   If account retrieval fails.
+   */
+  public function getAccountStatus(string $accountId): array {
+    $client = $this->getPlatformClient();
+
+    try {
+      $account = $client->accounts->retrieve($accountId);
+
+      // Map Stripe account status to our status values.
+      $status = 'pending';
+      if ($account->details_submitted && $account->charges_enabled && $account->payouts_enabled) {
+        $status = 'complete';
+      }
+      elseif ($account->charges_enabled === FALSE || $account->payouts_enabled === FALSE) {
+        $status = 'restricted';
+      }
+
+      return [
+        'status' => $status,
+        'charges_enabled' => (bool) $account->charges_enabled,
+        'payouts_enabled' => (bool) $account->payouts_enabled,
+        'details_submitted' => (bool) $account->details_submitted,
+      ];
+    }
+    catch (ApiErrorException $e) {
+      $this->logger()->error('Failed to retrieve account status: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+      throw $e;
+    }
+  }
+
+  /**
+   * Creates a PaymentIntent for a ticket sale (destination charge with Connect).
+   *
+   * @param int $amount
+   *   Amount in cents (e.g., 5000 for $50.00).
+   * @param string $currency
+   *   Currency code (e.g., 'usd', 'aud').
+   * @param string $stripeAccountId
+   *   The vendor's Stripe Connect account ID (acct_xxx).
+   * @param int $applicationFeeAmount
+   *   Application fee in cents (platform fee).
+   * @param array $metadata
+   *   Optional metadata to attach to the PaymentIntent.
+   *
+   * @return \Stripe\PaymentIntent
+   *   The created PaymentIntent.
+   *
+   * @throws \Stripe\Exception\ApiErrorException
+   *   If PaymentIntent creation fails.
+   */
+  public function createPaymentIntentForTicketSale(
+    int $amount,
+    string $currency,
+    string $stripeAccountId,
+    int $applicationFeeAmount,
+    array $metadata = []
+  ): \Stripe\PaymentIntent {
+    $client = $this->getPlatformClient();
+
+    try {
+      $params = [
+        'amount' => $amount,
+        'currency' => strtolower($currency),
+        'application_fee_amount' => $applicationFeeAmount,
+        'transfer_data' => [
+          'destination' => $stripeAccountId,
+        ],
+        'metadata' => $metadata,
+      ];
+
+      $paymentIntent = $client->paymentIntents->create($params);
+
+      $this->logger()->info('Created PaymentIntent @id for ticket sale: @amount @currency to account @account (fee: @fee)', [
+        '@id' => $paymentIntent->id,
+        '@amount' => $amount,
+        '@currency' => $currency,
+        '@account' => $stripeAccountId,
+        '@fee' => $applicationFeeAmount,
+      ]);
+
+      return $paymentIntent;
+    }
+    catch (ApiErrorException $e) {
+      $this->logger()->error('Failed to create PaymentIntent for ticket sale: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+      throw $e;
+    }
+  }
+
+  /**
+   * Creates a PaymentIntent for a Boost purchase (platform-only, no Connect).
+   *
+   * @param int $amount
+   *   Amount in cents (e.g., 3500 for $35.00).
+   * @param string $currency
+   *   Currency code (e.g., 'usd', 'aud').
+   * @param array $metadata
+   *   Optional metadata to attach to the PaymentIntent.
+   *
+   * @return \Stripe\PaymentIntent
+   *   The created PaymentIntent.
+   *
+   * @throws \Stripe\Exception\ApiErrorException
+   *   If PaymentIntent creation fails.
+   */
+  public function createPaymentIntentForBoost(
+    int $amount,
+    string $currency,
+    array $metadata = []
+  ): \Stripe\PaymentIntent {
+    $client = $this->getPlatformClient();
+
+    try {
+      $params = [
+        'amount' => $amount,
+        'currency' => strtolower($currency),
+        'metadata' => $metadata,
+      ];
+
+      $paymentIntent = $client->paymentIntents->create($params);
+
+      $this->logger()->info('Created PaymentIntent @id for Boost purchase: @amount @currency', [
+        '@id' => $paymentIntent->id,
+        '@amount' => $amount,
+        '@currency' => $currency,
+      ]);
+
+      return $paymentIntent;
+    }
+    catch (ApiErrorException $e) {
+      $this->logger()->error('Failed to create PaymentIntent for Boost: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+      throw $e;
+    }
+  }
+
+  /**
+   * Calculates the application fee for a ticket sale.
+   *
+   * @param int $amount
+   *   Amount in cents.
+   * @param float $feePercentage
+   *   Fee percentage (e.g., 0.03 for 3%).
+   * @param int $fixedFeeCents
+   *   Fixed fee in cents (e.g., 30 for $0.30).
+   *
+   * @return int
+   *   Application fee in cents.
+   */
+  public function calculateApplicationFee(int $amount, float $feePercentage = 0.03, int $fixedFeeCents = 30): int {
+    $percentageFee = (int) round($amount * $feePercentage);
+    return $percentageFee + $fixedFeeCents;
+  }
+
+}

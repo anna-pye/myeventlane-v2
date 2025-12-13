@@ -1,0 +1,10 @@
+administer escalations:
+  title: 'Administer escalations'
+  description: 'Create, edit, and delete escalations.'
+  restrict access: true
+
+view escalations:
+  title: 'View escalations'
+  description: 'View escalation details and status.'
+  restrict access: true
+

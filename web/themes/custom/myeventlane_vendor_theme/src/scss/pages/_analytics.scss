@@ -1,0 +1,310 @@
+/**
+ * @file
+ * Analytics page styles for MyEventLane Vendor Theme.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/breakpoints' as *;
+
+// ============================================================================
+// ANALYTICS PAGE LAYOUT
+// ============================================================================
+
+.mel-analytics {
+  display: flex;
+  flex-direction: column;
+  gap: $section-gap;
+}
+
+// ============================================================================
+// ANALYTICS HEADER
+// ============================================================================
+
+.mel-analytics__header {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+  
+  @include respond-to(md) {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+}
+
+.mel-analytics__title {
+  @include page-title;
+  margin: 0;
+}
+
+.mel-analytics__subtitle {
+  font-size: $font-size-body;
+  color: $text-secondary;
+  margin-top: $spacing-1;
+}
+
+.mel-analytics__filters {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  flex-wrap: wrap;
+}
+
+// ============================================================================
+// DATE RANGE SELECTOR
+// ============================================================================
+
+.mel-date-range {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-2 $spacing-4;
+  background: $bg-primary;
+  border: 1px solid $border-color;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: $border-color-dark;
+  }
+}
+
+.mel-date-range__icon {
+  width: 18px;
+  height: 18px;
+  color: $text-muted;
+}
+
+.mel-date-range__text {
+  font-weight: $font-weight-medium;
+}
+
+// ============================================================================
+// ANALYTICS KPI SECTION
+// ============================================================================
+
+.mel-analytics__kpis {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-4;
+  
+  @include respond-to(md) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// ============================================================================
+// ANALYTICS CHARTS SECTION
+// ============================================================================
+
+.mel-analytics__charts {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-6;
+}
+
+.mel-analytics__chart-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-6;
+  
+  @include respond-to(lg) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.mel-analytics__chart-full {
+  grid-column: 1 / -1;
+}
+
+// ============================================================================
+// ANALYTICS TABLES SECTION
+// ============================================================================
+
+.mel-analytics__tables {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-6;
+  
+  @include respond-to(lg) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+// ============================================================================
+// REFERRAL SOURCES TABLE
+// ============================================================================
+
+.mel-referral-table {
+  width: 100%;
+}
+
+.mel-referral-table__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-3 0;
+  border-bottom: 1px solid $border-color-light;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.mel-referral-table__source {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+}
+
+.mel-referral-table__icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg-secondary;
+  border-radius: $radius-md;
+  
+  img {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.mel-referral-table__name {
+  font-weight: $font-weight-medium;
+}
+
+.mel-referral-table__stats {
+  display: flex;
+  align-items: center;
+  gap: $spacing-6;
+  text-align: right;
+}
+
+.mel-referral-table__visits,
+.mel-referral-table__conversions {
+  min-width: 60px;
+}
+
+.mel-referral-table__value {
+  font-weight: $font-weight-semibold;
+}
+
+.mel-referral-table__label {
+  font-size: $font-size-xs;
+  color: $text-muted;
+}
+
+// ============================================================================
+// TICKET BREAKDOWN TABLE
+// ============================================================================
+
+.mel-ticket-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.mel-ticket-breakdown__item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+}
+
+.mel-ticket-breakdown__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mel-ticket-breakdown__name {
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-1;
+}
+
+.mel-ticket-breakdown__bar {
+  height: 8px;
+  background: $bg-tertiary;
+  border-radius: $radius-full;
+  overflow: hidden;
+}
+
+.mel-ticket-breakdown__bar-fill {
+  height: 100%;
+  background: $primary;
+  border-radius: $radius-full;
+}
+
+.mel-ticket-breakdown__stats {
+  text-align: right;
+  min-width: 80px;
+}
+
+.mel-ticket-breakdown__sold {
+  font-weight: $font-weight-semibold;
+}
+
+.mel-ticket-breakdown__revenue {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+// ============================================================================
+// SALES PER DAY TABLE
+// ============================================================================
+
+.mel-sales-table {
+  width: 100%;
+}
+
+.mel-sales-table__header {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, 100px);
+  gap: $spacing-4;
+  padding: $spacing-3 0;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $text-secondary;
+  border-bottom: 1px solid $border-color;
+}
+
+.mel-sales-table__row {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, 100px);
+  gap: $spacing-4;
+  padding: $spacing-3 0;
+  border-bottom: 1px solid $border-color-light;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.mel-sales-table__date {
+  font-weight: $font-weight-medium;
+}
+
+.mel-sales-table__value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+// ============================================================================
+// EXPORT ACTIONS
+// ============================================================================
+
+.mel-analytics__export {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $spacing-3;
+  padding-top: $spacing-6;
+  border-top: 1px solid $border-color-light;
+}
+
+

@@ -16,9 +16,9 @@ handlers:
   list_builder: Drupal\myeventlane_vendor\VendorListBuilder
   access: Drupal\myeventlane_vendor\Entity\VendorAccessControlHandler
   form:
-    default: Drupal\Core\Entity\ContentEntityForm
-    add: Drupal\Core\Entity\ContentEntityForm
-    edit: Drupal\Core\Entity\ContentEntityForm
+    default: Drupal\myeventlane_vendor\Form\VendorForm
+    add: Drupal\myeventlane_vendor\Form\VendorForm
+    edit: Drupal\myeventlane_vendor\Form\VendorForm
     delete: Drupal\Core\Entity\ContentEntityDeleteForm
   route_provider:
     html:
@@ -30,10 +30,11 @@ entity_keys:
   id: id
   uuid: uuid
   label: name
+  owner: uid
 links:
-  canonical: '/organisers/{myeventlane_vendor}'
-  add-form: /admin/content/organisers/add
-  edit-form: '/admin/content/organisers/{myeventlane_vendor}/edit'
-  delete-form: '/admin/content/organisers/{myeventlane_vendor}/delete'
-  collection: /admin/content/organisers
+  canonical: '/vendor/{myeventlane_vendor}'
+  add-form: '/admin/structure/myeventlane/vendor/add'
+  edit-form: '/admin/structure/myeventlane/vendor/{myeventlane_vendor}/edit'
+  delete-form: '/admin/structure/myeventlane/vendor/{myeventlane_vendor}/delete'
+  collection: '/admin/structure/myeventlane/vendor'
 field_ui_base_route: myeventlane_vendor.settings

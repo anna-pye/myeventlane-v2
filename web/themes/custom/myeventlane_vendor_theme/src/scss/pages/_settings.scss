@@ -1,0 +1,528 @@
+/**
+ * @file
+ * Vendor Settings Page Styles
+ *
+ * Styling for the comprehensive vendor settings form with vertical tabs.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/shadows' as *;
+@use '../tokens/breakpoints' as *;
+
+// ============================================================================
+// SETTINGS PAGE CONTAINER
+// ============================================================================
+
+#vendor-settings-form {
+  max-width: 100%;
+  
+  // Ensure form fields are styled
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    padding: $spacing-4 !important;
+    border: 1px solid $input-border !important;
+    border-radius: $radius-input !important;
+    
+    &:focus {
+      border-color: $primary !important;
+      box-shadow: 0 0 0 3px rgba($primary, 0.1) !important;
+    }
+  }
+}
+
+// ============================================================================
+// VERTICAL TABS STYLING
+// ============================================================================
+
+.vertical-tabs,
+#vendor-settings-form .vertical-tabs {
+  display: flex !important;
+  gap: $spacing-6;
+  margin: 0;
+  border: none;
+  background: transparent;
+  
+  @include respond-down(md) {
+    flex-direction: column;
+  }
+}
+
+.vertical-tabs__menu,
+#vendor-settings-form .vertical-tabs__menu {
+  flex: 0 0 240px !important;
+  margin: 0;
+  padding: $spacing-2 !important;
+  list-style: none;
+  background: $bg-primary !important;
+  border: 1px solid $border-color-light !important;
+  border-radius: $radius-lg !important;
+  
+  @include respond-down(md) {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-2;
+  }
+}
+
+.vertical-tabs__menu-item {
+  margin: 0;
+  padding: 0;
+  
+  @include respond-down(md) {
+    flex: 1;
+    min-width: calc(50% - #{$spacing-1});
+  }
+}
+
+.vertical-tabs__tab,
+#vendor-settings-form .vertical-tabs__tab,
+.vertical-tabs__menu a {
+  display: block !important;
+  padding: $spacing-4 $spacing-5 !important;
+  margin-bottom: $spacing-1;
+  color: $text-secondary !important;
+  text-decoration: none !important;
+  border-radius: $radius-md !important;
+  font-weight: $font-weight-medium !important;
+  font-size: $font-size-body !important;
+  transition: all 0.2s ease;
+  border: 1px solid transparent !important;
+  
+  &:hover {
+    background: $bg-secondary !important;
+    color: $text-primary !important;
+    text-decoration: none !important;
+  }
+  
+  &:focus {
+    outline: 2px solid $primary !important;
+    outline-offset: 2px;
+  }
+  
+  &.is-selected,
+  &.selected {
+    background: $primary !important;
+    color: $text-inverse !important;
+    border-color: $primary !important;
+    font-weight: $font-weight-semibold !important;
+    
+    &:hover {
+      background: $primary-dark !important;
+      color: $text-inverse !important;
+    }
+  }
+  
+  @include respond-down(md) {
+    padding: $spacing-3 $spacing-4 !important;
+    font-size: $font-size-sm !important;
+    text-align: center;
+  }
+}
+
+.vertical-tabs__panes {
+  flex: 1;
+  background: $bg-primary;
+  border: 1px solid $border-color-light;
+  border-radius: $radius-lg;
+  padding: $spacing-6;
+  min-height: 400px;
+  
+  @include respond-down(md) {
+    padding: $spacing-4;
+  }
+}
+
+.vertical-tabs__pane {
+  display: none;
+  
+  &.is-selected {
+    display: block;
+  }
+}
+
+// ============================================================================
+// DETAILS / FIELD SETS
+// ============================================================================
+
+details {
+  margin-bottom: $spacing-6;
+  border: 1px solid $border-color-light;
+  border-radius: $radius-md;
+  background: $bg-primary;
+  overflow: hidden;
+  
+  &[open] {
+    border-color: $border-color;
+  }
+}
+
+details > summary {
+  padding: $spacing-5;
+  background: $bg-secondary;
+  cursor: pointer;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-lg;
+  color: $text-primary;
+  list-style: none;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  
+  &::-webkit-details-marker {
+    display: none;
+  }
+  
+  &::before {
+    content: '▶';
+    display: inline-block;
+    margin-right: $spacing-3;
+    transition: transform 0.2s ease;
+    color: $primary;
+  }
+  
+  &:hover {
+    background: $bg-tertiary;
+  }
+}
+
+details[open] > summary {
+  border-bottom: 1px solid $border-color-light;
+  
+  &::before {
+    transform: rotate(90deg);
+  }
+}
+
+details > .details-wrapper {
+  padding: $spacing-6;
+  
+  @include respond-down(md) {
+    padding: $spacing-4;
+  }
+}
+
+// ============================================================================
+// FORM FIELD STYLING
+// ============================================================================
+
+.form-item {
+  margin-bottom: $spacing-6;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.form-item label {
+  display: block;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin-bottom: $spacing-2;
+  font-size: $font-size-body;
+}
+
+.form-item__description,
+.description {
+  margin-top: $spacing-2;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  line-height: 1.5;
+}
+
+// Input fields
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+textarea,
+select {
+  width: 100%;
+  padding: $spacing-4;
+  font-size: $font-size-body;
+  font-family: $font-family-sans;
+  color: $text-primary;
+  background: $input-bg;
+  border: 1px solid $input-border;
+  border-radius: $radius-input;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.1);
+  }
+  
+  &::placeholder {
+    color: $text-muted;
+  }
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+// File uploads
+.form-managed-file {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+  
+  .form-file {
+    padding: $spacing-3;
+  }
+  
+  .file {
+    display: flex;
+    align-items: center;
+    gap: $spacing-3;
+    padding: $spacing-3;
+    background: $bg-secondary;
+    border-radius: $radius-md;
+  }
+}
+
+// Checkboxes
+.form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  
+  input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: $primary;
+  }
+  
+  label {
+    margin: 0;
+    font-weight: $font-weight-normal;
+    cursor: pointer;
+  }
+}
+
+// ============================================================================
+// SOCIAL LINKS TABLE
+// ============================================================================
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: $spacing-4;
+  
+  thead {
+    background: $bg-secondary;
+    
+    th {
+      padding: $spacing-3 $spacing-4;
+      text-align: left;
+      font-weight: $font-weight-semibold;
+      font-size: $font-size-sm;
+      color: $text-secondary;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid $border-color-light;
+    }
+  }
+  
+  tbody {
+    tr {
+      border-bottom: 1px solid $border-color-light;
+      
+      &:hover {
+        background: $bg-secondary;
+      }
+      
+      &.draggable {
+        cursor: move;
+      }
+    }
+    
+    td {
+      padding: $spacing-4;
+      vertical-align: middle;
+      
+      input {
+        margin: 0;
+      }
+    }
+  }
+}
+
+// ============================================================================
+// BUTTONS
+// ============================================================================
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  margin-top: $spacing-8;
+  padding-top: $spacing-6;
+  border-top: 2px solid $border-color-light;
+  
+  .button {
+    padding: $spacing-4 $spacing-6;
+    font-size: $font-size-body;
+    font-weight: $font-weight-semibold;
+    border-radius: $radius-md;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &.button--primary {
+      background: $primary;
+      color: $text-inverse;
+      
+      &:hover {
+        background: $primary-dark;
+        transform: translateY(-1px);
+        box-shadow: $shadow-md;
+      }
+    }
+    
+    &.button--secondary {
+      background: $bg-secondary;
+      color: $text-primary;
+      border: 1px solid $border-color;
+      
+      &:hover {
+        background: $bg-tertiary;
+        border-color: $border-color;
+      }
+    }
+  }
+}
+
+// AJAX buttons
+.ajax-processed {
+  padding: $spacing-3 $spacing-5;
+  font-size: $font-size-sm;
+  border-radius: $radius-md;
+  border: 1px solid $border-color;
+  background: $bg-secondary;
+  color: $text-primary;
+  
+  &:hover {
+    background: $bg-tertiary;
+    border-color: $primary;
+    color: $primary;
+  }
+}
+
+// ============================================================================
+// FIELD SETS
+// ============================================================================
+
+fieldset {
+  border: 1px solid $border-color-light;
+  border-radius: $radius-md;
+  padding: $spacing-5;
+  margin-bottom: $spacing-6;
+  background: $bg-secondary;
+  
+  legend {
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-lg;
+    color: $text-primary;
+    padding: 0 $spacing-3;
+  }
+}
+
+// ============================================================================
+// ENTITY AUTCOMPLETE
+// ============================================================================
+
+.form-item--entity-autocomplete {
+  .form-autocomplete {
+    position: relative;
+  }
+  
+  .ui-autocomplete {
+    background: $bg-primary;
+    border: 1px solid $border-color;
+    border-radius: $radius-md;
+    box-shadow: $shadow-dropdown;
+    max-height: 300px;
+    overflow-y: auto;
+    
+    .ui-menu-item {
+      padding: $spacing-3 $spacing-4;
+      cursor: pointer;
+      
+      &:hover,
+      &.ui-state-active {
+        background: $bg-secondary;
+      }
+    }
+  }
+}
+
+// ============================================================================
+// MARKUP / INFO SECTIONS
+// ============================================================================
+
+.markup {
+  padding: $spacing-4;
+  background: $bg-secondary;
+  border-radius: $radius-md;
+  border-left: 3px solid $primary;
+  
+  p {
+    margin: 0 0 $spacing-2 0;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  strong {
+    color: $text-primary;
+    font-weight: $font-weight-semibold;
+  }
+  
+  a {
+    color: $primary;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// ============================================================================
+// RESPONSIVE ADJUSTMENTS
+// ============================================================================
+
+@include respond-down(md) {
+  .vertical-tabs {
+    gap: $spacing-4;
+  }
+  
+  .vertical-tabs__panes {
+    padding: $spacing-4;
+  }
+  
+  .form-item {
+    margin-bottom: $spacing-4;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    
+    .button {
+      width: 100%;
+    }
+  }
+}

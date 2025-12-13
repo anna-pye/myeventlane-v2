@@ -28,30 +28,11 @@ import './event-form.js';
    * This function is called both as a Drupal behavior and as a fallback.
    */
   function initializeTheme(context) {
-    // Only run on full page load, not on AJAX updates
-    // This prevents interference with Commerce payment gateway initialization
-    if (context !== document) {
-      return;
-    }
-
-    // Prevent double initialization by checking if already initialized
-    if (document.documentElement.classList.contains('js-loaded')) {
-      return;
-    }
-
-    // Initialize mobile navigation
+    // Always initialize mobile navigation - it checks for double init internally
     initMobileNav();
 
-    // Initialize account dropdown
-    initAccountDropdown();
-    
-    // Retry account dropdown after a short delay in case elements aren't ready
-    setTimeout(function() {
-      initAccountDropdown();
-    }, 200);
-
-    // Add loaded class for CSS transitions
-    document.documentElement.classList.add('js-loaded');
+    // Account dropdown is now CSS-only using :focus-within
+    // No JavaScript initialization needed!
   }
 
   // Register as Drupal behavior if Drupal is available
@@ -76,15 +57,19 @@ import './event-form.js';
   // Drupal behaviors haven't loaded yet or library loading order is disrupted.
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {
-      // Only initialize if Drupal behaviors haven't already done so
-      if (!document.documentElement.classList.contains('js-loaded')) {
-        initializeTheme(document);
-      }
-    });
-  } else {
-    // DOM already loaded, initialize immediately if not already done
-    if (!document.documentElement.classList.contains('js-loaded')) {
       initializeTheme(document);
-    }
+    });
+    // Also try immediately in case DOM is ready but event hasn't fired
+    setTimeout(function() {
+      initializeTheme(document);
+    }, 0);
+  } else {
+    // DOM already loaded, initialize immediately
+    initializeTheme(document);
   }
+  
+  // Additional fallback - try again after a short delay to catch late-loading elements
+  setTimeout(function() {
+    initializeTheme(document);
+  }, 500);
 })();

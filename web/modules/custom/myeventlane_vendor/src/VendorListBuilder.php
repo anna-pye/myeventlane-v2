@@ -58,7 +58,6 @@ final class VendorListBuilder extends EntityListBuilder {
    */
   public function buildHeader(): array {
     $header['name'] = $this->t('Vendor');
-    $header['slug'] = $this->t('Slug');
     $header['owner'] = $this->t('Owner');
     $header['updated'] = $this->t('Updated');
     return $header + parent::buildHeader();
@@ -70,12 +69,6 @@ final class VendorListBuilder extends EntityListBuilder {
   public function buildRow(EntityInterface $entity): array {
     /** @var \Drupal\myeventlane_vendor\Entity\Vendor $entity */
     $row['name'] = $entity->toLink();
-
-    // Slug from configurable field.
-    $row['slug'] = '-';
-    if ($entity->hasField('field_slug') && !$entity->get('field_slug')->isEmpty()) {
-      $row['slug'] = $entity->get('field_slug')->value;
-    }
 
     // Owner from base field (uid) via EntityOwnerInterface.
     $row['owner'] = '-';

@@ -1,0 +1,129 @@
+{#
+  Vendor boost management page.
+  Variables: campaigns (active boosts), events (all events with boost status).
+#}
+<div class="mel-page-header">
+  <div class="mel-page-header__content">
+    <h2 class="mel-page-header__subtitle">{{ 'Promote your events'|t }}</h2>
+    <p class="mel-page-header__description">
+      {{ 'Boost your events to get featured on the homepage and reach more attendees.'|t }}
+    </p>
+  </div>
+</div>
+
+{% if campaigns|length > 0 %}
+  <div class="mel-card">
+    <div class="mel-card__header">
+      <div class="mel-card__title">
+        <span class="mel-icon">⚡</span>
+        {{ 'Active boosts'|t }}
+      </div>
+    </div>
+    <div class="mel-list">
+      {% for campaign in campaigns %}
+        <div class="mel-list__item mel-list__item--with-actions">
+          <div class="mel-list__content">
+            <div class="mel-list__title">{{ campaign.event_title|default(campaign.label) }}</div>
+            <div class="mel-list__meta">
+              <span class="mel-badge mel-badge--success">{{ campaign.status }}</span>
+              {% if campaign.ends %}
+                <span class="mel-text--muted">{{ 'Ends'|t }}: {{ campaign.ends }}</span>
+              {% endif %}
+            </div>
+          </div>
+          {% if campaign.boost_url %}
+            <div class="mel-list__actions">
+              <a href="{{ campaign.boost_url }}" class="mel-btn mel-btn--sm mel-btn--secondary">
+                {{ 'Extend'|t }}
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+<div class="mel-card">
+  <div class="mel-card__header">
+    <div class="mel-card__title">{{ 'Your events'|t }}</div>
+  </div>
+  
+  {% if events|length > 0 %}
+    <div class="mel-table">
+      <div class="mel-table__head">
+        <div>{{ 'Event'|t }}</div>
+        <div>{{ 'Boost status'|t }}</div>
+        <div>{{ 'Action'|t }}</div>
+      </div>
+      <div class="mel-table__body">
+        {% for event in events %}
+          <div class="mel-table__row">
+            <div class="mel-text--bold">{{ event.title }}</div>
+            <div>
+              {% if event.is_boosted %}
+                <span class="mel-badge mel-badge--success">
+                  <span class="mel-icon">⚡</span> {{ 'Boosted'|t }}
+                </span>
+              {% else %}
+                <span class="mel-badge mel-badge--neutral">{{ 'Not boosted'|t }}</span>
+              {% endif %}
+            </div>
+            <div>
+              <a href="{{ event.boost_url }}" class="mel-btn mel-btn--sm mel-btn--primary">
+                {% if event.is_boosted %}
+                  {{ 'Extend boost'|t }}
+                {% else %}
+                  {{ 'Boost now'|t }}
+                {% endif %}
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div class="mel-empty">
+      <div class="mel-empty__icon">🎉</div>
+      <div class="mel-empty__title">{{ 'No events yet'|t }}</div>
+      <div class="mel-empty__description">
+        {{ 'Create an event first, then come back to boost it.'|t }}
+      </div>
+      <a href="/vendor/events/add" class="mel-btn mel-btn--primary">
+        {{ 'Create event'|t }}
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<div class="mel-card mel-card--info">
+  <div class="mel-card__header">
+    <div class="mel-card__title">{{ 'How boost works'|t }}</div>
+  </div>
+  <div class="mel-card__body">
+    <div class="mel-grid mel-grid--3">
+      <div class="mel-feature">
+        <div class="mel-feature__icon">🏠</div>
+        <div class="mel-feature__title">{{ 'Homepage placement'|t }}</div>
+        <div class="mel-feature__description">
+          {{ 'Your event appears in the featured section on the homepage.'|t }}
+        </div>
+      </div>
+      <div class="mel-feature">
+        <div class="mel-feature__icon">📈</div>
+        <div class="mel-feature__title">{{ 'More visibility'|t }}</div>
+        <div class="mel-feature__description">
+          {{ 'Boosted events get 3-5x more views on average.'|t }}
+        </div>
+      </div>
+      <div class="mel-feature">
+        <div class="mel-feature__icon">⏱️</div>
+        <div class="mel-feature__title">{{ 'Flexible duration'|t }}</div>
+        <div class="mel-feature__description">
+          {{ 'Choose 3, 7, or 14 day boost packages.'|t }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

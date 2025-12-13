@@ -272,7 +272,26 @@ final class AttendanceManager implements AttendanceManagerInterface {
       ->load(reset($ids));
 
     $attendee->setStatus(EventAttendee::STATUS_CONFIRMED);
+    
+    // Track promotion timestamp.
+    $attendee->set('promoted_at', \Drupal::time()->getRequestTime());
+    
     $attendee->save();
+
+    // Send promotion notification if service is available.
+    try {
+      $notificationService = \Drupal::service('myeventlane_event_attendees.waitlist_notification');
+      $event = $this->entityTypeManager->getStorage('node')->load($eventId);
+      if ($event) {
+        $notificationService->sendPromotionNotification($attendee, $event);
+      }
+    }
+    catch (\Exception $e) {
+      // Log error but don't fail promotion.
+      \Drupal::logger('myeventlane_event_attendees')->error('Failed to send waitlist promotion notification: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+    }
 
     return $attendee;
   }

@@ -1,0 +1,81 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the myeventlane_escalations module.
+ */
+
+use Drupal\Core\Database\Database;
+
+/**
+ * Implements hook_schema().
+ */
+function myeventlane_escalations_schema(): array {
+  $schema = [];
+
+  $schema['escalation'] = [
+    'description' => 'The base table for escalation entities.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique escalation ID.',
+      ],
+      'uuid' => [
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'description' => 'The Universally Unique Identifier.',
+      ],
+      'user_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The {users}.uid of the customer who submitted the escalation.',
+      ],
+      'subject' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The escalation subject.',
+      ],
+      'status' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => 'new',
+        'description' => 'The escalation status.',
+      ],
+      'priority' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => 'normal',
+        'description' => 'The escalation priority.',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The Unix timestamp when the escalation was created.',
+      ],
+      'changed' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The Unix timestamp when the escalation was most recently saved.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'uuid' => ['uuid'],
+      'user_id' => ['user_id'],
+      'status' => ['status'],
+      'priority' => ['priority'],
+      'created' => ['created'],
+    ],
+  ];
+
+  return $schema;
+}
+

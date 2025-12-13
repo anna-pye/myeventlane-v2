@@ -1,0 +1,16 @@
+enable_platform_donations: true
+enable_rsvp_donations: true
+platform_presets:
+  - 10.00
+  - 25.00
+  - 50.00
+  - 100.00
+attendee_presets:
+  - 5.00
+  - 10.00
+  - 25.00
+  - 50.00
+min_amount: 1.00
+platform_copy: 'Support MyEventLane and help us continue building tools for event creators.'
+attendee_copy: 'Support this event organiser with an optional donation. Your contribution helps make this event possible.'
+require_stripe_connected_for_attendee_donations: true

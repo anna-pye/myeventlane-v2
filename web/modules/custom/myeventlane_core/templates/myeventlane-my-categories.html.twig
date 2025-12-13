@@ -1,0 +1,93 @@
+{#
+/**
+ * @file
+ * Template for the My Categories page.
+ *
+ * Available variables:
+ * - followed_categories: Array of category data with new events.
+ */
+#}
+<div class="mel-my-categories-wrapper">
+
+  <h1 class="mel-page-title">{{ 'My Categories'|t }}</h1>
+
+  {% if followed_categories is empty %}
+    <div class="mel-card mel-card--empty">
+      <p>{{ 'You are not following any categories yet.'|t }}</p>
+      <p>{{ 'Browse events and click "Follow" on categories you\'re interested in to see new events here.'|t }}</p>
+      <a href="{{ path('<front>') }}" class="mel-btn mel-btn-primary">{{ 'Browse Events'|t }}</a>
+    </div>
+  {% else %}
+    <p class="mel-intro-text">{{ 'Here are the categories you follow and new events this week:'|t }}</p>
+
+    {% for category in followed_categories %}
+      <section class="mel-category-section" aria-labelledby="category-{{ category.id }}-title">
+        <div class="mel-category-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 id="category-{{ category.id }}-title" class="mel-section-title">
+            <a href="{{ category.url }}">{{ category.name }}</a>
+          </h2>
+          <a href="{{ category.unfollow_url }}" class="mel-btn mel-btn-small mel-btn-secondary">{{ 'Unfollow'|t }}</a>
+        </div>
+
+        {% if category.new_events_count > 0 %}
+          <div class="mel-events-grid">
+            {% for event in category.new_events %}
+              <article class="mel-event-card">
+                {% if event.is_boosted %}
+                  <div class="mel-event-card-featured-badge" style="
+                    position: absolute;
+                    top: 0.75rem;
+                    right: 0.75rem;
+                    background: linear-gradient(135deg, #ff6f61 0%, #ff8c7a 100%);
+                    color: white;
+                    padding: 0.375rem 0.75rem;
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    border-radius: 999px;
+                    box-shadow: 0 2px 8px rgba(255, 111, 97, 0.4);
+                    z-index: 10;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  ">
+                    ⭐ Featured
+                  </div>
+                {% endif %}
+                <div class="mel-event-card-body">
+                  <h3 class="mel-event-card-title">
+                    <a href="{{ event.url }}">{{ event.title }}</a>
+                  </h3>
+                  <div class="mel-event-card-meta">
+                    {% if event.start_date %}
+                      <div class="mel-event-card-meta-item">
+                        <span class="mel-event-card-meta-icon">📅</span>
+                        <span>{{ event.start_date }}{% if event.start_time %} at {{ event.start_time }}{% endif %}</span>
+                      </div>
+                    {% endif %}
+                    {% if event.venue %}
+                      <div class="mel-event-card-meta-item">
+                        <span class="mel-event-card-meta-icon">📍</span>
+                        <span>{{ event.venue }}</span>
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="mel-event-card-footer">
+                    <a href="{{ event.url }}" class="mel-btn mel-btn-primary mel-btn-sm">{{ 'View Event'|t }}</a>
+                    {% if event.ics_url %}
+                      <a href="{{ event.ics_url }}" class="mel-btn mel-btn-link mel-btn-sm" download>{{ 'Add to Calendar'|t }}</a>
+                    {% endif %}
+                  </div>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="mel-card mel-card--empty">
+            <p>{{ 'No new events in this category this week.'|t }}</p>
+          </div>
+        {% endif %}
+      </section>
+    {% endfor %}
+  {% endif %}
+
+</div>
+

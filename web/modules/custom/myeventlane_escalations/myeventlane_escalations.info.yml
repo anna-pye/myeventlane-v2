@@ -1,0 +1,13 @@
+name: MyEventLane Escalations
+type: module
+description: 'Escalation management system for vendor-customer issues and support requests.'
+core_version_requirement: ^11
+package: MyEventLane
+lifecycle: stable
+
+dependencies:
+  - drupal:user
+  - drupal:node
+  - myeventlane_core:myeventlane_core
+  - myeventlane_vendor:myeventlane_vendor
+

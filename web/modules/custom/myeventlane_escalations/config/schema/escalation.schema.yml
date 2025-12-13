@@ -1,0 +1,8 @@
+escalation.*:
+  type: config_entity
+  label: 'Escalation settings'
+
+escalation.escalation.*:
+  type: entity_type
+  label: 'Escalation entity'
+

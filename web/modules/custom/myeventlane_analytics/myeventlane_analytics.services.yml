@@ -1,0 +1,23 @@
+services:
+  # Analytics data service.
+  myeventlane_analytics.data:
+    class: Drupal\myeventlane_analytics\Service\AnalyticsDataService
+    arguments: ['@entity_type.manager', '@database']
+
+  # Sales analytics service.
+  myeventlane_analytics.sales:
+    class: Drupal\myeventlane_analytics\Service\SalesAnalyticsService
+    arguments: ['@entity_type.manager', '@myeventlane_analytics.data']
+
+  # Conversion analytics service.
+  myeventlane_analytics.conversion:
+    class: Drupal\myeventlane_analytics\Service\ConversionAnalyticsService
+    arguments: ['@entity_type.manager', '@myeventlane_analytics.data']
+
+  # Report generator service.
+  myeventlane_analytics.report:
+    class: Drupal\myeventlane_analytics\Service\ReportGeneratorService
+    arguments: ['@entity_type.manager', '@renderer', '@myeventlane_analytics.data']
+
+
+

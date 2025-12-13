@@ -120,94 +120,142 @@ function myeventlane_rsvp_update_9002() {
  * Add new fields to rsvp_submission entity table.
  */
 function myeventlane_rsvp_update_9003() {
-  $schema = \Drupal::database()->schema();
-  $table = 'rsvp_submission';
+  $fields = [
+    'event_title' => [
+      'type' => 'string',
+      'label' => 'Event title',
+    ],
+    'event_start_time' => [
+      'type' => 'timestamp',
+      'label' => 'Event start time',
+    ],
+  ];
 
-  // Skip if table doesn't exist (entity not yet installed).
-  if (!$schema->tableExists($table)) {
-    return t('Entity table does not exist. Run entity updates first.');
+  foreach ($fields as $field_name => $info) {
+    if (!\Drupal::entityTypeManager()->getStorage('field_storage_config')->load("rsvp_submission.$field_name")) {
+      $field_storage = \Drupal\field\Entity\FieldStorageConfig::create([
+        'field_name' => $field_name,
+        'entity_type' => 'rsvp_submission',
+        'type' => $info['type'],
+        'cardinality' => 1,
+        'translatable' => FALSE,
+      ]);
+      $field_storage->save();
+    }
   }
-
-  // Add email field.
-  if (!$schema->fieldExists($table, 'email')) {
-    $schema->addField($table, 'email', [
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => FALSE,
-    ]);
-  }
-
-  // Add name field (alias for attendee_name).
-  if (!$schema->fieldExists($table, 'name')) {
-    $schema->addField($table, 'name', [
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => FALSE,
-    ]);
-  }
-
-  // Add guests field.
-  if (!$schema->fieldExists($table, 'guests')) {
-    $schema->addField($table, 'guests', [
-      'type' => 'int',
-      'not null' => FALSE,
-      'default' => 1,
-    ]);
-  }
-
-  // Add phone field.
-  if (!$schema->fieldExists($table, 'phone')) {
-    $schema->addField($table, 'phone', [
-      'type' => 'varchar',
-      'length' => 32,
-      'not null' => FALSE,
-    ]);
-  }
-
-  // Add created field.
-  if (!$schema->fieldExists($table, 'created')) {
-    $schema->addField($table, 'created', [
-      'type' => 'int',
-      'not null' => FALSE,
-    ]);
-  }
-
-  // Add checked_in field.
-  if (!$schema->fieldExists($table, 'checked_in')) {
-    $schema->addField($table, 'checked_in', [
-      'type' => 'int',
-      'size' => 'tiny',
-      'not null' => FALSE,
-      'default' => 0,
-    ]);
-  }
-
-  // Add checked_in_at field.
-  if (!$schema->fieldExists($table, 'checked_in_at')) {
-    $schema->addField($table, 'checked_in_at', [
-      'type' => 'int',
-      'not null' => FALSE,
-    ]);
-  }
-
-  // Update entity field definitions.
-  \Drupal::entityDefinitionUpdateManager()->applyUpdates();
-
-  return t('Added new fields to rsvp_submission entity table.');
 }
 
 /**
  * Fix event_id field to be entity reference format.
  */
 function myeventlane_rsvp_update_9004() {
-  // Update entity definitions to apply the new field definitions.
   $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
   
-  // Check if entity type needs update.
-  if ($entity_definition_update_manager->needsUpdates()) {
-    $entity_definition_update_manager->applyUpdates();
+  // Check if updates are needed.
+  if (!$entity_definition_update_manager->needsUpdates()) {
+    return t('No entity definition updates needed.');
+  }
+  
+  // Get the list of changes needed.
+  $change_list = $entity_definition_update_manager->getChangeList();
+  $updates_applied = FALSE;
+  
+  // Apply entity type updates if needed.
+  if (!empty($change_list['entity_type'])) {
+    foreach ($change_list['entity_type'] as $entity_type_id => $change) {
+      if ($entity_type_id === 'rsvp_submission') {
+        $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
+        $entity_definition_update_manager->updateEntityType($entity_type);
+        $updates_applied = TRUE;
+      }
+    }
+  }
+  
+  // Apply base field definition updates if needed.
+  if (!empty($change_list['field_storage'])) {
+    $entity_type = \Drupal::entityTypeManager()->getDefinition('rsvp_submission');
+    $base_field_definitions = \Drupal\myeventlane_rsvp\Entity\RsvpSubmission::baseFieldDefinitions($entity_type);
+    
+    foreach ($change_list['field_storage'] as $field_storage_id => $change) {
+      if (strpos($field_storage_id, 'rsvp_submission.') === 0) {
+        $field_name = str_replace('rsvp_submission.', '', $field_storage_id);
+        
+        // Only update if this is a base field defined in the entity class.
+        if (isset($base_field_definitions[$field_name])) {
+          $field_storage_definition = $base_field_definitions[$field_name];
+          $entity_definition_update_manager->updateFieldStorageDefinition($field_storage_definition);
+          $updates_applied = TRUE;
+        }
+      }
+    }
+  }
+  
+  if ($updates_applied) {
     return t('Applied entity definition updates for rsvp_submission.');
   }
   
   return t('No entity definition updates needed.');
+}
+
+/**
+ * Update RSVP status and event_id field definitions.
+ * 
+ * Since these are base fields, we need to update them through the entity
+ * definition update manager. However, due to issues with the update method,
+ * we mark these as needing manual review through the entity updates page.
+ */
+function myeventlane_rsvp_update_9006() {
+  // Clear the entity type cache so Drupal re-reads the definitions.
+  \Drupal::entityTypeManager()->clearCachedDefinitions();
+  
+  // Note: The actual field definition updates (status max_length and event_id handler)
+  // need to be applied through /admin/reports/status/entity-updates because
+  // updateFieldStorageDefinition requires batch processing for base fields.
+  // The entity definition update manager will detect the changes and apply them.
+  
+  return t('Prepared RSVP field definitions for update. Please visit /admin/reports/status/entity-updates to apply the changes.');
+}
+
+/**
+ * Install missing base fields for rsvp_submission entity.
+ */
+function myeventlane_rsvp_update_9005() {
+  $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type = \Drupal::entityTypeManager()->getDefinition('rsvp_submission');
+  $base_field_definitions = \Drupal\myeventlane_rsvp\Entity\RsvpSubmission::baseFieldDefinitions($entity_type);
+  
+  // List of fields that need to be installed.
+  $fields_to_install = [
+    'name',
+    'email',
+    'guests',
+    'phone',
+    'donation',
+    'created',
+    'checked_in',
+    'checked_in_at',
+    'status',
+    'event_id',
+  ];
+  
+  foreach ($fields_to_install as $field_name) {
+    if (isset($base_field_definitions[$field_name])) {
+      $field_definition = $base_field_definitions[$field_name];
+      try {
+        // Try to get existing field storage definition.
+        $entity_definition_update_manager->getFieldStorageDefinition($field_name, 'rsvp_submission');
+        // Field exists - use the update manager's change detection.
+        $change_list = $entity_definition_update_manager->getChangeList();
+        if (!empty($change_list['field_storage']["rsvp_submission.$field_name"])) {
+          $entity_definition_update_manager->updateFieldStorageDefinition($field_definition);
+        }
+      }
+      catch (\Exception $e) {
+        // Field doesn't exist, install it.
+        $entity_definition_update_manager->installFieldStorageDefinition($field_name, 'rsvp_submission', 'myeventlane_rsvp', $field_definition);
+      }
+    }
+  }
+  
+  return t('Installed/updated missing base fields for rsvp_submission entity.');
 }

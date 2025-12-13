@@ -45,6 +45,8 @@
 @use 'layout/container';
 @use 'layout/grid';
 @use 'layout/flex';
+@use 'layout/navigation';
+@use 'layout/header-layout';
 @use 'layout/page-grid';
 @use 'layout/regions';
 @use 'layout/event-grid';
@@ -62,10 +64,12 @@
 @use 'components/header';
 @use 'components/hero';
 @use 'components/event-card';
+@use 'components/event-type-pill';
 @use 'components/rsvp';
 @use 'components/cart';
 @use 'components/checkout';
 @use 'components/footer';
+@use 'components/vendor-detail';
 
 // ---------------------------------------------------------------------------
 // 6. Pages

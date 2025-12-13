@@ -16,3 +16,38 @@ function myeventlane_event_attendees_install() {
   // No manual table creation needed.
   \Drupal::logger('myeventlane_event_attendees')->notice('Event Attendees module installed. Entity schema created automatically.');
 }
+
+/**
+ * Update entity definitions for event_attendee to include missing base fields.
+ */
+function myeventlane_event_attendees_update_8002() {
+  $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type = \Drupal::entityTypeManager()->getDefinition('event_attendee');
+  $base_field_definitions = \Drupal\myeventlane_event_attendees\Entity\EventAttendee::baseFieldDefinitions($entity_type);
+  
+  // Install promoted_at field if needed.
+  if (isset($base_field_definitions['promoted_at'])) {
+    $field_definition = $base_field_definitions['promoted_at'];
+    try {
+      $entity_definition_update_manager->getFieldStorageDefinition('promoted_at', 'event_attendee');
+    }
+    catch (\Exception $e) {
+      // Field doesn't exist, install it.
+      $entity_definition_update_manager->installFieldStorageDefinition('promoted_at', 'event_attendee', 'myeventlane_event_attendees', $field_definition);
+    }
+  }
+  
+  // Install accessibility_needs field if needed.
+  if (isset($base_field_definitions['accessibility_needs'])) {
+    $field_definition = $base_field_definitions['accessibility_needs'];
+    try {
+      $entity_definition_update_manager->getFieldStorageDefinition('accessibility_needs', 'event_attendee');
+    }
+    catch (\Exception $e) {
+      // Field doesn't exist, install it.
+      $entity_definition_update_manager->installFieldStorageDefinition('accessibility_needs', 'event_attendee', 'myeventlane_event_attendees', $field_definition);
+    }
+  }
+  
+  return t('Installed missing base fields for event_attendee entity.');
+}

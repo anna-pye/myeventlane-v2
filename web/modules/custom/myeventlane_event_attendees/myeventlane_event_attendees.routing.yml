@@ -64,3 +64,17 @@ myeventlane_event_attendees.vendor_checkin:
     parameters:
       event_attendee:
         type: entity:event_attendee
+
+# Get waitlist position for current user.
+myeventlane_event_attendees.waitlist_position:
+  path: '/event/{node}/waitlist/position'
+  defaults:
+    _controller: '\Drupal\myeventlane_event_attendees\Controller\WaitlistController::getPosition'
+    _format: json
+  requirements:
+    _custom_access: '\Drupal\myeventlane_event_attendees\Controller\WaitlistController::accessPosition'
+    node: '\d+'
+  options:
+    parameters:
+      node:
+        type: entity:node

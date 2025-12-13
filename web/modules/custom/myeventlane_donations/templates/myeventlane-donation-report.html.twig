@@ -1,0 +1,97 @@
+{#
+/**
+ * @file
+ * Template for admin donation report page.
+ *
+ * Available variables:
+ * - platform_stats: Array of monthly platform donation stats.
+ * - rsvp_stats: Array of monthly RSVP donation stats.
+ * - total_platform: Total platform donations.
+ * - total_rsvp: Total RSVP donations.
+ * - count_platform: Count of platform donations.
+ * - count_rsvp: Count of RSVP donations.
+ * - export_url: URL to export CSV.
+ */
+#}
+<div class="mel-donation-report">
+  <div class="mel-donation-report__header">
+    <h1>{{ 'Donation Reports'|t }}</h1>
+    <a href="{{ export_url }}" class="mel-btn mel-btn-primary">{{ 'Export CSV'|t }}</a>
+  </div>
+
+  <div class="mel-donation-report__summary">
+    <div class="mel-card">
+      <h2>{{ 'Platform Donations (Vendor → MyEventLane)'|t }}</h2>
+      <div class="mel-stats">
+        <div class="mel-stat">
+          <span class="mel-stat__label">{{ 'Total'|t }}</span>
+          <span class="mel-stat__value">${{ total_platform|number_format(2) }}</span>
+        </div>
+        <div class="mel-stat">
+          <span class="mel-stat__label">{{ 'Count'|t }}</span>
+          <span class="mel-stat__value">{{ count_platform }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mel-card">
+      <h2>{{ 'RSVP Donations (Attendee → Vendor)'|t }}</h2>
+      <div class="mel-stats">
+        <div class="mel-stat">
+          <span class="mel-stat__label">{{ 'Total'|t }}</span>
+          <span class="mel-stat__value">${{ total_rsvp|number_format(2) }}</span>
+        </div>
+        <div class="mel-stat">
+          <span class="mel-stat__label">{{ 'Count'|t }}</span>
+          <span class="mel-stat__value">{{ count_rsvp }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mel-donation-report__tables">
+    <div class="mel-card">
+      <h2>{{ 'Platform Donations by Month'|t }}</h2>
+      <table class="mel-table">
+        <thead>
+          <tr>
+            <th>{{ 'Month'|t }}</th>
+            <th>{{ 'Total'|t }}</th>
+            <th>{{ 'Count'|t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stat in platform_stats %}
+            <tr>
+              <td>{{ stat.month }}</td>
+              <td>${{ stat.total|number_format(2) }}</td>
+              <td>{{ stat.count }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mel-card">
+      <h2>{{ 'RSVP Donations by Month'|t }}</h2>
+      <table class="mel-table">
+        <thead>
+          <tr>
+            <th>{{ 'Month'|t }}</th>
+            <th>{{ 'Total'|t }}</th>
+            <th>{{ 'Count'|t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stat in rsvp_stats %}
+            <tr>
+              <td>{{ stat.month }}</td>
+              <td>${{ stat.total|number_format(2) }}</td>
+              <td>{{ stat.count }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,12 @@
+services:
+  myeventlane_donations.service:
+    class: Drupal\myeventlane_donations\Service\DonationService
+    arguments: ['@entity_type.manager', '@config.factory', '@myeventlane_core.stripe', '@logger.factory']
+
+  myeventlane_donations.platform:
+    class: Drupal\myeventlane_donations\Service\PlatformDonationService
+    arguments: ['@entity_type.manager', '@commerce_cart.cart_provider', '@commerce_cart.cart_manager', '@logger.factory']
+
+  myeventlane_donations.rsvp:
+    class: Drupal\myeventlane_donations\Service\RsvpDonationService
+    arguments: ['@entity_type.manager', '@commerce_cart.cart_provider', '@commerce_cart.cart_manager', '@logger.factory']

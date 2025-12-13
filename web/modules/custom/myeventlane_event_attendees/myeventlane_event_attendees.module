@@ -1,0 +1,58 @@
+<?php
+
+/**
+ * @file
+ * Module file for MyEventLane Event Attendees.
+ */
+
+use Drupal\Core\Render\RendererInterface;
+
+/**
+ * Implements hook_mail().
+ */
+function myeventlane_event_attendees_mail($key, &$message, $params): void {
+  /** @var \Drupal\Core\Render\RendererInterface $renderer */
+  $renderer = \Drupal::service('renderer');
+
+  switch ($key) {
+    case 'waitlist_promotion':
+      $message['subject'] = $params['subject'] ?? t('A spot opened up for your event');
+
+      $build = [
+        '#theme' => 'myeventlane_waitlist_promotion_email',
+        '#event' => $params['event'] ?? NULL,
+        '#attendee' => $params['attendee'] ?? NULL,
+        '#event_title' => $params['event_title'] ?? '',
+        '#event_start' => $params['event_start'] ?? NULL,
+        '#event_url' => $params['event_url'] ?? '',
+        '#purchase_url' => $params['purchase_url'] ?? '',
+        '#attendee_name' => $params['attendee_name'] ?? '',
+      ];
+
+      $message['body'][] = $renderer->renderPlain($build);
+      break;
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function myeventlane_event_attendees_theme(array $existing, string $type, string $theme, string $path): array {
+  return [
+    'myeventlane_waitlist_promotion_email' => [
+      'variables' => [
+        'event' => NULL,
+        'attendee' => NULL,
+        'event_title' => '',
+        'event_start' => NULL,
+        'event_url' => '',
+        'purchase_url' => '',
+        'attendee_name' => '',
+      ],
+      'template' => 'email-waitlist-promotion',
+    ],
+  ];
+}
+
+
+

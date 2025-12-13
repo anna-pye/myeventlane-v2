@@ -1,0 +1,17 @@
+name: 'MyEventLane Analytics'
+type: module
+description: 'Comprehensive analytics and reporting for vendors. Provides time-series sales data, conversion funnels, and detailed event analytics.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_core:myeventlane_core
+  - myeventlane_dashboard:myeventlane_dashboard
+  - myeventlane_commerce:myeventlane_commerce
+  - drupal:node
+  - drupal:commerce_order
+  - drupal:commerce_product
+
+
+

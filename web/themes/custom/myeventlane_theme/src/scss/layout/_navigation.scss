@@ -1,1 +1,78 @@
-/* Placeholder for src/scss/layout/_navigation.scss */
+// ==========================================================================
+// Navigation Layout Helpers
+// ==========================================================================
+// Shared, mobile-first layout rules to align Drupal-rendered menus with
+// MyEventLane navigation tokens.
+
+@use '../tokens/colors';
+@use '../tokens/radii';
+@use '../tokens/spacing';
+@use '../tokens/typography';
+@use '../tokens/breakpoints';
+
+.mel-nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: spacing.mel-space(1);
+  flex-wrap: wrap;
+
+  @include breakpoints.mel-break(md) {
+    flex-wrap: nowrap;
+  }
+}
+
+.mel-nav__item {
+  margin: 0;
+  padding: 0;
+}
+
+.mel-nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: spacing.mel-space(1);
+  padding: spacing.mel-space(2) spacing.mel-space(3);
+  min-height: 44px;
+  text-decoration: none;
+  color: colors.$mel-color-text;
+  font-size: typography.mel-font-size(base);
+  font-weight: typography.$mel-font-medium;
+  border-radius: radii.$mel-radius-md;
+  transition: background 0.2s ease, color 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    background: colors.$mel-color-bg;
+    color: colors.$mel-color-primary;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: colors.$mel-focus-ring;
+  }
+
+  &.is-active,
+  &[aria-current='page'],
+  &[aria-current='true'] {
+    background: colors.$mel-color-bg;
+    color: colors.$mel-color-primary;
+    font-weight: typography.$mel-font-semibold;
+  }
+}
+
+// Vertical stacks for sidebars or dropdowns
+.mel-nav--stacked {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+// Compact horizontal menu (breadcrumbs, meta)
+.mel-nav--inline {
+  gap: spacing.mel-space(0);
+
+  .mel-nav__link {
+    padding: spacing.mel-space(1) spacing.mel-space(2);
+    font-size: typography.mel-font-size(sm);
+  }
+}

@@ -1,0 +1,25 @@
+# Analytics dashboard.
+myeventlane_analytics.dashboard:
+  path: '/vendor/analytics'
+  defaults:
+    _controller: '\Drupal\myeventlane_analytics\Controller\AnalyticsDashboardController::dashboard'
+    _title: 'Analytics Dashboard'
+  requirements:
+    _permission: 'access vendor dashboard'
+
+# Per-event analytics.
+myeventlane_analytics.event:
+  path: '/vendor/analytics/event/{node}'
+  defaults:
+    _controller: '\Drupal\myeventlane_analytics\Controller\AnalyticsDashboardController::eventAnalytics'
+    _title_callback: '\Drupal\myeventlane_analytics\Controller\AnalyticsDashboardController::eventTitle'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_analytics\Controller\AnalyticsDashboardController::accessEvent'
+    node: '\d+'
+  options:
+    parameters:
+      node:
+        type: entity:node
+
+
+

@@ -1,0 +1,181 @@
+{#
+/**
+ * @file
+ * Left navigation sidebar for MyEventLane Vendor Console.
+ *
+ * mel-sidebar navigation with:
+ * - Logo/brand
+ * - Main navigation items
+ * - Workspace info
+ * - User/logout
+ */
+#}
+<nav class="mel-sidebar" aria-label="{{ 'Vendor navigation'|t }}">
+  {# Back to Administration link (admins only) #}
+  {% if page.is_admin and page.admin_portal_url %}
+    <div class="mel-sidebar__admin-link">
+      <a href="{{ page.admin_portal_url }}" class="mel-sidebar__link mel-sidebar__link--admin" target="_blank" rel="noopener noreferrer">
+        <span class="mel-sidebar__link-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </span>
+        <span class="mel-sidebar__link-label">{{ '< Back to Administration'|t }}</span>
+      </a>
+    </div>
+  {% endif %}
+
+  {# Brand / Logo #}
+  <div class="mel-sidebar__brand">
+    <a href="/vendor/dashboard" class="mel-sidebar__logo" aria-label="{{ 'Vendor dashboard'|t }}">
+      <span class="mel-sidebar__logo-mark">M</span>
+      <span class="mel-sidebar__logo-text">MyEventLane</span>
+    </a>
+  </div>
+
+  {# Main Navigation #}
+  <ul class="mel-sidebar__nav" role="list">
+    {% set active = page.active_section|default('dashboard') %}
+    
+    {# Primary nav items #}
+    {% set nav_items = [
+      { path: '/vendor/dashboard', label: 'Dashboard'|t, key: 'dashboard', icon: 'dashboard' },
+      { path: '/vendor/events', label: 'Events'|t, key: 'events', icon: 'events' },
+    ] %}
+    
+    {% for item in nav_items %}
+      <li class="mel-sidebar__item">
+        <a href="{{ item.path }}"
+           class="mel-sidebar__link{% if active == item.key %} is-active{% endif %}"
+           {% if active == item.key %}aria-current="page"{% endif %}>
+          <span class="mel-sidebar__link-icon" aria-hidden="true">
+            {% if item.icon == 'dashboard' %}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>
+              </svg>
+            {% elseif item.icon == 'events' %}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            {% endif %}
+          </span>
+          <span class="mel-sidebar__link-label">{{ item.label }}</span>
+        </a>
+      </li>
+    {% endfor %}
+    
+    {# Section divider #}
+    <li aria-hidden="true"><hr class="mel-sidebar__divider"></li>
+    <li class="mel-sidebar__section-label">{{ 'Management'|t }}</li>
+    
+    {# Management items - using actual routes from routing.yml #}
+    {% set mgmt_items = [
+      { path: '/vendor/audience', label: 'Audience'|t, key: 'audience', icon: 'users' },
+      { path: '/vendor/payouts', label: 'Payouts'|t, key: 'payouts', icon: 'dollar' },
+    ] %}
+    
+    {% for item in mgmt_items %}
+      <li class="mel-sidebar__item">
+        <a href="{{ item.path }}"
+           class="mel-sidebar__link{% if active == item.key %} is-active{% endif %}"
+           {% if active == item.key %}aria-current="page"{% endif %}>
+          <span class="mel-sidebar__link-icon" aria-hidden="true">
+            {% if item.icon == 'users' %}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            {% elseif item.icon == 'dollar' %}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            {% endif %}
+          </span>
+          <span class="mel-sidebar__link-label">{{ item.label }}</span>
+        </a>
+      </li>
+    {% endfor %}
+    
+    {# Section divider #}
+    <li aria-hidden="true"><hr class="mel-sidebar__divider"></li>
+    <li class="mel-sidebar__section-label">{{ 'Growth'|t }}</li>
+    
+    {# Growth items - using actual routes from routing.yml #}
+    {% set growth_items = [
+      { path: '/vendor/boost', label: 'Boost'|t, key: 'boost', icon: 'zap' },
+    ] %}
+    
+    {% for item in growth_items %}
+      <li class="mel-sidebar__item">
+        <a href="{{ item.path }}"
+           class="mel-sidebar__link{% if active == item.key %} is-active{% endif %}"
+           {% if active == item.key %}aria-current="page"{% endif %}>
+          <span class="mel-sidebar__link-icon" aria-hidden="true">
+            {% if item.icon == 'zap' %}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            {% endif %}
+          </span>
+          <span class="mel-sidebar__link-label">{{ item.label }}</span>
+        </a>
+      </li>
+    {% endfor %}
+    
+    {# Settings #}
+    <li aria-hidden="true"><hr class="mel-sidebar__divider"></li>
+    
+    <li class="mel-sidebar__item">
+      <a href="/vendor/settings"
+         class="mel-sidebar__link{% if active == 'settings' %} is-active{% endif %}">
+        <span class="mel-sidebar__link-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </span>
+        <span class="mel-sidebar__link-label">{{ 'Settings'|t }}</span>
+      </a>
+    </li>
+  </ul>
+
+  {# Footer / User Info #}
+  <div class="mel-sidebar__footer">
+    {# Back to main site #}
+    <a class="mel-sidebar__link" href="{{ page.main_site_url|default('/') }}">
+      <span class="mel-sidebar__link-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </span>
+      <span class="mel-sidebar__link-label">{{ 'Back to main site'|t }}</span>
+    </a>
+    
+    {# Workspace info #}
+    {% if page.workspace_name %}
+      <div class="mel-sidebar__workspace">
+        <div class="mel-sidebar__workspace-label">{{ 'Workspace'|t }}</div>
+        <div class="mel-sidebar__workspace-name">{{ page.workspace_name }}</div>
+      </div>
+    {% endif %}
+    
+    {# User info #}
+    {% if page.user_name %}
+      <div class="mel-sidebar__user">
+        <div class="mel-sidebar__user-avatar">
+          {{ page.user_initials|default('U') }}
+        </div>
+        <div class="mel-sidebar__user-info">
+          <div class="mel-sidebar__user-name">{{ page.user_name }}</div>
+          <div class="mel-sidebar__user-role">{{ page.user_role|default('Vendor'|t) }}</div>
+        </div>
+      </div>
+    {% endif %}
+    
+    {# Logout #}
+    {% if page.logout_link %}
+      <div class="mel-sidebar__logout">
+        {{ page.logout_link }}
+      </div>
+    {% endif %}
+  </div>
+</nav>
+

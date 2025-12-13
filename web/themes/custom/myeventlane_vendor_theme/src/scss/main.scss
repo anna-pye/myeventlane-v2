@@ -1,0 +1,71 @@
+/**
+ * @file
+ * Main SCSS entry point for MyEventLane Vendor Theme.
+ *
+ * Humanitix/Eventbrite quality vendor console with clean, professional design.
+ * Uses Inter/Nunito fonts, navy sidebar, and coral accents.
+ */
+
+// ============================================================================
+// DESIGN TOKENS
+// ============================================================================
+
+@use 'tokens/colors';
+@use 'tokens/typography';
+@use 'tokens/spacing';
+@use 'tokens/breakpoints';
+@use 'tokens/shadows';
+@use 'tokens/radii';
+
+// ============================================================================
+// BASE STYLES
+// ============================================================================
+
+@use 'base/reset';
+@use 'base/forms';
+
+// ============================================================================
+// LAYOUT
+// ============================================================================
+
+@use 'layout/container';
+@use 'layout/grid';
+@use 'layout/two-column';
+@use 'layout/navigation';
+@use 'layout/header';
+@use 'layout/sidebar-help';
+
+// ============================================================================
+// COMPONENTS
+// ============================================================================
+
+@use 'components/buttons';
+@use 'components/cards';
+@use 'components/tables';
+@use 'components/tabs';
+@use 'components/forms' as form-components;
+@use 'components/kpi-cards';
+@use 'components/charts';
+@use 'components/badges';
+@use 'components/lists';
+@use 'components/upload';
+@use 'components/inline-actions';
+@use 'components/empty-states';
+@use 'components/console';
+@use 'components/event-form' as event-form-components;
+@use 'components/stripe-panel';
+@use 'components/best-event';
+@use 'components/notifications';
+@use 'components/event-table';
+@use 'components/account-summary';
+@use 'components/quick-actions';
+
+// ============================================================================
+// PAGE-SPECIFIC STYLES
+// ============================================================================
+
+@use 'pages/dashboard';
+@use 'pages/event-form';
+@use 'pages/analytics';
+@use 'pages/settings';
+

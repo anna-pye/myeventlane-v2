@@ -1,0 +1,223 @@
+/**
+ * @file
+ * Styles for vendor analytics section on vendor detail pages.
+ */
+
+.vendor-analytics-section {
+  margin-top: 3rem;
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #dfe6e9;
+}
+
+.vendor-analytics-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem;
+  color: #2d3436;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #74b9ff;
+}
+
+.vendor-analytics-subtitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 2rem 0 1rem;
+  color: #2d3436;
+}
+
+.vendor-analytics-kpis {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 600px) {
+  .vendor-analytics-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .vendor-analytics-kpis {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.vendor-kpi-card {
+  background: white;
+  border: 1px solid #dfe6e9;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vendor-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.vendor-kpi-card--revenue {
+  border-left: 4px solid #ff7675;
+}
+
+.vendor-kpi-card--events {
+  border-left: 4px solid #74b9ff;
+}
+
+.vendor-kpi-card--tickets {
+  border-left: 4px solid #00b894;
+}
+
+.vendor-kpi-card--participants {
+  border-left: 4px solid #a29bfe;
+}
+
+.vendor-kpi-card--fees {
+  border-left: 4px solid #fdcb6e;
+}
+
+.vendor-kpi-card--net {
+  border-left: 4px solid #6c5ce7;
+}
+
+.vendor-kpi-card .kpi-card__header {
+  margin-bottom: 0.5rem;
+}
+
+.vendor-kpi-card .kpi-card__icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #f8f9fa;
+  color: #74b9ff;
+}
+
+.vendor-kpi-card .kpi-card__label {
+  font-size: 0.875rem;
+  color: #636e72;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.vendor-kpi-card .kpi-card__value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3436;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.vendor-kpi-card .kpi-card__delta {
+  font-size: 0.8125rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  background: #e9ecef;
+  color: #495057;
+}
+
+.vendor-kpi-card .kpi-card__delta--positive {
+  background: #d4edda;
+  color: #155724;
+}
+
+.vendor-analytics-events {
+  margin-top: 2rem;
+}
+
+.vendor-events-table-wrapper {
+  overflow-x: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.vendor-events-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.vendor-events-table thead {
+  background: #f8f9fa;
+}
+
+.vendor-events-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #636e72;
+  border-bottom: 2px solid #dfe6e9;
+}
+
+.vendor-events-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #dfe6e9;
+}
+
+.vendor-events-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.vendor-events-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.vendor-events-table .event-link {
+  font-weight: 600;
+  color: #74b9ff;
+  text-decoration: none;
+}
+
+.vendor-events-table .event-link:hover {
+  text-decoration: underline;
+}
+
+.vendor-events-table .transaction-amount {
+  font-weight: 600;
+  color: #2d3436;
+}
+
+.vendor-events-table .status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vendor-events-table .status-badge--published {
+  background: #d4edda;
+  color: #155724;
+}
+
+.vendor-events-table .status-badge--draft {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.vendor-analytics-empty {
+  text-align: center;
+  padding: 2rem;
+  color: #636e72;
+  font-style: italic;
+}
+
+.section-count {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #636e72;
+}

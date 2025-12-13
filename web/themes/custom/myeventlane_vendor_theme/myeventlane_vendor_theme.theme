@@ -51,8 +51,31 @@ function myeventlane_vendor_theme_preprocess_page(array &$variables): void {
     }
   }
 
-  // Set main site URL.
-  $variables['page']['main_site_url'] = '/';
+  // Set main site URL - build URL pointing to public domain.
+  try {
+    if (\Drupal::hasService('myeventlane_core.domain_detector')) {
+      $domain_detector = \Drupal::service('myeventlane_core.domain_detector');
+      $variables['page']['main_site_url'] = $domain_detector->buildDomainUrl('/', 'public');
+    }
+    else {
+      // Fallback: use current request to build public URL.
+      $request = \Drupal::requestStack()->getCurrentRequest();
+      if ($request) {
+        $scheme = $request->getScheme();
+        $host = $request->getHost();
+        // Remove vendor. or admin. prefix to get main domain.
+        $host = preg_replace('/^(vendor|admin)\./', '', $host);
+        $variables['page']['main_site_url'] = $scheme . '://' . $host . '/';
+      }
+      else {
+        $variables['page']['main_site_url'] = '/';
+      }
+    }
+  }
+  catch (\Exception $e) {
+    // Fallback to relative URL if service unavailable.
+    $variables['page']['main_site_url'] = '/';
+  }
 
   // Set admin portal URL for administrators.
   $variables['page']['is_admin'] = FALSE;

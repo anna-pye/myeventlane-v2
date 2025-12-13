@@ -10,76 +10,82 @@ dependencies:
     - field.field.myeventlane_vendor.myeventlane_vendor.field_logo_image
     - field.field.myeventlane_vendor.myeventlane_vendor.field_owner
     - field.field.myeventlane_vendor.myeventlane_vendor.field_phone
+    - field.field.myeventlane_vendor.myeventlane_vendor.field_public_show_email
+    - field.field.myeventlane_vendor.myeventlane_vendor.field_public_show_location
+    - field.field.myeventlane_vendor.myeventlane_vendor.field_public_show_phone
     - field.field.myeventlane_vendor.myeventlane_vendor.field_social_links
     - field.field.myeventlane_vendor.myeventlane_vendor.field_summary
+    - field.field.myeventlane_vendor.myeventlane_vendor.field_vendor_bio
+    - field.field.myeventlane_vendor.myeventlane_vendor.field_vendor_logo
+    - field.field.myeventlane_vendor.myeventlane_vendor.field_vendor_store
+    - field.field.myeventlane_vendor.myeventlane_vendor.field_vendor_users
     - field.field.myeventlane_vendor.myeventlane_vendor.field_website
-    - image.style.medium
   module:
     - image
     - link
     - myeventlane_vendor
     - telephone
+    - text
 id: myeventlane_vendor.myeventlane_vendor.default
 targetEntityType: myeventlane_vendor
 bundle: myeventlane_vendor
 mode: default
 content:
-  created:
-    type: timestamp
-    label: inline
-    settings:
-      date_format: medium
-      custom_date_format: ''
-      timezone: ''
-      tooltip:
-        date_format: long
-        custom_date_format: ''
-      time_diff:
-        enabled: false
-        future_format: '@interval hence'
-        past_format: '@interval ago'
-        granularity: 2
-        refresh: 60
-    third_party_settings: {  }
-    weight: 2
-    region: content
   field_address:
     type: string
-    label: above
+    label: hidden
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 7
+    weight: 10
     region: content
   field_banner_image:
     type: image
-    label: above
+    label: hidden
     settings:
       image_link: ''
-      image_style: ''
+      image_style: large
       image_loading:
         attribute: lazy
     third_party_settings: {  }
-    weight: 6
+    weight: 0
+    region: content
+  field_description:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 5
     region: content
   field_email:
     type: basic_string
-    label: above
+    label: hidden
     settings: {  }
     third_party_settings: {  }
     weight: 8
     region: content
+  field_logo_image:
+    type: image
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: medium
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
+    weight: 2
+    region: content
   field_phone:
     type: telephone_link
-    label: above
+    label: hidden
     settings:
       title: ''
     third_party_settings: {  }
-    weight: 3
+    weight: 9
     region: content
   field_social_links:
     type: link
-    label: above
+    label: hidden
     settings:
       trim_length: 80
       url_only: false
@@ -87,21 +93,24 @@ content:
       rel: ''
       target: ''
     third_party_settings: {  }
-    weight: 5
+    weight: 11
     region: content
-  field_website:
-    type: link
-    label: above
+  field_summary:
+    type: string
+    label: hidden
     settings:
-      trim_length: 80
-      url_only: false
-      url_plain: false
-      rel: ''
-      target: ''
+      link_to_entity: false
     third_party_settings: {  }
     weight: 4
     region: content
-  logo:
+  field_vendor_bio:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 6
+    region: content
+  field_vendor_logo:
     type: image
     label: hidden
     settings:
@@ -112,18 +121,33 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
+  field_website:
+    type: link
+    label: hidden
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    weight: 7
+    region: content
   name:
     type: string
     label: hidden
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 0
+    weight: 3
     region: content
 hidden:
   changed: true
-  field_description: true
-  field_logo_image: true
+  created: true
   field_owner: true
-  field_summary: true
+  field_public_show_email: true
+  field_public_show_location: true
+  field_public_show_phone: true
+  field_vendor_store: true
+  field_vendor_users: true
   uid: true

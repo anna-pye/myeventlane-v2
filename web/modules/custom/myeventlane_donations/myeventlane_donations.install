@@ -1,0 +1,91 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the myeventlane_donations module.
+ */
+
+use Drupal\commerce_order\Entity\OrderItemType;
+use Drupal\commerce_order\Entity\OrderType;
+
+/**
+ * Creates Commerce order types and order item types for donations.
+ */
+function myeventlane_donations_install(): void {
+  // Create platform donation order type.
+  if (!OrderType::load('platform_donation')) {
+    $orderType = OrderType::create([
+      'id' => 'platform_donation',
+      'label' => 'Platform Donation',
+      'workflow' => 'order_default',
+      'numberPattern' => 'order_default',
+      'refresh_mode' => 'customer',
+      'refresh_frequency' => 0,
+      'sendReceipt' => TRUE,
+      'receiptBcc' => '',
+      'receiptSubject' => 'Thank you for your donation to MyEventLane',
+    ]);
+    $orderType->save();
+  }
+
+  // Create platform donation order item type.
+  if (!OrderItemType::load('platform_donation')) {
+    $orderItemType = OrderItemType::create([
+      'id' => 'platform_donation',
+      'label' => 'Platform Donation',
+      'purchasableEntityType' => NULL,
+      'orderType' => 'platform_donation',
+    ]);
+    $orderItemType->save();
+  }
+
+  // Create RSVP donation order type.
+  if (!OrderType::load('rsvp_donation')) {
+    $orderType = OrderType::create([
+      'id' => 'rsvp_donation',
+      'label' => 'RSVP Donation',
+      'workflow' => 'order_default',
+      'numberPattern' => 'order_default',
+      'refresh_mode' => 'customer',
+      'refresh_frequency' => 0,
+      'sendReceipt' => TRUE,
+      'receiptBcc' => '',
+      'receiptSubject' => 'Thank you for your donation',
+    ]);
+    $orderType->save();
+  }
+
+  // Create RSVP donation order item type.
+  if (!OrderItemType::load('rsvp_donation')) {
+    $orderItemType = OrderItemType::create([
+      'id' => 'rsvp_donation',
+      'label' => 'RSVP Donation',
+      'purchasableEntityType' => NULL,
+      'orderType' => 'rsvp_donation',
+    ]);
+    $orderItemType->save();
+  }
+}
+
+/**
+ * Removes Commerce order types and order item types.
+ */
+function myeventlane_donations_uninstall(): void {
+  // Delete order item types first (they reference order types).
+  $orderItemTypes = ['platform_donation', 'rsvp_donation'];
+  foreach ($orderItemTypes as $id) {
+    $orderItemType = OrderItemType::load($id);
+    if ($orderItemType) {
+      $orderItemType->delete();
+    }
+  }
+
+  // Delete order types.
+  $orderTypes = ['platform_donation', 'rsvp_donation'];
+  foreach ($orderTypes as $id) {
+    $orderType = OrderType::load($id);
+    if ($orderType) {
+      $orderType->delete();
+    }
+  }
+}

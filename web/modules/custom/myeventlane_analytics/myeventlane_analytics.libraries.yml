@@ -1,0 +1,13 @@
+analytics:
+  version: 1.x
+  css:
+    theme:
+      css/analytics.css: {}
+  js:
+    js/analytics.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+
+
+

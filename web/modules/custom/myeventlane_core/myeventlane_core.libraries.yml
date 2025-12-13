@@ -1,0 +1,10 @@
+onboarding:
+  version: 1.x
+  css:
+    component:
+      css/onboarding.css: {}
+  dependencies:
+    - core/drupal
+    - myeventlane_theme/global-styling
+
+

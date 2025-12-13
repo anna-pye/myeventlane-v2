@@ -1,0 +1,261 @@
+/**
+ * @file
+ * Tab component styles for MyEventLane Vendor Theme.
+ *
+ * mel-tabs: Tab navigation for multi-step forms and content sections.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/breakpoints' as *;
+@use '../tokens/shadows' as *;
+
+// ============================================================================
+// TAB CONTAINER (mel-tabs)
+// ============================================================================
+
+.mel-tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+// ============================================================================
+// TAB LIST (horizontal navigation)
+// ============================================================================
+
+.mel-tabs__list {
+  display: flex;
+  align-items: center;
+  gap: $spacing-1;
+  padding: $spacing-1;
+  background: $bg-secondary;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-6;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  
+  // Hide scrollbar but allow scrolling
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+// Underline variant
+.mel-tabs__list--underline {
+  background: transparent;
+  padding: 0;
+  border-bottom: 1px solid $border-color;
+  border-radius: 0;
+  gap: $spacing-6;
+}
+
+// ============================================================================
+// TAB BUTTON
+// ============================================================================
+
+.mel-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-3 $spacing-4;
+  font-size: $font-size-label;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+  background: transparent;
+  border: none;
+  border-radius: $radius-md;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    color: $text-primary;
+    background: rgba(0, 0, 0, 0.05);
+  }
+  
+  &.is-active,
+  &[aria-selected="true"] {
+    color: $text-primary;
+    background: $bg-primary;
+    box-shadow: $shadow-sm;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: $shadow-focus;
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Underline tab variant
+.mel-tabs__list--underline .mel-tabs__tab {
+  padding: $spacing-3 $spacing-1;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: transparent;
+    transition: background-color 0.15s ease-in-out;
+  }
+  
+  &:hover {
+    background: transparent;
+  }
+  
+  &.is-active,
+  &[aria-selected="true"] {
+    background: transparent;
+    box-shadow: none;
+    color: $primary;
+    
+    &::after {
+      background: $primary;
+    }
+  }
+}
+
+// ============================================================================
+// TAB ICON & BADGE
+// ============================================================================
+
+.mel-tabs__tab-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.mel-tabs__tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 $spacing-1;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  background: $bg-tertiary;
+  color: $text-secondary;
+  border-radius: $radius-full;
+  
+  .is-active & {
+    background: $primary;
+    color: $text-inverse;
+  }
+}
+
+// ============================================================================
+// TAB PANELS
+// ============================================================================
+
+.mel-tabs__panels {
+  position: relative;
+}
+
+.mel-tabs__panel {
+  display: none;
+  
+  &.is-active,
+  &[aria-hidden="false"] {
+    display: block;
+  }
+}
+
+// ============================================================================
+// STEPPER TABS (for multi-step forms)
+// ============================================================================
+
+.mel-stepper {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-4 0;
+  margin-bottom: $spacing-6;
+  overflow-x: auto;
+}
+
+.mel-stepper__step {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  padding: $spacing-2 $spacing-4;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-muted;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover:not(:disabled) {
+    color: $text-secondary;
+  }
+  
+  &.is-active {
+    color: $text-primary;
+  }
+  
+  &.is-completed {
+    color: $success;
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.mel-stepper__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  background: $bg-tertiary;
+  border-radius: $radius-full;
+  
+  .is-active & {
+    background: $primary;
+    color: $text-inverse;
+  }
+  
+  .is-completed & {
+    background: $success;
+    color: $text-inverse;
+  }
+}
+
+.mel-stepper__label {
+  @include respond-down(md) {
+    display: none;
+  }
+}
+
+.mel-stepper__connector {
+  flex: 0 0 24px;
+  height: 1px;
+  background: $border-color;
+  
+  .is-completed + .mel-stepper__step & {
+    background: $success;
+  }
+}
+
+

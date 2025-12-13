@@ -1,0 +1,42 @@
+/**
+ * @file
+ * Hides Drupal admin sidebar on vendor event management pages.
+ */
+
+/* Hide admin toolbar sidebar on vendor event management pages */
+body.path-vendor-event .gin-sidebar,
+body.path-vendor-event .layout-sidebar-first,
+body.path-vendor-event .region-sidebar-first,
+body[data-drupal-path*="/vendor/event/"] .gin-sidebar,
+body[data-drupal-path*="/vendor/event/"] .layout-sidebar-first,
+body[data-drupal-path*="/vendor/event/"] .region-sidebar-first {
+  display: none !important;
+}
+
+/* Expand main content to full width when sidebar is hidden */
+body.path-vendor-event .layout-content,
+body.path-vendor-event .region-content,
+body[data-drupal-path*="/vendor/event/"] .layout-content,
+body[data-drupal-path*="/vendor/event/"] .region-content {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+}
+
+/* Hide local tasks (tabs) on vendor event management pages */
+body.path-vendor-event .tabs,
+body.path-vendor-event .local-tasks,
+body.path-vendor-event .block-local-tasks-block,
+body[data-drupal-path*="/vendor/event/"] .tabs,
+body[data-drupal-path*="/vendor/event/"] .local-tasks,
+body[data-drupal-path*="/vendor/event/"] .block-local-tasks-block {
+  display: none !important;
+}
+
+/* Hide admin toolbar if present */
+body.path-vendor-event .toolbar,
+body[data-drupal-path*="/vendor/event/"] .toolbar {
+  display: none !important;
+}
+
+

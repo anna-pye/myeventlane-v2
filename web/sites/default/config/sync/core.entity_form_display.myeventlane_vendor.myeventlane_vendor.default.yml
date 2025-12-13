@@ -10,8 +10,15 @@ dependencies:
     - field.field.myeventlane_vendor.myeventlane_vendor.field_logo_image
     - field.field.myeventlane_vendor.myeventlane_vendor.field_owner
     - field.field.myeventlane_vendor.myeventlane_vendor.field_phone
+    - field.field.myeventlane_vendor.myeventlane_vendor.field_public_show_email
+    - field.field.myeventlane_vendor.myeventlane_vendor.field_public_show_location
+    - field.field.myeventlane_vendor.myeventlane_vendor.field_public_show_phone
     - field.field.myeventlane_vendor.myeventlane_vendor.field_social_links
     - field.field.myeventlane_vendor.myeventlane_vendor.field_summary
+    - field.field.myeventlane_vendor.myeventlane_vendor.field_vendor_bio
+    - field.field.myeventlane_vendor.myeventlane_vendor.field_vendor_logo
+    - field.field.myeventlane_vendor.myeventlane_vendor.field_vendor_store
+    - field.field.myeventlane_vendor.myeventlane_vendor.field_vendor_users
     - field.field.myeventlane_vendor.myeventlane_vendor.field_website
     - image.style.thumbnail
   module:
@@ -138,4 +145,11 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-hidden: {  }
+hidden:
+  field_public_show_email: true
+  field_public_show_location: true
+  field_public_show_phone: true
+  field_vendor_bio: true
+  field_vendor_logo: true
+  field_vendor_store: true
+  field_vendor_users: true

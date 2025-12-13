@@ -1,0 +1,252 @@
+/**
+ * @file
+ * List component styles for MyEventLane Vendor Theme.
+ *
+ * mel-list: Various list layouts for dashboard content.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/radii' as *;
+
+// ============================================================================
+// BASE LIST (mel-list)
+// ============================================================================
+
+.mel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mel-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-4;
+  padding: $spacing-3 0;
+  border-bottom: 1px solid $border-color-light;
+  
+  &:first-child {
+    padding-top: 0;
+  }
+  
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.mel-list__item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.mel-list__item-title {
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+}
+
+.mel-list__item-meta {
+  font-size: $font-size-sm;
+  color: $text-muted;
+  margin-top: $spacing-1;
+}
+
+.mel-list__item-value {
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  text-align: right;
+}
+
+// ============================================================================
+// LIST WITH ICONS
+// ============================================================================
+
+.mel-list--icons {
+  .mel-list__item {
+    padding: $spacing-4 0;
+  }
+}
+
+.mel-list__item-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg-secondary;
+  border-radius: $radius-md;
+  color: $text-secondary;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// ============================================================================
+// CLICKABLE LIST
+// ============================================================================
+
+.mel-list--clickable {
+  .mel-list__item {
+    padding: $spacing-3 $spacing-4;
+    margin: 0 (-$spacing-4);
+    border-radius: $radius-md;
+    border-bottom: none;
+    cursor: pointer;
+    transition: background-color 0.1s ease-in-out;
+    
+    &:hover {
+      background: $bg-secondary;
+    }
+  }
+}
+
+// ============================================================================
+// STACKED LIST (vertical content)
+// ============================================================================
+
+.mel-list--stacked {
+  .mel-list__item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: $spacing-2;
+  }
+  
+  .mel-list__item-value {
+    text-align: left;
+  }
+}
+
+// ============================================================================
+// STAT LIST
+// ============================================================================
+
+.mel-stat-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+}
+
+.mel-stat-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-4;
+}
+
+.mel-stat-list__label {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+.mel-stat-list__color {
+  width: 12px;
+  height: 12px;
+  border-radius: $radius-sm;
+  flex-shrink: 0;
+}
+
+.mel-stat-list__value {
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+}
+
+.mel-stat-list__bar {
+  flex: 1;
+  height: 8px;
+  background: $bg-tertiary;
+  border-radius: $radius-full;
+  overflow: hidden;
+}
+
+.mel-stat-list__bar-fill {
+  height: 100%;
+  background: $primary;
+  border-radius: $radius-full;
+  transition: width 0.3s ease-out;
+}
+
+// ============================================================================
+// ACTIVITY FEED
+// ============================================================================
+
+.mel-activity {
+  display: flex;
+  flex-direction: column;
+}
+
+.mel-activity__item {
+  display: flex;
+  gap: $spacing-3;
+  padding: $spacing-3 0;
+  position: relative;
+  
+  &:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 40px;
+    bottom: 0;
+    width: 2px;
+    background: $border-color-light;
+  }
+}
+
+.mel-activity__icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg-secondary;
+  border-radius: $radius-full;
+  color: $text-secondary;
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.mel-activity__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.mel-activity__text {
+  font-size: $font-size-sm;
+  color: $text-primary;
+  
+  strong {
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.mel-activity__time {
+  font-size: $font-size-xs;
+  color: $text-muted;
+  margin-top: $spacing-1;
+}
+
+// ============================================================================
+// EMPTY STATE
+// ============================================================================
+
+.mel-list__empty,
+.mel-empty {
+  padding: $spacing-6;
+  text-align: center;
+  color: $text-muted;
+  font-size: $font-size-sm;
+}
+
+

@@ -1,0 +1,190 @@
+/**
+ * @file
+ * Card component styles for MyEventLane Vendor Theme.
+ *
+ * mel-card: Container component for content sections.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/shadows' as *;
+@use '../tokens/typography' as *;
+
+// ============================================================================
+// BASE CARD (mel-card)
+// ============================================================================
+
+.mel-card {
+  background-color: $ml-vendor-card;
+  border: 1px solid $ml-vendor-border;
+  border-radius: $radius-card;
+  box-shadow: $shadow-card;
+  
+  &:hover {
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+// Card with no hover effect
+.mel-card--static {
+  &:hover {
+    box-shadow: $shadow-card;
+  }
+}
+
+// ============================================================================
+// CARD STRUCTURE
+// ============================================================================
+
+.mel-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-4;
+  padding: $card-padding;
+  border-bottom: 1px solid $border-color-light;
+}
+
+.mel-card__header--no-border {
+  border-bottom: none;
+  padding-bottom: $spacing-2;
+}
+
+.mel-card__title {
+  @include section-title;
+  margin: 0;
+}
+
+.mel-card__subtitle {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin-top: $spacing-1;
+}
+
+.mel-card__meta {
+  font-size: $font-size-sm;
+  color: $text-muted;
+}
+
+.mel-card__body {
+  padding: $card-padding;
+}
+
+.mel-card__body--flush {
+  padding: 0;
+}
+
+.mel-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-4;
+  padding: $card-padding;
+  border-top: 1px solid $border-color-light;
+  background: $bg-secondary;
+  border-radius: 0 0 $radius-card $radius-card;
+}
+
+// ============================================================================
+// CARD VARIANTS
+// ============================================================================
+
+// Compact card (less padding)
+.mel-card--compact {
+  .mel-card__header,
+  .mel-card__body,
+  .mel-card__footer {
+    padding: $card-padding-sm;
+  }
+}
+
+// Highlighted card
+.mel-card--highlight {
+  border-color: $primary;
+  box-shadow: 0 0 0 1px $primary;
+}
+
+// Coral accent card
+.mel-card--coral {
+  border-left: 3px solid $ml-accent-coral;
+}
+
+// Success card
+.mel-card--success {
+  border-left: 3px solid $success;
+}
+
+// Warning card
+.mel-card--warning {
+  border-left: 3px solid $warning;
+  background: $warning-light;
+}
+
+// ============================================================================
+// CARD ACTIONS
+// ============================================================================
+
+.mel-card__actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+}
+
+// ============================================================================
+// CARD DIVIDER
+// ============================================================================
+
+.mel-card__divider {
+  margin: 0;
+  border: none;
+  border-top: 1px solid $border-color-light;
+}
+
+// ============================================================================
+// CLICKABLE CARD
+// ============================================================================
+
+a.mel-card,
+.mel-card--clickable {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    border-color: $border-color-dark;
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+    text-decoration: none;
+  }
+}
+
+// ============================================================================
+// LEGACY CARD SUPPORT
+// ============================================================================
+
+.card {
+  @extend .mel-card;
+  padding: $card-padding;
+  margin-bottom: $spacing-6;
+  
+  &__header {
+    @extend .mel-card__header;
+    margin: -#{$card-padding} -#{$card-padding} $spacing-4;
+    padding: $card-padding;
+    border-bottom: 1px solid $border-color;
+  }
+  
+  &__title {
+    @extend .mel-card__title;
+  }
+  
+  &__footer {
+    @extend .mel-card__footer;
+    margin: $spacing-4 -#{$card-padding} -#{$card-padding};
+    padding: $card-padding;
+  }
+}
+

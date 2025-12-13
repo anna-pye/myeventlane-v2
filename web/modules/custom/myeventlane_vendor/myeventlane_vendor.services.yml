@@ -1,0 +1,113 @@
+services:
+  myeventlane_vendor.vendor_store_subscriber:
+    class: Drupal\myeventlane_vendor\EventSubscriber\VendorStoreSubscriber
+    arguments: ['@entity_type.manager', '@logger.factory']
+    tags:
+      - { name: event_subscriber }
+
+  myeventlane_vendor.manage_event_navigation:
+    class: Drupal\myeventlane_vendor\Service\ManageEventNavigation
+
+  myeventlane_vendor.service.ticket_sales:
+    class: Drupal\myeventlane_vendor\Service\TicketSalesService
+    arguments: ['@entity_type.manager']
+
+  myeventlane_vendor.service.rsvp_stats:
+    class: Drupal\myeventlane_vendor\Service\RsvpStatsService
+    arguments: ['@entity_type.manager']
+
+  myeventlane_vendor.service.category_audience:
+    class: Drupal\myeventlane_vendor\Service\CategoryAudienceService
+    arguments: ['@entity_type.manager']
+
+  myeventlane_vendor.service.boost_status:
+    class: Drupal\myeventlane_vendor\Service\BoostStatusService
+    arguments: ['@entity_type.manager', '@datetime.time']
+
+  myeventlane_vendor.service.metrics_aggregator:
+    class: Drupal\myeventlane_vendor\Service\MetricsAggregator
+    arguments:
+      - '@myeventlane_vendor.service.ticket_sales'
+      - '@myeventlane_vendor.service.rsvp_stats'
+      - '@myeventlane_vendor.service.category_audience'
+      - '@myeventlane_vendor.service.boost_status'
+
+  # Vendor console controllers as services for DI.
+  myeventlane_vendor.controller.vendor_dashboard:
+    class: Drupal\myeventlane_vendor\Controller\VendorDashboardController
+    arguments: ['@myeventlane_core.domain_detector', '@current_user', '@myeventlane_vendor.service.metrics_aggregator', '@entity_type.manager']
+    tags:
+      - { name: controller.service_arguments }
+
+  myeventlane_vendor.controller.vendor_events:
+    class: Drupal\myeventlane_vendor\Controller\VendorEventsController
+    arguments: ['@myeventlane_core.domain_detector', '@current_user', '@entity_type.manager', '@form_builder']
+    tags:
+      - { name: controller.service_arguments }
+
+  myeventlane_vendor.controller.vendor_event_create:
+    class: Drupal\myeventlane_vendor\Controller\VendorEventCreateController
+    arguments: ['@myeventlane_core.domain_detector', '@current_user', '@entity_type.manager', '@entity.form_builder']
+    tags:
+      - { name: controller.service_arguments }
+
+  myeventlane_vendor.controller.vendor_event_overview:
+    class: Drupal\myeventlane_vendor\Controller\VendorEventOverviewController
+    arguments: ['@myeventlane_core.domain_detector', '@current_user', '@myeventlane_vendor.service.metrics_aggregator']
+    tags:
+      - { name: controller.service_arguments }
+
+  myeventlane_vendor.controller.vendor_event_tickets:
+    class: Drupal\myeventlane_vendor\Controller\VendorEventTicketsController
+    arguments: ['@myeventlane_core.domain_detector', '@current_user', '@myeventlane_vendor.service.ticket_sales']
+    tags:
+      - { name: controller.service_arguments }
+
+  myeventlane_vendor.controller.vendor_event_rsvps:
+    class: Drupal\myeventlane_vendor\Controller\VendorEventRsvpController
+    arguments: ['@myeventlane_core.domain_detector', '@current_user', '@myeventlane_vendor.service.rsvp_stats', '@entity_type.manager']
+    tags:
+      - { name: controller.service_arguments }
+
+  myeventlane_vendor.controller.vendor_event_analytics:
+    class: Drupal\myeventlane_vendor\Controller\VendorEventAnalyticsController
+    arguments: ['@myeventlane_core.domain_detector', '@current_user', '@myeventlane_vendor.service.metrics_aggregator']
+    tags:
+      - { name: controller.service_arguments }
+
+  myeventlane_vendor.controller.vendor_event_settings:
+    class: Drupal\myeventlane_vendor\Controller\VendorEventSettingsController
+    arguments: ['@myeventlane_core.domain_detector', '@current_user']
+    tags:
+      - { name: controller.service_arguments }
+
+  myeventlane_vendor.controller.vendor_event_attendees:
+    class: Drupal\myeventlane_vendor\Controller\VendorEventAttendeesController
+    arguments: ['@myeventlane_core.domain_detector', '@current_user', '@myeventlane_event_attendees.manager']
+    tags:
+      - { name: controller.service_arguments }
+
+  myeventlane_vendor.controller.vendor_payouts:
+    class: Drupal\myeventlane_vendor\Controller\VendorPayoutsController
+    arguments: ['@myeventlane_core.domain_detector', '@current_user', '@myeventlane_vendor.service.ticket_sales', '@entity_type.manager']
+    tags:
+      - { name: controller.service_arguments }
+
+  myeventlane_vendor.controller.vendor_boost:
+    class: Drupal\myeventlane_vendor\Controller\VendorBoostController
+    arguments: ['@myeventlane_core.domain_detector', '@current_user', '@myeventlane_vendor.service.boost_status']
+    tags:
+      - { name: controller.service_arguments }
+
+  myeventlane_vendor.controller.vendor_audience:
+    class: Drupal\myeventlane_vendor\Controller\VendorAudienceController
+    arguments: ['@myeventlane_core.domain_detector', '@current_user', '@myeventlane_vendor.service.category_audience']
+    tags:
+      - { name: controller.service_arguments }
+
+  myeventlane_vendor.controller.vendor_settings:
+    class: Drupal\myeventlane_vendor\Controller\VendorSettingsController
+    arguments: ['@myeventlane_core.domain_detector', '@current_user', '@entity_type.manager', '@form_builder']
+    tags:
+      - { name: controller.service_arguments }
+

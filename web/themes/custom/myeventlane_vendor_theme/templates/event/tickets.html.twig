@@ -1,0 +1,73 @@
+{#
+  Event tickets view.
+  Variables: event, sales, tickets.
+#}
+<div class="mel-grid mel-grid--2">
+  <div class="mel-card">
+    <div class="mel-card__header">
+      <div class="mel-card__title">{{ 'Sales summary'|t }}</div>
+    </div>
+    <div class="mel-stats">
+      <div class="mel-stat">
+        <div class="mel-stat__label">{{ 'Gross'|t }}</div>
+        <div class="mel-stat__value">{{ sales.gross|default('$0') }}</div>
+      </div>
+      <div class="mel-stat">
+        <div class="mel-stat__label">{{ 'Net'|t }}</div>
+        <div class="mel-stat__value">{{ sales.net|default('$0') }}</div>
+      </div>
+      <div class="mel-stat">
+        <div class="mel-stat__label">{{ 'Tickets sold'|t }}</div>
+        <div class="mel-stat__value">{{ sales.tickets_sold|default(0) }}</div>
+      </div>
+      <div class="mel-stat">
+        <div class="mel-stat__label">{{ 'Remaining'|t }}</div>
+        <div class="mel-stat__value">{{ sales.tickets_available|default(0) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mel-card">
+    <div class="mel-card__header">
+      <div class="mel-card__title">{{ 'Actions'|t }}</div>
+    </div>
+    <div class="mel-list mel-list--actions">
+      <a class="mel-list__item" href="/vendor/event/{{ event_id|default(event.id()) }}/tickets">
+        {{ 'Edit ticket types'|t }}
+      </a>
+      <a class="mel-list__item" href="/vendor/event/{{ event_id|default(event.id()) }}/checkout-questions">
+        {{ 'Checkout questions'|t }}
+      </a>
+      <a class="mel-list__item" href="/vendor/event/{{ event_id|default(event.id()) }}/payments">
+        {{ 'Payment settings'|t }}
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="mel-card">
+  <div class="mel-card__header">
+    <div class="mel-card__title">{{ 'Ticket types'|t }}</div>
+    <a class="mel-btn mel-btn--ghost" href="/vendor/event/{{ event_id|default(event.id()) }}/tickets">{{ 'Manage'|t }}</a>
+  </div>
+  <div class="mel-table">
+    <div class="mel-table__head">
+      <div>{{ 'Type'|t }}</div>
+      <div>{{ 'Sold'|t }}</div>
+      <div>{{ 'Available'|t }}</div>
+      <div>{{ 'Revenue'|t }}</div>
+    </div>
+    <div class="mel-table__body">
+      {% for ticket in tickets %}
+        <div class="mel-table__row">
+          <div>{{ ticket.label }}</div>
+          <div>{{ ticket.sold }}</div>
+          <div>{{ ticket.available }}</div>
+          <div>{{ ticket.revenue }}</div>
+        </div>
+      {% else %}
+        <div class="mel-table__empty">{{ 'No ticket types configured yet.'|t }}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

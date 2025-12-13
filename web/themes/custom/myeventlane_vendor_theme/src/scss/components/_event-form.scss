@@ -1,0 +1,283 @@
+/**
+ * @file
+ * Event form component styles (shared between pages).
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/shadows' as *;
+
+// ============================================================================
+// FORM CARD (styled form sections)
+// ============================================================================
+
+.mel-form-card {
+  background: $bg-primary;
+  border: 1px solid $border-color;
+  border-radius: $radius-card;
+  margin-bottom: $spacing-6;
+}
+
+.mel-form-card__header {
+  padding: $spacing-5 $spacing-6;
+  border-bottom: 1px solid $border-color-light;
+}
+
+.mel-form-card__title {
+  @include section-title;
+  margin: 0;
+}
+
+.mel-form-card__description {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin-top: $spacing-1;
+}
+
+.mel-form-card__body {
+  padding: $spacing-6;
+}
+
+// ============================================================================
+// IMAGE UPLOAD PREVIEW
+// ============================================================================
+
+.mel-image-field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.mel-image-field__preview {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 16 / 9;
+  background: $bg-secondary;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.mel-image-field__actions {
+  position: absolute;
+  bottom: $spacing-3;
+  right: $spacing-3;
+  display: flex;
+  gap: $spacing-2;
+}
+
+.mel-image-field__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: $text-muted;
+  
+  svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: $spacing-2;
+    opacity: 0.5;
+  }
+}
+
+// ============================================================================
+// DATE/TIME PICKER STYLING
+// ============================================================================
+
+.mel-datetime-field {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-4;
+  
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mel-datetime-field__label {
+  grid-column: 1 / -1;
+  @include label-text;
+  margin-bottom: $spacing-1;
+}
+
+// ============================================================================
+// TICKET ROW (inline editing)
+// ============================================================================
+
+.mel-ticket-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  gap: $spacing-3;
+  align-items: center;
+  padding: $spacing-3;
+  background: $bg-primary;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-2;
+  
+  &:hover {
+    border-color: $border-color-dark;
+  }
+}
+
+.mel-ticket-row__name {
+  font-weight: $font-weight-medium;
+}
+
+.mel-ticket-row__input {
+  padding: $spacing-2;
+  font-size: $font-size-sm;
+  border: 1px solid $border-color;
+  border-radius: $radius-sm;
+  
+  &:focus {
+    outline: none;
+    border-color: $primary;
+  }
+}
+
+.mel-ticket-row__actions {
+  display: flex;
+  gap: $spacing-1;
+}
+
+.mel-ticket-row__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: $text-muted;
+  cursor: pointer;
+  border-radius: $radius-sm;
+  
+  &:hover {
+    background: $bg-secondary;
+    color: $text-primary;
+  }
+  
+  &--danger:hover {
+    background: $danger-light;
+    color: $danger;
+  }
+}
+
+// ============================================================================
+// ADD TICKET BUTTON
+// ============================================================================
+
+.mel-add-ticket {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-2;
+  width: 100%;
+  padding: $spacing-4;
+  background: $bg-secondary;
+  border: 2px dashed $border-color;
+  border-radius: $radius-md;
+  color: $text-secondary;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: all 0.15s;
+  
+  &:hover {
+    border-color: $primary;
+    color: $primary;
+    background: rgba($primary, 0.02);
+  }
+}
+
+// ============================================================================
+// LOCATION AUTOCOMPLETE
+// ============================================================================
+
+.mel-location-field {
+  position: relative;
+}
+
+.mel-location-field__map {
+  height: 200px;
+  background: $bg-secondary;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  margin-top: $spacing-4;
+  overflow: hidden;
+}
+
+.mel-location-field__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  margin-top: $spacing-3;
+  font-size: $font-size-sm;
+  color: $primary;
+  cursor: pointer;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.mel-location-field__manual {
+  margin-top: $spacing-4;
+  padding-top: $spacing-4;
+  border-top: 1px solid $border-color-light;
+  
+  &[hidden] {
+    display: none;
+  }
+}
+
+// ============================================================================
+// CATEGORY SELECTOR
+// ============================================================================
+
+.mel-category-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-2;
+}
+
+.mel-category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-2 $spacing-3;
+  background: $bg-secondary;
+  border: 1px solid $border-color;
+  border-radius: $radius-full;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  transition: all 0.15s;
+  
+  &:hover {
+    border-color: $primary;
+  }
+  
+  &.is-selected {
+    background: rgba($primary, 0.1);
+    border-color: $primary;
+    color: $primary;
+  }
+}
+
+.mel-category-chip__icon {
+  width: 18px;
+  height: 18px;
+}
+

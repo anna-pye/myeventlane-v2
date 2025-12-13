@@ -1,0 +1,467 @@
+MyEventLane Parity Implementation Plan
+=======================================
+
+Date: 2025-01-XX
+Based on: docs/myeventlane-platform-comparison.txt
+
+This plan outlines the concrete Drupal 11 implementation for addressing the top three priority gaps identified in the platform comparison.
+
+================================================================================
+GAP 1: WAITLIST ENHANCEMENTS
+================================================================================
+
+GOAL: Improve waitlist user experience and vendor visibility
+
+MODULES TO MODIFY:
+------------------
+- web/modules/custom/myeventlane_event_attendees/
+  * src/Service/AttendanceWaitlistManager.php (enhance)
+  * src/Service/AttendanceManager.php (enhance)
+  * src/Controller/WaitlistController.php (NEW)
+  * myeventlane_event_attendees.routing.yml (add routes)
+  * myeventlane_event_attendees.services.yml (add services)
+
+- web/modules/custom/myeventlane_rsvp/
+  * src/Service/RsvpPromotionManager.php (enhance)
+  * src/Service/RsvpMailer.php (enhance)
+
+- web/modules/custom/myeventlane_dashboard/
+  * src/Controller/VendorDashboardController.php (enhance)
+  * templates/myeventlane-vendor-dashboard.html.twig (enhance)
+
+DATA MODEL CHANGES:
+-------------------
+1. Add field to EventAttendee entity:
+   - field_waitlist_position: integer (calculated, not stored)
+   - field_promoted_at: timestamp (when promoted from waitlist)
+   - field_promotion_notified: boolean (email sent flag)
+
+2. Add config entity for waitlist settings:
+   - myeventlane_event_attendees.waitlist_settings
+   - Settings: auto-notify on promotion, notification template, promotion window hours
+
+SERVICES TO CREATE/ENHANCE:
+---------------------------
+1. WaitlistNotificationService (NEW)
+   - Sends email when attendee promoted
+   - Uses MailManagerInterface
+   - Template: email-waitlist-promotion.html.twig
+
+2. Enhance AttendanceWaitlistManager
+   - Add getWaitlistPosition() method (already exists, enhance)
+   - Add notifyOnPromotion() method
+   - Add getWaitlistAnalytics() method
+
+3. Enhance AttendanceManager
+   - Add promoteFromWaitlist() method (if missing)
+   - Track promotion timestamp
+
+PLUGINS/CONTROLLERS:
+--------------------
+1. WaitlistController (NEW)
+   - Route: /event/{node}/waitlist/position
+   - Returns JSON with waitlist position for current user
+   - Access: authenticated users
+
+2. Enhance VendorDashboardController
+   - Add waitlist analytics section
+   - Show conversion rates, average wait time
+
+VIEWS:
+------
+1. View: "Event Waitlist" (NEW)
+   - Displays waitlisted attendees for an event
+   - Fields: Name, Email, Position, Date Added, Status
+   - Filter: Event ID (contextual)
+   - Access: Vendor access control
+
+2. View: "Waitlist Analytics" (NEW)
+   - Displays waitlist metrics per event
+   - Fields: Event, Total Waitlist, Promoted, Conversion Rate, Avg Wait Time
+   - Access: Vendor access control
+
+TWIG TEMPLATES:
+---------------
+1. email-waitlist-promotion.html.twig (NEW)
+   - Email template for promotion notification
+   - Includes: Event details, purchase link, expiration time
+
+2. waitlist-position-block.html.twig (NEW)
+   - Block showing user's waitlist position
+   - Displays on event page for waitlisted users
+
+3. Enhance myeventlane-vendor-dashboard.html.twig
+   - Add waitlist analytics section
+   - Show waitlist conversion metrics
+
+THEME/UI:
+---------
+- Add waitlist position indicator to event page
+- Add "View Waitlist" link in vendor dashboard
+- Style waitlist promotion emails
+
+ANALYTICS HOOKS:
+----------------
+- Track waitlist promotion events (if GA4 integration exists)
+- Log promotion notifications for analytics
+
+VENDOR DASHBOARD INTEGRATION:
+------------------------------
+- Add "Waitlist Analytics" card to vendor dashboard
+- Show per-event waitlist metrics
+- Link to detailed waitlist view
+
+ATTENDEE EXPERIENCE:
+--------------------
+- Display waitlist position on event page (for authenticated waitlisted users)
+- Email notification when promoted with purchase link
+- Clear messaging about waitlist status
+
+================================================================================
+GAP 2: VENDOR ANALYTICS DASHBOARD
+================================================================================
+
+GOAL: Provide comprehensive analytics and reporting for vendors
+
+MODULES TO CREATE/MODIFY:
+-------------------------
+- web/modules/custom/myeventlane_analytics/ (NEW MODULE)
+  * myeventlane_analytics.info.yml
+  * myeventlane_analytics.module
+  * myeventlane_analytics.routing.yml
+  * myeventlane_analytics.permissions.yml
+  * myeventlane_analytics.services.yml
+  * src/
+    - Controller/AnalyticsDashboardController.php
+    - Service/AnalyticsDataService.php
+    - Service/SalesAnalyticsService.php
+    - Service/ConversionAnalyticsService.php
+    - Service/ReportGeneratorService.php
+  * templates/
+    - analytics-dashboard.html.twig
+    - analytics-event-detail.html.twig
+
+- web/modules/custom/myeventlane_dashboard/
+  * src/Controller/VendorDashboardController.php (enhance)
+  * templates/myeventlane-vendor-dashboard.html.twig (add analytics links)
+
+DATA MODEL CHANGES:
+-------------------
+1. Create analytics tracking table (optional, for historical data):
+   - myeventlane_analytics_sales
+   - Fields: event_id, date, ticket_count, revenue, source
+   - Populated via event subscribers
+
+2. Add fields to commerce_order_item (if needed):
+   - field_analytics_source: string (track where sale came from)
+   - field_analytics_campaign: string (marketing campaign tracking)
+
+SERVICES TO CREATE:
+-------------------
+1. AnalyticsDataService
+   - Aggregates sales data over time
+   - Calculates conversion rates
+   - Provides time-series data for charts
+
+2. SalesAnalyticsService
+   - Tracks sales velocity
+   - Identifies peak sales periods
+   - Revenue breakdowns by ticket type
+
+3. ConversionAnalyticsService
+   - Tracks view → cart → checkout → completion funnel
+   - Calculates drop-off rates
+   - Identifies conversion bottlenecks
+
+4. ReportGeneratorService
+   - Generates PDF reports
+   - Creates CSV exports with enhanced data
+   - Supports custom date ranges
+
+PLUGINS/CONTROLLERS:
+--------------------
+1. AnalyticsDashboardController
+   - Route: /vendor/analytics
+   - Route: /vendor/analytics/event/{node}
+   - Displays analytics dashboard and per-event analytics
+
+VIEWS:
+------
+1. View: "Event Sales Timeline" (NEW)
+   - Time-series chart data
+   - Fields: Date, Ticket Count, Revenue
+   - Chart display plugin
+
+2. View: "Ticket Type Performance" (NEW)
+   - Breakdown by ticket variation
+   - Fields: Ticket Type, Sold, Revenue, Conversion Rate
+
+3. View: "Conversion Funnel" (NEW)
+   - Event → View → Cart → Checkout → Complete
+   - Calculated fields for each stage
+
+TWIG TEMPLATES:
+---------------
+1. analytics-dashboard.html.twig (NEW)
+   - Main analytics dashboard
+   - Charts, graphs, summary cards
+
+2. analytics-event-detail.html.twig (NEW)
+   - Per-event analytics view
+   - Time-series charts, conversion funnel, ticket breakdowns
+
+3. report-pdf.html.twig (NEW)
+   - PDF report template
+   - Comprehensive event analytics
+
+THEME/UI:
+---------
+- Chart.js or D3.js integration for visualisations
+- Responsive dashboard layout
+- Export buttons (PDF, CSV)
+- Date range picker
+- Filter controls
+
+ANALYTICS HOOKS:
+----------------
+- Track page views on event pages (for conversion funnel)
+- Track add-to-cart events
+- Track checkout initiation
+- Track order completion
+- Store in config or custom table for analytics
+
+VENDOR DASHBOARD INTEGRATION:
+------------------------------
+- Add "Analytics" link to vendor dashboard
+- Show key metrics summary cards
+- Link to detailed analytics per event
+
+ATTENDEE EXPERIENCE:
+--------------------
+- No direct attendee-facing changes (vendor-only feature)
+
+LIBRARIES:
+----------
+- Add Chart.js library for visualisations
+- myeventlane_analytics.libraries.yml
+
+================================================================================
+GAP 3: ACCESSIBILITY DATA CAPTURE AND FILTERING
+================================================================================
+
+GOAL: Improve accessibility data capture and event discoverability
+
+MODULES TO MODIFY:
+------------------
+- web/modules/custom/myeventlane_event_attendees/
+  * src/Entity/EventAttendee.php (add accessibility field)
+  * myeventlane_event_attendees.install (add field schema)
+
+- web/modules/custom/myeventlane_schema/
+  * config/install/field.field.event_attendee.event_attendee.field_accessibility_needs.yml (NEW)
+  * config/install/field.storage.event_attendee.field_accessibility_needs.yml (NEW)
+
+- web/modules/custom/myeventlane_event/
+  * myeventlane_event.module (add accessibility filtering)
+
+- web/modules/custom/myeventlane_commerce/
+  * src/Form/TicketSelectionForm.php (add accessibility field)
+  * src/Plugin/Commerce/CheckoutPane/AttendeeInfoPerTicket.php (add accessibility)
+
+- web/modules/custom/myeventlane_rsvp/
+  * src/Form/RsvpPublicForm.php (add accessibility field)
+
+- web/themes/custom/myeventlane_theme/
+  * templates/node--event--teaser.html.twig (add accessibility icons)
+  * templates/node--event--full.html.twig (enhance accessibility display)
+  * src/scss/components/_accessibility.scss (NEW)
+
+DATA MODEL CHANGES:
+-------------------
+1. Add field to EventAttendee entity:
+   - field_accessibility_needs: entity_reference (taxonomy)
+   - References same "accessibility" vocabulary
+   - Multiple values allowed
+   - Optional field
+
+2. Enhance accessibility taxonomy vocabulary:
+   - Add more comprehensive terms:
+     * Wheelchair Accessible
+     * Accessible Toilets
+     * Sign Language Interpreter Available
+     * Hearing Loop Available
+     * Quiet Space Available
+     * Guide Dog Friendly
+     * Accessible Parking
+     * Step-Free Access
+     * Visual Impairment Support
+     * Cognitive Accessibility
+     * Dietary Requirements Accommodated
+   - Add icons/images for each term (via taxonomy term image field)
+
+3. Add field to event node (if not exists):
+   - field_accessibility_icons: computed field (derived from taxonomy)
+   - Displays accessibility icons on event listings
+
+SERVICES TO CREATE:
+-------------------
+1. AccessibilityFilterService (NEW)
+   - Filters events by accessibility needs
+   - Matches attendee needs with event features
+   - Provides filtering for Views
+
+PLUGINS/CONTROLLERS:
+--------------------
+1. Enhance existing event listing controllers
+   - Add accessibility filter parameter
+   - Filter events based on accessibility taxonomy
+
+VIEWS:
+------
+1. Enhance existing "Upcoming Events" view
+   - Add exposed filter: "Accessibility Features"
+   - Add exposed filter: "Show only accessible events" (checkbox)
+   - Add accessibility icons to display
+
+2. View: "Accessible Events" (NEW)
+   - Pre-filtered view showing only events with accessibility features
+   - Accessible from main navigation
+
+TWIG TEMPLATES:
+---------------
+1. Enhance node--event--teaser.html.twig
+   - Add accessibility icons/badges
+   - Display accessibility features prominently
+
+2. Enhance node--event--full.html.twig
+   - Enhanced accessibility information section
+   - Clear display of available features
+
+3. accessibility-icons.html.twig (NEW)
+   - Reusable component for accessibility icons
+   - Displays icons based on taxonomy terms
+
+THEME/UI:
+---------
+- Accessibility icons/badges on event cards
+- Filter UI for accessibility features
+- Clear visual indicators
+- Accessible markup (ARIA labels, semantic HTML)
+
+ANALYTICS HOOKS:
+----------------
+- Track accessibility filter usage
+- Track events viewed by accessibility feature
+- Analytics on accessibility requirement capture
+
+VENDOR DASHBOARD INTEGRATION:
+------------------------------
+- Show accessibility data in attendee exports
+- Accessibility needs summary in event dashboard
+- Reminder to set accessibility features when creating events
+
+ATTENDEE EXPERIENCE:
+--------------------
+- Accessibility needs field during ticket purchase/RSVP
+- Filter events by accessibility features
+- Visual accessibility indicators on event listings
+- Clear messaging about accessibility options
+
+EXPORT ENHANCEMENTS:
+--------------------
+- Include accessibility_needs column in attendee CSV exports
+- Include accessibility features in event exports
+
+================================================================================
+IMPLEMENTATION CHECKLIST
+================================================================================
+
+After implementing each gap, run these commands:
+
+1. ddev composer dump-autoload
+2. ddev drush cr
+3. ddev drush en [module_name] -y (for new modules)
+4. ddev drush cim -y (import new config)
+5. ddev drush cex -y (export config after testing)
+6. ddev exec vendor/bin/phpcs web/modules/custom/[module_name]
+7. ddev exec vendor/bin/phpstan web/modules/custom/[module_name] (if configured)
+
+For database changes:
+- ddev drush updatedb -y
+- ddev drush cr
+
+For new fields:
+- Ensure field config is in config/install or config/optional
+- Run ddev drush cim -y to create fields
+- Or use hook_install() in .install file
+
+For Views:
+- Create Views via UI or config
+- Export to config/sync
+- Include in module's config/install if needed
+
+================================================================================
+TESTING REQUIREMENTS
+================================================================================
+
+For each gap, test:
+1. Vendor can access new features
+2. Attendees can use new features
+3. Data is correctly stored and retrieved
+4. Exports include new data
+5. UI is accessible and responsive
+6. No regressions in existing functionality
+
+================================================================================
+DEPENDENCIES
+================================================================================
+
+Gap 1 (Waitlist):
+- myeventlane_event_attendees
+- myeventlane_rsvp
+- myeventlane_dashboard
+
+Gap 2 (Analytics):
+- myeventlane_analytics (new)
+- myeventlane_dashboard
+- myeventlane_commerce
+- Chart.js library (via CDN or npm)
+
+Gap 3 (Accessibility):
+- myeventlane_event_attendees
+- myeventlane_schema
+- myeventlane_event
+- myeventlane_commerce
+- myeventlane_rsvp
+- myeventlane_theme
+
+================================================================================
+ESTIMATED COMPLEXITY
+================================================================================
+
+Gap 1 (Waitlist): Medium
+- Existing infrastructure supports this well
+- Main work: email notifications, analytics, UI enhancements
+
+Gap 2 (Analytics): Medium-High
+- Requires new module and services
+- Chart integration needed
+- More complex data aggregation
+
+Gap 3 (Accessibility): Low-Medium
+- Field system already in place
+- Main work: UI enhancements, filtering, data capture
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Review and approve this plan
+2. Implement Gap 1 (Waitlist Enhancements) first
+3. Implement Gap 3 (Accessibility) second (simpler, high impact)
+4. Implement Gap 2 (Analytics) third (more complex)
+5. Test each gap independently
+6. Deploy incrementally
+
+
+

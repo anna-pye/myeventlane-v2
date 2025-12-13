@@ -1,0 +1,43 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Drupal\myeventlane_vendor\Controller;
+
+use Drupal\node\NodeInterface;
+
+/**
+ * Controller for the "Ticket types" step.
+ */
+final class ManageEventTicketsController extends ManageEventControllerBase {
+
+  /**
+   * Renders the ticket types management form.
+   *
+   * @param \Drupal\node\NodeInterface $event
+   *   The event node.
+   *
+   * @return array
+   *   Render array.
+   */
+  public function tickets(NodeInterface $event): array {
+    // Get the ticket types form.
+    $form = $this->formBuilder()->getForm('Drupal\myeventlane_vendor\Form\EventTicketsForm', $event);
+
+    $content = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['mel-manage-event-content', 'mel-tickets-step']],
+      'form' => $form,
+    ];
+
+    return $this->buildPage($event, 'myeventlane_vendor.manage_event.tickets', $content);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getPageTitle(NodeInterface $event): string {
+    return (string) $this->t('Ticket types');
+  }
+
+}

@@ -13,3 +13,7 @@ dependencies:
   - drupal:link
   - drupal:user
   - drupal:field_ui
+  - commerce:commerce_store
+
+optional_dependencies:
+  - pathauto:pathauto

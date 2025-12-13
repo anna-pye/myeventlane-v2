@@ -1,0 +1,34 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.myeventlane_vendor.field_vendor_logo
+    - myeventlane_vendor.myeventlane_vendor
+  module:
+    - image
+id: myeventlane_vendor.myeventlane_vendor.field_vendor_logo
+field_name: field_vendor_logo
+entity_type: myeventlane_vendor
+bundle: myeventlane_vendor
+label: 'Logo'
+description: 'The vendor logo image.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  file_directory: vendor_logos
+  file_extensions: 'png gif jpg jpeg webp svg'
+  max_filesize: '2 MB'
+  alt_field: true
+  alt_field_required: false
+  title_field: false
+  title_field_required: false
+  handler: 'default:file'
+  handler_settings: {  }
+field_type: image
+
+
+
+
+

@@ -19,8 +19,11 @@
   {% else %}
     (Create Mode)
   {% endif %}
-  - Form ID: {{ element['#form_id']|default('unknown') }}
-  - Element keys: {{ element|keys|join(', ') }}
+  - Form ID: {{ form['#form_id']|default('unknown') }}
+  - Form keys: {{ form|keys|join(', ') }}
+  - Has location: {{ form.location is defined ? 'YES' : 'NO' }}
+  - Has booking_config: {{ form.booking_config is defined ? 'YES' : 'NO' }}
+  - Has visibility: {{ form.visibility is defined ? 'YES' : 'NO' }}
 </div>
 
 <div class="mel-form-page-header">
@@ -47,13 +50,11 @@
 
 {# Main Form #}
 {# Note: mel-event-form-vendor class is added by EventFormAlter service #}
+{# The form variable is passed from template_preprocess_form #}
 <form{{ attributes }}>
-  {{ element.form_build_id }}
-  {{ element.form_token }}
-  {{ element.form_id }}
-  
-  {# Use 'form' variable if available, otherwise fall back to 'element' #}
-  {% set form = form|default(element) %}
+  {{ form.form_build_id }}
+  {{ form.form_token }}
+  {{ form.form_id }}
 
   {# A. Event Basics Card #}
   {% if form.event_basics %}
@@ -121,7 +122,7 @@
   {% endif %}
 
   {# C. Location Card #}
-  {% if form.location %}
+  {% if form.location is defined %}
     <div class="mel-form-group mel-form-card">
       {{ form.location }}
     </div>
@@ -151,7 +152,7 @@
   {% endif %}
 
   {# D. Booking Configuration Card #}
-  {% if form.booking_config %}
+  {% if form.booking_config is defined %}
     <div class="mel-form-group mel-form-card mel-form-card--highlight">
       {{ form.booking_config }}
     </div>
@@ -188,7 +189,7 @@
   {% endif %}
 
   {# E. Visibility + Promotion Card #}
-  {% if form.visibility %}
+  {% if form.visibility is defined %}
     <div class="mel-form-group mel-form-card">
       {{ form.visibility }}
     </div>

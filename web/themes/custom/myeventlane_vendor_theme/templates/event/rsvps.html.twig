@@ -1,0 +1,121 @@
+{#
+  Event RSVPs view.
+  Variables: event, summary, series, rsvps.
+#}
+<div class="mel-grid mel-grid--2 mel-mb-lg">
+  <div class="mel-card">
+    <div class="mel-card__header">
+      <div class="mel-card__title">{{ 'RSVP summary'|t }}</div>
+    </div>
+    <div class="mel-stats">
+      <div class="mel-stat">
+        <div class="mel-stat__label">{{ 'Total'|t }}</div>
+        <div class="mel-stat__value">{{ summary.total|default(0) }}</div>
+      </div>
+      <div class="mel-stat">
+        <div class="mel-stat__label">{{ 'Confirmed'|t }}</div>
+        <div class="mel-stat__value">{{ summary.confirmed|default(0) }}</div>
+      </div>
+      <div class="mel-stat">
+        <div class="mel-stat__label">{{ 'Pending'|t }}</div>
+        <div class="mel-stat__value">{{ summary.pending|default(0) }}</div>
+      </div>
+      <div class="mel-stat">
+        <div class="mel-stat__label">{{ 'Waitlisted'|t }}</div>
+        <div class="mel-stat__value">{{ summary.waitlisted|default(0) }}</div>
+      </div>
+      <div class="mel-stat">
+        <div class="mel-stat__label">{{ 'Cancelled'|t }}</div>
+        <div class="mel-stat__value">{{ summary.cancelled|default(0) }}</div>
+      </div>
+      <div class="mel-stat">
+        <div class="mel-stat__label">{{ 'Check-ins'|t }}</div>
+        <div class="mel-stat__value">{{ summary.checkins|default(0) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mel-card">
+    <div class="mel-card__header">
+      <div class="mel-card__title">{{ 'RSVP Trend'|t }}</div>
+    </div>
+    <div class="mel-card__body">
+      <canvas data-chart-id="event-rsvps" height="150"></canvas>
+    </div>
+  </div>
+</div>
+
+{# RSVP List #}
+<div class="mel-card">
+  <div class="mel-card__header">
+    <div class="mel-card__title">{{ 'All RSVPs'|t }}</div>
+    {% if rsvps|length > 0 %}
+      <div class="mel-search mel-search--inline">
+        <input type="text" class="mel-input mel-input--sm" placeholder="{{ 'Search...'|t }}" id="rsvp-search">
+      </div>
+    {% endif %}
+  </div>
+  
+  {% if rsvps|length > 0 %}
+    <div class="mel-table-responsive">
+      <table class="mel-table mel-table--striped" id="rsvp-table">
+        <thead>
+          <tr>
+            <th>{{ 'Name'|t }}</th>
+            <th>{{ 'Email'|t }}</th>
+            <th>{{ 'Guests'|t }}</th>
+            <th>{{ 'Status'|t }}</th>
+            <th>{{ 'Date'|t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rsvp in rsvps %}
+            <tr class="rsvp-row">
+              <td>{{ rsvp.name|default('—') }}</td>
+              <td>
+                {% if rsvp.email %}
+                  <a href="mailto:{{ rsvp.email }}">{{ rsvp.email }}</a>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td>{{ rsvp.guests|default(0) }}</td>
+              <td>
+                <span class="mel-badge mel-badge--{{ rsvp.status|lower|default('pending') }}">
+                  {{ rsvp.status|default('Pending') }}
+                </span>
+              </td>
+              <td>{{ rsvp.created|default('—') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="mel-empty">
+      <div class="mel-empty__icon">📋</div>
+      <div class="mel-empty__title">{{ 'No RSVPs yet'|t }}</div>
+      <div class="mel-empty__description">
+        {{ 'RSVPs will appear here when people sign up for your event.'|t }}
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+{# Search JavaScript #}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('rsvp-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.rsvp-row');
+        
+        rows.forEach(function(row) {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+      });
+    }
+  });
+</script>

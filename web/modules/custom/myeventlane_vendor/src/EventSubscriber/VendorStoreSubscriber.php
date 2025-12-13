@@ -1,0 +1,158 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Drupal\myeventlane_vendor\EventSubscriber;
+
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\myeventlane_vendor\Entity\Vendor;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Drupal\Core\Entity\EntityStorageException;
+
+/**
+ * Event subscriber to auto-create Commerce Store when Vendor is created.
+ */
+final class VendorStoreSubscriber implements EventSubscriberInterface {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  private EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * The logger factory.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
+   */
+  private LoggerChannelFactoryInterface $loggerFactory;
+
+  /**
+   * Track vendors being processed to prevent recursion.
+   *
+   * @var array
+   */
+  private static array $processing = [];
+
+  /**
+   * Constructs a VendorStoreSubscriber.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
+   *   The logger factory.
+   */
+  public function __construct(
+    EntityTypeManagerInterface $entity_type_manager,
+    LoggerChannelFactoryInterface $logger_factory,
+  ) {
+    $this->entityTypeManager = $entity_type_manager;
+    $this->loggerFactory = $logger_factory;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getSubscribedEvents(): array {
+    return [
+      'entity.myeventlane_vendor.insert' => 'onVendorInsert',
+    ];
+  }
+
+  /**
+   * Creates a Commerce Store when a Vendor is created.
+   *
+   * @param mixed $event
+   *   The entity storage event.
+   */
+  public function onVendorInsert($event): void {
+    /** @var \Drupal\myeventlane_vendor\Entity\Vendor $vendor */
+    $vendor = $event->getEntity();
+    $this->onVendorInsertFromHook($vendor);
+  }
+
+  /**
+   * Creates a Commerce Store when a Vendor is created (called from hook).
+   *
+   * @param \Drupal\myeventlane_vendor\Entity\Vendor $vendor
+   *   The vendor entity.
+   */
+  public function onVendorInsertFromHook(Vendor $vendor): void {
+    $logger = $this->loggerFactory->get('myeventlane_vendor');
+
+    $logger->notice('Vendor insert hook fired for vendor @id', ['@id' => $vendor->id()]);
+
+    // Prevent recursion if we're already processing this vendor.
+    if (isset(self::$processing[$vendor->id()])) {
+      $logger->notice('Vendor @id already being processed, skipping', ['@id' => $vendor->id()]);
+      return;
+    }
+
+    // Only proceed if vendor doesn't already have a store.
+    if (!$vendor->get('field_vendor_store')->isEmpty()) {
+      $logger->notice('Vendor @id already has a store, skipping', ['@id' => $vendor->id()]);
+      return;
+    }
+
+    $logger->notice('Proceeding to create store for vendor @id', ['@id' => $vendor->id()]);
+
+    // Mark as processing.
+    self::$processing[$vendor->id()] = TRUE;
+
+    try {
+      $store_storage = $this->entityTypeManager->getStorage('commerce_store');
+      $owner = $vendor->getOwner();
+
+      // Create a new Commerce Store for this vendor.
+      /** @var \Drupal\commerce_store\Entity\StoreInterface $store */
+      $store = $store_storage->create([
+        'type' => 'online',
+        'uid' => $owner ? $owner->id() : 1,
+        'name' => $vendor->getName() . ' Store',
+        'mail' => $owner && $owner->getEmail() ? $owner->getEmail() : 'noreply@myeventlane.com',
+        'default_currency' => 'AUD',
+        'timezone' => 'Australia/Sydney',
+        'address' => [
+          'country_code' => 'AU',
+          'administrative_area' => '',
+          'locality' => '',
+          'postal_code' => '',
+          'address_line1' => '',
+          'organization' => $vendor->getName(),
+        ],
+        'billing_countries' => ['AU'],
+        'is_default' => FALSE,
+        'status' => TRUE,
+      ]);
+
+      // Link the store back to the vendor.
+      $store->set('field_vendor_reference', $vendor);
+      $store->save();
+
+      // Link the vendor to the store.
+      $vendor->set('field_vendor_store', $store);
+      // Save the vendor again to persist the store reference.
+      // This won't trigger insert again since the entity is no longer new.
+      $vendor->save();
+
+      // Unmark as processing.
+      unset(self::$processing[$vendor->id()]);
+
+    }
+    catch (EntityStorageException $e) {
+      // Unmark as processing on error.
+      unset(self::$processing[$vendor->id()]);
+
+      $this->loggerFactory->get('myeventlane_vendor')->error(
+        'Failed to create store for vendor @vendor: @message',
+        [
+          '@vendor' => $vendor->id(),
+          '@message' => $e->getMessage(),
+        ]
+      );
+    }
+  }
+
+}

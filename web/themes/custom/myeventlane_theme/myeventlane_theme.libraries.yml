@@ -1,7 +1,5 @@
 # MyEventLane Theme Libraries
-#
-# Main theme library loaded globally via myeventlane_theme.info.yml.
-# Assets are built by Vite into the dist/ folder.
+# Built with Vite; outputs live in dist/.
 
 global-styling:
   css:
@@ -12,18 +10,18 @@ global-styling:
   dependencies:
     - core/drupal
 
-# Event form enhancements
-event-form:
-  js:
-    dist/main.js: { attributes: { type: module } }
-  dependencies:
-    - core/drupal
-    - core/drupal.form
-    - core/drupal.states
-
-# Account dropdown - direct script (non-module for compatibility)
+# Account dropdown fallback bundle (kept for legacy attachments).
 account-dropdown:
   js:
     dist/account-dropdown.js: {}
   dependencies:
     - core/drupal
+
+# Event form behaviors rely on the main bundle; use dependencies only to avoid
+# double-loading scripts while allowing targeted attachment from PHP/Twig.
+event-form:
+  dependencies:
+    - myeventlane_theme/global-styling
+    - core/drupal
+    - core/drupal.form
+    - core/drupal.states

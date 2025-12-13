@@ -1,21 +1,7 @@
-# Parent menu link for MyEventLane configuration section.
-myeventlane_core.config:
-  title: 'MyEventLane'
-  description: 'Configure the MyEventLane event and ticketing platform.'
-  route_name: myeventlane_core.config
-  parent: system.admin_config
-  weight: -5
-
-# General settings under MyEventLane config.
-myeventlane_core.settings:
-  title: 'General'
-  description: 'Configure general platform settings for MyEventLane.'
-  route_name: myeventlane_core.settings
-  parent: myeventlane_core.config
-  weight: -10
-
-
-
-
-
-
+# User account menu links.
+myeventlane_core.my_categories:
+  title: 'My Categories'
+  description: 'View categories you follow and new events'
+  route_name: myeventlane_core.my_categories
+  menu_name: account
+  weight: 10

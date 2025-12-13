@@ -1,0 +1,37 @@
+<?php
+
+/**
+ * @file
+ * Theme hooks for MyEventLane Analytics.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function myeventlane_analytics_theme(array $existing, string $type, string $theme, string $path): array {
+  return [
+    'myeventlane_analytics_dashboard' => [
+      'variables' => [
+        'summary_stats' => [],
+        'event_analytics' => [],
+      ],
+      'template' => 'analytics-dashboard',
+    ],
+    'myeventlane_analytics_event' => [
+      'variables' => [
+        'event' => NULL,
+        'time_series' => [],
+        'ticket_breakdown' => [],
+        'sales_velocity' => [],
+        'conversion_funnel' => [],
+        'bottlenecks' => [],
+        'total_revenue' => 0.0,
+        'total_tickets' => 0,
+      ],
+      'template' => 'analytics-event',
+    ],
+  ];
+}
+
+
+

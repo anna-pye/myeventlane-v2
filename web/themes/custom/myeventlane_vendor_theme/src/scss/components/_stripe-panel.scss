@@ -1,0 +1,136 @@
+/**
+ * @file
+ * Stripe Connect panel styles.
+ */
+
+.mel-stripe-panel {
+  padding: 0;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--mel-color-border);
+  }
+
+  &__icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--mel-color-bg-subtle);
+    border-radius: 8px;
+    color: var(--mel-color-text-secondary);
+  }
+
+  &__title {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--mel-color-text);
+  }
+
+  &__status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 9999px;
+
+    &--connected {
+      background: rgba(16, 185, 129, 0.1);
+      color: #059669;
+    }
+
+    &--pending {
+      background: rgba(245, 158, 11, 0.1);
+      color: #d97706;
+    }
+
+    &--not_connected {
+      background: rgba(107, 114, 128, 0.1);
+      color: #6b7280;
+    }
+  }
+
+  &__status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  &__body {
+    padding: 16px;
+  }
+
+  &__metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  &__metric {
+    text-align: center;
+
+    &-label {
+      display: block;
+      font-size: 12px;
+      color: var(--mel-color-text-secondary);
+      margin-bottom: 4px;
+    }
+
+    &-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--mel-color-text);
+    }
+  }
+
+  &__account {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    background: var(--mel-color-bg-subtle);
+    border-radius: 8px;
+    margin-bottom: 16px;
+
+    &-label {
+      font-size: 13px;
+      color: var(--mel-color-text-secondary);
+    }
+
+    &-id {
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--mel-color-text);
+      background: var(--mel-color-bg);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  &__empty {
+    text-align: center;
+    padding: 16px;
+
+    p {
+      color: var(--mel-color-text-secondary);
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+  }
+}
+

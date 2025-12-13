@@ -1,0 +1,121 @@
+{#
+  Event attendees pane.
+  Variables: event, attendees, summary.
+#}
+<div class="mel-grid mel-grid--4">
+  <div class="mel-card mel-card--stat">
+    <div class="mel-stat">
+      <div class="mel-stat__label">{{ 'Total attendees'|t }}</div>
+      <div class="mel-stat__value">{{ summary.total|default(0) }}</div>
+    </div>
+  </div>
+  <div class="mel-card mel-card--stat">
+    <div class="mel-stat">
+      <div class="mel-stat__label">{{ 'Ticket holders'|t }}</div>
+      <div class="mel-stat__value">{{ summary.ticket|default(0) }}</div>
+    </div>
+  </div>
+  <div class="mel-card mel-card--stat">
+    <div class="mel-stat">
+      <div class="mel-stat__label">{{ 'RSVPs'|t }}</div>
+      <div class="mel-stat__value">{{ summary.rsvp|default(0) }}</div>
+    </div>
+  </div>
+  <div class="mel-card mel-card--stat">
+    <div class="mel-stat">
+      <div class="mel-stat__label">{{ 'Capacity'|t }}</div>
+      <div class="mel-stat__value">
+        {% if summary.remaining is not null %}
+          {{ summary.total }}/{{ summary.capacity }}
+        {% else %}
+          {{ summary.capacity }}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mel-card">
+  <div class="mel-card__header">
+    <div class="mel-card__title">{{ 'Attendee list'|t }}</div>
+    <div class="mel-card__actions">
+      <input type="text" class="mel-input mel-input--sm" placeholder="{{ 'Search attendees...'|t }}" id="attendee-search">
+    </div>
+  </div>
+  
+  {% if attendees|length > 0 %}
+    <div class="mel-table mel-table--striped">
+      <div class="mel-table__head">
+        <div>{{ 'Name'|t }}</div>
+        <div>{{ 'Email'|t }}</div>
+        <div>{{ 'Source'|t }}</div>
+        <div>{{ 'Status'|t }}</div>
+        <div>{{ 'Ticket code'|t }}</div>
+        <div>{{ 'Checked in'|t }}</div>
+      </div>
+      <div class="mel-table__body" id="attendee-list">
+        {% for attendee in attendees %}
+          <div class="mel-table__row" data-name="{{ attendee.name|lower }}" data-email="{{ attendee.email|lower }}">
+            <div class="mel-text--bold">{{ attendee.name }}</div>
+            <div>{{ attendee.email }}</div>
+            <div>
+              <span class="mel-badge mel-badge--{{ attendee.source|lower }}">
+                {{ attendee.source }}
+              </span>
+            </div>
+            <div>
+              <span class="mel-badge mel-badge--{{ attendee.status|lower }}">
+                {{ attendee.status }}
+              </span>
+            </div>
+            <div>
+              {% if attendee.ticket_code %}
+                <code class="mel-code">{{ attendee.ticket_code }}</code>
+              {% else %}
+                <span class="mel-text--muted">—</span>
+              {% endif %}
+            </div>
+            <div>
+              {% if attendee.checked_in %}
+                <span class="mel-badge mel-badge--success">{{ 'Yes'|t }}</span>
+              {% else %}
+                <span class="mel-badge mel-badge--neutral">{{ 'No'|t }}</span>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div class="mel-empty">
+      <div class="mel-empty__icon">👥</div>
+      <div class="mel-empty__title">{{ 'No attendees yet'|t }}</div>
+      <div class="mel-empty__description">
+        {{ 'When people RSVP or purchase tickets, they will appear here.'|t }}
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  // Simple client-side search
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('attendee-search');
+    const attendeeList = document.getElementById('attendee-list');
+    
+    if (searchInput && attendeeList) {
+      searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        const rows = attendeeList.querySelectorAll('.mel-table__row');
+        
+        rows.forEach(function(row) {
+          const name = row.dataset.name || '';
+          const email = row.dataset.email || '';
+          const matches = name.includes(query) || email.includes(query);
+          row.style.display = matches ? '' : 'none';
+        });
+      });
+    }
+  });
+</script>
+

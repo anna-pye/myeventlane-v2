@@ -4,6 +4,13 @@ status: true
 dependencies:
   config:
     - commerce_store.commerce_store_type.online
+    - field.field.commerce_store.online.field_stripe_account_id
+    - field.field.commerce_store.online.field_stripe_charges_enabled
+    - field.field.commerce_store.online.field_stripe_connected
+    - field.field.commerce_store.online.field_stripe_dashboard_url
+    - field.field.commerce_store.online.field_stripe_onboard_url
+    - field.field.commerce_store.online.field_stripe_payouts_enabled
+    - field.field.commerce_store.online.field_vendor_reference
   module:
     - address
     - path
@@ -89,4 +96,11 @@ content:
     third_party_settings: {  }
 hidden:
   created: true
+  field_stripe_account_id: true
+  field_stripe_charges_enabled: true
+  field_stripe_connected: true
+  field_stripe_dashboard_url: true
+  field_stripe_onboard_url: true
+  field_stripe_payouts_enabled: true
+  field_vendor_reference: true
   uid: true

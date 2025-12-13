@@ -33,6 +33,7 @@
         "drupal/core-recommended": "^11.2",
         "drupal/ctools": "^4.1",
         "drupal/field_group": "^4.0",
+        "drupal/flag": "^5.0",
         "drupal/focal_point": "^2.1",
         "drupal/fullcalendar_view": "^5.2",
         "drupal/gin": "^5.0",

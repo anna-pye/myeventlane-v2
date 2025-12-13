@@ -4,3 +4,17 @@ myeventlane_vendor.settings:
   route_name: myeventlane_vendor.settings
   base_route: myeventlane_vendor.settings
   weight: 0
+
+# Edit tab for vendor entities.
+entity.myeventlane_vendor.edit_form:
+  title: 'Edit'
+  route_name: entity.myeventlane_vendor.edit_form
+  base_route: entity.myeventlane_vendor.canonical
+  weight: 10
+
+# Delete tab for vendor entities.
+entity.myeventlane_vendor.delete_form:
+  title: 'Delete'
+  route_name: entity.myeventlane_vendor.delete_form
+  base_route: entity.myeventlane_vendor.canonical
+  weight: 20

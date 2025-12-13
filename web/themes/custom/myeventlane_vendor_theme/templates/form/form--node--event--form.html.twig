@@ -1,0 +1,32 @@
+{#
+/**
+ * @file
+ * Vendor theme override for the event node form.
+ * 
+ * This template wraps the form with proper <form> tags and adds tabbed navigation.
+ * Since this template is in the vendor theme, it always renders the tabbed interface.
+ *
+ * Available variables:
+ * - attributes: HTML attributes for the form element.
+ * - children: The rendered form elements (all the fields).
+ */
+#}
+<form{{ attributes.addClass('mel-event-form-vendor') }}>
+  <div class="mel-event-create-form" data-event-form>
+    {# Tab navigation #}
+    <nav class="mel-event-form-tabs" role="tablist">
+      <button type="button" class="mel-tab-button is-active" data-tab="basics" role="tab" aria-selected="true">{{ 'Basics'|t }}</button>
+      <button type="button" class="mel-tab-button" data-tab="location" role="tab" aria-selected="false">{{ 'Location'|t }}</button>
+      <button type="button" class="mel-tab-button" data-tab="schedule" role="tab" aria-selected="false">{{ 'Schedule'|t }}</button>
+      <button type="button" class="mel-tab-button" data-tab="tickets" role="tab" aria-selected="false">{{ 'Tickets'|t }}</button>
+      <button type="button" class="mel-tab-button" data-tab="addons" role="tab" aria-selected="false">{{ 'Add-ons'|t }}</button>
+      <button type="button" class="mel-tab-button" data-tab="design" role="tab" aria-selected="false">{{ 'Design'|t }}</button>
+      <button type="button" class="mel-tab-button" data-tab="publish" role="tab" aria-selected="false">{{ 'Publish'|t }}</button>
+    </nav>
+
+    {# All form children are rendered here - sections wrapped in tab panes by form alter #}
+    <div class="mel-event-form-content">
+      {{ children }}
+    </div>
+  </div>
+</form>

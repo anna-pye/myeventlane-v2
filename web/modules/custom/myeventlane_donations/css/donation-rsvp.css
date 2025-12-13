@@ -1,0 +1,123 @@
+/**
+ * @file
+ * RSVP donation section styles.
+ */
+
+/* RSVP donation section */
+.mel-rsvp-donation-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+
+.mel-rsvp-donation-section--disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.mel-donation-intro-text {
+  margin-bottom: 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #555;
+}
+
+.mel-donation-toggle {
+  margin-bottom: 1rem;
+  min-height: 44px;
+}
+
+.mel-donation-toggle label {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.mel-donation-amounts {
+  margin-top: 1rem;
+}
+
+.mel-donation-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.mel-donation-presets input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.mel-donation-presets label {
+  display: inline-block;
+  min-width: 80px;
+  min-height: 44px;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-align: center;
+  border: 2px solid #ddd;
+  background: #fff;
+  color: #333;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mel-donation-presets label:hover {
+  border-color: #c0392b;
+  background: #fef5f4;
+}
+
+.mel-donation-presets input[type="radio"]:checked + label,
+.mel-donation-presets input[type="radio"]:focus + label {
+  border-color: #c0392b;
+  background: #c0392b;
+  color: #fff;
+  outline: 3px solid rgba(192, 57, 43, 0.3);
+  outline-offset: 2px;
+}
+
+.mel-donation-custom-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+}
+
+.mel-donation-custom-input:focus {
+  outline: none;
+  border-color: #c0392b;
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.1);
+}
+
+.mel-donation-disabled-message {
+  color: #666;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .mel-rsvp-donation-section {
+    padding: 1rem;
+  }
+
+  .mel-donation-presets {
+    gap: 0.5rem;
+  }
+
+  .mel-donation-presets label {
+    flex: 1 1 calc(50% - 0.25rem);
+    min-width: 0;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+}

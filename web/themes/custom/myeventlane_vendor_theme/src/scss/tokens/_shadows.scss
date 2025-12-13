@@ -1,0 +1,40 @@
+/**
+ * @file
+ * Shadow tokens for MyEventLane Vendor Theme.
+ *
+ * Subtle shadows for depth and hierarchy.
+ */
+
+// ============================================================================
+// SHADOW SCALE
+// ============================================================================
+
+$shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+$shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+$shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+$shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+$shadow-none: 0 0 #0000;
+
+// ============================================================================
+// COMPONENT-SPECIFIC SHADOWS
+// ============================================================================
+
+$shadow-card: $shadow-sm;
+$shadow-card-hover: $shadow-md;
+$shadow-dropdown: $shadow-lg;
+$shadow-modal: $shadow-xl;
+$shadow-sidebar: 2px 0 8px rgba(0, 0, 0, 0.08);
+$shadow-header: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+// ============================================================================
+// FOCUS SHADOWS
+// ============================================================================
+
+$shadow-focus: 0 0 0 3px rgba(37, 99, 235, 0.15);
+$shadow-focus-danger: 0 0 0 3px rgba(255, 138, 138, 0.25);
+$shadow-focus-success: 0 0 0 3px rgba(92, 201, 139, 0.25);
+

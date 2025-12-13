@@ -283,7 +283,7 @@ class PaymentInformation extends PaymentCheckoutPaneBase {
       }
       else {
         // For other gateways that collect billing info, show the billing profile form
-        $pane_form = $this->buildBillingProfileForm($pane_form, $form_state);
+      $pane_form = $this->buildBillingProfileForm($pane_form, $form_state);
       }
     }
 
@@ -363,11 +363,6 @@ class PaymentInformation extends PaymentCheckoutPaneBase {
       '#weight' => 10,
     ];
     $pane_form['billing_information'] = $inline_form->buildInlineForm($pane_form['billing_information'], $form_state);
-    
-    // DEBUG: Log that billing_information element was added
-    \Drupal::logger('payment_info_debug')->notice('billing_information element added to pane_form. Keys after: @keys', [
-      '@keys' => implode(', ', array_keys($pane_form)),
-    ]);
 
     return $pane_form;
   }
@@ -448,6 +443,7 @@ class PaymentInformation extends PaymentCheckoutPaneBase {
 
     $payment_gateway_plugin = $payment_gateway->getPlugin();
     if ($payment_gateway_plugin instanceof SupportsCreatingPaymentMethodsInterface) {
+      $payment_method = NULL;
       if (!empty($selected_option->getPaymentMethodTypeId())) {
         // Check if add_payment_method form element exists before accessing it
         // Must check parent key first to avoid "Undefined array key" warnings
@@ -470,6 +466,11 @@ class PaymentInformation extends PaymentCheckoutPaneBase {
         /** @var \Drupal\commerce_payment\PaymentMethodStorageInterface $payment_method_storage */
         $payment_method_storage = $this->entityTypeManager->getStorage('commerce_payment_method');
         $payment_method = $payment_method_storage->load($selected_option->getPaymentMethodId());
+      }
+
+      // Only proceed if payment method was successfully loaded/created.
+      if (!$payment_method) {
+        return;
       }
 
       /** @var \Drupal\commerce_payment\Entity\PaymentMethodInterface $payment_method */

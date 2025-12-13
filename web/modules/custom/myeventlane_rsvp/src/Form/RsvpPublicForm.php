@@ -185,17 +185,133 @@ class RsvpPublicForm extends FormBase {
       ];
     }
 
-    // Optional donation field.
-    $form['donation'] = [
-      '#type' => 'number',
-      '#title' => $this->t('Optional donation'),
-      '#description' => $this->t('Support this event with an optional donation. Amount in AUD.'),
-      '#required' => FALSE,
-      '#min' => 0,
-      '#step' => 1,
-      '#default_value' => 0,
-      '#field_prefix' => '$',
-    ];
+    // Optional donation panel.
+    $donationConfig = \Drupal::config('myeventlane_donations.settings');
+    $donationEnabled = $donationConfig->get('enable_rsvp_donations') ?? FALSE;
+    $requireStripeConnected = $donationConfig->get('require_stripe_connected_for_attendee_donations') ?? TRUE;
+
+    if ($donationEnabled) {
+      // Check if vendor has Stripe Connect if required.
+      $showDonation = TRUE;
+      if ($requireStripeConnected) {
+        $showDonation = $this->isVendorStripeConnected($event);
+        // Log for debugging.
+        if (!$showDonation) {
+          $this->logger->debug('Donation section hidden: Vendor Stripe Connect not enabled for event @event_id (vendor uid: @uid)', [
+            '@event_id' => $event->id(),
+            '@uid' => $event->getOwnerId(),
+          ]);
+        }
+      }
+
+      if ($showDonation) {
+        $form['donation_section'] = [
+          '#type' => 'details',
+          '#title' => $this->t('Support this event (optional)'),
+          '#open' => FALSE,
+          '#attributes' => ['class' => ['mel-rsvp-donation-section']],
+        ];
+
+        $form['donation_section']['donation_intro'] = [
+          '#markup' => '<p class="mel-donation-intro-text">' .
+            $this->t($donationConfig->get('attendee_copy') ?? 'Support this event organiser with an optional donation. Your contribution helps make this event possible.') .
+            '</p>',
+        ];
+
+        $presets = $donationConfig->get('attendee_presets') ?? [5.00, 10.00, 25.00, 50.00];
+        $minAmount = (float) ($donationConfig->get('min_amount') ?? 1.00);
+
+        $form['donation_section']['donation_toggle'] = [
+          '#type' => 'checkbox',
+          '#title' => $this->t('Add a donation'),
+          '#default_value' => FALSE,
+          '#attributes' => ['class' => ['mel-donation-toggle']],
+        ];
+
+        $form['donation_section']['donation_amounts'] = [
+          '#type' => 'container',
+          '#attributes' => ['class' => ['mel-donation-amounts']],
+          '#states' => [
+            'visible' => [
+              ':input[name="donation_toggle"]' => ['checked' => TRUE],
+            ],
+          ],
+        ];
+
+        // Preset radio buttons.
+        $presetOptions = [];
+        foreach ($presets as $preset) {
+          $presetOptions[(string) $preset] = '$' . number_format($preset, 2);
+        }
+        $presetOptions['custom'] = $this->t('Custom amount');
+
+        $form['donation_section']['donation_amounts']['donation_preset'] = [
+          '#type' => 'radios',
+          '#title' => $this->t('Donation amount'),
+          '#options' => $presetOptions,
+          '#default_value' => '',
+          '#required' => FALSE,
+          '#attributes' => ['class' => ['mel-donation-presets']],
+        ];
+
+        // Custom amount input.
+        $form['donation_section']['donation_amounts']['donation_custom'] = [
+          '#type' => 'number',
+          '#title' => $this->t('Custom amount (AUD)'),
+          '#description' => $this->t('Minimum $@min', ['@min' => number_format($minAmount, 2)]),
+          '#required' => FALSE,
+          '#min' => $minAmount,
+          '#step' => 0.01,
+          '#default_value' => '',
+          '#field_prefix' => '$',
+          '#attributes' => ['class' => ['mel-donation-custom-input']],
+          '#states' => [
+            'visible' => [
+              ':input[name="donation_preset"]' => ['value' => 'custom'],
+            ],
+            'required' => [
+              ':input[name="donation_preset"]' => ['value' => 'custom'],
+            ],
+          ],
+        ];
+
+        // Hidden field to store final donation amount.
+        $form['donation'] = [
+          '#type' => 'hidden',
+          '#default_value' => 0,
+        ];
+
+        $form['#attached']['library'][] = 'myeventlane_donations/donation-form';
+        $form['#attached']['library'][] = 'myeventlane_donations/donation-rsvp';
+      }
+      elseif ($requireStripeConnected) {
+        // Show disabled state with message.
+        $form['donation_section'] = [
+          '#type' => 'details',
+          '#title' => $this->t('Support this event (optional)'),
+          '#open' => FALSE,
+          '#attributes' => ['class' => ['mel-rsvp-donation-section', 'mel-rsvp-donation-section--disabled']],
+        ];
+
+        $form['donation_section']['donation_disabled'] = [
+          '#markup' => '<p class="mel-donation-disabled-message">' .
+            $this->t('Donations are not available for this event at this time.') .
+            '</p>',
+        ];
+
+        $form['donation'] = [
+          '#type' => 'hidden',
+          '#default_value' => 0,
+        ];
+      }
+    }
+    else {
+      // Donations disabled globally.
+      $form['donation'] = [
+        '#type' => 'hidden',
+        '#default_value' => 0,
+      ];
+    }
 
     $form['actions'] = ['#type' => 'actions'];
 
@@ -224,6 +340,38 @@ class RsvpPublicForm extends FormBase {
     if (!empty($email) && !\Drupal::service('email.validator')->isValid($email)) {
       $form_state->setErrorByName('email', $this->t('Please enter a valid email address.'));
     }
+
+    // Validate donation amount if donation toggle is enabled.
+    $donationToggle = $form_state->getValue('donation_toggle');
+    if ($donationToggle) {
+      $donationConfig = \Drupal::config('myeventlane_donations.settings');
+      $minAmount = (float) ($donationConfig->get('min_amount') ?? 1.00);
+      $preset = $form_state->getValue('donation_preset');
+      $customAmount = $form_state->getValue('donation_custom');
+
+      $donationAmount = 0;
+      if ($preset === 'custom') {
+        if (empty($customAmount) || (float) $customAmount < $minAmount) {
+          $form_state->setErrorByName('donation_custom', $this->t('Please enter a donation amount of at least $@min.', [
+            '@min' => number_format($minAmount, 2),
+          ]));
+        }
+        else {
+          $donationAmount = (float) $customAmount;
+        }
+      }
+      elseif (!empty($preset) && $preset !== 'custom') {
+        $donationAmount = (float) $preset;
+      }
+      else {
+        $form_state->setErrorByName('donation_preset', $this->t('Please select a donation amount.'));
+      }
+
+      $form_state->set('donation_amount', $donationAmount);
+    }
+    else {
+      $form_state->set('donation_amount', 0);
+    }
   }
 
   /**
@@ -250,6 +398,9 @@ class RsvpPublicForm extends FormBase {
     try {
       $storage = $this->entityTypeManager->getStorage('rsvp_submission');
 
+      // Get donation amount from form state.
+      $donationAmount = $form_state->get('donation_amount') ?? 0;
+
       // Create the RSVP submission entity.
       $submission = $storage->create([
         'event_id' => ['target_id' => $event->id()],
@@ -258,11 +409,36 @@ class RsvpPublicForm extends FormBase {
         'email' => $values['email'] ?? '',
         'phone' => $values['phone'] ?? '',
         'guests' => (int) ($values['guests'] ?? 1),
-        'donation' => (float) ($values['donation'] ?? 0),
+        'donation' => (float) $donationAmount,
         'status' => 'confirmed',
       ]);
 
       $submission->save();
+
+      // Process donation payment if amount > 0.
+      if ($donationAmount > 0) {
+        try {
+          if (\Drupal::hasService('myeventlane_donations.rsvp')) {
+            $rsvpDonationService = \Drupal::service('myeventlane_donations.rsvp');
+            $order = $rsvpDonationService->createDonationOrder($submission, $event, $donationAmount);
+            if ($order) {
+              // Store order ID in submission metadata if field exists.
+              // Redirect to checkout for payment.
+              $form_state->setRedirect('commerce_checkout.form', [
+                'commerce_order' => $order->id(),
+              ]);
+              return;
+            }
+          }
+        }
+        catch (\Exception $e) {
+          // Log error but don't fail RSVP submission.
+          $this->logger->error('Failed to process RSVP donation: @message', [
+            '@message' => $e->getMessage(),
+          ]);
+          $this->messengerService->addWarning($this->t('Your RSVP was saved, but we could not process your donation. Please contact support.'));
+        }
+      }
 
       $this->logger->notice('RSVP created for event @event by @name (@email)', [
         '@event' => $event->label(),
@@ -361,6 +537,77 @@ class RsvpPublicForm extends FormBase {
     }
     catch (\Exception) {
       return [];
+    }
+  }
+
+  /**
+   * Checks if the vendor for an event has Stripe Connect enabled.
+   *
+   * @param \Drupal\node\NodeInterface $event
+   *   The event node.
+   *
+   * @return bool
+   *   TRUE if vendor has Stripe Connect, FALSE otherwise.
+   */
+  protected function isVendorStripeConnected(NodeInterface $event): bool {
+    try {
+      // Get vendor from event owner.
+      $vendorUid = (int) $event->getOwnerId();
+      if ($vendorUid === 0) {
+        $this->logger->debug('Event @event_id has no owner (uid 0)', ['@event_id' => $event->id()]);
+        return FALSE;
+      }
+
+      // Find store for this vendor.
+      $storeStorage = $this->entityTypeManager->getStorage('commerce_store');
+      $storeIds = $storeStorage->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('uid', $vendorUid)
+        ->range(0, 1)
+        ->execute();
+
+      if (empty($storeIds)) {
+        $this->logger->debug('No store found for vendor uid @uid (event @event_id)', [
+          '@uid' => $vendorUid,
+          '@event_id' => $event->id(),
+        ]);
+        return FALSE;
+      }
+
+      $store = $storeStorage->load(reset($storeIds));
+      if (!$store) {
+        return FALSE;
+      }
+
+      // Check if Stripe is connected and charges are enabled.
+      if ($store->hasField('field_stripe_charges_enabled') && !$store->get('field_stripe_charges_enabled')->isEmpty()) {
+        $connected = (bool) $store->get('field_stripe_charges_enabled')->value;
+        $this->logger->debug('Stripe charges enabled check for store @store_id: @connected', [
+          '@store_id' => $store->id(),
+          '@connected' => $connected ? 'yes' : 'no',
+        ]);
+        return $connected;
+      }
+
+      // Fallback: check connected flag.
+      if ($store->hasField('field_stripe_connected') && !$store->get('field_stripe_connected')->isEmpty()) {
+        $connected = (bool) $store->get('field_stripe_connected')->value;
+        $this->logger->debug('Stripe connected flag check for store @store_id: @connected', [
+          '@store_id' => $store->id(),
+          '@connected' => $connected ? 'yes' : 'no',
+        ]);
+        return $connected;
+      }
+
+      $this->logger->debug('No Stripe fields found on store @store_id', ['@store_id' => $store->id()]);
+      return FALSE;
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Error checking Stripe Connect for event @event_id: @message', [
+        '@event_id' => $event->id(),
+        '@message' => $e->getMessage(),
+      ]);
+      return FALSE;
     }
   }
 

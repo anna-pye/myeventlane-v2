@@ -1,0 +1,64 @@
+{#
+/**
+ * @file
+ * Best performing event card component.
+ *
+ * Variables:
+ * - event: Best event object with:
+ *   - title: Event title
+ *   - tickets_sold: Number of tickets sold
+ *   - revenue: Total revenue
+ *   - revenue_formatted: Formatted revenue string
+ *   - rsvps: RSVP count
+ *   - conversion_rate: Optional conversion rate
+ *   - analytics_url: URL to event analytics
+ *   - manage_url: URL to manage event
+ */
+#}
+{% if event %}
+<div class="mel-best-event">
+  <div class="mel-best-event__header">
+    <div class="mel-best-event__badge">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+      {{ 'Best Performer'|t }}
+    </div>
+  </div>
+  
+  <div class="mel-best-event__content">
+    <h3 class="mel-best-event__title">{{ event.title }}</h3>
+    
+    <div class="mel-best-event__stats">
+      <div class="mel-best-event__stat">
+        <span class="mel-best-event__stat-value">{{ event.tickets_sold }}</span>
+        <span class="mel-best-event__stat-label">{{ 'Tickets Sold'|t }}</span>
+      </div>
+      <div class="mel-best-event__stat">
+        <span class="mel-best-event__stat-value">{{ event.revenue_formatted }}</span>
+        <span class="mel-best-event__stat-label">{{ 'Revenue'|t }}</span>
+      </div>
+      <div class="mel-best-event__stat">
+        <span class="mel-best-event__stat-value">{{ event.rsvps }}</span>
+        <span class="mel-best-event__stat-label">{{ 'RSVPs'|t }}</span>
+      </div>
+      {% if event.conversion_rate %}
+        <div class="mel-best-event__stat">
+          <span class="mel-best-event__stat-value">{{ event.conversion_rate }}%</span>
+          <span class="mel-best-event__stat-label">{{ 'Conversion'|t }}</span>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  
+  <div class="mel-best-event__footer">
+    <a href="{{ event.analytics_url }}" class="mel-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+      </svg>
+      {{ 'View Analytics'|t }}
+    </a>
+  </div>
+</div>
+{% endif %}
+

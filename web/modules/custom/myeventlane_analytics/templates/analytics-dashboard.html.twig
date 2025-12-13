@@ -1,0 +1,101 @@
+{#
+/**
+ * @file
+ * Template for the analytics dashboard.
+ *
+ * Available variables:
+ * - summary_stats: Summary statistics across all events.
+ * - event_analytics: Array of event analytics data.
+ */
+#}
+<div class="mel-analytics-dashboard">
+
+  <h1 class="mel-analytics-title">{{ 'Analytics Dashboard'|t }}</h1>
+
+  {# Summary Cards #}
+  <div class="mel-analytics-summary" style="
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  ">
+    <div class="mel-analytics-card" style="
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    ">
+      <h3 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; color: #666; font-weight: 600;">{{ 'Total Events'|t }}</h3>
+      <p style="margin: 0; font-size: 2rem; font-weight: 700; color: #333;">{{ summary_stats.total_events }}</p>
+    </div>
+
+    <div class="mel-analytics-card" style="
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    ">
+      <h3 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; color: #666; font-weight: 600;">{{ 'Total Revenue'|t }}</h3>
+      <p style="margin: 0; font-size: 2rem; font-weight: 700; color: #28a745;">${{ summary_stats.total_revenue|number_format(2) }}</p>
+    </div>
+
+    <div class="mel-analytics-card" style="
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    ">
+      <h3 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; color: #666; font-weight: 600;">{{ 'Total Tickets'|t }}</h3>
+      <p style="margin: 0; font-size: 2rem; font-weight: 700; color: #333;">{{ summary_stats.total_tickets }}</p>
+    </div>
+  </div>
+
+  {# Events List #}
+  <section class="mel-analytics-events" aria-labelledby="events-analytics-title">
+    <h2 id="events-analytics-title" class="mel-section-title">{{ 'Event Analytics'|t }}</h2>
+
+    {% if event_analytics is not empty %}
+      <div class="mel-analytics-events-table">
+        <table class="mel-table" style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background-color: #f5f5f5;">
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #ddd;">{{ 'Event'|t }}</th>
+              <th style="padding: 1rem; text-align: right; border-bottom: 2px solid #ddd;">{{ 'Tickets Sold'|t }}</th>
+              <th style="padding: 1rem; text-align: right; border-bottom: 2px solid #ddd;">{{ 'Revenue'|t }}</th>
+              <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #ddd;">{{ 'Actions'|t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in event_analytics %}
+              <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 1rem;">
+                  <a href="{{ item.url }}" style="font-weight: 600; color: #007bff; text-decoration: none;">{{ item.event.label }}</a>
+                </td>
+                <td style="padding: 1rem; text-align: right;">{{ item.tickets }}</td>
+                <td style="padding: 1rem; text-align: right; font-weight: 600; color: #28a745;">${{ item.revenue|number_format(2) }}</td>
+                <td style="padding: 1rem; text-align: center;">
+                  <a href="{{ item.analytics_url }}" class="mel-btn mel-btn-primary mel-btn-sm">{{ 'View Analytics'|t }}</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="mel-analytics-empty" style="
+        text-align: center;
+        padding: 3rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      ">
+        <p style="color: #666; font-size: 1.1rem;">{{ 'No events with analytics data yet.'|t }}</p>
+        <p style="color: #999; margin-top: 0.5rem;">{{ 'Create an event and start selling tickets to see analytics.'|t }}</p>
+      </div>
+    {% endif %}
+  </section>
+
+</div>
+
+
+

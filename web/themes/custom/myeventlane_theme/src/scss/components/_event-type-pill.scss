@@ -1,0 +1,191 @@
+// ==========================================================================
+// Event Type Pill Component
+// ==========================================================================
+// Reusable pill badge for event types: RSVP, Tickets, Featured, etc.
+// Consistent styling across teasers, full pages, and listings.
+
+@use '../tokens/colors';
+@use '../tokens/typography';
+@use '../tokens/spacing';
+@use '../tokens/radii';
+@use '../tokens/shadows';
+
+// ---------------------------------------------------------------------------
+// Base Pill Styles
+// ---------------------------------------------------------------------------
+
+.mel-event-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: spacing.mel-space(1);
+  border-radius: radii.$mel-radius-full;
+  font-weight: typography.$mel-font-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  white-space: nowrap;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+// ---------------------------------------------------------------------------
+// Size Variants
+// ---------------------------------------------------------------------------
+
+.mel-event-pill--sm {
+  padding: spacing.mel-space(1) spacing.mel-space(2);
+  font-size: typography.mel-font-size(xs);
+}
+
+.mel-event-pill--md {
+  padding: spacing.mel-space(2) spacing.mel-space(3);
+  font-size: typography.mel-font-size(sm);
+}
+
+.mel-event-pill--lg {
+  padding: spacing.mel-space(2) spacing.mel-space(4);
+  font-size: typography.mel-font-size(base);
+}
+
+// ---------------------------------------------------------------------------
+// Type Variants - Colors
+// ---------------------------------------------------------------------------
+
+// RSVP - Blue (Free, RSVP events)
+.mel-event-pill--rsvp {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: colors.$mel-color-text-inverse;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.35);
+}
+
+// Paid / Tickets - Coral (Paid ticketed events)
+.mel-event-pill--paid {
+  background: linear-gradient(135deg, colors.$mel-color-primary 0%, #e85a4d 100%);
+  color: colors.$mel-color-text-inverse;
+  box-shadow: 0 2px 6px rgba(255, 111, 97, 0.35);
+}
+
+// Both - Purple (Mixed RSVP + Paid)
+.mel-event-pill--both {
+  background: linear-gradient(135deg, colors.$mel-color-secondary 0%, #7a65e8 100%);
+  color: colors.$mel-color-text-inverse;
+  box-shadow: 0 2px 6px rgba(141, 121, 246, 0.35);
+}
+
+// External - Teal (External booking link)
+.mel-event-pill--external {
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  color: colors.$mel-color-text-inverse;
+  box-shadow: 0 2px 6px rgba(20, 184, 166, 0.35);
+}
+
+// Featured - Gold (Boosted/promoted events)
+.mel-event-pill--featured {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: colors.$mel-color-text-inverse;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+}
+
+// None / Unavailable - Gray
+.mel-event-pill--none {
+  background: colors.$mel-color-surface-alt;
+  color: colors.$mel-color-text-muted;
+  box-shadow: none;
+}
+
+// Free - Green (Alternative to RSVP for "Free" badge)
+.mel-event-pill--free {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: colors.$mel-color-text-inverse;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
+}
+
+// Sold Out - Red
+.mel-event-pill--sold-out {
+  background: linear-gradient(135deg, colors.$mel-color-error 0%, #dc2626 100%);
+  color: colors.$mel-color-text-inverse;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.35);
+}
+
+// Waitlist - Amber
+.mel-event-pill--waitlist {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: colors.$mel-color-text-inverse;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.35);
+}
+
+// ---------------------------------------------------------------------------
+// Pill Icon
+// ---------------------------------------------------------------------------
+
+.mel-event-pill__icon {
+  flex-shrink: 0;
+  font-size: 0.85em;
+}
+
+// ---------------------------------------------------------------------------
+// Pill Label
+// ---------------------------------------------------------------------------
+
+.mel-event-pill__label {
+  // No additional styles needed - inherits from parent
+}
+
+// ---------------------------------------------------------------------------
+// Interactive States (for clickable pills)
+// ---------------------------------------------------------------------------
+
+a.mel-event-pill,
+button.mel-event-pill {
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid colors.$mel-focus-ring-color;
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Pill Group (multiple pills together)
+// ---------------------------------------------------------------------------
+
+.mel-event-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: spacing.mel-space(2);
+  align-items: center;
+}
+
+// ---------------------------------------------------------------------------
+// Legacy Support - Inline styles compatibility
+// ---------------------------------------------------------------------------
+// These classes provide backward compatibility with existing inline-styled badges
+
+.mel-event-card-type-badge {
+  @extend .mel-event-pill;
+  @extend .mel-event-pill--sm;
+}
+
+.mel-event-card-type-badge--rsvp {
+  @extend .mel-event-pill--rsvp;
+}
+
+.mel-event-card-type-badge--paid {
+  @extend .mel-event-pill--paid;
+}
+
+.mel-event-card-type-badge--tickets {
+  @extend .mel-event-pill--paid;
+}
+
+.mel-event-card-type-badge--free {
+  @extend .mel-event-pill--rsvp;
+}

@@ -1,0 +1,5 @@
+public_domain: 'https://myeventlane.com'
+vendor_domain: 'https://vendor.myeventlane.com'
+admin_domain: 'https://admin.myeventlane.com'
+force_redirects: true
+allow_admin_override: true

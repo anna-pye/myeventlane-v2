@@ -11,6 +11,25 @@
  */
 #}
 
+{# DEBUG: Template loaded #}
+<!-- DEBUG: node--event--form.html.twig template is loading -->
+{% if node %}
+  <!-- DEBUG: Edit mode - Node ID: {{ node.id }} -->
+{% else %}
+  <!-- DEBUG: Create mode - New event form -->
+{% endif %}
+
+{# Visible debug message (remove after testing) #}
+<div style="background: #ffeb3b; padding: 10px; margin: 10px 0; border: 2px solid #f57f17; font-weight: bold;">
+  🔍 DEBUG: Event Form Template Loaded
+  {% if node %}
+    (Edit Mode - Node ID: {{ node.id }})
+  {% else %}
+    (Create Mode)
+  {% endif %}
+  - Template: node--event--form.html.twig
+</div>
+
 <div class="mel-form-page-header">
   {% if node %}
     <nav class="mel-breadcrumb" aria-label="Breadcrumb">
@@ -34,7 +53,8 @@
 {% endif %}
 
 {# Main Form #}
-<form{{ attributes.addClass('mel-event-form') }}>
+{# Note: mel-event-form-vendor class is added by EventFormAlter service #}
+<form{{ attributes }}>
   {{ form.form_build_id }}
   {{ form.form_token }}
   {{ form.form_id }}
@@ -207,10 +227,32 @@
     {% endif %}
   {% endif %}
 
+  {# F. Attendee Questions Card #}
+  {% if form.attendee_questions %}
+    <div class="mel-form-group mel-form-card">
+      {{ form.attendee_questions }}
+    </div>
+  {% else %}
+    {% if form.field_attendee_questions %}
+      <div class="mel-form-group mel-form-card">
+        <div class="mel-form-section-header">
+          <h2 class="mel-form-section-title">
+            <span class="mel-form-section-icon">❓</span>
+            {{ 'Additional Questions'|t }}
+          </h2>
+          <p class="mel-form-section-description">{{ 'Optionally collect additional information from attendees during registration. These questions are not required.'|t }}</p>
+        </div>
+        <div class="mel-form-section-content">
+          {{ form.field_attendee_questions }}
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+
   {# Render any remaining fields not explicitly handled above #}
   {% set remaining_fields = form|without(
     'form_build_id', 'form_token', 'form_id',
-    'event_basics', 'date_time', 'location', 'booking_config', 'visibility',
+    'event_basics', 'date_time', 'location', 'booking_config', 'visibility', 'attendee_questions',
     'title', 'body', 'field_event_vendor', 'field_event_store',
     'field_event_image', 'field_event_hero',
     'field_event_start', 'field_event_end', 'field_event_date',
@@ -218,7 +260,7 @@
     'field_event_type', 'field_capacity', 'field_product_target',
     'field_ticket_types', 'field_external_url',
     'field_category', 'field_event_categories', 'field_tags',
-    'field_accessibility', 'field_event_status',
+    'field_accessibility', 'field_event_status', 'field_attendee_questions',
     'advanced', 'actions', 'path', 'booking_status'
   ) %}
   {% if remaining_fields|length > 0 %}

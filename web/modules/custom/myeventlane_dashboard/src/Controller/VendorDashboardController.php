@@ -7,8 +7,10 @@ namespace Drupal\myeventlane_dashboard\Controller;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
+use Drupal\myeventlane_boost\BoostManager;
 use Drupal\myeventlane_dashboard\Service\DashboardAccess;
 use Drupal\myeventlane_dashboard\Service\DashboardEventLoader;
+use Drupal\myeventlane_event_attendees\Service\AttendanceWaitlistManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -25,16 +27,34 @@ final class VendorDashboardController extends ControllerBase {
     private readonly DashboardAccess $dashboardAccess,
     private readonly DashboardEventLoader $eventLoader,
     private readonly TimeInterface $time,
+    private readonly ?BoostManager $boostManager = NULL,
+    private readonly ?AttendanceWaitlistManager $waitlistManager = NULL,
   ) {}
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): static {
+    try {
+      $boostManager = $container->get('myeventlane_boost.manager');
+    }
+    catch (\Exception) {
+      $boostManager = NULL;
+    }
+
+    try {
+      $waitlistManager = $container->get('myeventlane_event_attendees.waitlist');
+    }
+    catch (\Exception) {
+      $waitlistManager = NULL;
+    }
+
     return new static(
       $container->get('myeventlane_dashboard.access'),
       $container->get('myeventlane_dashboard.event_loader'),
       $container->get('datetime.time'),
+      $boostManager,
+      $waitlistManager,
     );
   }
 
@@ -55,10 +75,10 @@ final class VendorDashboardController extends ControllerBase {
    *   The event node ID.
    *
    * @return array
-   *   Array with 'attendee_count', 'revenue', and 'mode'.
+   *   Array with 'attendee_count', 'rsvp_count', 'waitlist_count', 'revenue', 'mode', and action URLs.
    */
   private function getEventStats(int $eventId): array {
-    // Get attendee count using entity query API.
+    // Get attendee count (ticket-based attendees).
     $attendeeCount = $this->entityTypeManager()
       ->getStorage('event_attendee')
       ->getQuery()
@@ -67,6 +87,29 @@ final class VendorDashboardController extends ControllerBase {
       ->condition('status', 'confirmed')
       ->count()
       ->execute();
+
+    // Get RSVP counts (separate from ticket attendees).
+    $rsvpCount = 0;
+    $waitlistCount = 0;
+    try {
+      $rsvpStorage = $this->entityTypeManager()->getStorage('rsvp_submission');
+      $rsvpCount = (int) $rsvpStorage->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('event_id', $eventId)
+        ->condition('status', 'confirmed')
+        ->count()
+        ->execute();
+      
+      $waitlistCount = (int) $rsvpStorage->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('event_id', $eventId)
+        ->condition('status', 'waitlist')
+        ->count()
+        ->execute();
+    }
+    catch (\Exception) {
+      // RSVP module may not be available.
+    }
 
     // Get revenue from Commerce orders.
     // Find all order items linked to this event.
@@ -77,9 +120,29 @@ final class VendorDashboardController extends ControllerBase {
 
     $revenue = 0;
     foreach ($orderItems as $item) {
-      $totalPrice = $item->getTotalPrice();
-      if ($totalPrice) {
-        $revenue += (float) $totalPrice->getNumber();
+      // Check if order reference field exists and has a value before accessing.
+      if (!$item->hasField('order_id') || $item->get('order_id')->isEmpty()) {
+        continue;
+      }
+      
+      try {
+        $order = $item->getOrder();
+        // Only count revenue from completed orders.
+        if ($order && $order->getState()->getId() === 'completed') {
+          $totalPrice = $item->getTotalPrice();
+          if ($totalPrice) {
+            $revenue += (float) $totalPrice->getNumber();
+          }
+        }
+      }
+      catch (\Exception $e) {
+        // Skip order items with broken or missing order references.
+        // Log error for debugging but don't break the dashboard.
+        \Drupal::logger('myeventlane_dashboard')->warning('Skipping order item @id with invalid order reference: @message', [
+          '@id' => $item->id(),
+          '@message' => $e->getMessage(),
+        ]);
+        continue;
       }
     }
 
@@ -96,10 +159,67 @@ final class VendorDashboardController extends ControllerBase {
       }
     }
 
+    // Build action URLs.
+    $rsvpViewUrl = NULL;
+    $rsvpExportUrl = NULL;
+    $attendeeViewUrl = NULL;
+    $attendeeExportUrl = NULL;
+
+    try {
+      $rsvpViewUrl = Url::fromRoute('myeventlane_rsvp.vendor_view', ['event' => $eventId])->toString();
+      $rsvpExportUrl = Url::fromRoute('myeventlane_rsvp.export_csv', ['event' => $eventId])->toString();
+    }
+    catch (\Exception) {
+      // Routes may not exist.
+    }
+
+    try {
+      $attendeeViewUrl = Url::fromRoute('myeventlane_event_attendees.vendor_list', ['node' => $eventId])->toString();
+      $attendeeExportUrl = Url::fromRoute('myeventlane_event_attendees.vendor_export', ['node' => $eventId])->toString();
+    }
+    catch (\Exception) {
+      // Routes may not exist.
+    }
+
+    // Get waitlist analytics if service is available.
+    $waitlistAnalytics = NULL;
+    if ($this->waitlistManager) {
+      try {
+        $waitlistAnalytics = $this->waitlistManager->getWaitlistAnalytics($eventId);
+      }
+      catch (\Exception) {
+        // Analytics not available.
+      }
+    }
+
+    // Get donation metrics (RSVP donations for this event).
+    $donationTotal = 0;
+    $donationCount = 0;
+    try {
+      if (\Drupal::hasService('myeventlane_donations.service')) {
+        $donationService = \Drupal::service('myeventlane_donations.service');
+        $donationStats = $donationService->getEventDonationStats($eventId);
+        $donationTotal = $donationStats['total'] ?? 0;
+        $donationCount = $donationStats['count'] ?? 0;
+      }
+    }
+    catch (\Exception) {
+      // Donations module may not be available.
+    }
+
     return [
       'attendee_count' => (int) $attendeeCount,
+      'rsvp_count' => $rsvpCount,
+      'waitlist_count' => $waitlistCount,
       'revenue' => $revenue,
+      'donation_total' => $donationTotal,
+      'donation_count' => $donationCount,
       'mode' => $mode,
+      'waitlist_analytics' => $waitlistAnalytics,
+      'rsvp_view_url' => $rsvpViewUrl,
+      'rsvp_export_url' => $rsvpExportUrl,
+      'attendee_view_url' => $attendeeViewUrl,
+      'attendee_export_url' => $attendeeExportUrl,
     ];
   }
 
@@ -142,6 +262,9 @@ final class VendorDashboardController extends ControllerBase {
       // Get attendee counts and revenue for this event.
       $stats = $this->getEventStats((int) $event->id());
 
+      // Get Boost status.
+      $boostStatus = $this->getBoostStatus($event);
+
       $eventData = [
         'id' => $event->id(),
         'title' => $event->label(),
@@ -150,8 +273,18 @@ final class VendorDashboardController extends ControllerBase {
         'start_date' => $startTime ? date('M j, Y', $startTime) : '',
         'start_time' => $startTime ? date('g:ia', $startTime) : '',
         'attendee_count' => $stats['attendee_count'],
+        'rsvp_count' => $stats['rsvp_count'] ?? 0,
+        'waitlist_count' => $stats['waitlist_count'] ?? 0,
         'revenue' => $stats['revenue'],
+        'donation_total' => $stats['donation_total'] ?? 0,
+        'donation_count' => $stats['donation_count'] ?? 0,
         'event_mode' => $stats['mode'],
+        'waitlist_analytics' => $stats['waitlist_analytics'] ?? NULL,
+        'boost_status' => $boostStatus,
+        'rsvp_view_url' => $stats['rsvp_view_url'] ?? NULL,
+        'rsvp_export_url' => $stats['rsvp_export_url'] ?? NULL,
+        'attendee_view_url' => $stats['attendee_view_url'] ?? NULL,
+        'attendee_export_url' => $stats['attendee_export_url'] ?? NULL,
       ];
 
       // Categorize events: upcoming if start time is in the future, otherwise past.
@@ -168,16 +301,52 @@ final class VendorDashboardController extends ControllerBase {
     $quickLinks = [
       [
         'title' => $this->t('Create Event'),
-        'url' => Url::fromRoute('node.add', ['node_type' => 'event'])->toString(),
+        // Use the vendor gateway so creation flows to the vendor edit journey.
+        'url' => Url::fromRoute('myeventlane_vendor.create_event_gateway')->toString(),
         'icon' => 'add',
       ],
     ];
+
+    // Add analytics link if module is available.
+    try {
+      $analyticsUrl = Url::fromRoute('myeventlane_analytics.dashboard');
+      $quickLinks[] = [
+        'title' => $this->t('View Analytics'),
+        'url' => $analyticsUrl->toString(),
+        'icon' => 'analytics',
+      ];
+    }
+    catch (\Exception) {
+      // Analytics module not available.
+    }
+
+    // Get Stripe connection status.
+    $stripeStatus = $this->getStripeStatus();
+    
+    // Add Stripe Connect links to quick actions.
+    if ($stripeStatus) {
+      if (!$stripeStatus['connected'] && $stripeStatus['connect_url']) {
+        $quickLinks[] = [
+          'title' => $this->t('Connect Stripe'),
+          'url' => $stripeStatus['connect_url'],
+          'icon' => 'payment',
+        ];
+      }
+      if ($stripeStatus['connected'] && $stripeStatus['manage_url']) {
+        $quickLinks[] = [
+          'title' => $this->t('Manage Stripe Account'),
+          'url' => $stripeStatus['manage_url'],
+          'icon' => 'settings',
+        ];
+      }
+    }
 
     return [
       '#theme' => 'myeventlane_vendor_dashboard',
       '#upcoming_events' => $upcomingEvents,
       '#past_events' => $pastEvents,
       '#quick_links' => $quickLinks,
+      '#stripe_status' => $stripeStatus,
       '#welcome_message' => $this->t('Welcome back, @name. Here is an overview of your events.', [
         '@name' => $currentUser->getDisplayName(),
       ]),
@@ -189,6 +358,183 @@ final class VendorDashboardController extends ControllerBase {
         'tags' => ['node_list', 'user:' . $currentUser->id()],
         'max-age' => 300,
       ],
+    ];
+  }
+
+  /**
+   * Gets Stripe connection status for the current user's store.
+   *
+   * @return array
+   *   Array with 'connected', 'status', 'account_id', 'connect_url', 'manage_url'.
+   */
+  private function getStripeStatus(): array {
+    $currentUser = $this->currentUser();
+    $userId = (int) $currentUser->id();
+
+    if ($userId === 0) {
+      return [
+        'connected' => FALSE,
+        'status' => 'unconnected',
+        'status_label' => $this->t('Not Connected'),
+        'status_message' => $this->t('Connect your Stripe account to start accepting payments.'),
+        'account_id' => NULL,
+        'connect_url' => NULL,
+        'manage_url' => NULL,
+      ];
+    }
+
+    // Find store for this user.
+    $storeStorage = $this->entityTypeManager()->getStorage('commerce_store');
+    $storeIds = $storeStorage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('uid', $userId)
+      ->range(0, 1)
+      ->execute();
+
+    if (empty($storeIds)) {
+      return [
+        'connected' => FALSE,
+        'status' => 'unconnected',
+        'account_id' => NULL,
+        'connect_url' => Url::fromRoute('myeventlane_vendor.stripe_connect')->toString(),
+        'manage_url' => NULL,
+      ];
+    }
+
+    $store = $storeStorage->load(reset($storeIds));
+    if (!$store) {
+      return [
+        'connected' => FALSE,
+        'status' => 'unconnected',
+        'account_id' => NULL,
+        'connect_url' => Url::fromRoute('myeventlane_vendor.stripe_connect')->toString(),
+        'manage_url' => NULL,
+      ];
+    }
+
+    // Check for Stripe account ID.
+    $accountId = NULL;
+    $status = 'unconnected';
+    $connected = FALSE;
+
+    if ($store->hasField('field_stripe_account_id') && !$store->get('field_stripe_account_id')->isEmpty()) {
+      $accountId = $store->get('field_stripe_account_id')->value;
+    }
+
+    // Check charges enabled status - if charges are enabled, account is functional.
+    $chargesEnabled = FALSE;
+    if ($store->hasField('field_stripe_charges_enabled') && !$store->get('field_stripe_charges_enabled')->isEmpty()) {
+      $chargesEnabled = (bool) $store->get('field_stripe_charges_enabled')->value;
+    }
+
+    // Determine status based on available fields.
+    if ($store->hasField('field_stripe_status') && !$store->get('field_stripe_status')->isEmpty()) {
+      $status = $store->get('field_stripe_status')->value;
+    }
+    elseif ($chargesEnabled) {
+      // If charges are enabled, account is connected and functional.
+      $status = 'complete';
+      $connected = TRUE;
+    }
+    elseif ($store->hasField('field_stripe_connected') && !$store->get('field_stripe_connected')->isEmpty()) {
+      $connected = (bool) $store->get('field_stripe_connected')->value;
+      $status = $connected ? 'complete' : 'pending';
+    }
+    elseif (!empty($accountId)) {
+      // Account ID exists but no status info - assume pending.
+      $status = 'pending';
+    }
+
+    // Override: if charges are enabled, mark as connected regardless of other flags.
+    if ($chargesEnabled) {
+      $connected = TRUE;
+      $status = 'complete';
+    }
+    elseif ($status === 'complete') {
+      $connected = TRUE;
+    }
+
+    // Build status labels and messages.
+    $statusLabel = $this->t('Not Connected');
+    $statusMessage = $this->t('Connect your Stripe account to start accepting payments.');
+
+    if ($connected) {
+      $statusLabel = $this->t('Connected');
+      $statusMessage = $this->t('Your Stripe account is active and ready to accept payments.');
+    }
+    elseif ($status === 'pending') {
+      $statusLabel = $this->t('Pending');
+      $statusMessage = $this->t('Your Stripe account is pending verification. Complete onboarding to start accepting payments.');
+    }
+
+    return [
+      'connected' => $connected,
+      'status' => $status,
+      'status_label' => $statusLabel,
+      'status_message' => $statusMessage,
+      'account_id' => $accountId,
+      'connect_url' => Url::fromRoute('myeventlane_vendor.stripe_connect')->toString(),
+      'manage_url' => !empty($accountId) ? Url::fromRoute('myeventlane_vendor.stripe_manage')->toString() : NULL,
+    ];
+  }
+
+  /**
+   * Gets Boost status for an event.
+   *
+   * @param \Drupal\node\NodeInterface $event
+   *   The event node.
+   *
+   * @return array
+   *   Array with 'is_boosted', 'expires_date', 'boost_url', 'can_boost'.
+   */
+  private function getBoostStatus(\Drupal\node\NodeInterface $event): array {
+    if (!$this->boostManager) {
+      return [
+        'is_boosted' => FALSE,
+        'expires_date' => NULL,
+        'boost_url' => NULL,
+        'can_boost' => FALSE,
+      ];
+    }
+
+    $isBoosted = $this->boostManager->isBoosted($event);
+    $expiresDate = NULL;
+    $canBoost = TRUE;
+
+    if ($isBoosted && $event->hasField('field_promo_expires') && !$event->get('field_promo_expires')->isEmpty()) {
+      $expiresValue = $event->get('field_promo_expires')->value;
+      if ($expiresValue) {
+        try {
+          $expires = new \DateTimeImmutable($expiresValue, new \DateTimeZone('UTC'));
+          $expiresDate = $expires->format('M j, Y');
+        }
+        catch (\Exception) {
+          // Invalid date.
+        }
+      }
+    }
+
+    // Check if event is expired (boost ended).
+    $isExpired = FALSE;
+    if ($event->hasField('field_promoted') && (bool) $event->get('field_promoted')->value) {
+      if ($expiresValue = $event->get('field_promo_expires')->value ?? NULL) {
+        try {
+          $expires = new \DateTimeImmutable($expiresValue, new \DateTimeZone('UTC'));
+          $now = new \DateTimeImmutable('@' . $this->time->getRequestTime());
+          $isExpired = $expires <= $now;
+        }
+        catch (\Exception) {
+          // Invalid date.
+        }
+      }
+    }
+
+    return [
+      'is_boosted' => $isBoosted,
+      'is_expired' => $isExpired,
+      'expires_date' => $expiresDate,
+      'boost_url' => Url::fromRoute('myeventlane_boost.boost_page', ['node' => $event->id()])->toString(),
+      'can_boost' => $canBoost,
     ];
   }
 
