@@ -65,6 +65,20 @@
           <span class="sidebar-metric__label">{{ 'Upcoming Events'|t }}</span>
           <span class="sidebar-metric__value">{{ sidebar_metrics.upcoming_events }}</span>
         </div>
+        {% if sidebar_metrics.total_donations is defined and sidebar_metrics.total_donations > 0 %}
+          <div class="sidebar-metric">
+            <span class="sidebar-metric__label">{{ 'Total Donations'|t }}</span>
+            <span class="sidebar-metric__value">${{ sidebar_metrics.total_donations|number_format(2) }}</span>
+          </div>
+          <div class="sidebar-metric">
+            <span class="sidebar-metric__label">{{ 'Platform Donations'|t }}</span>
+            <span class="sidebar-metric__value">${{ sidebar_metrics.platform_donation_total|default(0)|number_format(2) }}</span>
+          </div>
+          <div class="sidebar-metric">
+            <span class="sidebar-metric__label">{{ 'RSVP Donations'|t }}</span>
+            <span class="sidebar-metric__value">${{ sidebar_metrics.rsvp_donation_total|default(0)|number_format(2) }}</span>
+          </div>
+        {% endif %}
       </div>
     {% endif %}
 
@@ -382,6 +396,7 @@
                 <th>{{ 'Vendor'|t }}</th>
                 <th>{{ 'Date'|t }}</th>
                 <th>{{ 'Revenue'|t }}</th>
+                <th>{{ 'Donations'|t }}</th>
                 <th>{{ 'Tickets'|t }}</th>
                 <th>{{ 'RSVPs'|t }}</th>
                 <th>{{ 'Attendees'|t }}</th>
@@ -403,6 +418,18 @@
                   </td>
                   <td>{{ event.event_date }}</td>
                   <td class="transaction-amount">${{ event.revenue|number_format(2) }}</td>
+                  <td>
+                    {% if event.donation_total is defined and event.donation_total > 0 %}
+                      <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <strong class="transaction-amount">${{ event.donation_total|number_format(2) }}</strong>
+                        {% if event.donation_count is defined and event.donation_count > 0 %}
+                          <span style="font-size: 0.875rem; color: #666;">{{ event.donation_count }} {{ 'donation'|t }}{% if event.donation_count != 1 %}s{% endif %}</span>
+                        {% endif %}
+                      </div>
+                    {% else %}
+                      <span style="color: #999;">$0.00</span>
+                    {% endif %}
+                  </td>
                   <td>{{ event.tickets_sold }}</td>
                   <td>{{ event.rsvps }}</td>
                   <td>{{ event.attendees }}</td>
@@ -427,6 +454,7 @@
                 <th>{{ 'Events'|t }}</th>
                 <th>{{ 'Published'|t }}</th>
                 <th>{{ 'Total Revenue'|t }}</th>
+                <th>{{ 'Donations'|t }}</th>
                 <th>{{ 'Platform Fees'|t }}</th>
                 <th>{{ 'Net Revenue'|t }}</th>
                 <th>{{ 'Tickets Sold'|t }}</th>
@@ -443,6 +471,18 @@
                   <td>{{ vendor.event_count }}</td>
                   <td>{{ vendor.published_events }}</td>
                   <td class="transaction-amount">${{ vendor.total_revenue|number_format(2) }}</td>
+                  <td>
+                    {% if vendor.donation_total is defined and vendor.donation_total > 0 %}
+                      <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <strong class="transaction-amount">${{ vendor.donation_total|number_format(2) }}</strong>
+                        {% if vendor.donation_count is defined and vendor.donation_count > 0 %}
+                          <span style="font-size: 0.875rem; color: #666;">{{ vendor.donation_count }} {{ 'donation'|t }}{% if vendor.donation_count != 1 %}s{% endif %}</span>
+                        {% endif %}
+                      </div>
+                    {% else %}
+                      <span style="color: #999;">$0.00</span>
+                    {% endif %}
+                  </td>
                   <td class="transaction-amount">${{ vendor.platform_fees|number_format(2) }}</td>
                   <td class="transaction-amount"><strong>${{ vendor.net_revenue|number_format(2) }}</strong></td>
                   <td>{{ vendor.tickets_sold }}</td>

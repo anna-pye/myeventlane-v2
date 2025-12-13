@@ -30,3 +30,4 @@ myeventlane_donations.settings:
     require_stripe_connected_for_attendee_donations:
       type: boolean
       label: 'Require Stripe Connect for attendee donations'
+

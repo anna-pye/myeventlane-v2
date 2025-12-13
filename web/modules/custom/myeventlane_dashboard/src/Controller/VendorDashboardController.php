@@ -307,6 +307,19 @@ final class VendorDashboardController extends ControllerBase {
       ],
     ];
 
+    // Add donations link if donations module is available.
+    try {
+      $donationsUrl = Url::fromRoute('myeventlane_donations.vendor_list');
+      $quickLinks[] = [
+        'title' => $this->t('View Donations'),
+        'url' => $donationsUrl->toString(),
+        'icon' => 'donations',
+      ];
+    }
+    catch (\Exception) {
+      // Donations module may not be available.
+    }
+
     // Add analytics link if module is available.
     try {
       $analyticsUrl = Url::fromRoute('myeventlane_analytics.dashboard');

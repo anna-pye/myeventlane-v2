@@ -3,3 +3,4 @@ administer myeventlane donations:
   title: 'Administer donation settings'
   description: 'Configure donation settings, view reports, and export donation data.'
   restrict access: TRUE
+

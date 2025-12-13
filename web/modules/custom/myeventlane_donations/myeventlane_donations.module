@@ -30,5 +30,15 @@ function myeventlane_donations_theme(array $existing, string $type, string $them
       ],
       'template' => 'myeventlane-donation-report',
     ],
+    'myeventlane_donation_vendor_list' => [
+      'variables' => [
+        'events' => [],
+        'total_donations' => 0,
+        'total_count' => 0,
+        'average_donation' => 0,
+      ],
+      'template' => 'myeventlane-donation-vendor-list',
+    ],
   ];
 }
+

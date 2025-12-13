@@ -196,6 +196,20 @@ final class AdminDashboardController extends ControllerBase {
       'icon' => 'user',
     ];
 
+    // Donation reports.
+    try {
+      $donationUrl = Url::fromRoute('myeventlane_donations.admin_report');
+      $links[] = [
+        'title' => $this->t('Donation Reports'),
+        'url' => $donationUrl->toString(),
+        'description' => $this->t('View platform and RSVP donation analytics.'),
+        'icon' => 'donations',
+      ];
+    }
+    catch (\Exception) {
+      // Donations module may not be available.
+    }
+
     // Reports.
     $links[] = [
       'title' => $this->t('Reports'),
@@ -293,8 +307,9 @@ final class AdminDashboardController extends ControllerBase {
    */
   protected function getRevenueKpis(): array {
     $metrics = $this->getPlatformMetrics();
+    $sidebarMetrics = $this->getSidebarMetrics($metrics);
 
-    return [
+    $kpis = [
       [
         'label' => 'Total Revenue',
         'value' => '$' . number_format($metrics['total_revenue'], 2),
@@ -332,6 +347,23 @@ final class AdminDashboardController extends ControllerBase {
         ],
       ],
     ];
+
+    // Add donation KPIs if available.
+    if (isset($sidebarMetrics['total_donations']) && $sidebarMetrics['total_donations'] > 0) {
+      $kpis[] = [
+        'label' => 'Total Donations',
+        'value' => '$' . number_format($sidebarMetrics['total_donations'], 2),
+        'icon' => 'donations',
+        'color' => 'orange',
+        'delta' => [
+          'value' => (string) ($sidebarMetrics['platform_donation_count'] + $sidebarMetrics['rsvp_donation_count']),
+          'label' => 'donations',
+          'positive' => TRUE,
+        ],
+      ];
+    }
+
+    return $kpis;
   }
 
   /**
@@ -576,6 +608,66 @@ final class AdminDashboardController extends ControllerBase {
         // Event field may not exist.
       }
 
+      // Get donation metrics.
+      $platform_donation_total = 0.0;
+      $rsvp_donation_total = 0.0;
+      $platform_donation_count = 0;
+      $rsvp_donation_count = 0;
+      try {
+        // Check if donations module is enabled and service exists.
+        if ($this->moduleHandler()->moduleExists('myeventlane_donations') && \Drupal::hasService('myeventlane_donations.service')) {
+          try {
+            $donationService = \Drupal::service('myeventlane_donations.service');
+            
+            // Get all platform donations.
+            $order_storage = $this->entityTypeManager()->getStorage('commerce_order');
+            $platform_order_ids = $order_storage->getQuery()
+              ->accessCheck(FALSE)
+              ->condition('type', 'platform_donation')
+              ->condition('state', 'completed')
+              ->execute();
+            
+            if (!empty($platform_order_ids)) {
+              $platform_orders = $order_storage->loadMultiple($platform_order_ids);
+              foreach ($platform_orders as $order) {
+                $totalPrice = $order->getTotalPrice();
+                if ($totalPrice) {
+                  $platform_donation_total += (float) $totalPrice->getNumber();
+                  $platform_donation_count++;
+                }
+              }
+            }
+            
+            // Get all RSVP donations.
+            $rsvp_order_ids = $order_storage->getQuery()
+              ->accessCheck(FALSE)
+              ->condition('type', 'rsvp_donation')
+              ->condition('state', 'completed')
+              ->execute();
+            
+            if (!empty($rsvp_order_ids)) {
+              $rsvp_orders = $order_storage->loadMultiple($rsvp_order_ids);
+              foreach ($rsvp_orders as $order) {
+                $totalPrice = $order->getTotalPrice();
+                if ($totalPrice) {
+                  $rsvp_donation_total += (float) $totalPrice->getNumber();
+                  $rsvp_donation_count++;
+                }
+              }
+            }
+          }
+          catch (\Exception $serviceException) {
+            // Service exists but can't be instantiated - log and continue.
+            $this->getLogger('myeventlane_admin_dashboard')->warning('Donation service unavailable: @message', [
+              '@message' => $serviceException->getMessage(),
+            ]);
+          }
+        }
+      }
+      catch (\Exception $e) {
+        // Donations module may not be available.
+      }
+
       return [
         'total_rsvps' => $rsvp_count,
         'confirmed_rsvps' => $rsvp_confirmed,
@@ -588,6 +680,11 @@ final class AdminDashboardController extends ControllerBase {
         'total_orders' => $platform_metrics['total_orders'],
         'total_revenue' => $platform_metrics['total_revenue'],
         'platform_fees' => $platform_metrics['platform_fees'],
+        'platform_donation_total' => $platform_donation_total,
+        'rsvp_donation_total' => $rsvp_donation_total,
+        'platform_donation_count' => $platform_donation_count,
+        'rsvp_donation_count' => $rsvp_donation_count,
+        'total_donations' => $platform_donation_total + $rsvp_donation_total,
       ];
     }
     catch (\Exception $e) {
@@ -914,6 +1011,26 @@ final class AdminDashboardController extends ControllerBase {
           // Attendee module may not be available.
         }
 
+        // Get donation metrics for this event.
+        $donation_total = 0.0;
+        $donation_count = 0;
+        try {
+          if ($this->moduleHandler()->moduleExists('myeventlane_donations') && \Drupal::hasService('myeventlane_donations.service')) {
+            try {
+              $donationService = \Drupal::service('myeventlane_donations.service');
+              $donationStats = $donationService->getEventDonationStats($event_id);
+              $donation_total = $donationStats['total'] ?? 0;
+              $donation_count = $donationStats['count'] ?? 0;
+            }
+            catch (\Exception $serviceException) {
+              // Service exists but can't be instantiated - skip donation stats.
+            }
+          }
+        }
+        catch (\Exception $e) {
+          // Donations module may not be available.
+        }
+
         $breakdown[] = [
           'event_id' => $event_id,
           'event_title' => $event->label(),
@@ -925,6 +1042,8 @@ final class AdminDashboardController extends ControllerBase {
           'tickets_sold' => $tickets_sold,
           'rsvps' => $rsvp_count,
           'attendees' => $attendee_count,
+          'donation_total' => $donation_total,
+          'donation_count' => $donation_count,
           'total_participants' => $tickets_sold + $attendee_count + $rsvp_count,
           'created' => $event->getCreatedTime(),
         ];
@@ -984,6 +1103,8 @@ final class AdminDashboardController extends ControllerBase {
         $revenue = 0.0;
         $tickets_sold = 0;
         $total_orders = 0;
+        $donation_total = 0.0;
+        $donation_count = 0;
 
         if (!empty($event_ids)) {
           $order_item_storage = $this->entityTypeManager()->getStorage('commerce_order_item');
@@ -1016,6 +1137,26 @@ final class AdminDashboardController extends ControllerBase {
               continue;
             }
           }
+
+          // Get donation totals for vendor's events.
+          try {
+            if ($this->moduleHandler()->moduleExists('myeventlane_donations') && \Drupal::hasService('myeventlane_donations.service')) {
+              try {
+                $donationService = \Drupal::service('myeventlane_donations.service');
+                foreach ($event_ids as $eventId) {
+                  $donationStats = $donationService->getEventDonationStats((int) $eventId);
+                  $donation_total += $donationStats['total'] ?? 0;
+                  $donation_count += $donationStats['count'] ?? 0;
+                }
+              }
+              catch (\Exception $serviceException) {
+                // Service exists but can't be instantiated - skip donation stats.
+              }
+            }
+          }
+          catch (\Exception $e) {
+            // Donations module may not be available.
+          }
         }
 
         // Get vendor users count.
@@ -1035,6 +1176,8 @@ final class AdminDashboardController extends ControllerBase {
           'net_revenue' => $revenue * 0.95,
           'tickets_sold' => $tickets_sold,
           'total_orders' => $total_orders,
+          'donation_total' => $donation_total,
+          'donation_count' => $donation_count,
           'user_count' => $user_count,
           'created' => $vendor->getCreatedTime(),
         ];
