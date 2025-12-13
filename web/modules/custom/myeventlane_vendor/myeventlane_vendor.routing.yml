@@ -42,12 +42,12 @@ entity.myeventlane_vendor.delete_form:
   options:
     _admin_route: TRUE
 
-# Vendor canonical (public) route.
+# Vendor canonical (public) route with analytics.
 entity.myeventlane_vendor.canonical:
   path: '/vendor/{myeventlane_vendor}'
   defaults:
-    _entity_view: 'myeventlane_vendor.full'
-    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title'
+    _controller: '\Drupal\myeventlane_vendor\Controller\VendorDetailController::view'
+    _title_callback: '\Drupal\myeventlane_vendor\Controller\VendorPublicController::title'
   requirements:
     _entity_access: 'myeventlane_vendor.view'
   options:
@@ -221,7 +221,7 @@ myeventlane_vendor.console.dashboard:
     _controller: 'myeventlane_vendor.controller.vendor_dashboard:dashboard'
     _title: 'Vendor dashboard'
   requirements:
-    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
 
 myeventlane_vendor.console.events:
   path: '/vendor/events'
@@ -229,7 +229,7 @@ myeventlane_vendor.console.events:
     _controller: 'myeventlane_vendor.controller.vendor_events:list'
     _title: 'Events'
   requirements:
-    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
 
 myeventlane_vendor.console.events_add:
   path: '/vendor/events/add'
@@ -237,7 +237,7 @@ myeventlane_vendor.console.events_add:
     _controller: 'myeventlane_vendor.controller.vendor_event_create:buildForm'
     _title: 'Create event'
   requirements:
-    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
 
 myeventlane_vendor.console.event_overview:
   path: '/vendor/events/{event}/overview'
@@ -245,7 +245,7 @@ myeventlane_vendor.console.event_overview:
     _controller: 'myeventlane_vendor.controller.vendor_event_overview:overview'
     _title: 'Event overview'
   requirements:
-    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
     event: '\d+'
   options:
     parameters:
@@ -260,7 +260,7 @@ myeventlane_vendor.console.event_tickets:
     _controller: 'myeventlane_vendor.controller.vendor_event_tickets:tickets'
     _title: 'Event tickets'
   requirements:
-    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
     event: '\d+'
   options:
     parameters:
@@ -275,7 +275,7 @@ myeventlane_vendor.console.event_rsvps:
     _controller: 'myeventlane_vendor.controller.vendor_event_rsvps:rsvps'
     _title: 'Event RSVPs'
   requirements:
-    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
     event: '\d+'
   options:
     parameters:
@@ -290,7 +290,7 @@ myeventlane_vendor.console.event_analytics:
     _controller: 'myeventlane_vendor.controller.vendor_event_analytics:analytics'
     _title: 'Event analytics'
   requirements:
-    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
     event: '\d+'
   options:
     parameters:
@@ -305,7 +305,7 @@ myeventlane_vendor.console.event_settings:
     _controller: 'myeventlane_vendor.controller.vendor_event_settings:settings'
     _title: 'Event settings'
   requirements:
-    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
     event: '\d+'
   options:
     parameters:
@@ -320,7 +320,7 @@ myeventlane_vendor.console.event_attendees:
     _controller: 'myeventlane_vendor.controller.vendor_event_attendees:attendees'
     _title: 'Event attendees'
   requirements:
-    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
     event: '\d+'
   options:
     parameters:
@@ -335,7 +335,7 @@ myeventlane_vendor.console.payouts:
     _controller: 'myeventlane_vendor.controller.vendor_payouts:payouts'
     _title: 'Payouts'
   requirements:
-    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
 
 myeventlane_vendor.console.boost:
   path: '/vendor/boost'
@@ -343,7 +343,7 @@ myeventlane_vendor.console.boost:
     _controller: 'myeventlane_vendor.controller.vendor_boost:boost'
     _title: 'Boost'
   requirements:
-    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
 
 myeventlane_vendor.console.audience:
   path: '/vendor/audience'
@@ -351,7 +351,7 @@ myeventlane_vendor.console.audience:
     _controller: 'myeventlane_vendor.controller.vendor_audience:audience'
     _title: 'Audience'
   requirements:
-    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
 
 myeventlane_vendor.console.settings:
   path: '/vendor/settings'
@@ -359,7 +359,7 @@ myeventlane_vendor.console.settings:
     _controller: 'myeventlane_vendor.controller.vendor_settings:settings'
     _title: 'Vendor settings'
   requirements:
-    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
 
 myeventlane_vendor.manage_event.design:
   path: '/vendor/event/{event}/design'

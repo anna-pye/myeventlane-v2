@@ -54,6 +54,53 @@ function myeventlane_vendor_theme_preprocess_page(array &$variables): void {
   // Set main site URL.
   $variables['page']['main_site_url'] = '/';
 
+  // Set admin portal URL for administrators.
+  $variables['page']['is_admin'] = FALSE;
+  $variables['page']['admin_portal_url'] = NULL;
+  if ($current_user->isAuthenticated()) {
+    $roles = $current_user->getRoles();
+    if (in_array('administrator', $roles) || $current_user->id() === 1) {
+      $variables['page']['is_admin'] = TRUE;
+      
+      // Build admin portal URL using Drupal's URL generator to ensure proper route.
+      try {
+        $admin_url = \Drupal\Core\Url::fromRoute('myeventlane_admin_dashboard.overview', [], ['absolute' => TRUE]);
+        $variables['page']['admin_portal_url'] = $admin_url->toString(TRUE)->getGeneratedUrl();
+      }
+      catch (\Exception $e) {
+        // If route doesn't exist or URL generation fails, try DomainDetector.
+        try {
+          if (\Drupal::hasService('myeventlane_core.domain_detector')) {
+            $domain_detector = \Drupal::service('myeventlane_core.domain_detector');
+            $variables['page']['admin_portal_url'] = $domain_detector->buildDomainUrl('/admin/myeventlane', 'admin');
+          }
+        }
+        catch (\Exception $e2) {
+          // Service not available, use fallback.
+        }
+        
+        // Fallback: use current request to build admin URL.
+        if (empty($variables['page']['admin_portal_url'])) {
+          $request = \Drupal::requestStack()->getCurrentRequest();
+          if ($request) {
+            $scheme = $request->getScheme();
+            $host = $request->getHost();
+            // Replace 'vendor.' with 'admin.' in hostname.
+            $host = preg_replace('/^vendor\./', 'admin.', $host);
+            if (!str_starts_with($host, 'admin.')) {
+              $host = 'admin.' . preg_replace('/^(admin|vendor)\./', '', $host);
+            }
+            $variables['page']['admin_portal_url'] = $scheme . '://' . $host . '/admin/myeventlane';
+          }
+          else {
+            // Final fallback: relative URL.
+            $variables['page']['admin_portal_url'] = '/admin/myeventlane';
+          }
+        }
+      }
+    }
+  }
+
   // Determine active section from route.
   $route_name = $route_match->getRouteName();
   $variables['page']['active_section'] = _myeventlane_vendor_theme_get_active_section($route_name);
@@ -64,6 +111,88 @@ function myeventlane_vendor_theme_preprocess_page(array &$variables): void {
     '#title' => t('Log out'),
     '#url' => \Drupal\Core\Url::fromRoute('user.logout'),
   ];
+
+  // Build user menu for header.
+  if ($current_user->isAuthenticated()) {
+    $user_menu_items = [];
+    
+    // User profile link.
+    $user_menu_items[] = [
+      '#type' => 'link',
+      '#title' => t('Profile'),
+      '#url' => \Drupal\Core\Url::fromRoute('entity.user.canonical', ['user' => $current_user->id()]),
+      '#attributes' => ['class' => ['user-menu__item']],
+    ];
+    
+    // Logout link.
+    $user_menu_items[] = [
+      '#type' => 'link',
+      '#title' => t('Log out'),
+      '#url' => \Drupal\Core\Url::fromRoute('user.logout'),
+      '#attributes' => ['class' => ['user-menu__item']],
+    ];
+    
+    $variables['page']['user_menu'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['user-menu']],
+      'user_info' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['user-menu__info']],
+        'initials' => [
+          '#markup' => '<span class="user-menu__initials">' . ($variables['page']['user_initials'] ?? 'U') . '</span>',
+        ],
+        'name' => [
+          '#markup' => '<span class="user-menu__name">' . ($variables['page']['user_name'] ?? 'User') . '</span>',
+        ],
+      ],
+      'dropdown' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['user-menu__dropdown']],
+        'items' => $user_menu_items,
+      ],
+    ];
+  }
+  else {
+    $variables['page']['user_menu'] = [];
+  }
+
+  // Build quick actions for header (Admin Portal button for admins, Create Event always).
+  $variables['page']['quick_actions'] = [];
+  
+  // Admin Portal button (for administrators).
+  if ($variables['page']['is_admin'] && $variables['page']['admin_portal_url']) {
+    $variables['page']['quick_actions'][] = [
+      '#type' => 'link',
+      '#title' => t('Admin Portal'),
+      '#url' => \Drupal\Core\Url::fromUri($variables['page']['admin_portal_url']),
+      '#attributes' => [
+        'class' => ['mel-btn', 'mel-btn--secondary', 'mel-header__action-btn'],
+      ],
+    ];
+  }
+  
+  // Create Event button (always shown for vendors/admins).
+  if ($current_user->isAuthenticated()) {
+    $variables['page']['quick_actions'][] = [
+      '#type' => 'link',
+      '#title' => t('+ Create Event'),
+      '#url' => \Drupal\Core\Url::fromRoute('myeventlane_vendor.create_event_gateway'),
+      '#attributes' => [
+        'class' => ['mel-btn', 'mel-btn--primary', 'mel-header__action-btn'],
+      ],
+    ];
+  }
+
+  // Wrap vendor settings form in console page template.
+  if ($route_name === 'myeventlane_vendor.console.settings' && isset($variables['page']['content']['vendor_profile_settings'])) {
+    $form = $variables['page']['content']['vendor_profile_settings'];
+    $variables['page']['content']['vendor_profile_settings'] = [
+      '#theme' => 'myeventlane_vendor_console_page',
+      '#title' => 'Settings',
+      '#body' => $form,
+      '#attached' => $form['#attached'] ?? [],
+    ];
+  }
 }
 
 /**

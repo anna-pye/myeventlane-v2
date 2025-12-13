@@ -11,3 +11,63 @@ services:
       - '@datetime.time'
       - '@date.formatter'
       - '@language_manager'
+
+  myeventlane_core.stripe:
+    class: Drupal\myeventlane_core\Service\StripeService
+    arguments:
+      - '@config.factory'
+      - '@entity_type.manager'
+      - '@logger.factory'
+
+  myeventlane_core.category_digest_generator:
+    class: Drupal\myeventlane_core\Service\CategoryDigestGenerator
+    arguments:
+      - '@entity_type.manager'
+      - '@plugin.manager.mail'
+      - '@renderer'
+      - '@flag'
+
+  myeventlane_core.category_digest_queue:
+    class: Drupal\myeventlane_core\Queue\CategoryDigestQueue
+    arguments:
+      - '@myeventlane_core.category_digest_generator'
+    tags:
+      - { name: queue_worker, queue_name: mel_category_digest, cron: 60 }
+
+  myeventlane_core.domain_detector:
+    class: Drupal\myeventlane_core\Service\DomainDetector
+    arguments:
+      - '@request_stack'
+      - '@config.factory'
+
+  myeventlane_core.vendor_domain_subscriber:
+    class: Drupal\myeventlane_core\EventSubscriber\VendorDomainSubscriber
+    arguments:
+      - '@myeventlane_core.domain_detector'
+      - '@current_route_match'
+      - '@current_user'
+      - '@config.factory'
+    tags:
+      - { name: event_subscriber }
+
+  myeventlane_core.vendor_theme_negotiator:
+    class: Drupal\myeventlane_core\Theme\VendorThemeNegotiator
+    arguments:
+      - '@myeventlane_core.domain_detector'
+    tags:
+      - { name: theme_negotiator, priority: 2000 }
+
+  myeventlane_core.admin_theme_negotiator:
+    class: Drupal\myeventlane_core\Theme\AdminThemeNegotiator
+    arguments:
+      - '@myeventlane_core.domain_detector'
+    tags:
+      - { name: theme_negotiator, priority: 2100 }
+
+  myeventlane_core.admin_domain_redirect_subscriber:
+    class: Drupal\myeventlane_core\EventSubscriber\AdminDomainRedirectSubscriber
+    arguments:
+      - '@myeventlane_core.domain_detector'
+    tags:
+      - { name: event_subscriber }
+

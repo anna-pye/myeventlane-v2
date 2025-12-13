@@ -3,3 +3,5 @@ myeventlane_rsvp.rsvp_action:
   title: 'RSVP Now'
   appears_on:
     - entity.node.canonical
+  route_parameters:
+    node: entity.node
