@@ -1,25 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\myeventlane_tickets\Controller;
 
+use Drupal\commerce_order\Entity\OrderItemInterface;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\myeventlane_tickets\Ticket\TicketPdfGenerator;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Controller for downloading ticket PDFs.
  */
-class TicketDownloadController extends ControllerBase {
+final class TicketDownloadController extends ControllerBase {
 
   /**
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * The entity type manager.
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
-   * @var \Drupal\myeventlane_tickets\Ticket\TicketPdfGenerator
+   * The PDF generator.
    */
-  protected $pdfGenerator;
+  protected TicketPdfGenerator $pdfGenerator;
 
   /**
    * {@inheritdoc}
@@ -32,23 +40,61 @@ class TicketDownloadController extends ControllerBase {
   }
 
   /**
+   * Ensures the current user can download for the given order item.
+   *
+   * This prevents insecure direct object reference (IDOR) issues where a user
+   * could download tickets/passes by guessing order item IDs.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
+   */
+  private function assertOrderItemDownloadAccess(OrderItemInterface $order_item, AccountInterface $account): void {
+    // Require login: these artifacts are tied to orders/attendees.
+    if (!$account->isAuthenticated()) {
+      throw new AccessDeniedHttpException();
+    }
+
+    // Allow privileged users.
+    if ($account->hasPermission('administer myeventlane tickets') || $account->hasPermission('administer commerce_order')) {
+      return;
+    }
+
+    $order = $order_item->getOrder();
+    if (!$order) {
+      throw new AccessDeniedHttpException();
+    }
+
+    // Only the purchasing customer can download their ticket.
+    if ((int) $order->getCustomerId() !== (int) $account->id()) {
+      throw new AccessDeniedHttpException();
+    }
+  }
+
+  /**
    * Download a ticket PDF.
    *
-   * @param int $order_item_id
+   * @param string $order_item_id
    *   The order item ID.
    *
    * @return \Symfony\Component\HttpFoundation\Response
    *   The PDF response.
    */
-  public function download(int $order_item_id): Response {
+  public function download(string $order_item_id): Response {
+    if (!ctype_digit($order_item_id)) {
+      throw new NotFoundHttpException();
+    }
+
+    $order_item_id_int = (int) $order_item_id;
     // Load the order item.
+    /** @var \Drupal\commerce_order\Entity\OrderItemInterface|null $orderItem */
     $orderItem = $this->entityTypeManager
       ->getStorage('commerce_order_item')
-      ->load($order_item_id);
+      ->load($order_item_id_int);
 
     if (!$orderItem) {
-      return new Response('Order item not found', 404);
+      throw new NotFoundHttpException();
     }
+
+    $this->assertOrderItemDownloadAccess($orderItem, $this->currentUser());
 
     // Get event from order item.
     $event = NULL;
@@ -65,14 +111,17 @@ class TicketDownloadController extends ControllerBase {
     }
 
     if (!$event) {
-      return new Response('Event not found', 404);
+      throw new NotFoundHttpException();
     }
 
     // Try to find the associated event attendee record first.
     $attendeeStorage = $this->entityTypeManager->getStorage('event_attendee');
     $attendeeIds = $attendeeStorage->getQuery()
+      // Access is verified above via order ownership. We bypass access checks
+      // here because the attendee entity is typically accessible to event
+      // owners/admins, while customers still need to download their ticket.
       ->accessCheck(FALSE)
-      ->condition('order_item', $order_item_id)
+      ->condition('order_item', $order_item_id_int)
       ->range(0, 1)
       ->execute();
 
@@ -119,7 +168,7 @@ class TicketDownloadController extends ControllerBase {
 
     $response = new Response($pdf_data);
     $response->headers->set('Content-Type', 'application/pdf');
-    $filename = $ticketCode ? "ticket-{$ticketCode}.pdf" : "ticket-{$order_item_id}.pdf";
+    $filename = $ticketCode ? "ticket-{$ticketCode}.pdf" : "ticket-{$order_item_id_int}.pdf";
     $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
 
     return $response;
