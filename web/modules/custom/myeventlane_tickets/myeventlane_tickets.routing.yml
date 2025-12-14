@@ -17,3 +17,4 @@ myeventlane_tickets.download_pdf:
     _title: 'Download Ticket PDF'
   requirements:
     _permission: 'access content'
+    order_item_id: '\d+'

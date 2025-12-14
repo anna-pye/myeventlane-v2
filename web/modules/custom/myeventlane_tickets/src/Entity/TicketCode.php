@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\myeventlane_tickets\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Stores unique ticket verification codes.
@@ -21,25 +24,30 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   }
  * )
  */
-class TicketCode extends ContentEntityBase {
+final class TicketCode extends ContentEntityBase {
 
-  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+  /**
+   * {@inheritdoc}
+   */
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type): array {
+
+    $fields = parent::baseFieldDefinitions($entity_type);
 
     $fields['id'] = BaseFieldDefinition::create('integer')
-      ->setLabel('ID')
+      ->setLabel(new TranslatableMarkup('ID'))
       ->setReadOnly(TRUE);
 
     $fields['code'] = BaseFieldDefinition::create('string')
-      ->setLabel('Code')
+      ->setLabel(new TranslatableMarkup('Code'))
       ->setRequired(TRUE);
 
     $fields['order_item_id'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel('Order Item')
+      ->setLabel(new TranslatableMarkup('Order item'))
       ->setSetting('target_type', 'commerce_order_item')
       ->setRequired(TRUE);
 
     $fields['event_id'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel('Event')
+      ->setLabel(new TranslatableMarkup('Event'))
       ->setSetting('target_type', 'node')
       ->setRequired(TRUE);
 
