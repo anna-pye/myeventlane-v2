@@ -335,7 +335,7 @@
           {% if event_type is defined %}
             {% if event_type == 'rsvp' %}
               <div class="mel-event-price mel-event-price--free">
-                <span class="mel-event-price-value">Free Event</span>
+                <span class="mel-event-price-value">{{ 'RSVP'|t }}</span>
               </div>
             {% elseif event_type == 'paid' or event_type == 'both' %}
               {% if node.field_event_price is defined and node.field_event_price.value is not empty %}
@@ -354,7 +354,7 @@
               </div>
             {% else %}
               <div class="mel-event-price mel-event-price--free">
-                <span class="mel-event-price-value">Free</span>
+                <span class="mel-event-price-value">{{ 'RSVP'|t }}</span>
               </div>
             {% endif %}
           {% else %}
@@ -362,7 +362,7 @@
             {% set raw_type = node.field_event_type.value|default('rsvp') %}
             {% if raw_type == 'rsvp' %}
               <div class="mel-event-price mel-event-price--free">
-                <span class="mel-event-price-value">Free Event</span>
+                <span class="mel-event-price-value">{{ 'RSVP'|t }}</span>
               </div>
             {% elseif raw_type == 'paid' or raw_type == 'both' %}
               <div class="mel-event-price">
@@ -370,7 +370,7 @@
               </div>
             {% else %}
               <div class="mel-event-price mel-event-price--free">
-                <span class="mel-event-price-value">Free</span>
+                <span class="mel-event-price-value">{{ 'RSVP'|t }}</span>
               </div>
             {% endif %}
           {% endif %}

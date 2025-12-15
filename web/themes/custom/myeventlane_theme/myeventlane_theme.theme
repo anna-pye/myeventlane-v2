@@ -147,6 +147,66 @@ function myeventlane_theme_preprocess_page(array &$variables): void {
     } else {
       $variables['new_events'] = NULL;
     }
+    
+    // Render value proposition block
+    try {
+      $block_manager = \Drupal::service('plugin.manager.block');
+      $value_prop_block = $block_manager->createInstance('myeventlane_value_proposition', []);
+      if ($value_prop_block && $value_prop_block->access(\Drupal::currentUser())) {
+        $build = $value_prop_block->build();
+        if (!empty($build)) {
+          $variables['value_proposition'] = $build;
+        }
+      }
+    } catch (\Exception $e) {
+      // Block not available, continue without it
+      $variables['value_proposition'] = NULL;
+    }
+    
+    // Add hero positioning variables (for platform messaging)
+    $current_user = \Drupal::currentUser();
+    $is_logged_in = $current_user->isAuthenticated();
+    
+    // Determine create event URL based on login status
+    $create_event_url = '/create-event';
+    if ($is_logged_in) {
+      // Check if user has vendor - if so, route to dashboard, otherwise to /node/add/event
+      $uid = (int) $current_user->id();
+      $has_vendor = FALSE;
+      if (\Drupal::moduleHandler()->moduleExists('myeventlane_vendor')) {
+        $vendor_storage = \Drupal::entityTypeManager()->getStorage('myeventlane_vendor');
+        $vendor_ids = $vendor_storage->getQuery()
+          ->accessCheck(TRUE)
+          ->condition('uid', $uid)
+          ->range(0, 1)
+          ->execute();
+        if (empty($vendor_ids)) {
+          $vendor_ids = $vendor_storage->getQuery()
+            ->accessCheck(TRUE)
+            ->condition('field_vendor_users', $uid)
+            ->range(0, 1)
+            ->execute();
+        }
+        $has_vendor = !empty($vendor_ids);
+      }
+      $create_event_url = $has_vendor ? '/vendor/dashboard' : '/node/add/event';
+    }
+    
+    $variables['hero_headline'] = t('Your lane to great events.');
+    $variables['hero_subheading'] = t('Create, share, and celebrate local stories.');
+    $variables['hero_badges'] = [
+      t('Free to list'),
+      t('Community-first'),
+      t('Run your show, your way'),
+    ];
+    $variables['hero_primary_cta'] = [
+      'text' => t('Create your event'),
+      'url' => $create_event_url,
+    ];
+    $variables['hero_secondary_cta'] = [
+      'text' => t('Explore events'),
+      'url' => '/events',
+    ];
   }
 }
 
