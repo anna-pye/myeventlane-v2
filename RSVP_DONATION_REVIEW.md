@@ -134,3 +134,4 @@ After applying fixes, test by:
 4. Verifying the donation section appears in the RSVP form
 5. Testing donation submission flow
 
+

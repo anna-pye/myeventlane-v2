@@ -1,0 +1,3 @@
+web/themes/custom/myeventlane_theme/myeventlane_theme.info.yml
+web/themes/custom/myeventlane_vendor_theme/myeventlane_vendor_theme.info.yml
+web/themes/custom/myeventlane_admin/myeventlane_admin.info.yml

@@ -1,0 +1,592 @@
+{
+    "address": {
+        "package": "Field types",
+        "project": "address",
+        "display_name": "Address (address)",
+        "name": "address",
+        "type": "module",
+        "path": "modules/contrib/address",
+        "status": "Enabled",
+        "version": "2.0.4"
+    },
+    "admin_toolbar": {
+        "package": "Administration",
+        "project": "admin_toolbar",
+        "display_name": "Admin Toolbar (admin_toolbar)",
+        "name": "admin_toolbar",
+        "type": "module",
+        "path": "modules/contrib/admin_toolbar",
+        "status": "Enabled",
+        "version": "3.6.2"
+    },
+    "admin_toolbar_search": {
+        "package": "Administration",
+        "project": "admin_toolbar",
+        "display_name": "Admin Toolbar Search (admin_toolbar_search)",
+        "name": "admin_toolbar_search",
+        "type": "module",
+        "path": "modules/contrib/admin_toolbar/admin_toolbar_search",
+        "status": "Enabled",
+        "version": "3.6.2"
+    },
+    "admin_toolbar_tools": {
+        "package": "Administration",
+        "project": "admin_toolbar",
+        "display_name": "Admin Toolbar Extra Tools (admin_toolbar_tools)",
+        "name": "admin_toolbar_tools",
+        "type": "module",
+        "path": "modules/contrib/admin_toolbar/admin_toolbar_tools",
+        "status": "Enabled",
+        "version": "3.6.2"
+    },
+    "commerce": {
+        "package": "Commerce",
+        "project": "commerce",
+        "display_name": "Commerce (commerce)",
+        "name": "commerce",
+        "type": "module",
+        "path": "modules/contrib/commerce",
+        "status": "Enabled",
+        "version": "3.2.0"
+    },
+    "commerce_cart": {
+        "package": "Commerce",
+        "project": "commerce",
+        "display_name": "Commerce Cart (commerce_cart)",
+        "name": "commerce_cart",
+        "type": "module",
+        "path": "modules/contrib/commerce/modules/cart",
+        "status": "Enabled",
+        "version": "3.2.0"
+    },
+    "commerce_checkout": {
+        "package": "Commerce",
+        "project": "commerce",
+        "display_name": "Commerce Checkout (commerce_checkout)",
+        "name": "commerce_checkout",
+        "type": "module",
+        "path": "modules/contrib/commerce/modules/checkout",
+        "status": "Enabled",
+        "version": "3.2.0"
+    },
+    "commerce_log": {
+        "package": "Commerce",
+        "project": "commerce",
+        "display_name": "Commerce Log (commerce_log)",
+        "name": "commerce_log",
+        "type": "module",
+        "path": "modules/contrib/commerce/modules/log",
+        "status": "Enabled",
+        "version": "3.2.0"
+    },
+    "commerce_number_pattern": {
+        "package": "Commerce",
+        "project": "commerce",
+        "display_name": "Commerce Number Pattern (commerce_number_pattern)",
+        "name": "commerce_number_pattern",
+        "type": "module",
+        "path": "modules/contrib/commerce/modules/number_pattern",
+        "status": "Enabled",
+        "version": "3.2.0"
+    },
+    "commerce_order": {
+        "package": "Commerce",
+        "project": "commerce",
+        "display_name": "Commerce Order (commerce_order)",
+        "name": "commerce_order",
+        "type": "module",
+        "path": "modules/contrib/commerce/modules/order",
+        "status": "Enabled",
+        "version": "3.2.0"
+    },
+    "commerce_payment": {
+        "package": "Commerce",
+        "project": "commerce",
+        "display_name": "Commerce Payment (commerce_payment)",
+        "name": "commerce_payment",
+        "type": "module",
+        "path": "modules/contrib/commerce/modules/payment",
+        "status": "Enabled",
+        "version": "3.2.0"
+    },
+    "commerce_price": {
+        "package": "Commerce",
+        "project": "commerce",
+        "display_name": "Commerce Price (commerce_price)",
+        "name": "commerce_price",
+        "type": "module",
+        "path": "modules/contrib/commerce/modules/price",
+        "status": "Enabled",
+        "version": "3.2.0"
+    },
+    "commerce_product": {
+        "package": "Commerce",
+        "project": "commerce",
+        "display_name": "Commerce Product (commerce_product)",
+        "name": "commerce_product",
+        "type": "module",
+        "path": "modules/contrib/commerce/modules/product",
+        "status": "Enabled",
+        "version": "3.2.0"
+    },
+    "commerce_promotion": {
+        "package": "Commerce",
+        "project": "commerce",
+        "display_name": "Commerce Promotion (commerce_promotion)",
+        "name": "commerce_promotion",
+        "type": "module",
+        "path": "modules/contrib/commerce/modules/promotion",
+        "status": "Enabled",
+        "version": "3.2.0"
+    },
+    "commerce_store": {
+        "package": "Commerce",
+        "project": "commerce",
+        "display_name": "Commerce Store (commerce_store)",
+        "name": "commerce_store",
+        "type": "module",
+        "path": "modules/contrib/commerce/modules/store",
+        "status": "Enabled",
+        "version": "3.2.0"
+    },
+    "commerce_tax": {
+        "package": "Commerce",
+        "project": "commerce",
+        "display_name": "Commerce Tax (commerce_tax)",
+        "name": "commerce_tax",
+        "type": "module",
+        "path": "modules/contrib/commerce/modules/tax",
+        "status": "Enabled",
+        "version": "3.2.0"
+    },
+    "commerce_stripe": {
+        "package": "Commerce (contrib)",
+        "project": "commerce_stripe",
+        "display_name": "Commerce Stripe (commerce_stripe)",
+        "name": "commerce_stripe",
+        "type": "module",
+        "path": "modules/contrib/commerce_stripe",
+        "status": "Enabled",
+        "version": "8.x-1.3"
+    },
+    "conditional_fields": {
+        "package": "Fields",
+        "project": "conditional_fields",
+        "display_name": "Conditional Fields (conditional_fields)",
+        "name": "conditional_fields",
+        "type": "module",
+        "path": "modules/contrib/conditional_fields",
+        "status": "Enabled",
+        "version": "4.0.0-alpha6"
+    },
+    "crop": {
+        "package": "Media",
+        "project": "crop",
+        "display_name": "Crop API (crop)",
+        "name": "crop",
+        "type": "module",
+        "path": "modules/contrib/crop",
+        "status": "Enabled",
+        "version": "8.x-2.5"
+    },
+    "ctools": {
+        "package": "Chaos tool suite",
+        "project": "ctools",
+        "display_name": "Chaos Tools (ctools)",
+        "name": "ctools",
+        "type": "module",
+        "path": "modules/contrib/ctools",
+        "status": "Enabled",
+        "version": "4.1.0"
+    },
+    "ctools_block": {
+        "package": "Chaos tool suite (Experimental)",
+        "project": "ctools",
+        "display_name": "Chaos Tools Blocks (ctools_block)",
+        "name": "ctools_block",
+        "type": "module",
+        "path": "modules/contrib/ctools/modules/ctools_block",
+        "status": "Enabled",
+        "version": "4.1.0"
+    },
+    "ctools_views": {
+        "package": "Chaos tool suite (Experimental)",
+        "project": "ctools",
+        "display_name": "Chaos Tools Views (ctools_views)",
+        "name": "ctools_views",
+        "type": "module",
+        "path": "modules/contrib/ctools/modules/ctools_views",
+        "status": "Enabled",
+        "version": "4.1.0"
+    },
+    "entity": {
+        "package": "Other",
+        "project": "entity",
+        "display_name": "Entity (entity)",
+        "name": "entity",
+        "type": "module",
+        "path": "modules/contrib/entity",
+        "status": "Enabled",
+        "version": "8.x-1.6"
+    },
+    "entity_reference_revisions": {
+        "package": "Field types",
+        "project": "entity_reference_revisions",
+        "display_name": "Entity Reference Revisions (entity_reference_revisions)",
+        "name": "entity_reference_revisions",
+        "type": "module",
+        "path": "modules/contrib/entity_reference_revisions",
+        "status": "Enabled",
+        "version": "8.x-1.12"
+    },
+    "field_group": {
+        "package": "Fields",
+        "project": "field_group",
+        "display_name": "Field Group (field_group)",
+        "name": "field_group",
+        "type": "module",
+        "path": "modules/contrib/field_group",
+        "status": "Enabled",
+        "version": "4.0.0"
+    },
+    "flag": {
+        "package": "Flags",
+        "project": "flag",
+        "display_name": "Flag (flag)",
+        "name": "flag",
+        "type": "module",
+        "path": "modules/contrib/flag",
+        "status": "Enabled",
+        "version": "5.0.3"
+    },
+    "focal_point": {
+        "package": "Media",
+        "project": "focal_point",
+        "display_name": "Focal Point (focal_point)",
+        "name": "focal_point",
+        "type": "module",
+        "path": "modules/contrib/focal_point",
+        "status": "Enabled",
+        "version": "2.1.2"
+    },
+    "fullcalendar_view": {
+        "package": "Views",
+        "project": "fullcalendar_view",
+        "display_name": "Full Calendar View Plugin (fullcalendar_view)",
+        "name": "fullcalendar_view",
+        "type": "module",
+        "path": "modules/contrib/fullcalendar_view",
+        "status": "Enabled",
+        "version": "5.2.5"
+    },
+    "gin_login": {
+        "package": "Other",
+        "project": "",
+        "display_name": "Gin Login (gin_login)",
+        "name": "gin_login",
+        "type": "module",
+        "path": "modules/contrib/gin_login",
+        "status": "Enabled",
+        "version": null
+    },
+    "gin_toolbar": {
+        "package": "Other",
+        "project": "gin_toolbar",
+        "display_name": "Gin Toolbar (gin_toolbar)",
+        "name": "gin_toolbar",
+        "type": "module",
+        "path": "modules/contrib/gin_toolbar",
+        "status": "Enabled",
+        "version": "3.0.2"
+    },
+    "image_widget_crop": {
+        "package": "Media",
+        "project": "image_widget_crop",
+        "display_name": "ImageWidgetCrop (image_widget_crop)",
+        "name": "image_widget_crop",
+        "type": "module",
+        "path": "modules/contrib/image_widget_crop",
+        "status": "Enabled",
+        "version": "3.0.0"
+    },
+    "inline_entity_form": {
+        "package": "Fields",
+        "project": "inline_entity_form",
+        "display_name": "Inline Entity Form (inline_entity_form)",
+        "name": "inline_entity_form",
+        "type": "module",
+        "path": "modules/contrib/inline_entity_form",
+        "status": "Enabled",
+        "version": "3.0.0-rc21"
+    },
+    "menu_link_attributes": {
+        "package": "Other",
+        "project": "menu_link_attributes",
+        "display_name": "Menu Link Attributes (menu_link_attributes)",
+        "name": "menu_link_attributes",
+        "type": "module",
+        "path": "modules/contrib/menu_link_attributes",
+        "status": "Enabled",
+        "version": "8.x-1.6"
+    },
+    "paragraphs": {
+        "package": "Paragraphs",
+        "project": "paragraphs",
+        "display_name": "Paragraphs (paragraphs)",
+        "name": "paragraphs",
+        "type": "module",
+        "path": "modules/contrib/paragraphs",
+        "status": "Enabled",
+        "version": "8.x-1.19"
+    },
+    "pathauto": {
+        "package": "Other",
+        "project": "pathauto",
+        "display_name": "Pathauto (pathauto)",
+        "name": "pathauto",
+        "type": "module",
+        "path": "modules/contrib/pathauto",
+        "status": "Enabled",
+        "version": "8.x-1.14"
+    },
+    "profile": {
+        "package": "Other",
+        "project": "profile",
+        "display_name": "Profile (profile)",
+        "name": "profile",
+        "type": "module",
+        "path": "modules/contrib/profile",
+        "status": "Enabled",
+        "version": "8.x-1.14"
+    },
+    "state_machine": {
+        "package": "Other",
+        "project": "state_machine",
+        "display_name": "State Machine (state_machine)",
+        "name": "state_machine",
+        "type": "module",
+        "path": "modules/contrib/state_machine",
+        "status": "Enabled",
+        "version": "8.x-1.13"
+    },
+    "token": {
+        "package": "Other",
+        "project": "token",
+        "display_name": "Token (token)",
+        "name": "token",
+        "type": "module",
+        "path": "modules/contrib/token",
+        "status": "Enabled",
+        "version": "8.x-1.16"
+    },
+    "twbstools": {
+        "package": "Other",
+        "project": "twbstools",
+        "display_name": "Bootstrap tools (twbstools)",
+        "name": "twbstools",
+        "type": "module",
+        "path": "modules/contrib/twbstools",
+        "status": "Enabled",
+        "version": "2.1.0"
+    },
+    "twig_tweak": {
+        "package": "Other",
+        "project": "twig_tweak",
+        "display_name": "Twig Tweak (twig_tweak)",
+        "name": "twig_tweak",
+        "type": "module",
+        "path": "modules/contrib/twig_tweak",
+        "status": "Enabled",
+        "version": "3.4.1"
+    },
+    "myeventlane_admin_dashboard": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Admin Dashboard (myeventlane_admin_dashboard)",
+        "name": "myeventlane_admin_dashboard",
+        "type": "module",
+        "path": "modules/custom/myeventlane_admin_dashboard",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_analytics": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Analytics (myeventlane_analytics)",
+        "name": "myeventlane_analytics",
+        "type": "module",
+        "path": "modules/custom/myeventlane_analytics",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_boost": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Boost (myeventlane_boost)",
+        "name": "myeventlane_boost",
+        "type": "module",
+        "path": "modules/custom/myeventlane_boost",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_commerce": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Commerce (myeventlane_commerce)",
+        "name": "myeventlane_commerce",
+        "type": "module",
+        "path": "modules/custom/myeventlane_commerce",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_core": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Core (myeventlane_core)",
+        "name": "myeventlane_core",
+        "type": "module",
+        "path": "modules/custom/myeventlane_core",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_dashboard": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Dashboard (myeventlane_dashboard)",
+        "name": "myeventlane_dashboard",
+        "type": "module",
+        "path": "modules/custom/myeventlane_dashboard",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_demo": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Demo (myeventlane_demo)",
+        "name": "myeventlane_demo",
+        "type": "module",
+        "path": "modules/custom/myeventlane_demo",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_donations": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Donations (myeventlane_donations)",
+        "name": "myeventlane_donations",
+        "type": "module",
+        "path": "modules/custom/myeventlane_donations",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_event": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Event (myeventlane_event)",
+        "name": "myeventlane_event",
+        "type": "module",
+        "path": "modules/custom/myeventlane_event",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_event_attendees": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Event Attendees (myeventlane_event_attendees)",
+        "name": "myeventlane_event_attendees",
+        "type": "module",
+        "path": "modules/custom/myeventlane_event_attendees",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_finance": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Finance (myeventlane_finance)",
+        "name": "myeventlane_finance",
+        "type": "module",
+        "path": "modules/custom/myeventlane_finance",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_location": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Location (myeventlane_location)",
+        "name": "myeventlane_location",
+        "type": "module",
+        "path": "modules/custom/myeventlane_location",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_messaging": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Messaging (myeventlane_messaging)",
+        "name": "myeventlane_messaging",
+        "type": "module",
+        "path": "modules/custom/myeventlane_messaging",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_rsvp": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane RSVP (myeventlane_rsvp)",
+        "name": "myeventlane_rsvp",
+        "type": "module",
+        "path": "modules/custom/myeventlane_rsvp",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_schema": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Schema (myeventlane_schema)",
+        "name": "myeventlane_schema",
+        "type": "module",
+        "path": "modules/custom/myeventlane_schema",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_tickets": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Tickets (myeventlane_tickets)",
+        "name": "myeventlane_tickets",
+        "type": "module",
+        "path": "modules/custom/myeventlane_tickets",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_vendor": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Vendor (myeventlane_vendor)",
+        "name": "myeventlane_vendor",
+        "type": "module",
+        "path": "modules/custom/myeventlane_vendor",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_views": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Views (myeventlane_views)",
+        "name": "myeventlane_views",
+        "type": "module",
+        "path": "modules/custom/myeventlane_views",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_wallet": {
+        "package": "MyEventLane",
+        "project": "",
+        "display_name": "MyEventLane Wallet (myeventlane_wallet)",
+        "name": "myeventlane_wallet",
+        "type": "module",
+        "path": "modules/custom/myeventlane_wallet",
+        "status": "Enabled",
+        "version": null
+    }
+}

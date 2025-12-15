@@ -9,3 +9,4 @@ view vendor bas reports:
   description: 'Access vendor-specific BAS (Business Activity Statement) reports.'
   restrict access: TRUE
 
+

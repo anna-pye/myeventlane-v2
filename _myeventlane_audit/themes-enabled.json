@@ -1,0 +1,72 @@
+{
+    "claro": {
+        "package": "Core",
+        "project": "",
+        "display_name": "Claro (claro)",
+        "name": "claro",
+        "type": "theme",
+        "path": "core/themes/claro",
+        "status": "Enabled",
+        "version": "11.2.10"
+    },
+    "olivero": {
+        "package": "Core",
+        "project": "",
+        "display_name": "Olivero (olivero)",
+        "name": "olivero",
+        "type": "theme",
+        "path": "core/themes/olivero",
+        "status": "Enabled",
+        "version": "11.2.10"
+    },
+    "stable9": {
+        "package": "Core",
+        "project": "",
+        "display_name": "Stable 9 (stable9)",
+        "name": "stable9",
+        "type": "theme",
+        "path": "core/themes/stable9",
+        "status": "Enabled",
+        "version": "11.2.10"
+    },
+    "gin": {
+        "package": "",
+        "project": "gin",
+        "display_name": "Gin (gin)",
+        "name": "gin",
+        "type": "theme",
+        "path": "themes/contrib/gin",
+        "status": "Enabled",
+        "version": "5.0.9"
+    },
+    "myeventlane_admin": {
+        "package": "",
+        "project": "",
+        "display_name": "MyEventLane Admin (myeventlane_admin)",
+        "name": "myeventlane_admin",
+        "type": "theme",
+        "path": "themes/custom/myeventlane_admin",
+        "status": "Enabled",
+        "version": "1.0.0"
+    },
+    "myeventlane_theme": {
+        "package": "",
+        "project": "",
+        "display_name": "MyEventLane Theme (myeventlane_theme)",
+        "name": "myeventlane_theme",
+        "type": "theme",
+        "path": "themes/custom/myeventlane_theme",
+        "status": "Enabled",
+        "version": null
+    },
+    "myeventlane_vendor_theme": {
+        "package": "",
+        "project": "",
+        "display_name": "MyEventLane Vendor Theme (myeventlane_vendor_theme)",
+        "name": "myeventlane_vendor_theme",
+        "type": "theme",
+        "path": "themes/custom/myeventlane_vendor_theme",
+        "status": "Enabled",
+        "version": null
+    }
+}

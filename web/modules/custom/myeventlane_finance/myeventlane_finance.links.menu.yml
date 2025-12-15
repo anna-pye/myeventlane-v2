@@ -6,3 +6,4 @@ myeventlane_finance.admin_bas:
   parent: myeventlane_admin_dashboard.overview
   weight: 30
 
+
