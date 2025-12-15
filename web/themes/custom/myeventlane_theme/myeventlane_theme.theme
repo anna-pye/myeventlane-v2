@@ -8,6 +8,7 @@
 use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\node\NodeInterface;
+use Drupal\views\Views;
 
 /**
  * Implements hook_theme().
@@ -67,6 +68,43 @@ function myeventlane_theme_preprocess_page(array &$variables): void {
     }
   }
   
+  // Check if current user is a vendor (for profile link routing)
+  $current_user = \Drupal::currentUser();
+  if ($current_user->isAuthenticated()) {
+    $uid = (int) $current_user->id();
+    $is_vendor = FALSE;
+    
+    if (\Drupal::moduleHandler()->moduleExists('myeventlane_vendor')) {
+      $vendor_storage = \Drupal::entityTypeManager()->getStorage('myeventlane_vendor');
+      
+      // Check if user owns a vendor (uid field)
+      $owner_ids = $vendor_storage->getQuery()
+        ->accessCheck(TRUE)
+        ->condition('uid', $uid)
+        ->range(0, 1)
+        ->execute();
+      
+      if (empty($owner_ids)) {
+        // Check if user is in field_vendor_users
+        $user_ids = $vendor_storage->getQuery()
+          ->accessCheck(TRUE)
+          ->condition('field_vendor_users', $uid)
+          ->range(0, 1)
+          ->execute();
+        
+        if (!empty($user_ids)) {
+          $is_vendor = TRUE;
+        }
+      } else {
+        $is_vendor = TRUE;
+      }
+    }
+    
+    $variables['user_is_vendor'] = $is_vendor;
+  } else {
+    $variables['user_is_vendor'] = FALSE;
+  }
+  
   // Front page specific processing
   // Check if this is the front page.
   if (\Drupal::service('path.matcher')->isFrontPage()) {
@@ -87,6 +125,28 @@ function myeventlane_theme_preprocess_page(array &$variables): void {
     
     // Add calendar data for mini calendar
     $variables['calendar'] = _myeventlane_theme_get_calendar_data();
+    
+    // Load and render Featured Events view
+    $featured_view = Views::getView('featured_events');
+    if ($featured_view && $featured_view->access('block_featured')) {
+      $featured_view->setDisplay('block_featured');
+      $featured_view->preExecute();
+      $featured_view->execute();
+      $variables['featured_events'] = $featured_view->render();
+    } else {
+      $variables['featured_events'] = NULL;
+    }
+    
+    // Load and render New Events view
+    $new_view = Views::getView('new_events');
+    if ($new_view && $new_view->access('block_new')) {
+      $new_view->setDisplay('block_new');
+      $new_view->preExecute();
+      $new_view->execute();
+      $variables['new_events'] = $new_view->render();
+    } else {
+      $variables['new_events'] = NULL;
+    }
   }
 }
 
@@ -448,6 +508,16 @@ function myeventlane_theme_preprocess_form(array &$variables): void {
       '@keys' => implode(', ', array_slice($filtered_keys, 0, 20)), // First 20 keys
     ]);
   }
+
+  // Vendor profile settings form.
+  if ($form_id === 'vendor_profile_settings') {
+    // Add template suggestions for vendor profile settings form
+    if (!isset($variables['theme_hook_suggestions'])) {
+      $variables['theme_hook_suggestions'] = [];
+    }
+    array_unshift($variables['theme_hook_suggestions'], 'form__vendor_profile_settings');
+    array_unshift($variables['theme_hook_suggestions'], 'form__vendor-profile-settings');
+  }
 }
 
 /**
@@ -550,6 +620,12 @@ function myeventlane_theme_form_alter(array &$form, \Drupal\Core\Form\FormStateI
   if (strpos($form_id, 'myeventlane_vendor') === 0) {
     $form['#attributes']['class'][] = 'mel-form';
     $form['#attributes']['class'][] = 'mel-form--vendor';
+  }
+
+  // Vendor profile settings form.
+  if ($form_id === 'vendor_profile_settings') {
+    $form['#attributes']['class'][] = 'mel-form';
+    $form['#attributes']['class'][] = 'mel-form--vendor-profile-settings';
   }
 
   // Commerce checkout form - ensure Commerce Stripe Payment Element libraries are attached.

@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file
+ * Primary module file for MyEventLane Finance module.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_theme().
+ */
+function myeventlane_finance_theme(): array {
+  return [
+    'admin_bas_page' => [
+      'variables' => [
+        'summary' => [],
+        'start_date' => NULL,
+        'end_date' => NULL,
+      ],
+      'template' => 'admin-bas-page',
+    ],
+    'vendor_bas_page' => [
+      'variables' => [
+        'summary' => [],
+        'vendor' => NULL,
+        'start_date' => NULL,
+        'end_date' => NULL,
+      ],
+      'template' => 'vendor-bas-page',
+    ],
+  ];
+}
+

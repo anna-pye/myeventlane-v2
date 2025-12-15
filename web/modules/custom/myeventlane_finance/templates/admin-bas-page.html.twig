@@ -1,0 +1,95 @@
+{#
+/**
+ * @file
+ * Template for the admin BAS report page.
+ *
+ * Available variables:
+ * - summary: BAS summary array with period, g1_total_sales, gst_on_sales_1a,
+ *   gst_on_purchases_1b, gst_refunds, net_gst.
+ * - start_date: Start date string (YYYY-MM-DD).
+ * - end_date: End date string (YYYY-MM-DD).
+ */
+#}
+{{ attach_library('myeventlane_finance/bas') }}
+
+<div class="bas-page bas-page--admin">
+  <div class="bas-page__header">
+    <h1 class="bas-page__title">{{ 'Business Activity Statement (BAS)'|t }}</h1>
+    <p class="bas-page__subtitle">{{ 'Platform-wide GST reporting for BAS preparation'|t }}</p>
+  </div>
+
+  {# Period selector form #}
+  <div class="bas-page__period-selector">
+    <form method="get" action="{{ path('myeventlane_finance.admin_bas') }}" class="bas-period-form">
+      <div class="bas-period-form__fields">
+        <div class="bas-period-form__field">
+          <label for="bas-start-date" class="bas-period-form__label">{{ 'Start Date'|t }}</label>
+          <input type="date" id="bas-start-date" name="start" value="{{ start_date }}" class="bas-period-form__input" required>
+        </div>
+        <div class="bas-period-form__field">
+          <label for="bas-end-date" class="bas-period-form__label">{{ 'End Date'|t }}</label>
+          <input type="date" id="bas-end-date" name="end" value="{{ end_date }}" class="bas-period-form__input" required>
+        </div>
+        <div class="bas-period-form__field">
+          <button type="submit" class="bas-period-form__submit">{{ 'Update Period'|t }}</button>
+        </div>
+      </div>
+    </form>
+    <div class="bas-period-form__current">
+      <strong>{{ 'Current Period:'|t }}</strong> {{ summary.period }}
+    </div>
+    <div class="bas-page__export-buttons">
+      <a href="{{ path('myeventlane_finance.admin_bas_csv', {}, {'query': {'start': start_date, 'end': end_date}}) }}" class="bas-export-button bas-export-button--csv">{{ 'Download CSV'|t }}</a>
+      <a href="{{ path('myeventlane_finance.admin_bas_pdf', {}, {'query': {'start': start_date, 'end': end_date}}) }}" class="bas-export-button bas-export-button--pdf">{{ 'Download PDF'|t }}</a>
+    </div>
+  </div>
+
+  {# Summary cards #}
+  <div class="bas-page__summary">
+    <div class="bas-summary-cards">
+      <div class="bas-summary-card">
+        <div class="bas-summary-card__label">{{ 'G1 Total Sales'|t }}</div>
+        <div class="bas-summary-card__value">${{ summary.g1_total_sales|number_format(2, '.', ',') }}</div>
+        <div class="bas-summary-card__description">{{ 'Total sales amount (including GST)'|t }}</div>
+      </div>
+
+      <div class="bas-summary-card">
+        <div class="bas-summary-card__label">{{ '1A GST on Sales'|t }}</div>
+        <div class="bas-summary-card__value">${{ summary.gst_on_sales_1a|number_format(2, '.', ',') }}</div>
+        <div class="bas-summary-card__description">{{ 'GST collected on sales'|t }}</div>
+      </div>
+
+      <div class="bas-summary-card">
+        <div class="bas-summary-card__label">{{ '1B GST on Purchases'|t }}</div>
+        <div class="bas-summary-card__value">${{ summary.gst_on_purchases_1b|number_format(2, '.', ',') }}</div>
+        <div class="bas-summary-card__description">{{ 'GST on purchases'|t }}</div>
+      </div>
+
+      <div class="bas-summary-card">
+        <div class="bas-summary-card__label">{{ 'GST Refunds'|t }}</div>
+        <div class="bas-summary-card__value">${{ summary.gst_refunds|number_format(2, '.', ',') }}</div>
+        <div class="bas-summary-card__description">{{ 'GST refunded to customers'|t }}</div>
+      </div>
+
+      <div class="bas-summary-card bas-summary-card--highlight">
+        <div class="bas-summary-card__label">{{ 'Net GST'|t }}</div>
+        <div class="bas-summary-card__value">${{ summary.net_gst|number_format(2, '.', ',') }}</div>
+        <div class="bas-summary-card__description">
+          {% if summary.net_gst >= 0 %}
+            {{ 'Amount payable to ATO'|t }}
+          {% else %}
+            {{ 'Amount refundable from ATO'|t }}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# Disclaimer #}
+  <div class="bas-page__disclaimer">
+    <p class="bas-disclaimer">
+      <strong>{{ 'Disclaimer:'|t }}</strong> {{ 'For BAS preparation only. Not lodged with the ATO.'|t }}
+    </p>
+  </div>
+</div>
+

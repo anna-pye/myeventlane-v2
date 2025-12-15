@@ -24,3 +24,10 @@ donation-rsvp:
   dependencies:
     - myeventlane_donations/donation-form
 
+donation-report:
+  css:
+    theme:
+      css/donation-report.css: {}
+  dependencies:
+    - core/drupal
+

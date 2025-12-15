@@ -1,7 +1,7 @@
 services:
   myeventlane_tickets.code:
     class: Drupal\myeventlane_tickets\Ticket\TicketCodeGenerator
-    arguments: ['@entity_type.manager']
+    arguments: ['@entity_type.manager', '@uuid']
 
   myeventlane_tickets.pdf:
     class: Drupal\myeventlane_tickets\Ticket\TicketPdfGenerator

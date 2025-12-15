@@ -52,46 +52,54 @@
   <div class="mel-donation-report__tables">
     <div class="mel-card">
       <h2>{{ 'Platform Donations by Month'|t }}</h2>
-      <table class="mel-table">
-        <thead>
-          <tr>
-            <th>{{ 'Month'|t }}</th>
-            <th>{{ 'Total'|t }}</th>
-            <th>{{ 'Count'|t }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for stat in platform_stats %}
+      {% if platform_stats is not empty %}
+        <table class="mel-table">
+          <thead>
             <tr>
-              <td>{{ stat.month }}</td>
-              <td>${{ stat.total|number_format(2) }}</td>
-              <td>{{ stat.count }}</td>
+              <th>{{ 'Month'|t }}</th>
+              <th>{{ 'Total'|t }}</th>
+              <th>{{ 'Count'|t }}</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for stat in platform_stats %}
+              <tr>
+                <td>{{ stat.month }}</td>
+                <td>${{ stat.total|number_format(2) }}</td>
+                <td>{{ stat.count }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="mel-table-empty">{{ 'No platform donations recorded for this period.'|t }}</div>
+      {% endif %}
     </div>
 
     <div class="mel-card">
       <h2>{{ 'RSVP Donations by Month'|t }}</h2>
-      <table class="mel-table">
-        <thead>
-          <tr>
-            <th>{{ 'Month'|t }}</th>
-            <th>{{ 'Total'|t }}</th>
-            <th>{{ 'Count'|t }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for stat in rsvp_stats %}
+      {% if rsvp_stats is not empty %}
+        <table class="mel-table">
+          <thead>
             <tr>
-              <td>{{ stat.month }}</td>
-              <td>${{ stat.total|number_format(2) }}</td>
-              <td>{{ stat.count }}</td>
+              <th>{{ 'Month'|t }}</th>
+              <th>{{ 'Total'|t }}</th>
+              <th>{{ 'Count'|t }}</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for stat in rsvp_stats %}
+              <tr>
+                <td>{{ stat.month }}</td>
+                <td>${{ stat.total|number_format(2) }}</td>
+                <td>{{ stat.count }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="mel-table-empty">{{ 'No RSVP donations recorded for this period.'|t }}</div>
+      {% endif %}
     </div>
   </div>
 </div>

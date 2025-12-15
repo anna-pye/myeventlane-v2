@@ -48,11 +48,13 @@
         "drupal/migrate_tools": "^6.1",
         "drupal/paragraphs": "^1.19",
         "drupal/pathauto": "^1.14",
+        "drupal/social_auth_google": "^4.0",
         "drupal/token": "^1.16",
         "drupal/twbstools": "^2.1",
         "drupal/twig_tweak": "^3.4",
         "drush/drush": "^13",
-        "mglaman/drupal-check": "^1.5"
+        "mglaman/drupal-check": "^1.5",
+        "phpoffice/phpspreadsheet": "^5.3"
     },
     "conflict": {
         "drupal/drupal": "*"

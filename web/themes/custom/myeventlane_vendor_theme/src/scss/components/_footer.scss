@@ -1,0 +1,62 @@
+/**
+ * @file
+ * Footer component styles for MyEventLane Vendor Theme.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+
+// ============================================================================
+// FOOTER
+// ============================================================================
+
+.mel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-4;
+  flex-wrap: wrap;
+}
+
+.mel-footer__left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+}
+
+.mel-footer__brand {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  
+  // If there's an image/logo, make it small
+  img,
+  svg {
+    max-width: 120px;
+    max-height: 40px;
+    width: auto;
+    height: auto;
+  }
+}
+
+.mel-footer__meta {
+  font-size: $font-size-xs;
+  color: $text-secondary;
+}
+
+.mel-footer__right {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+}
+
+.mel-footer__link {
+  font-size: $font-size-sm;
+  color: $primary;
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}

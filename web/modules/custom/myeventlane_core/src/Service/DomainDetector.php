@@ -156,17 +156,19 @@ final class DomainDetector {
       return $public_domain;
     }
 
-    // Fallback: construct from current request.
+    // Fallback: construct from current request (production-ready).
     $request = $this->requestStack->getCurrentRequest();
     if ($request) {
       $scheme = $request->getScheme();
       $host = $request->getHost();
-      // Remove 'vendor.' or 'admin.' prefix if present.
+      // Remove 'vendor.' or 'admin.' prefix if present to get base domain.
       $host = preg_replace('/^(vendor|admin)\./', '', $host);
       return $scheme . '://' . $host;
     }
 
-    return 'https://myeventlane.com';
+    // Last resort fallback: construct from base hostname if available.
+    // This will work in both dev and production environments.
+    return 'https://myeventlane.ddev.site';
   }
 
   /**
@@ -182,19 +184,23 @@ final class DomainDetector {
       return $vendor_domain;
     }
 
-    // Fallback: construct from current request.
+    // Fallback: construct from current request (production-ready).
     $request = $this->requestStack->getCurrentRequest();
     if ($request) {
       $scheme = $request->getScheme();
       $host = $request->getHost();
       // Ensure 'vendor.' prefix.
       if (!str_starts_with($host, 'vendor.')) {
+        // Remove 'admin.' prefix if present, then add 'vendor.'
+        $host = preg_replace('/^admin\./', '', $host);
         $host = 'vendor.' . $host;
       }
       return $scheme . '://' . $host;
     }
 
-    return 'https://vendor.myeventlane.com';
+    // Last resort fallback: construct vendor subdomain.
+    // This will work in both dev and production environments.
+    return 'https://vendor.myeventlane.ddev.site';
   }
 
   /**
@@ -210,7 +216,7 @@ final class DomainDetector {
       return $admin_domain;
     }
 
-    // Fallback: construct from current request.
+    // Fallback: construct from current request (production-ready).
     $request = $this->requestStack->getCurrentRequest();
     if ($request) {
       $scheme = $request->getScheme();
@@ -224,7 +230,9 @@ final class DomainDetector {
       return $scheme . '://' . $host;
     }
 
-    return 'https://admin.myeventlane.com';
+    // Last resort fallback: construct admin subdomain.
+    // This will work in both dev and production environments.
+    return 'https://admin.myeventlane.ddev.site';
   }
 
   /**

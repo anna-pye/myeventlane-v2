@@ -9,11 +9,12 @@ use Drupal\commerce_order\Entity\OrderItemInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\commerce_cart\CartProviderInterface;
 use Drupal\commerce_cart\CartManagerInterface;
+use Drupal\commerce_cart\CartSessionInterface;
 use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\myeventlane_rsvp\Entity\RsvpSubmission;
 use Drupal\node\NodeInterface;
-use Drupal\price\Price;
+use Drupal\commerce_price\Price;
 
 /**
  * Service for handling RSVP attendee donations (attendee → vendor via Stripe Connect).
@@ -29,6 +30,8 @@ final class RsvpDonationService {
    *   The cart provider.
    * @param \Drupal\commerce_cart\CartManagerInterface $cartManager
    *   The cart manager.
+   * @param \Drupal\commerce_cart\CartSessionInterface $cartSession
+   *   The cart session.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerFactory
    *   The logger factory.
    */
@@ -36,6 +39,7 @@ final class RsvpDonationService {
     private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly CartProviderInterface $cartProvider,
     private readonly CartManagerInterface $cartManager,
+    private readonly CartSessionInterface $cartSession,
     private readonly LoggerChannelFactoryInterface $loggerFactory,
   ) {}
 
@@ -66,6 +70,12 @@ final class RsvpDonationService {
    *   If order creation fails.
    */
   public function createDonationOrder(RsvpSubmission $submission, NodeInterface $event, float $amount): ?OrderInterface {
+    $this->logger()->info('Creating RSVP donation order: event=@event_id, submission=@submission_id, amount=@amount', [
+      '@event_id' => $event->id(),
+      '@submission_id' => $submission->id(),
+      '@amount' => $amount,
+    ]);
+
     // Get vendor store for this event.
     $store = $this->getVendorStore($event);
     if (!$store) {
@@ -75,6 +85,8 @@ final class RsvpDonationService {
       return NULL;
     }
 
+    $this->logger()->debug('Store found: @store_id', ['@store_id' => $store->id()]);
+
     // Verify Stripe Connect is enabled for this store.
     if (!$this->isStripeConnected($store)) {
       $this->logger()->warning('Stripe Connect not enabled for store @store_id', [
@@ -83,24 +95,59 @@ final class RsvpDonationService {
       return NULL;
     }
 
-    // Get or create cart (anonymous cart for RSVP donations).
-    $cart = $this->cartProvider->getCart('rsvp_donation', $store);
+    $this->logger()->debug('Stripe Connect verified for store @store_id', ['@store_id' => $store->id()]);
 
-    if (!$cart) {
-      $cart = $this->cartProvider->createCart('rsvp_donation', $store);
+    // Create order directly with rsvp_donation order type.
+    try {
+      $orderStorage = $this->entityTypeManager->getStorage('commerce_order');
+      $order = $orderStorage->create([
+        'type' => 'rsvp_donation',
+        'store_id' => $store->id(),
+        'uid' => 0, // Anonymous for RSVP donations
+        'state' => 'draft',
+      ]);
+      $order->save();
+      $this->logger()->debug('Order created: @order_id', ['@order_id' => $order->id()]);
+    }
+    catch (\Exception $e) {
+      $this->logger()->error('Failed to create donation order: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+      throw $e;
     }
 
     // Create order item.
     $orderItem = $this->createDonationOrderItem($amount, $event, $submission);
-    $this->cartManager->addOrderItem($cart, $orderItem);
+    
+    // Use cart manager to add item (handles validation and recalculation).
+    try {
+      $this->cartManager->addOrderItem($order, $orderItem);
+    }
+    catch (\Exception $e) {
+      $this->logger()->error('Failed to add order item to donation order: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+      // Try direct add as fallback.
+      $order->addItem($orderItem);
+      $order->save();
+    }
+
+    // Add order to cart session for anonymous users so they can access checkout.
+    // This is required because Commerce checkout access check uses cart session.
+    if ($order->getCustomerId() === 0) {
+      $this->cartSession->addCartId($order->id(), CartSessionInterface::ACTIVE);
+      $this->logger()->debug('Added order @order_id to cart session for anonymous user', [
+        '@order_id' => $order->id(),
+      ]);
+    }
 
     $this->logger()->info('Created RSVP donation order @order_id for submission @submission_id: $@amount', [
-      '@order_id' => $cart->id(),
+      '@order_id' => $order->id(),
       '@submission_id' => $submission->id(),
       '@amount' => number_format($amount, 2),
     ]);
 
-    return $cart;
+    return $order;
   }
 
   /**
@@ -159,21 +206,59 @@ final class RsvpDonationService {
   private function getVendorStore(NodeInterface $event): ?StoreInterface {
     $vendorUid = (int) $event->getOwnerId();
     if ($vendorUid === 0) {
+      $this->logger()->warning('Event @event_id has no owner (uid 0)', [
+        '@event_id' => $event->id(),
+      ]);
       return NULL;
     }
 
-    $storeStorage = $this->entityTypeManager->getStorage('commerce_store');
-    $storeIds = $storeStorage->getQuery()
-      ->accessCheck(FALSE)
-      ->condition('uid', $vendorUid)
-      ->range(0, 1)
-      ->execute();
+    $store = NULL;
 
-    if (empty($storeIds)) {
+    // First, try to find store via vendor entity (if vendor module is available).
+    if (\Drupal::moduleHandler()->moduleExists('myeventlane_vendor')) {
+      $vendorStorage = $this->entityTypeManager->getStorage('myeventlane_vendor');
+      $vendors = $vendorStorage->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('field_owner', $vendorUid)
+        ->range(0, 1)
+        ->execute();
+
+      if (!empty($vendors)) {
+        $vendor = $vendorStorage->load(reset($vendors));
+        if ($vendor && $vendor->hasField('field_vendor_store') && !$vendor->get('field_vendor_store')->isEmpty()) {
+          $store = $vendor->get('field_vendor_store')->entity;
+          $this->logger()->debug('Found store via vendor entity for event @event_id', [
+            '@event_id' => $event->id(),
+          ]);
+        }
+      }
+    }
+
+    // Fallback: Find store by owner UID.
+    if (!$store) {
+      $storeStorage = $this->entityTypeManager->getStorage('commerce_store');
+      $storeIds = $storeStorage->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('uid', $vendorUid)
+        ->range(0, 1)
+        ->execute();
+
+      if (!empty($storeIds)) {
+        $store = $storeStorage->load(reset($storeIds));
+        $this->logger()->debug('Found store via owner UID for event @event_id', [
+          '@event_id' => $event->id(),
+        ]);
+      }
+    }
+
+    if (!$store) {
+      $this->logger()->warning('No store found for vendor uid @uid (event @event_id)', [
+        '@uid' => $vendorUid,
+        '@event_id' => $event->id(),
+      ]);
       return NULL;
     }
 
-    $store = $storeStorage->load(reset($storeIds));
     return $store instanceof StoreInterface ? $store : NULL;
   }
 
@@ -189,14 +274,27 @@ final class RsvpDonationService {
   private function isStripeConnected(StoreInterface $store): bool {
     // Check if charges are enabled (most reliable indicator).
     if ($store->hasField('field_stripe_charges_enabled') && !$store->get('field_stripe_charges_enabled')->isEmpty()) {
-      return (bool) $store->get('field_stripe_charges_enabled')->value;
+      $connected = (bool) $store->get('field_stripe_charges_enabled')->value;
+      $this->logger()->debug('Stripe charges enabled check for store @store_id: @connected', [
+        '@store_id' => $store->id(),
+        '@connected' => $connected ? 'yes' : 'no',
+      ]);
+      return $connected;
     }
 
     // Fallback: check connected flag.
     if ($store->hasField('field_stripe_connected') && !$store->get('field_stripe_connected')->isEmpty()) {
-      return (bool) $store->get('field_stripe_connected')->value;
+      $connected = (bool) $store->get('field_stripe_connected')->value;
+      $this->logger()->debug('Stripe connected flag check for store @store_id: @connected', [
+        '@store_id' => $store->id(),
+        '@connected' => $connected ? 'yes' : 'no',
+      ]);
+      return $connected;
     }
 
+    $this->logger()->debug('No Stripe fields found on store @store_id', [
+      '@store_id' => $store->id(),
+    ]);
     return FALSE;
   }
 

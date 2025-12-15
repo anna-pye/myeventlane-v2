@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\myeventlane_admin_dashboard\Controller;
 
+use Drupal\commerce_order\Entity\OrderItemInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 
@@ -11,6 +12,36 @@ use Drupal\Core\Url;
  * Provides the admin overview dashboard page.
  */
 final class AdminDashboardController extends ControllerBase {
+
+  /**
+   * Safely gets the order from an order item.
+   *
+   * @param \Drupal\commerce_order\Entity\OrderItemInterface $order_item
+   *   The order item.
+   *
+   * @return \Drupal\commerce_order\Entity\OrderInterface|null
+   *   The order entity, or NULL if not available.
+   */
+  protected function getOrderFromItem(OrderItemInterface $order_item) {
+    if (!$order_item->hasField('order_id') || $order_item->get('order_id')->isEmpty()) {
+      return NULL;
+    }
+
+    // Get the target_id and load the order manually to avoid warnings.
+    $order_id = $order_item->get('order_id')->target_id;
+    if (!$order_id) {
+      return NULL;
+    }
+
+    try {
+      return $this->entityTypeManager()
+        ->getStorage('commerce_order')
+        ->load($order_id);
+    }
+    catch (\Exception $e) {
+      return NULL;
+    }
+  }
 
   /**
    * Returns the admin overview page.
@@ -467,12 +498,8 @@ final class AdminDashboardController extends ControllerBase {
       ]);
 
       foreach ($order_items as $item) {
-        if (!$item->hasField('order_id') || $item->get('order_id')->isEmpty()) {
-          continue;
-        }
-
         try {
-          $order = $item->getOrder();
+          $order = $this->getOrderFromItem($item);
           if ($order && $order->getState()->getId() === 'completed') {
             $event_id = NULL;
             if ($item->hasField('field_target_event') && !$item->get('field_target_event')->isEmpty()) {
@@ -573,16 +600,14 @@ final class AdminDashboardController extends ControllerBase {
           ->execute();
         $items = $order_item_storage->loadMultiple($order_items);
         foreach ($items as $item) {
-          if ($item->hasField('order_id') && !$item->get('order_id')->isEmpty()) {
-            try {
-              $order = $item->getOrder();
-              if ($order && $order->getState()->getId() === 'completed') {
-                $tickets_sold += (int) $item->getQuantity();
-              }
+          try {
+            $order = $this->getOrderFromItem($item);
+            if ($order && $order->getState()->getId() === 'completed') {
+              $tickets_sold += (int) $item->getQuantity();
             }
-            catch (\Exception $e) {
-              continue;
-            }
+          }
+          catch (\Exception $e) {
+            continue;
           }
         }
       }
@@ -810,11 +835,8 @@ final class AdminDashboardController extends ControllerBase {
 
             $revenue = 0.0;
             foreach ($order_items as $item) {
-              if (!$item->hasField('order_id') || $item->get('order_id')->isEmpty()) {
-                continue;
-              }
               try {
-                $order = $item->getOrder();
+                $order = $this->getOrderFromItem($item);
                 if ($order && $order->getState()->getId() === 'completed') {
                   $total_price = $item->getTotalPrice();
                   if ($total_price) {
@@ -963,11 +985,8 @@ final class AdminDashboardController extends ControllerBase {
         ]);
 
         foreach ($order_items as $item) {
-          if (!$item->hasField('order_id') || $item->get('order_id')->isEmpty()) {
-            continue;
-          }
           try {
-            $order = $item->getOrder();
+            $order = $this->getOrderFromItem($item);
             if ($order && $order->getState()->getId() === 'completed') {
               $total_price = $item->getTotalPrice();
               if ($total_price) {
@@ -1114,11 +1133,8 @@ final class AdminDashboardController extends ControllerBase {
 
           $processed_orders = [];
           foreach ($order_items as $item) {
-            if (!$item->hasField('order_id') || $item->get('order_id')->isEmpty()) {
-              continue;
-            }
             try {
-              $order = $item->getOrder();
+              $order = $this->getOrderFromItem($item);
               if ($order && $order->getState()->getId() === 'completed') {
                 $order_id = $order->id();
                 if (!isset($processed_orders[$order_id])) {

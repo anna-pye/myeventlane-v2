@@ -31,14 +31,8 @@ final class GoogleWalletBuilder {
    *   The Google Wallet save URL.
    */
   public function generateSaveLink(OrderItemInterface $orderItem): string {
-    // TODO: Implement actual Google Wallet JWT generation.
+    // @todo Implement actual Google Wallet JWT generation.
     return 'https://pay.google.com/gp/v/save/placeholder';
   }
 
 }
-
-
-
-
-
-

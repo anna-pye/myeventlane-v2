@@ -97,20 +97,30 @@
               </svg>
               {{ 'My Events'|t }}
             </a>
-            <a href="{{ path('entity.user.canonical', {'user': user.id}) }}" class="mel-account-menu-item" role="menuitem">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M3 14c0-2.5 2.5-4.5 5-4.5s5 2 5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
-              {{ 'My Account'|t }}
-            </a>
-            <a href="{{ path('myeventlane_vendor.console.dashboard') }}" class="mel-account-menu-item" role="menuitem">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.5"/>
-              </svg>
-              {{ 'Vendor Dashboard'|t }}
-            </a>
+            {% if user_is_vendor %}
+              <a href="{{ path('myeventlane_vendor.console.settings') }}" class="mel-account-menu-item" role="menuitem">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M3 14c0-2.5 2.5-4.5 5-4.5s5 2 5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                {{ 'My Profile'|t }}
+              </a>
+              <a href="{{ path('myeventlane_vendor.console.dashboard') }}" class="mel-account-menu-item" role="menuitem">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                {{ 'Vendor Dashboard'|t }}
+              </a>
+            {% else %}
+              <a href="{{ path('entity.user.edit_form', {'user': user.id}) }}" class="mel-account-menu-item" role="menuitem">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M3 14c0-2.5 2.5-4.5 5-4.5s5 2 5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                {{ 'My Profile'|t }}
+              </a>
+            {% endif %}
             <div class="mel-account-menu-divider" role="separator" aria-hidden="true"></div>
             <a href="{{ path('user.logout') }}" class="mel-account-menu-item" role="menuitem">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -180,8 +190,12 @@
               </button>
               <div class="mel-account-menu" role="menu" aria-hidden="true">
                 <a href="{{ path('myeventlane_dashboard.customer') }}" class="mel-account-menu-item" role="menuitem">{{ 'My Events'|t }}</a>
-                <a href="{{ path('myeventlane_vendor.console.dashboard') }}" class="mel-account-menu-item" role="menuitem">{{ 'Vendor Dashboard'|t }}</a>
-                <a href="{{ path('entity.user.canonical', {'user': user.id}) }}" class="mel-account-menu-item" role="menuitem">{{ 'My Account'|t }}</a>
+                {% if user_is_vendor %}
+                  <a href="{{ path('myeventlane_vendor.console.settings') }}" class="mel-account-menu-item" role="menuitem">{{ 'My Profile'|t }}</a>
+                  <a href="{{ path('myeventlane_vendor.console.dashboard') }}" class="mel-account-menu-item" role="menuitem">{{ 'Vendor Dashboard'|t }}</a>
+                {% else %}
+                  <a href="{{ path('entity.user.edit_form', {'user': user.id}) }}" class="mel-account-menu-item" role="menuitem">{{ 'My Profile'|t }}</a>
+                {% endif %}
                 <div class="mel-account-menu-divider" role="separator" aria-hidden="true"></div>
                 <a href="{{ path('user.logout') }}" class="mel-account-menu-item" role="menuitem">{{ 'Log out'|t }}</a>
               </div>

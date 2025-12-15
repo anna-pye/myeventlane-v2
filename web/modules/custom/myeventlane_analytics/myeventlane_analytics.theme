@@ -8,7 +8,7 @@
 /**
  * Implements hook_theme().
  */
-function myeventlane_analytics_theme(array $existing, string $type, string $theme, string $path): array {
+function myeventlane_analytics_theme(): array {
   return [
     'myeventlane_analytics_dashboard' => [
       'variables' => [
@@ -32,6 +32,7 @@ function myeventlane_analytics_theme(array $existing, string $type, string $them
     ],
   ];
 }
+
 
 
 

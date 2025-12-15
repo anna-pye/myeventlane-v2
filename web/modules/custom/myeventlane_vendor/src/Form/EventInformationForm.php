@@ -91,7 +91,7 @@ final class EventInformationForm extends FormBase {
         '#upload_location' => 'public://event_images',
         '#default_value' => $existing_fid,
         '#upload_validators' => [
-          'file_validate_extensions' => ['png jpg jpeg gif'],
+          'FileExtension' => ['extensions' => 'png jpg jpeg gif'],
         ],
         '#description' => $this->t('Upload or change the event image directly.'),
       ];

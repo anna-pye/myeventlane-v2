@@ -198,22 +198,27 @@ final class StripeConnectController extends ControllerBase {
       $destination = $request->query->get('destination');
       
       // Determine return URL based on destination.
+      // Use current request's scheme and host to ensure correct domain.
+      $request = \Drupal::request();
+      $baseUrl = $request->getSchemeAndHttpHost();
+      
       if ($destination && strpos($destination, '/vendor/onboard') !== FALSE) {
         // If coming from onboarding, return to onboarding stripe step.
-        $returnUrl = Url::fromRoute('myeventlane_vendor.stripe_callback', [], [
-          'absolute' => TRUE,
+        $callbackUrl = Url::fromRoute('myeventlane_vendor.stripe_callback', [], [
           'query' => ['destination' => $destination],
-        ])->toString();
+        ]);
+        $returnUrl = $baseUrl . $callbackUrl->toString();
       }
       else {
         // Default: return to callback which redirects to dashboard.
-        $returnUrl = Url::fromRoute('myeventlane_vendor.stripe_callback', [], ['absolute' => TRUE])->toString();
+        $callbackUrl = Url::fromRoute('myeventlane_vendor.stripe_callback', []);
+        $returnUrl = $baseUrl . $callbackUrl->toString();
       }
       
-      $refreshUrl = Url::fromRoute('myeventlane_vendor.stripe_connect', [], [
-        'absolute' => TRUE,
+      $connectUrl = Url::fromRoute('myeventlane_vendor.stripe_connect', [], [
         'query' => $destination ? ['destination' => $destination] : [],
-      ])->toString();
+      ]);
+      $refreshUrl = $baseUrl . $connectUrl->toString();
 
       $accountLink = $this->stripeService->createAccountLink($accountId, $returnUrl, $refreshUrl);
 

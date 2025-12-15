@@ -1,0 +1,95 @@
+{#
+/**
+ * @file
+ * Template for waitlist management interface.
+ *
+ * Available variables:
+ * - event: The event node entity.
+ * - waitlist: Array of waitlisted attendees with position, name, email, etc.
+ * - analytics: Array with waitlist analytics (conversion_rate, average_wait_time, etc.).
+ * - waitlist_count: Total number of waitlisted attendees.
+ */
+#}
+<div class="mel-waitlist-management">
+  <div class="mel-waitlist-management__header">
+    <div>
+      <h1 class="mel-waitlist-management__title">{{ 'Waitlist Management'|t }}</h1>
+      <p class="mel-waitlist-management__subtitle">
+        {{ 'Event:'|t }} <a href="{{ event.toUrl() }}">{{ event.label() }}</a>
+      </p>
+    </div>
+    <div class="mel-waitlist-management__actions">
+      <a href="{{ path('myeventlane_event_attendees.waitlist_export', {'node': event.id()}) }}" 
+         class="mel-btn mel-btn-secondary">
+        {{ 'Export CSV'|t }}
+      </a>
+      <a href="{{ path('myeventlane_vendor.console.event_overview', {'event': event.id()}) }}" 
+         class="mel-btn mel-btn-ghost">
+        {{ 'Back to Event'|t }}
+      </a>
+    </div>
+  </div>
+
+  {# Analytics Summary #}
+  {% if analytics %}
+    <div class="mel-waitlist-analytics">
+      <h2 class="mel-waitlist-analytics__title">{{ 'Waitlist Analytics'|t }}</h2>
+      <div class="mel-waitlist-analytics__grid">
+        <div class="mel-waitlist-analytics__card">
+          <div class="mel-waitlist-analytics__label">{{ 'Current Waitlist'|t }}</div>
+          <div class="mel-waitlist-analytics__value">{{ waitlist_count }}</div>
+        </div>
+        <div class="mel-waitlist-analytics__card">
+          <div class="mel-waitlist-analytics__label">{{ 'Total Promoted'|t }}</div>
+          <div class="mel-waitlist-analytics__value">{{ analytics.total_promoted }}</div>
+        </div>
+        <div class="mel-waitlist-analytics__card">
+          <div class="mel-waitlist-analytics__label">{{ 'Conversion Rate'|t }}</div>
+          <div class="mel-waitlist-analytics__value">{{ analytics.conversion_rate }}%</div>
+        </div>
+        <div class="mel-waitlist-analytics__card">
+          <div class="mel-waitlist-analytics__label">{{ 'Avg Wait Time'|t }}</div>
+          <div class="mel-waitlist-analytics__value">{{ analytics.average_wait_time }} {{ 'hours'|t }}</div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  {# Waitlist Table #}
+  <div class="mel-waitlist-table-wrapper">
+    <h2 class="mel-waitlist-table__title">{{ 'Waitlisted Attendees'|t }} ({{ waitlist_count }})</h2>
+    
+    {% if waitlist is empty %}
+      <div class="mel-waitlist-empty">
+        <p>{{ 'No one is currently on the waitlist for this event.'|t }}</p>
+      </div>
+    {% else %}
+      <table class="mel-waitlist-table">
+        <thead>
+          <tr>
+            <th>{{ 'Position'|t }}</th>
+            <th>{{ 'Name'|t }}</th>
+            <th>{{ 'Email'|t }}</th>
+            <th>{{ 'Date Added'|t }}</th>
+            <th>{{ 'Status'|t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for attendee in waitlist %}
+            <tr>
+              <td class="mel-waitlist-table__position">
+                <span class="mel-waitlist-table__position-number">{{ attendee.position }}</span>
+              </td>
+              <td>{{ attendee.name }}</td>
+              <td><a href="mailto:{{ attendee.email }}">{{ attendee.email }}</a></td>
+              <td>{{ attendee.date_added }}</td>
+              <td>
+                <span class="mel-badge mel-badge--waitlist">{{ attendee.status|capitalize }}</span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+</div>

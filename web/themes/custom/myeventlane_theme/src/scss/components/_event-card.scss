@@ -26,6 +26,22 @@
   flex-direction: column;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   position: relative;
+  
+  // Allow title to overflow if needed (for front page grid)
+  .mel-page--front & {
+    .mel-event-card-body {
+      overflow: visible;
+    }
+    .mel-event-card-title {
+      overflow: visible;
+      text-overflow: clip;
+      white-space: normal;
+      -webkit-line-clamp: unset;
+      line-clamp: unset;
+      height: auto;
+      max-height: none;
+    }
+  }
 
   &:hover {
     transform: translateY(-4px);

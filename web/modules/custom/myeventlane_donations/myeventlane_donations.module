@@ -6,6 +6,9 @@
  */
 
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Implements hook_theme().
@@ -40,5 +43,52 @@ function myeventlane_donations_theme(array $existing, string $type, string $them
       'template' => 'myeventlane-donation-vendor-list',
     ],
   ];
+}
+
+/**
+ * Implements hook_entity_access().
+ *
+ * Allows anonymous users to access their own draft orders (carts) during checkout.
+ * This is necessary for RSVP donations where anonymous users need to complete checkout.
+ */
+function myeventlane_donations_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  // Only process commerce_order entities.
+  if ($entity->getEntityTypeId() !== 'commerce_order') {
+    return AccessResult::neutral();
+  }
+
+  // Only allow 'view' and 'update' operations for draft orders.
+  if (!in_array($operation, ['view', 'update'], TRUE)) {
+    return AccessResult::neutral();
+  }
+
+  /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
+  $order = $entity;
+
+  // Allow access if:
+  // 1. Order is in draft state (cart)
+  // 2. User is anonymous (UID 0) and order belongs to anonymous (UID 0)
+  // 3. OR user owns the order
+  if ($order->getState()->getId() === 'draft') {
+    $orderUid = (int) $order->getCustomerId();
+    $accountUid = (int) $account->id();
+
+    // Anonymous users can access anonymous draft orders.
+    if ($accountUid === 0 && $orderUid === 0) {
+      return AccessResult::allowed()
+        ->cachePerUser()
+        ->addCacheableDependency($order);
+    }
+
+    // Authenticated users can access their own draft orders.
+    if ($accountUid > 0 && $orderUid === $accountUid) {
+      return AccessResult::allowed()
+        ->cachePerUser()
+        ->addCacheableDependency($order);
+    }
+  }
+
+  // For non-draft orders, let Commerce handle access normally.
+  return AccessResult::neutral();
 }
 

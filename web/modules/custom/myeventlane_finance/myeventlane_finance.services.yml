@@ -1,0 +1,16 @@
+services:
+  # BAS Report Service.
+  myeventlane_finance.bas_report:
+    class: Drupal\myeventlane_finance\Service\BasReportService
+    arguments: ['@entity_type.manager']
+
+  # BAS CSV Export Service.
+  myeventlane_finance.bas_csv_export:
+    class: Drupal\myeventlane_finance\Service\BasCsvExportService
+    arguments: ['@myeventlane_finance.bas_report']
+
+  # BAS PDF Export Service.
+  myeventlane_finance.bas_pdf_export:
+    class: Drupal\myeventlane_finance\Service\BasPdfExportService
+    arguments: ['@myeventlane_finance.bas_report']
+

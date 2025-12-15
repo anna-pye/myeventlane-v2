@@ -1,0 +1,7 @@
+bas:
+  css:
+    theme:
+      css/bas.css: {}
+  js:
+    js/bas.js: {}
+

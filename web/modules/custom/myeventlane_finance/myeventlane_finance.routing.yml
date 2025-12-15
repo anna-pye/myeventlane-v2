@@ -1,0 +1,62 @@
+# Admin BAS page.
+myeventlane_finance.admin_bas:
+  path: '/admin/myeventlane/finance/bas'
+  defaults:
+    _controller: '\Drupal\myeventlane_finance\Controller\AdminBasController::bas'
+    _title: 'BAS Report'
+  requirements:
+    _permission: 'view admin bas reports'
+  options:
+    _admin_route: TRUE
+
+# Admin BAS CSV export.
+myeventlane_finance.admin_bas_csv:
+  path: '/admin/myeventlane/finance/bas/export/csv'
+  defaults:
+    _controller: '\Drupal\myeventlane_finance\Controller\AdminBasController::exportCsv'
+  requirements:
+    _permission: 'view admin bas reports'
+  options:
+    _admin_route: TRUE
+
+# Admin BAS PDF export.
+myeventlane_finance.admin_bas_pdf:
+  path: '/admin/myeventlane/finance/bas/export/pdf'
+  defaults:
+    _controller: '\Drupal\myeventlane_finance\Controller\AdminBasController::exportPdf'
+  requirements:
+    _permission: 'view admin bas reports'
+  options:
+    _admin_route: TRUE
+
+# Vendor BAS page.
+myeventlane_finance.vendor_bas:
+  path: '/vendor/finance/bas'
+  defaults:
+    _controller: '\Drupal\myeventlane_finance\Controller\VendorBasController::bas'
+    _title: 'BAS Report'
+  requirements:
+    _permission: 'view vendor bas reports'
+  options:
+    _maintenance_access: FALSE
+
+# Vendor BAS CSV export.
+myeventlane_finance.vendor_bas_csv:
+  path: '/vendor/finance/bas/export/csv'
+  defaults:
+    _controller: '\Drupal\myeventlane_finance\Controller\VendorBasController::exportCsv'
+  requirements:
+    _permission: 'view vendor bas reports'
+  options:
+    _maintenance_access: FALSE
+
+# Vendor BAS PDF export.
+myeventlane_finance.vendor_bas_pdf:
+  path: '/vendor/finance/bas/export/pdf'
+  defaults:
+    _controller: '\Drupal\myeventlane_finance\Controller\VendorBasController::exportPdf'
+  requirements:
+    _permission: 'view vendor bas reports'
+  options:
+    _maintenance_access: FALSE
+

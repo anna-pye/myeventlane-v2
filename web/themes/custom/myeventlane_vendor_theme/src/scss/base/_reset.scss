@@ -1,130 +1,73 @@
 /**
  * @file
- * CSS reset and base styles for MyEventLane Vendor Theme.
+ * Base reset styles for vendor theme.
  */
 
 @use '../tokens/colors' as *;
 @use '../tokens/typography' as *;
 @use '../tokens/spacing' as *;
 
-// ============================================================================
-// RESET
-// ============================================================================
-
-*,
-*::before,
-*::after {
+* {
   box-sizing: border-box;
 }
 
 html {
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
 body {
-  margin: 0;
-  padding: 0;
   font-family: $font-family-sans;
-  font-size: $font-size-body;
+  font-size: $font-size-base;
   line-height: $line-height-normal;
   color: $text-primary;
   background-color: $bg-secondary;
+  margin: 0;
+  padding: 0;
 }
 
-// ============================================================================
-// TYPOGRAPHY BASE
-// ============================================================================
-
+// Headings
 h1, h2, h3, h4, h5, h6 {
-  margin: 0 0 $spacing-4 0;
   font-family: $heading-font-family;
   font-weight: $heading-font-weight;
-  line-height: $heading-line-height;
+  line-height: $line-height-tight;
   color: $text-primary;
+  margin-top: 0;
+  margin-bottom: $spacing-4;
 }
 
-h1 {
-  @include page-title;
-}
+h1 { font-size: $font-size-4xl; }
+h2 { font-size: $font-size-3xl; }
+h3 { font-size: $font-size-2xl; }
+h4 { font-size: $font-size-xl; }
+h5 { font-size: $font-size-lg; }
+h6 { font-size: $font-size-base; }
 
-h2 {
-  @include section-title;
-}
-
-h3 {
-  font-size: $font-size-lg;
-  font-weight: $font-weight-medium;
-}
-
-h4, h5, h6 {
-  font-size: $font-size-base;
-  font-weight: $font-weight-medium;
-}
-
-p {
-  margin: 0 0 $spacing-4 0;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
+// Links
 a {
   color: $primary;
   text-decoration: none;
-  
+  transition: color 0.15s ease-in-out;
+
   &:hover,
   &:focus {
-    text-decoration: underline;
     color: $primary-dark;
+    text-decoration: underline;
   }
 }
 
-// ============================================================================
-// LISTS
-// ============================================================================
-
+// Lists
 ul, ol {
-  margin: 0 0 $spacing-4 0;
+  margin: 0;
   padding-left: $spacing-6;
 }
 
-li {
-  margin-bottom: $spacing-2;
-}
-
-// ============================================================================
-// IMAGES & MEDIA
-// ============================================================================
-
-img, video {
+// Images
+img {
   max-width: 100%;
   height: auto;
+  display: block;
 }
 
-// ============================================================================
-// UTILITY CLASSES
-// ============================================================================
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.text-muted {
-  color: $text-muted;
-}
-
-.text-secondary {
-  color: $text-secondary;
-}
 

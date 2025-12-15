@@ -1,0 +1,193 @@
+/**
+ * @file
+ * Vendor donation list styles.
+ */
+
+.mel-donation-vendor-list {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.mel-donation-vendor-list__header {
+  margin-bottom: 2rem;
+}
+
+.mel-donation-vendor-list__header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 1.5rem 0;
+}
+
+.mel-donation-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.mel-stat-card {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mel-stat-label {
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mel-stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #c0392b;
+}
+
+.mel-donation-events {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.mel-donation-event-card {
+  padding: 1.5rem;
+}
+
+.mel-donation-event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.mel-donation-event-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+}
+
+.mel-donation-event-header h2 a {
+  color: #333;
+  text-decoration: none;
+}
+
+.mel-donation-event-header h2 a:hover {
+  color: #c0392b;
+}
+
+.mel-donation-event-stats {
+  display: flex;
+  gap: 2rem;
+}
+
+.mel-donation-event-stats .mel-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.mel-donation-event-stats .mel-stat-label {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.mel-donation-event-stats .mel-stat-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #c0392b;
+}
+
+.mel-donation-list {
+  margin-top: 1.5rem;
+}
+
+.mel-donation-list h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #333;
+}
+
+.mel-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.mel-table thead {
+  background: #f5f5f5;
+}
+
+.mel-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #333;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.mel-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  color: #555;
+}
+
+.mel-table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.mel-card--empty {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.mel-card--empty p {
+  font-size: 1.125rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .mel-donation-vendor-list {
+    padding: 1rem 0.5rem;
+  }
+
+  .mel-donation-summary {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .mel-donation-event-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .mel-donation-event-stats {
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .mel-table {
+    font-size: 0.875rem;
+  }
+
+  .mel-table th,
+  .mel-table td {
+    padding: 0.5rem;
+  }
+}
+

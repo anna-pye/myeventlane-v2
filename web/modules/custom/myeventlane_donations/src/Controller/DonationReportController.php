@@ -174,19 +174,20 @@ final class DonationReportController extends ControllerBase {
         $orders = $orderStorage->loadMultiple($orderIds);
         foreach ($orders as $order) {
           $created = $order->getCreatedTime();
-          $month = date('Y-m', $created);
-          if (!isset($stats[$month])) {
-            $stats[$month] = [
-              'month' => $month,
-              'total' => 0,
+          $monthKey = date('Y-m', $created);
+          $monthLabel = date('M Y', $created);
+          if (!isset($stats[$monthKey])) {
+            $stats[$monthKey] = [
+              'month' => $monthLabel,
+              'total' => 0.0,
               'count' => 0,
             ];
           }
           $totalPrice = $order->getTotalPrice();
           if ($totalPrice) {
-            $stats[$month]['total'] += (float) $totalPrice->getNumber();
+            $stats[$monthKey]['total'] += (float) $totalPrice->getNumber();
           }
-          $stats[$month]['count']++;
+          $stats[$monthKey]['count']++;
         }
       }
     }
@@ -223,19 +224,20 @@ final class DonationReportController extends ControllerBase {
         $orders = $orderStorage->loadMultiple($orderIds);
         foreach ($orders as $order) {
           $created = $order->getCreatedTime();
-          $month = date('Y-m', $created);
-          if (!isset($stats[$month])) {
-            $stats[$month] = [
-              'month' => $month,
-              'total' => 0,
+          $monthKey = date('Y-m', $created);
+          $monthLabel = date('M Y', $created);
+          if (!isset($stats[$monthKey])) {
+            $stats[$monthKey] = [
+              'month' => $monthLabel,
+              'total' => 0.0,
               'count' => 0,
             ];
           }
           $totalPrice = $order->getTotalPrice();
           if ($totalPrice) {
-            $stats[$month]['total'] += (float) $totalPrice->getNumber();
+            $stats[$monthKey]['total'] += (float) $totalPrice->getNumber();
           }
-          $stats[$month]['count']++;
+          $stats[$monthKey]['count']++;
         }
       }
     }

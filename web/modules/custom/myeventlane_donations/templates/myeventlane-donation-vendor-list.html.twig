@@ -1,0 +1,88 @@
+{#
+/**
+ * @file
+ * Template for vendor donation list page.
+ *
+ * Available variables:
+ * - events: Array of events with donation data.
+ * - total_donations: Total donation amount across all events.
+ * - total_count: Total number of donations.
+ * - average_donation: Average donation amount.
+ */
+#}
+<div class="mel-donation-vendor-list">
+  <div class="mel-donation-vendor-list__header">
+    <h1>{{ 'Donations Received'|t }}</h1>
+    <div class="mel-donation-summary">
+      <div class="mel-stat-card">
+        <span class="mel-stat-label">{{ 'Total Donations'|t }}</span>
+        <span class="mel-stat-value">${{ total_donations|number_format(2) }}</span>
+      </div>
+      <div class="mel-stat-card">
+        <span class="mel-stat-label">{{ 'Donation Count'|t }}</span>
+        <span class="mel-stat-value">{{ total_count }}</span>
+      </div>
+      <div class="mel-stat-card">
+        <span class="mel-stat-label">{{ 'Average Donation'|t }}</span>
+        <span class="mel-stat-value">${{ average_donation|number_format(2) }}</span>
+      </div>
+    </div>
+  </div>
+
+  {% if events is not empty %}
+    <div class="mel-donation-events">
+      {% for event in events %}
+        <div class="mel-card mel-donation-event-card">
+          <div class="mel-donation-event-header">
+            <h2><a href="{{ event.event_url }}">{{ event.event_title }}</a></h2>
+            <div class="mel-donation-event-stats">
+              <div class="mel-stat">
+                <span class="mel-stat-label">{{ 'Total'|t }}</span>
+                <span class="mel-stat-value">${{ event.total|number_format(2) }}</span>
+              </div>
+              <div class="mel-stat">
+                <span class="mel-stat-label">{{ 'Count'|t }}</span>
+                <span class="mel-stat-value">{{ event.count }}</span>
+              </div>
+              <div class="mel-stat">
+                <span class="mel-stat-label">{{ 'Average'|t }}</span>
+                <span class="mel-stat-value">${{ event.average|number_format(2) }}</span>
+              </div>
+            </div>
+          </div>
+
+          {% if event.donations is not empty %}
+            <div class="mel-donation-list">
+              <h3>{{ 'Recent Donations'|t }}</h3>
+              <table class="mel-table">
+                <thead>
+                  <tr>
+                    <th>{{ 'Date'|t }}</th>
+                    <th>{{ 'Amount'|t }}</th>
+                    <th>{{ 'Donor'|t }}</th>
+                    <th>{{ 'Email'|t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for donation in event.donations %}
+                    <tr>
+                      <td>{{ donation.date }}</td>
+                      <td>${{ donation.amount|number_format(2) }}</td>
+                      <td>{{ donation.donor_name }}</td>
+                      <td>{{ donation.donor_email }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="mel-card mel-card--empty">
+      <p>{{ 'You have not received any donations yet.'|t }}</p>
+    </div>
+  {% endif %}
+</div>
+

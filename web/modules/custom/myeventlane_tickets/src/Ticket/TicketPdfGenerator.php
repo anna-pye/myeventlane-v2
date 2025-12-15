@@ -12,11 +12,15 @@ use Dompdf\Dompdf;
 class TicketPdfGenerator {
 
   /**
+   * The renderer service.
+   *
    * @var \Drupal\Core\Render\RendererInterface
    */
   protected $renderer;
 
   /**
+   * The theme handler service.
+   *
    * @var \Drupal\Core\Extension\ThemeHandlerInterface
    */
   protected $themeHandler;
@@ -32,13 +36,13 @@ class TicketPdfGenerator {
   public function buildPdf(string $ticket_code, $event, string $holder) : string {
     // Extract event data to avoid render array issues with entity fields.
     $event_title = $event->label();
-    
+
     // Extract event start date.
     $event_start = NULL;
     if ($event->hasField('field_event_start') && !$event->get('field_event_start')->isEmpty()) {
       $event_start = $event->get('field_event_start')->value;
     }
-    
+
     // Extract location address as formatted string.
     $location = '';
     if ($event->hasField('field_location') && !$event->get('field_location')->isEmpty()) {

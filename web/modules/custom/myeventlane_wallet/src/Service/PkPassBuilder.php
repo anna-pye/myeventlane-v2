@@ -32,7 +32,7 @@ final class PkPassBuilder {
    *   Path to the generated .pkpass file.
    */
   public function generate(OrderItemInterface $orderItem): string {
-    // TODO: Implement actual pass generation.
+    // @todo Implement actual pass generation.
     // For now, return a placeholder path.
     $tempDir = $this->fileSystem->getTempDirectory();
     $passPath = $tempDir . '/ticket_' . $orderItem->id() . '.pkpass';
@@ -44,9 +44,3 @@ final class PkPassBuilder {
   }
 
 }
-
-
-
-
-
-

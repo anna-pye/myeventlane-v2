@@ -11,7 +11,7 @@ use Drupal\commerce_cart\CartProviderInterface;
 use Drupal\commerce_cart\CartManagerInterface;
 use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\price\Price;
+use Drupal\commerce_price\Price;
 
 /**
  * Service for handling platform donations (vendor → MyEventLane).

@@ -1,1119 +1,403 @@
-/**
- * @file
- * Complete fallback CSS for MyEventLane Vendor Theme.
- * This provides full styling when Vite hasn't been built.
- */
-
-/* ============================================================================
-   RESET & BASE
-   ============================================================================ */
-
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
-html {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
+/* Fallback styles for vendor console when Vite assets are not built. */
+html, body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  color: #1A1A1A;
-  background-color: #F7F8FA;
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  background: #f8fafc;
+  color: #0f172a;
 }
-
-/* Hide default Drupal menus - AGGRESSIVE */
-body.mel-vendor-theme > ul,
-body.mel-vendor-theme > nav,
-body.mel-vendor-theme > header:not(.mel-vendor-shell__header),
-body.mel-vendor-theme > div > ul,
-body.mel-vendor-theme > div > nav,
-body.mel-vendor-theme .region-navigation,
-body.mel-vendor-theme .region-header,
-body.mel-vendor-theme #block-myeventlane-vendor-theme-main-menu,
-body.mel-vendor-theme #block-myeventlane-vendor-theme-vendormenu,
-body.mel-vendor-theme .block-system-menu-block,
-body.mel-vendor-theme .block-menu,
-body.mel-vendor-theme .menu--vendor,
-body.mel-vendor-theme .menu--main,
-body > ul.menu,
-.dialog-off-canvas-main-canvas > ul,
-.dialog-off-canvas-main-canvas > nav:first-child,
-.dialog-off-canvas-main-canvas > header:first-child,
-.layout-container > header:first-child,
-.layout-container > nav:first-child,
-body.mel-vendor-theme .block-myeventlane-vendor-menu {
-  display: none !important;
-}
-
-/* Force vendor shell to show */
-body.mel-vendor-theme .mel-vendor-shell {
-  display: grid !important;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  margin: 0 0 1rem 0;
-  font-weight: 600;
-  line-height: 1.25;
-  color: #1A1A1A;
-}
-
-h1 { font-size: 1.75rem; }
-h2 { font-size: 1.25rem; }
-h3 { font-size: 1.125rem; }
 
 a {
-  color: #2563EB;
+  color: #2563eb;
   text-decoration: none;
 }
+a:hover { text-decoration: underline; }
 
-a:hover {
-  text-decoration: underline;
-}
-
-/* ============================================================================
-   LAYOUT - VENDOR SHELL
-   ============================================================================ */
-
-.mel-vendor-shell {
+.mel-vendor-shell,
+.vendor-shell {
   display: grid;
   grid-template-columns: 260px 1fr;
   min-height: 100vh;
-  background: #F7F8FA;
 }
 
-@media (max-width: 1023px) {
-  .mel-vendor-shell {
+@media (max-width: 960px) {
+  .mel-vendor-shell,
+  .vendor-shell {
     grid-template-columns: 1fr;
   }
 }
 
-/* Left Sidebar */
-.mel-vendor-shell__sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  background: #0D1520;
-  color: #fff;
-  padding: 1.5rem 1.25rem;
+.mel-vendor-shell__sidebar,
+.vendor-shell__sidebar {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 24px;
+}
+
+.mel-vendor-shell__main,
+.vendor-shell__main {
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 }
 
-@media (max-width: 1023px) {
-  .mel-vendor-shell__sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 280px;
-    z-index: 40;
-    transform: translateX(-100%);
-    transition: transform 0.25s ease-in-out;
-  }
-  
-  .mel-vendor-shell__sidebar.is-open {
-    transform: translateX(0);
-    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-  }
-}
-
-/* Sidebar Overlay */
-.mel-sidebar-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  opacity: 0;
-  visibility: hidden;
-  z-index: 39;
-  transition: opacity 0.25s, visibility 0.25s;
-}
-
-.mel-sidebar-overlay.is-visible {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* Main Area */
-.mel-vendor-shell__main {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: #fff;
-}
-
-/* Header */
-.mel-vendor-shell__header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: rgba(255,255,255,0.96);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid #E6E6E6;
-  padding: 0.75rem 1.5rem;
-}
-
-/* Content */
-.mel-vendor-shell__content {
-  flex: 1;
-  padding: 2rem;
-}
-
-/* Footer */
-.mel-vendor-shell__footer {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid #E6E6E6;
-  background: #F7F8FA;
-  color: #637185;
-  font-size: 0.875rem;
-}
-
-/* ============================================================================
-   HEADER
-   ============================================================================ */
-
-.mel-header {
+.mel-vendor-shell__header,
+.vendor-shell__topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 16px;
+  padding: 16px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 5;
 }
 
-.mel-header__left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.mel-vendor-shell__content,
+.vendor-shell__content {
+  padding: 24px;
 }
 
-.mel-header__right {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.mel-header__menu-toggle {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  background: transparent;
-  border: 1px solid #E6E6E6;
-  border-radius: 8px;
-  color: #1A1A1A;
-  cursor: pointer;
-}
-
-@media (max-width: 1023px) {
-  .mel-header__menu-toggle {
-    display: inline-flex;
-  }
-}
-
-.mel-header__brand {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  text-decoration: none;
-  color: inherit;
-}
-
-.mel-header__brand:hover {
-  text-decoration: none;
-}
-
-.mel-header__logo-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.mel-header__brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.mel-header__title {
-  font-weight: 600;
-  font-size: 1rem;
-  color: #1A1A1A;
-}
-
-.mel-header__subtitle {
-  font-size: 0.75rem;
-  color: #637185;
-}
-
-.mel-header__action {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border-radius: 8px;
-  text-decoration: none;
-  transition: all 0.15s;
-}
-
-.mel-header__action--primary {
-  background: #2563EB;
-  color: #fff;
-  border: none;
-}
-
-.mel-header__action--primary:hover {
-  background: #1D4ED8;
-  text-decoration: none;
-  color: #fff;
-}
-
-@media (max-width: 640px) {
-  .mel-header__action-text {
-    display: none;
-  }
-}
-
-.mel-header__user {
-  display: flex;
-  align-items: center;
-}
-
-.mel-header__user-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #FF8A8A;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-/* ============================================================================
-   SIDEBAR NAVIGATION
-   ============================================================================ */
-
-.mel-sidebar {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  gap: 1.5rem;
+.mel-vendor-shell__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
 }
 
 .mel-sidebar__brand {
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
 }
 
 .mel-sidebar__logo {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  text-decoration: none;
-  color: #fff;
-}
-
-.mel-sidebar__logo:hover {
-  text-decoration: none;
+  gap: 8px;
+  color: #e2e8f0;
+  font-weight: 700;
 }
 
 .mel-sidebar__logo-mark {
-  display: flex;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: #FF8A8A;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 1.125rem;
-}
-
-.mel-sidebar__logo-text {
-  font-weight: 600;
-  font-size: 1.125rem;
-}
-
-.mel-sidebar__nav {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.mel-sidebar__item {
-  margin: 0;
-}
-
-.mel-sidebar__link {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  color: rgba(255,255,255,0.7);
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 0.9375rem;
-  transition: all 0.15s;
-}
-
-.mel-sidebar__link:hover {
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  text-decoration: none;
-}
-
-.mel-sidebar__link.is-active {
   background: rgba(255,255,255,0.12);
-  color: #fff;
+  color: #ffffff;
+  font-weight: 700;
 }
 
-.mel-sidebar__link-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  opacity: 0.8;
+.mel-sidebar__nav,
+.vendor-shell__nav {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+  display: grid;
+  gap: 4px;
 }
 
-.mel-sidebar__divider {
-  border: none;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  margin: 1rem 0;
+.mel-sidebar__link,
+.vendor-shell__nav-link {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #cbd5e1;
 }
 
-.mel-sidebar__section-label {
-  padding: 0.5rem 1rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: rgba(255,255,255,0.5);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.mel-sidebar__link:hover,
+.vendor-shell__nav-link:hover {
+  background: rgba(255,255,255,0.08);
+  color: #ffffff;
+}
+
+.mel-sidebar__link.is-active,
+.vendor-shell__nav-link.is-active {
+  background: rgba(37, 99, 235, 0.18);
+  color: #ffffff;
 }
 
 .mel-sidebar__footer {
+  display: grid;
+  gap: 10px;
   margin-top: auto;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  color: #cbd5e1;
 }
 
-.mel-sidebar__user {
+.mel-header,
+.vendor-shell__topbar {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  background: rgba(255,255,255,0.05);
-  border-radius: 8px;
+  gap: 12px;
 }
 
-.mel-sidebar__user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #FF8A8A;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 600;
+.mel-header__title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
 }
 
-.mel-sidebar__user-info {
-  flex: 1;
-  min-width: 0;
+.mel-header__subtitle {
+  font-size: 14px;
+  color: #475569;
 }
 
-.mel-sidebar__user-name {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #fff;
+.mel-page-title {
+  margin: 0 0 4px 0;
+  font-size: 28px;
+  font-weight: 700;
 }
 
-.mel-sidebar__user-role {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.6);
-}
-
-.mel-sidebar__logout a {
-  color: rgba(255,255,255,0.6);
-  font-size: 0.875rem;
-  text-decoration: none;
-}
-
-.mel-sidebar__logout a:hover {
-  color: #fff;
-}
-
-/* ============================================================================
-   DASHBOARD
-   ============================================================================ */
-
-.mel-dashboard {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+.mel-page-subtitle {
+  margin: 0;
+  color: #475569;
 }
 
 .mel-dashboard__header {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-@media (min-width: 768px) {
-  .mel-dashboard__header {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-  }
-}
-
-.mel-dashboard__title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.mel-dashboard__subtitle {
-  color: #637185;
-  margin: 0.25rem 0 0 0;
-}
-
-.mel-dashboard__section {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.mel-dashboard__section-header {
-  display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 16px;
+  margin-bottom: 20px;
 }
-
-.mel-dashboard__section-title {
-  font-size: 1.25rem;
-  font-weight: 500;
-  margin: 0;
-}
-
-/* ============================================================================
-   KPI CARDS
-   ============================================================================ */
 
 .mel-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
 }
-
-@media (min-width: 768px) {
-  .mel-kpi-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.mel-kpi-card {
-  background: #fff;
-  border: 1px solid #E6E6E6;
-  border-radius: 12px;
-  padding: 1.25rem;
-}
-
-.mel-kpi-card__header {
-  margin-bottom: 0.75rem;
-}
-
-.mel-kpi-card__icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #F7F8FA;
-  color: #637185;
-}
-
-.mel-kpi-card__icon--coral {
-  background: #FFE0E0;
-  color: #FF8A8A;
-}
-
-.mel-kpi-card__icon--blue {
-  background: rgba(37,99,235,0.1);
-  color: #2563EB;
-}
-
-.mel-kpi-card__icon--green {
-  background: #D1FAE5;
-  color: #5CC98B;
-}
-
-.mel-kpi-card__icon--yellow {
-  background: #FFEAAA;
-  color: #F59E0B;
-}
-
-.mel-kpi-card__label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #637185;
-  margin-bottom: 0.5rem;
-}
-
-.mel-kpi-card__value {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: #1A1A1A;
-  line-height: 1.2;
-}
-
-.mel-kpi-card__currency {
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.mel-kpi-card__delta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin-top: 0.5rem;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border-radius: 4px;
-}
-
-.mel-kpi-card__delta--positive {
-  background: #D1FAE5;
-  color: #5CC98B;
-}
-
-.mel-kpi-card__delta--negative {
-  background: #FFE0E0;
-  color: #FF8A8A;
-}
-
-.mel-kpi-card__delta-label {
-  color: #637185;
-  font-weight: 400;
-}
-
-/* ============================================================================
-   TOOLS / QUICK ACTIONS
-   ============================================================================ */
-
-.mel-dashboard__tools {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-}
-
-@media (min-width: 640px) {
-  .mel-dashboard__tools {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .mel-dashboard__tools {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
-
-.mel-dashboard__tool {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1.25rem;
-  background: #fff;
-  border: 1px solid #E6E6E6;
-  border-radius: 12px;
-  text-decoration: none;
-  color: #1A1A1A;
-  text-align: center;
-  transition: all 0.15s;
-}
-
-.mel-dashboard__tool:hover {
-  border-color: #2563EB;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  transform: translateY(-2px);
-  text-decoration: none;
-}
-
-.mel-dashboard__tool-icon {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #F7F8FA;
-  border-radius: 8px;
-  color: #637185;
-}
-
-.mel-dashboard__tool-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-/* ============================================================================
-   CARDS
-   ============================================================================ */
 
 .mel-card {
-  background: #fff;
-  border: 1px solid #E6E6E6;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.mel-kpi__label {
+  color: #475569;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.mel-kpi__value {
+  font-size: 26px;
+  font-weight: 700;
+}
+.mel-kpi__delta {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #2563eb;
+}
+.mel-kpi__delta.is-negative {
+  color: #ef4444;
+}
+
+.mel-grid {
+  display: grid;
+  gap: 16px;
+}
+.mel-grid--2 {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
 .mel-card__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #E6E6E6;
+  margin-bottom: 10px;
 }
-
-.mel-card__header--no-border {
-  border-bottom: none;
-  padding-bottom: 0.5rem;
-}
-
 .mel-card__title {
-  font-size: 1rem;
   font-weight: 600;
-  margin: 0;
+}
+.mel-card__meta {
+  color: #475569;
+  font-size: 13px;
 }
 
-.mel-card__body {
-  padding: 1.5rem;
-}
-
-.mel-card__body--flush {
-  padding: 0;
-}
-
-/* ============================================================================
-   TABLES
-   ============================================================================ */
-
-.mel-table-css {
+.mel-table {
   display: flex;
   flex-direction: column;
+  gap: 6px;
 }
-
-.mel-table-css__head {
+.mel-table__head,
+.mel-table__row {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-  gap: 1rem;
-  padding: 0.75rem 1.5rem;
-  background: #F7F8FA;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #637185;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.mel-table-css__row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #E6E6E6;
-  text-decoration: none;
-  color: inherit;
+  gap: 8px;
   align-items: center;
-  transition: background 0.1s;
+  padding: 10px;
 }
-
-.mel-table-css__row:last-child {
-  border-bottom: none;
+.mel-table__head {
+  font-size: 13px;
+  color: #475569;
 }
-
-.mel-table-css__row:hover {
-  background: #F7F8FA;
+.mel-table__row {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
 }
+.mel-table__row:hover { border-color: #cbd5e1; }
+.mel-table__title { font-weight: 600; }
+.mel-table__meta { color: #475569; font-size: 13px; }
+.mel-table__empty { padding: 12px; color: #475569; }
 
-.mel-table__title {
-  font-weight: 500;
-  color: #1A1A1A;
-}
-
-.mel-table__meta {
-  font-size: 0.75rem;
-  color: #637185;
-  margin-top: 0.25rem;
-}
-
-/* ============================================================================
-   BADGES
-   ============================================================================ */
-
-.mel-badge {
-  display: inline-flex;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  border-radius: 9999px;
-  background: #F3F4F6;
-  color: #637185;
-}
-
-.mel-badge--on-sale,
-.mel-badge--published,
-.mel-badge--running {
-  background: #D1FAE5;
-  color: #059669;
-}
-
-.mel-badge--draft,
-.mel-badge--queued {
-  background: #FFEAAA;
-  color: #D97706;
-}
-
-.mel-badge--ended {
-  background: #F3F4F6;
-  color: #6B7280;
-}
-
-/* ============================================================================
-   LISTS
-   ============================================================================ */
-
-.mel-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
+.mel-list { display: grid; gap: 8px; }
 .mel-list__item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #E6E6E6;
 }
+.mel-list__meta { color: #475569; font-size: 13px; }
 
-.mel-list__item:first-child {
-  padding-top: 0;
-}
-
-.mel-list__item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.mel-list__item-title {
-  font-weight: 500;
-  color: #1A1A1A;
-}
-
-.mel-list__item-value {
-  font-weight: 600;
-  color: #1A1A1A;
-}
-
-/* ============================================================================
-   STATUS
-   ============================================================================ */
-
-.mel-status {
+.mel-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+  font-size: 12px;
 }
 
-.mel-status__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
+.mel-empty { color: #475569; font-size: 14px; }
 
-.mel-status--running .mel-status__dot {
-  background: #5CC98B;
-}
-
-.mel-status--queued .mel-status__dot {
-  background: #F59E0B;
-}
-
-/* ============================================================================
-   EMPTY STATES
-   ============================================================================ */
-
-.mel-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 1.5rem;
-  text-align: center;
-}
-
-.mel-empty-state--compact {
-  padding: 1.5rem;
-}
-
-.mel-empty-state__icon {
-  width: 48px;
-  height: 48px;
-  margin-bottom: 1rem;
-  color: #9CA3AF;
-}
-
-.mel-empty-state__text {
-  color: #637185;
-  margin-bottom: 1rem;
-}
-
-.mel-empty {
-  padding: 1.5rem;
-  text-align: center;
-  color: #637185;
-  font-size: 0.875rem;
-}
-
-/* ============================================================================
-   BUTTONS
-   ============================================================================ */
-
-.mel-btn {
+.mel-btn, .button, .button--primary, .button--secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  font-family: inherit;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  line-height: 1.25;
-  text-align: center;
-  text-decoration: none;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.mel-btn--primary {
-  background: #2563EB;
-  color: #fff;
-  border-color: #2563EB;
-}
-
-.mel-btn--primary:hover {
-  background: #1D4ED8;
-  border-color: #1D4ED8;
-  text-decoration: none;
-  color: #fff;
-}
-
-.mel-btn--secondary {
-  background: #fff;
-  color: #1A1A1A;
-  border-color: #E6E6E6;
-}
-
-.mel-btn--secondary:hover {
-  background: #F7F8FA;
-  border-color: #D1D5DB;
-  text-decoration: none;
-}
-
-.mel-link {
-  color: #2563EB;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.mel-link:hover {
-  text-decoration: underline;
-}
-
-/* ============================================================================
-   PANELS LAYOUT
-   ============================================================================ */
-
-.mel-dashboard__panels {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-
-@media (min-width: 1024px) {
-  .mel-dashboard__panels {
-    grid-template-columns: 2fr 1fr;
-  }
-}
-
-.mel-dashboard__panel-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* ============================================================================
-   CHART CARDS (Placeholder)
-   ============================================================================ */
-
-.mel-chart-card {
-  background: #fff;
-  border: 1px solid #E6E6E6;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.mel-chart-card__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #E6E6E6;
-}
-
-.mel-chart-card__title {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.mel-chart-card__subtitle {
-  font-size: 0.75rem;
-  color: #637185;
-  margin-top: 0.25rem;
-}
-
-.mel-chart-card__body {
-  padding: 1.5rem;
-}
-
-.mel-chart {
-  position: relative;
-  min-height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #9CA3AF;
-  font-size: 0.875rem;
-}
-
-.mel-chart--md {
-  min-height: 280px;
-}
-
-.mel-chart-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  margin-top: 1.5rem;
-}
-
-@media (min-width: 1024px) {
-  .mel-chart-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.mel-chart-period {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  background: #F7F8FA;
-  border-radius: 8px;
-}
-
-.mel-chart-period__btn {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #637185;
-  background: transparent;
+  gap: 6px;
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
+}
+.mel-btn--primary, .button, .button--primary {
+  background: #2563eb;
+  color: #fff;
+}
+.mel-btn--secondary, .button--secondary {
+  background: #e2e8f0;
+  color: #0f172a;
 }
 
-.mel-chart-period__btn:hover {
-  color: #1A1A1A;
+.mel-console {
+  display: grid;
+  gap: 16px;
 }
-
-.mel-chart-period__btn.is-active {
-  color: #1A1A1A;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-
-/* ============================================================================
-   FOOTER
-   ============================================================================ */
-
-.mel-footer {
+.mel-console__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+}
+.mel-console__tabs {
+  display: flex;
+  gap: 8px;
   flex-wrap: wrap;
 }
-
-.mel-footer__left {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.mel-console__tab {
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.08);
+}
+.mel-console__tab.is-active {
+  background: #2563eb;
+  color: #fff;
 }
 
-.mel-footer__brand {
+/* Event create form tabs */
+.mel-event-form-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.mel-tab-button {
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  white-space: nowrap;
+}
+
+.mel-tab-button:hover {
+  background: #f1f5f9;
+}
+
+.mel-tab-button.is-active {
+  background: #2563eb;
+  color: #fff;
   font-weight: 600;
-  color: #1A1A1A;
 }
 
-.mel-footer__meta {
-  color: #637185;
+.mel-tab-pane {
+  display: none;
 }
 
-.mel-footer__right {
+.mel-tab-pane.is-active {
+  display: block;
+}
+
+.mel-event-form-actions-wrapper {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 2px solid #e2e8f0;
+  margin-top: 24px;
 }
 
-.mel-footer__link {
-  color: #2563EB;
-  text-decoration: none;
+/* Hide duplicated raw lists injected before the shell when present. */
+body > nav,
+body > header,
+body > .header,
+body > .navbar,
+body > ul {
+  display: none !important;
 }
 
-.mel-footer__link:hover {
-  text-decoration: underline;
+/* Hide elements in the mel-form-hidden-elements container */
+.mel-form-hidden-elements {
+  /* Don't hide completely - form tokens need to submit */
+  /* Just hide any visual elements */
 }
+.mel-form-hidden-elements .mel-form-header,
+.mel-form-hidden-elements .mel-form-title,
+.mel-form-hidden-elements .mel-form-group,
+.mel-form-hidden-elements .mel-form-card,
+.mel-form-hidden-elements h2,
+.mel-form-hidden-elements h3,
+.mel-form-hidden-elements .form-item:not([type="hidden"]):not(:has(input[type="hidden"])) {
+  display: none !important;
+}
+
+/* Only show hidden inputs in the hidden elements container */
+.mel-form-hidden-elements > * {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+.mel-form-hidden-elements input[type="hidden"] {
+  display: block;
+}
+
 

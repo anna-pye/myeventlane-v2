@@ -28,14 +28,8 @@ final class WalletSigner {
    *   The signature.
    */
   public function sign(string $manifestPath): string {
-    // TODO: Implement actual signing with Apple certificates.
+    // @todo Implement actual signing with Apple certificates.
     return '';
   }
 
 }
-
-
-
-
-
-

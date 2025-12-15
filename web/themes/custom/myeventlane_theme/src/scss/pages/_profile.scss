@@ -1,0 +1,519 @@
+// ==========================================================================
+// Profile Pages (Customer & Vendor)
+// ==========================================================================
+// Beautiful profile editing pages with card-based layout, pastel styling,
+// and mobile-first responsive design.
+
+@use 'sass:color';
+@use '../tokens/colors';
+@use '../tokens/typography';
+@use '../tokens/spacing';
+@use '../tokens/radii';
+@use '../tokens/shadows';
+@use '../tokens/breakpoints';
+
+// ---------------------------------------------------------------------------
+// Profile Page Base
+// ---------------------------------------------------------------------------
+
+.mel-page--profile {
+  padding: spacing.mel-space(4) spacing.mel-space(4);
+
+  @include breakpoints.mel-break(md) {
+    padding: spacing.mel-space(6) spacing.mel-space(6);
+  }
+}
+
+.mel-profile-header {
+  margin-bottom: spacing.mel-space(6);
+  text-align: center;
+
+  @include breakpoints.mel-break(md) {
+    text-align: left;
+    margin-bottom: spacing.mel-space(8);
+  }
+}
+
+.mel-profile-header-title {
+  font-size: typography.mel-font-size(2xl);
+  font-weight: typography.$mel-font-extrabold;
+  color: colors.$mel-color-text;
+  margin: 0 0 spacing.mel-space(2) 0;
+  font-family: typography.$mel-font-family;
+
+  @include breakpoints.mel-break(md) {
+    font-size: typography.mel-font-size(3xl);
+  }
+}
+
+.mel-profile-header-subtitle {
+  font-size: typography.mel-font-size(base);
+  color: colors.$mel-color-text-muted;
+  margin: 0;
+}
+
+// ---------------------------------------------------------------------------
+// Profile Grid (Card Layout)
+// ---------------------------------------------------------------------------
+
+.mel-profile-grid {
+  display: grid;
+  gap: spacing.mel-space(5);
+  margin-bottom: spacing.mel-space(6);
+
+  @include breakpoints.mel-break(md) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: spacing.mel-space(6);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Profile Card
+// ---------------------------------------------------------------------------
+
+.mel-profile-card {
+  background: colors.$mel-color-surface;
+  border-radius: radii.$mel-radius-xl;
+  box-shadow: shadows.$mel-shadow-sm;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    box-shadow: shadows.$mel-shadow-md;
+  }
+}
+
+.mel-profile-card-header {
+  display: flex;
+  align-items: center;
+  gap: spacing.mel-space(3);
+  padding: spacing.mel-space(5) spacing.mel-space(5);
+  background: linear-gradient(135deg, colors.$mel-color-bg 0%, color.adjust(colors.$mel-color-bg, $lightness: -2%) 100%);
+  border-bottom: 1px solid colors.$mel-color-border;
+}
+
+.mel-profile-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: radii.$mel-radius-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: colors.$mel-color-text-inverse;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.mel-profile-card-icon--account {
+  background: linear-gradient(135deg, colors.$mel-color-secondary 0%, color.adjust(colors.$mel-color-secondary, $lightness: -10%) 100%);
+}
+
+.mel-profile-card-icon--address {
+  background: linear-gradient(135deg, colors.$mel-color-primary 0%, color.adjust(colors.$mel-color-primary, $lightness: -10%) 100%);
+}
+
+.mel-profile-card-icon--settings {
+  background: linear-gradient(135deg, colors.$mel-color-accent-alt 0%, color.adjust(colors.$mel-color-accent-alt, $lightness: -10%) 100%);
+}
+
+.mel-profile-card-icon--profile {
+  background: linear-gradient(135deg, colors.$mel-color-secondary 0%, color.adjust(colors.$mel-color-secondary, $lightness: -10%) 100%);
+}
+
+.mel-profile-card-icon--visual {
+  background: linear-gradient(135deg, #ff8c94 0%, color.adjust(#ff8c94, $lightness: -10%) 100%);
+}
+
+.mel-profile-card-icon--contact {
+  background: linear-gradient(135deg, colors.$mel-color-primary 0%, color.adjust(colors.$mel-color-primary, $lightness: -10%) 100%);
+}
+
+.mel-profile-card-icon--public {
+  background: linear-gradient(135deg, colors.$mel-color-success 0%, color.adjust(colors.$mel-color-success, $lightness: -10%) 100%);
+}
+
+.mel-profile-card-icon--payment {
+  background: linear-gradient(135deg, colors.$mel-color-accent 0%, color.adjust(colors.$mel-color-accent, $lightness: -10%) 100%);
+}
+
+.mel-profile-card-icon--team {
+  background: linear-gradient(135deg, colors.$mel-color-accent-alt 0%, color.adjust(colors.$mel-color-accent-alt, $lightness: -10%) 100%);
+}
+
+.mel-profile-card-icon--preferences {
+  background: linear-gradient(135deg, #a8e6cf 0%, color.adjust(#a8e6cf, $lightness: -10%) 100%);
+}
+
+.mel-profile-card-title {
+  font-size: typography.mel-font-size(lg);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-text;
+  margin: 0;
+  font-family: typography.$mel-font-family;
+}
+
+.mel-profile-card-body {
+  padding: spacing.mel-space(5);
+}
+
+.mel-profile-card-description {
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text-muted;
+  margin-bottom: spacing.mel-space(4);
+  line-height: typography.$mel-leading-relaxed;
+}
+
+// ---------------------------------------------------------------------------
+// Profile Avatar Section
+// ---------------------------------------------------------------------------
+
+.mel-profile-avatar-section {
+  text-align: center;
+  padding: spacing.mel-space(4);
+  background: colors.$mel-color-bg;
+  border-radius: radii.$mel-radius-lg;
+  margin-bottom: spacing.mel-space(5);
+}
+
+.mel-profile-avatar-help {
+  font-size: typography.mel-font-size(xs);
+  color: colors.$mel-color-text-muted;
+  margin-top: spacing.mel-space(3);
+  margin-bottom: 0;
+}
+
+// ---------------------------------------------------------------------------
+// Profile Section (sub-sections within cards)
+// ---------------------------------------------------------------------------
+
+.mel-profile-section {
+  margin-bottom: spacing.mel-space(5);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.mel-profile-section-title {
+  font-size: typography.mel-font-size(base);
+  font-weight: typography.$mel-font-semibold;
+  color: colors.$mel-color-text;
+  margin: 0 0 spacing.mel-space(4) 0;
+  padding-bottom: spacing.mel-space(2);
+  border-bottom: 1px solid colors.$mel-color-border;
+}
+
+// ---------------------------------------------------------------------------
+// Profile Empty State
+// ---------------------------------------------------------------------------
+
+.mel-profile-empty-state {
+  text-align: center;
+  padding: spacing.mel-space(6) spacing.mel-space(4);
+  color: colors.$mel-color-text-muted;
+  font-size: typography.mel-font-size(sm);
+  background: colors.$mel-color-bg;
+  border-radius: radii.$mel-radius-lg;
+  border: 2px dashed colors.$mel-color-border;
+}
+
+.mel-profile-customer-profiles {
+  // Container for customer profile management
+}
+
+// ---------------------------------------------------------------------------
+// Profile Actions (Form Submit)
+// ---------------------------------------------------------------------------
+
+.mel-profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: spacing.mel-space(3);
+  justify-content: flex-end;
+  padding-top: spacing.mel-space(6);
+  margin-top: spacing.mel-space(6);
+  border-top: 2px solid colors.$mel-color-border;
+
+  .form-actions {
+    margin: 0;
+    padding: 0;
+    border: none;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: spacing.mel-space(3);
+    justify-content: flex-end;
+
+    @include breakpoints.mel-break(md) {
+      width: auto;
+    }
+  }
+
+  .button,
+  .mel-btn {
+    min-width: 140px;
+    padding: spacing.mel-space(3) spacing.mel-space(6);
+    font-weight: typography.$mel-font-semibold;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Vendor Profile Specific Styles
+// ---------------------------------------------------------------------------
+
+.mel-page--vendor-profile {
+  // Vendor profile specific overrides
+}
+
+.mel-vendor-profile-form-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.mel-vendor-profile-form-content {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(5);
+
+  @include breakpoints.mel-break(lg) {
+    gap: spacing.mel-space(6);
+  }
+}
+
+.mel-profile-card--section {
+  // Full-width cards in vendor profile
+  @include breakpoints.mel-break(md) {
+    grid-column: 1 / -1;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Vertical Tabs Styling (for Vendor Profile)
+// ---------------------------------------------------------------------------
+
+.mel-vendor-profile-tabs-nav {
+  margin-bottom: spacing.mel-space(6);
+
+  // Override Drupal vertical tabs styling
+  .vertical-tabs {
+    border: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+  }
+
+  .vertical-tabs__menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: spacing.mel-space(2);
+    border-bottom: 2px solid colors.$mel-color-border;
+    padding-bottom: spacing.mel-space(2);
+    margin-bottom: spacing.mel-space(6);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    @include breakpoints.mel-break(md) {
+      flex-wrap: nowrap;
+    }
+  }
+
+  .vertical-tabs__menu-item {
+    margin: 0;
+    list-style: none;
+  }
+
+  .vertical-tabs__tab {
+    padding: spacing.mel-space(3) spacing.mel-space(4);
+    background: colors.$mel-color-bg;
+    border: 2px solid transparent;
+    border-radius: radii.$mel-radius-md;
+    font-size: typography.mel-font-size(sm);
+    font-weight: typography.$mel-font-medium;
+    color: colors.$mel-color-text-muted;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+
+    &:hover {
+      background: colors.$mel-color-surface;
+      color: colors.$mel-color-text;
+    }
+
+    &:focus-visible {
+      @include colors.mel-focus-ring;
+    }
+  }
+
+  .vertical-tabs__tab.is-selected,
+  .vertical-tabs__tab.selected {
+    background: colors.$mel-color-primary;
+    color: colors.$mel-color-text-inverse;
+    border-color: colors.$mel-color-primary;
+    font-weight: typography.$mel-font-semibold;
+
+    &:hover {
+      background: colors.$mel-color-primary-hover;
+      border-color: colors.$mel-color-primary-hover;
+    }
+  }
+
+  .vertical-tabs__panes {
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+  }
+
+  .vertical-tabs__pane {
+    display: none;
+
+    &.is-selected {
+      display: block;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Form Field Enhancements within Profile Cards
+// ---------------------------------------------------------------------------
+
+.mel-profile-card {
+  .form-item {
+    margin-bottom: spacing.mel-space(4);
+  }
+
+  label {
+    font-weight: typography.$mel-font-semibold;
+    color: colors.$mel-color-text;
+    margin-bottom: spacing.mel-space(2);
+  }
+
+  .description {
+    margin-top: spacing.mel-space(2);
+    color: colors.$mel-color-text-muted;
+    font-size: typography.mel-font-size(xs);
+  }
+
+  // Image upload fields
+  .image-widget {
+    .image-preview {
+      margin-bottom: spacing.mel-space(3);
+      border-radius: radii.$mel-radius-lg;
+      overflow: hidden;
+      border: 2px solid colors.$mel-color-border;
+    }
+
+    .file-upload {
+      padding: spacing.mel-space(4);
+      background: colors.$mel-color-bg;
+      border: 2px dashed colors.$mel-color-border;
+      border-radius: radii.$mel-radius-md;
+      text-align: center;
+      transition: all 0.15s ease;
+
+      &:hover {
+        border-color: colors.$mel-color-primary;
+        background: color.adjust(colors.$mel-color-bg, $lightness: -1%);
+      }
+    }
+  }
+
+  // Checkbox styling
+  .form-checkbox {
+    display: flex;
+    align-items: center;
+    gap: spacing.mel-space(2);
+
+    input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: colors.$mel-color-primary;
+    }
+
+    label {
+      margin: 0;
+      font-weight: typography.$mel-font-regular;
+    }
+  }
+
+  // Fieldset styling
+  fieldset {
+    margin: spacing.mel-space(4) 0;
+    padding: spacing.mel-space(5);
+    background: colors.$mel-color-bg;
+    border: 1px solid colors.$mel-color-border;
+    border-radius: radii.$mel-radius-lg;
+
+    legend {
+      font-weight: typography.$mel-font-semibold;
+      color: colors.$mel-color-text;
+      padding: 0 spacing.mel-space(2);
+    }
+  }
+
+  // Table styling (for social links, etc.)
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: spacing.mel-space(4) 0;
+
+    thead th {
+      background: colors.$mel-color-bg;
+      font-weight: typography.$mel-font-semibold;
+      color: colors.$mel-color-text;
+      padding: spacing.mel-space(3) spacing.mel-space(4);
+      text-align: left;
+      border-bottom: 2px solid colors.$mel-color-border;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid colors.$mel-color-border;
+
+      &:hover {
+        background: colors.$mel-color-bg;
+      }
+    }
+
+    tbody td {
+      padding: spacing.mel-space(3) spacing.mel-space(4);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Mobile Responsiveness
+// ---------------------------------------------------------------------------
+
+@include breakpoints.mel-break(sm, max) {
+  .mel-profile-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: spacing.mel-space(2);
+  }
+
+  .mel-profile-card-icon {
+    width: 40px;
+    height: 40px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .mel-profile-actions {
+    .form-actions {
+      flex-direction: column;
+
+      .button,
+      .mel-btn {
+        width: 100%;
+      }
+    }
+  }
+}

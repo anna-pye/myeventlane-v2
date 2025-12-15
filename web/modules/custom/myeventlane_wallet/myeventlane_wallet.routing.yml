@@ -6,6 +6,7 @@ myeventlane_wallet.apple:
     _title: 'Apple Wallet Pass'
   requirements:
     _permission: 'access content'
+    order_item_id: '\d+'
 
 # Google Wallet pass link.
 myeventlane_wallet.google:
@@ -15,6 +16,7 @@ myeventlane_wallet.google:
     _title: 'Google Wallet'
   requirements:
     _permission: 'access content'
+    order_item_id: '\d+'
 
 # Admin settings page.
 myeventlane_wallet.settings:

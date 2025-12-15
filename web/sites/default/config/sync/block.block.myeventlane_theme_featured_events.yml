@@ -1,6 +1,6 @@
 uuid: 1d3ec7c7-f157-47c4-91a4-a59937d26224
 langcode: en
-status: false
+status: true
 dependencies:
   config:
     - views.view.featured_events
@@ -28,3 +28,6 @@ visibility:
     id: request_path
     negate: false
     pages: '<front>'
+
+
+

@@ -190,6 +190,12 @@ class RsvpPublicForm extends FormBase {
     $donationEnabled = $donationConfig->get('enable_rsvp_donations') ?? FALSE;
     $requireStripeConnected = $donationConfig->get('require_stripe_connected_for_attendee_donations') ?? TRUE;
 
+    $this->logger->debug('RSVP donation check for event @event_id: enabled=@enabled, require_stripe=@require_stripe', [
+      '@event_id' => $event->id(),
+      '@enabled' => $donationEnabled ? 'yes' : 'no',
+      '@require_stripe' => $requireStripeConnected ? 'yes' : 'no',
+    ]);
+
     if ($donationEnabled) {
       // Check if vendor has Stripe Connect if required.
       $showDonation = TRUE;
@@ -202,6 +208,16 @@ class RsvpPublicForm extends FormBase {
             '@uid' => $event->getOwnerId(),
           ]);
         }
+        else {
+          $this->logger->debug('Donation section will be shown: Vendor has Stripe Connect enabled for event @event_id', [
+            '@event_id' => $event->id(),
+          ]);
+        }
+      }
+      else {
+        $this->logger->debug('Donation section will be shown: Stripe Connect not required for event @event_id', [
+          '@event_id' => $event->id(),
+        ]);
       }
 
       if ($showDonation) {
@@ -307,6 +323,9 @@ class RsvpPublicForm extends FormBase {
     }
     else {
       // Donations disabled globally.
+      $this->logger->debug('Donation section hidden: RSVP donations disabled globally for event @event_id', [
+        '@event_id' => $event->id(),
+      ]);
       $form['donation'] = [
         '#type' => 'hidden',
         '#default_value' => 0,
@@ -411,6 +430,7 @@ class RsvpPublicForm extends FormBase {
         'guests' => (int) ($values['guests'] ?? 1),
         'donation' => (float) $donationAmount,
         'status' => 'confirmed',
+        'user_id' => $this->currentUser()->id() ?: 0, // Set to 0 for anonymous users
       ]);
 
       $submission->save();
@@ -429,12 +449,26 @@ class RsvpPublicForm extends FormBase {
               ]);
               return;
             }
+            else {
+              // Order creation returned NULL - log the reason.
+              $this->logger->warning('RSVP donation order creation returned NULL for event @event_id, submission @submission_id, amount @amount', [
+                '@event_id' => $event->id(),
+                '@submission_id' => $submission->id(),
+                '@amount' => $donationAmount,
+              ]);
+              $this->messengerService->addWarning($this->t('Your RSVP was saved, but we could not process your donation. Please contact support.'));
+            }
+          }
+          else {
+            $this->logger->error('RSVP donation service not available');
+            $this->messengerService->addWarning($this->t('Your RSVP was saved, but we could not process your donation. Please contact support.'));
           }
         }
         catch (\Exception $e) {
           // Log error but don't fail RSVP submission.
           $this->logger->error('Failed to process RSVP donation: @message', [
             '@message' => $e->getMessage(),
+            '@trace' => $e->getTraceAsString(),
           ]);
           $this->messengerService->addWarning($this->t('Your RSVP was saved, but we could not process your donation. Please contact support.'));
         }
@@ -558,24 +592,50 @@ class RsvpPublicForm extends FormBase {
         return FALSE;
       }
 
-      // Find store for this vendor.
-      $storeStorage = $this->entityTypeManager->getStorage('commerce_store');
-      $storeIds = $storeStorage->getQuery()
-        ->accessCheck(FALSE)
-        ->condition('uid', $vendorUid)
-        ->range(0, 1)
-        ->execute();
+      $store = NULL;
 
-      if (empty($storeIds)) {
+      // First, try to find store via vendor entity (if vendor module is available).
+      if (\Drupal::moduleHandler()->moduleExists('myeventlane_vendor')) {
+        $vendorStorage = $this->entityTypeManager->getStorage('myeventlane_vendor');
+        $vendors = $vendorStorage->getQuery()
+          ->accessCheck(FALSE)
+          ->condition('field_owner', $vendorUid)
+          ->range(0, 1)
+          ->execute();
+
+        if (!empty($vendors)) {
+          $vendor = $vendorStorage->load(reset($vendors));
+          if ($vendor && $vendor->hasField('field_vendor_store') && !$vendor->get('field_vendor_store')->isEmpty()) {
+            $store = $vendor->get('field_vendor_store')->entity;
+            $this->logger->debug('Found store via vendor entity for event @event_id', [
+              '@event_id' => $event->id(),
+            ]);
+          }
+        }
+      }
+
+      // Fallback: Find store by owner UID.
+      if (!$store) {
+        $storeStorage = $this->entityTypeManager->getStorage('commerce_store');
+        $storeIds = $storeStorage->getQuery()
+          ->accessCheck(FALSE)
+          ->condition('uid', $vendorUid)
+          ->range(0, 1)
+          ->execute();
+
+        if (!empty($storeIds)) {
+          $store = $storeStorage->load(reset($storeIds));
+          $this->logger->debug('Found store via owner UID for event @event_id', [
+            '@event_id' => $event->id(),
+          ]);
+        }
+      }
+
+      if (!$store) {
         $this->logger->debug('No store found for vendor uid @uid (event @event_id)', [
           '@uid' => $vendorUid,
           '@event_id' => $event->id(),
         ]);
-        return FALSE;
-      }
-
-      $store = $storeStorage->load(reset($storeIds));
-      if (!$store) {
         return FALSE;
       }
 

@@ -38,7 +38,6 @@ class CreateEventGatewayController extends ControllerBase {
 
       $login_url = Url::fromRoute('user.login', [], [
         'query' => ['destination' => $destination],
-        'absolute' => TRUE,
       ]);
       return new RedirectResponse($login_url->toString());
     }

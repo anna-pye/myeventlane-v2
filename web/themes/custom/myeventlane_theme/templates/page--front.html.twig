@@ -73,56 +73,177 @@
     <div class="mel-container">
 
       {# Featured Events Section #}
-      <section class="mel-section">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-          <h2 style="font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin: 0;">Featured Events</h2>
-          <a href="/create-event" class="mel-btn mel-btn-primary" style="padding: 0.5rem 1.5rem; border-radius: 999px;">Create an Event</a>
+      <section class="mel-section mel-featured-events-section">
+        <div class="mel-section-header">
+          <h2 class="mel-section-title">{{ 'Featured Events'|t }}</h2>
+          <a href="/create-event" class="mel-btn mel-btn-primary mel-btn-pill">{{ 'Create an Event'|t }}</a>
         </div>
         
-        {# CSS for event grid #}
-        <style>
-          /* Hide view titles */
-          .mel-events-section h2:not(.mel-section-title),
-          .mel-events-section h3,
-          .mel-events-section .view-header { display: none !important; }
-          
-          /* Target the view content and make it a grid */
-          .mel-events-section .view-content {
-            display: grid !important;
-            grid-template-columns: repeat(3, 1fr) !important;
-            gap: 1.5rem !important;
-          }
-          
-          /* Fallback: if view-content doesn't exist, target views-row parent */
-          .mel-events-section .view > div:not(.view-header):not(.view-filters) {
-            display: grid !important;
-            grid-template-columns: repeat(3, 1fr) !important;
-            gap: 1.5rem !important;
-          }
-          
-          /* Event cards */
-          .mel-events-section .mel-event-card {
-            display: flex !important;
-            flex-direction: column !important;
-          }
-          
-          @media (max-width: 1024px) {
-            .mel-events-section .view-content,
-            .mel-events-section .view > div:not(.view-header):not(.view-filters) { 
-              grid-template-columns: repeat(2, 1fr) !important; 
-            }
-          }
-          @media (max-width: 640px) {
-            .mel-events-section .view-content,
-            .mel-events-section .view > div:not(.view-header):not(.view-filters) { 
-              grid-template-columns: 1fr !important; 
-            }
-          }
-        </style>
-        
-        <div class="mel-events-section">
-          {{ page.content }}
+        {# Render Featured Events View (hardcoded) #}
+        {% if featured_events %}
+          <div class="mel-events-section" style="width: 100%;">
+            <style>
+              /* Hide view headers - match taxonomy page exactly */
+              .mel-events-section h2:not(.mel-section-title),
+              .mel-events-section h3:not(.mel-event-card-title),
+              .mel-events-section .view-header { 
+                display: none !important; 
+              }
+              
+              /* CRITICAL: Target view-content with maximum specificity */
+              .mel-events-section .view.view-featured-events .view-content,
+              .mel-events-section .view .view-content,
+              .mel-events-section .view-content {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 1.5rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+              }
+              
+              /* Fallback for views without .view-content wrapper */
+              .mel-events-section .view > div:not(.view-header):not(.view-filters):not(.view-empty) {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 1.5rem !important;
+                width: 100% !important;
+              }
+              
+              /* Ensure cards are flex and grid items */
+              .mel-events-section .mel-event-card,
+              .mel-events-section .view-content > *,
+              .mel-events-section .view-content article {
+                display: flex !important;
+                flex-direction: column !important;
+              }
+              
+              /* Fix title overflow */
+              .mel-events-section .mel-event-card-title,
+              .mel-events-section .mel-event-card-title a {
+                overflow: visible !important;
+                text-overflow: clip !important;
+                white-space: normal !important;
+                -webkit-line-clamp: unset !important;
+                line-clamp: unset !important;
+                display: block !important;
+                height: auto !important;
+                max-height: none !important;
+                word-wrap: break-word !important;
+              }
+              
+              /* Fix card body overflow */
+              .mel-events-section .mel-event-card-body {
+                overflow: visible !important;
+                min-height: 0 !important;
+              }
+              
+              @media (max-width: 1024px) {
+                .mel-events-section .view.view-featured-events .view-content,
+                .mel-events-section .view .view-content,
+                .mel-events-section .view-content,
+                .mel-events-section .view > div:not(.view-header):not(.view-filters):not(.view-empty) { 
+                  grid-template-columns: repeat(2, 1fr) !important; 
+                }
+              }
+              @media (max-width: 640px) {
+                .mel-events-section .view.view-featured-events .view-content,
+                .mel-events-section .view .view-content,
+                .mel-events-section .view-content,
+                .mel-events-section .view > div:not(.view-header):not(.view-filters):not(.view-empty) { 
+                  grid-template-columns: 1fr !important; 
+                }
+              }
+            </style>
+            {{ featured_events }}
+          </div>
+        {% endif %}
+      </section>
+
+      {# New Events Section #}
+      <section class="mel-section mel-new-events-section">
+        <div class="mel-section-header">
+          <h2 class="mel-section-title">{{ 'New Events'|t }}</h2>
+          <a href="/events" class="mel-section-link">{{ 'View All Events'|t }} →</a>
         </div>
+        
+        {# Render New Events View (hardcoded) #}
+        {% if new_events %}
+          <div class="mel-events-section" style="width: 100%;">
+            <style>
+              /* Hide view headers - match taxonomy page exactly */
+              .mel-events-section h2:not(.mel-section-title),
+              .mel-events-section h3:not(.mel-event-card-title),
+              .mel-events-section .view-header { 
+                display: none !important; 
+              }
+              
+              /* CRITICAL: Target view-content with maximum specificity */
+              .mel-events-section .view.view-new-events .view-content,
+              .mel-events-section .view .view-content,
+              .mel-events-section .view-content {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 1.5rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+              }
+              
+              /* Fallback for views without .view-content wrapper */
+              .mel-events-section .view > div:not(.view-header):not(.view-filters):not(.view-empty) {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 1.5rem !important;
+                width: 100% !important;
+              }
+              
+              /* Ensure cards are flex and grid items */
+              .mel-events-section .mel-event-card,
+              .mel-events-section .view-content > *,
+              .mel-events-section .view-content article {
+                display: flex !important;
+                flex-direction: column !important;
+              }
+              
+              /* Fix title overflow */
+              .mel-events-section .mel-event-card-title,
+              .mel-events-section .mel-event-card-title a {
+                overflow: visible !important;
+                text-overflow: clip !important;
+                white-space: normal !important;
+                -webkit-line-clamp: unset !important;
+                line-clamp: unset !important;
+                display: block !important;
+                height: auto !important;
+                max-height: none !important;
+                word-wrap: break-word !important;
+              }
+              
+              /* Fix card body overflow */
+              .mel-events-section .mel-event-card-body {
+                overflow: visible !important;
+                min-height: 0 !important;
+              }
+              
+              @media (max-width: 1024px) {
+                .mel-events-section .view.view-new-events .view-content,
+                .mel-events-section .view .view-content,
+                .mel-events-section .view-content,
+                .mel-events-section .view > div:not(.view-header):not(.view-filters):not(.view-empty) { 
+                  grid-template-columns: repeat(2, 1fr) !important; 
+                }
+              }
+              @media (max-width: 640px) {
+                .mel-events-section .view.view-new-events .view-content,
+                .mel-events-section .view .view-content,
+                .mel-events-section .view-content,
+                .mel-events-section .view > div:not(.view-header):not(.view-filters):not(.view-empty) { 
+                  grid-template-columns: 1fr !important; 
+                }
+              }
+            </style>
+            {{ new_events }}
+          </div>
+        {% endif %}
       </section>
 
       {# ==================== MINI CALENDAR ==================== #}
