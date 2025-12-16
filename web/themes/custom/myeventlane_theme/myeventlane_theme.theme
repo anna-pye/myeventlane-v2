@@ -7,6 +7,7 @@
 
 use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\node\NodeInterface;
 use Drupal\views\Views;
 use Drupal\myeventlane_shared\Service\ColorService;
@@ -109,20 +110,103 @@ function myeventlane_theme_preprocess_page(array &$variables): void {
   // Front page specific processing
   // Check if this is the front page.
   if (\Drupal::service('path.matcher')->isFrontPage()) {
-    // Load category terms.
-    $term_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
-    $terms = $term_storage->loadByProperties(['vid' => 'categories']);
-    
-    $categories = [];
-    foreach ($terms as $term) {
-      $categories[] = [
-        'tid' => $term->id(),
-        'name' => $term->label(),
-        'url' => '/events/category/' . $term->id(),
+    // Build above-the-cards front UI data (cached + tagged).
+    try {
+      /** @var \Drupal\myeventlane_core\Service\FrontCategoryStatsService $stats */
+      $stats = \Drupal::service('myeventlane_core.front_category_stats');
+      $data = $stats->buildFrontStats();
+
+      $variables['mel_front'] = [
+        'headline' => 'Run Your Show',
+        'subline' => 'Your lane to great events.',
+        'values' => [
+          ['title' => 'Built for communities', 'text' => 'Simple tools to publish and manage events fast.'],
+          ['title' => 'No platform fees', 'text' => 'Keep more of what you earn.'],
+          ['title' => 'Inclusive by design', 'text' => 'Clear, accessible experiences for everyone.'],
+        ],
+        'categories' => $data['items'],
+        'total' => $data['total'],
+        'pie' => $data['pie'],
       ];
+
+      // Attach the front library.
+      $variables['#attached']['library'][] = 'myeventlane_theme/front';
+
+      // Make output cacheable and properly tagged.
+      $cacheable = new CacheableMetadata();
+      $cacheable->setCacheMaxAge((int) $data['cache']['max_age']);
+      $cacheable->setCacheTags($data['cache']['tags']);
+      $cacheable->applyTo($variables);
     }
+    catch (\Exception $e) {
+      // Gracefully fall back if the stats service is unavailable.
+    }
+
+    // Load category terms for the homepage category buttons.
+    // Prefer the vocabulary that backs /events/category/% (categories).
+    $term_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $terms = [];
+
+    try {
+      $terms = $term_storage->loadTree('categories', 0, NULL, TRUE);
+    }
+    catch (\Exception $e) {
+      // Fallback if vocabulary differs.
+      try {
+        $terms = $term_storage->loadTree('event_type', 0, NULL, TRUE);
+      }
+      catch (\Exception $e) {
+        $terms = [];
+      }
+    }
+
+    $categories = array_map(static function ($term) {
+      $name = $term->getName();
+      $key = strtolower($name);
+      $key = str_replace([' ', '&'], ['-', 'and'], $key);
+      $key = preg_replace('/[^a-z0-9-]/', '', $key);
+
+      return (object) [
+        'tid' => $term->id(),
+        'name' => $name,
+        // Matches views.view.upcoming_events.yml path: events/category/%
+        'url' => '/events/category/' . $term->id(),
+        'class' => $key,
+        // Alias for templates that expect machine_name.
+        'machine_name' => $key,
+      ];
+    }, $terms);
+
+    // New canonical variable for homepage template.
+    $variables['categories'] = $categories;
+    // Back-compat with older templates.
+    $variables['event_categories'] = array_map(static function ($t) {
+      return [
+        'tid' => $t->tid,
+        'name' => $t->name,
+        'url' => $t->url,
+      ];
+    }, $categories);
     
-    $variables['event_categories'] = $categories;
+    // Keep original hero headline and subheading
+    // $variables['hero_headline'] = t('Run Your Show');
+    // $variables['hero_subheading'] = t('Empowering Event Creators');
+    
+    // Load category pie chart block for hero
+    try {
+      $block_manager = \Drupal::service('plugin.manager.block');
+      $pie_chart_block = $block_manager->createInstance('category_pie_chart_block', []);
+      if ($pie_chart_block && $pie_chart_block->access(\Drupal::currentUser())) {
+        $build = $pie_chart_block->build();
+        if (!empty($build)) {
+          $variables['hero_pie_chart'] = $build;
+        }
+      }
+    }
+    catch (\Exception $e) {
+      // Pie chart block not available, continue without it.
+      $variables['hero_pie_chart'] = NULL;
+    }
     
     // Add calendar data for mini calendar
     $variables['calendar'] = _myeventlane_theme_get_calendar_data();
@@ -213,8 +297,11 @@ function myeventlane_theme_preprocess_page(array &$variables): void {
       $create_event_url = $has_vendor ? '/vendor/dashboard' : '/node/add/event';
     }
     
-    $variables['hero_headline'] = t('Your lane to great events.');
-    $variables['hero_subheading'] = t('Create, share, and celebrate local stories.');
+    // Only set default hero values if NOT on front page (front page has its own values)
+    if (!\Drupal::service('path.matcher')->isFrontPage()) {
+      $variables['hero_headline'] = t('Your lane to great events.');
+      $variables['hero_subheading'] = t('Create, share, and celebrate local stories.');
+    }
     $variables['hero_badges'] = [
       t('Free to list'),
       t('Community-first'),
@@ -822,7 +909,7 @@ function myeventlane_theme_form_alter(array &$form, \Drupal\Core\Form\FormStateI
 /**
  * Implements hook_preprocess_block().
  *
- * Adds categories and pie chart to home-hero block.
+ * Adds category terms to the Home Hero block.
  */
 function myeventlane_theme_preprocess_block(array &$variables): void {
   $plugin_id = $variables['plugin_id'] ?? '';
@@ -851,41 +938,42 @@ function myeventlane_theme_preprocess_block(array &$variables): void {
   }
   
   if ($is_home_hero) {
-    // Load category terms from categories vocabulary.
+    // Load category terms from the vocabulary used for the homepage hero.
+    // Prefer 'event_type' (per spec), fall back to 'categories' if needed.
     try {
       $term_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
-      $terms = $term_storage->loadTree('categories', 0, NULL, TRUE);
-      
-      $categories = [];
-      foreach ($terms as $term) {
-        $categories[] = [
+      $terms = [];
+
+      foreach (['event_type', 'categories'] as $vid) {
+        try {
+          $terms = $term_storage->loadTree($vid, 0, NULL, TRUE);
+          if (!empty($terms)) {
+            break;
+          }
+        }
+        catch (\Exception $e) {
+          // Try next vocabulary.
+        }
+      }
+
+      $categories = array_map(static function ($term) {
+        // Normalize to a safe CSS class key.
+        $key = strtolower($term->getName());
+        $key = str_replace([' ', '&'], ['-', 'and'], $key);
+        $key = preg_replace('/[^a-z0-9-]/', '', $key);
+
+        return (object) [
           'tid' => $term->id(),
           'name' => $term->getName(),
-          'url' => '/events?category=' . $term->id(),
+          'url' => '/events/category/' . $term->id(),
+          'class' => $key,
         ];
-      }
-      
+      }, $terms);
+
       $variables['categories'] = $categories;
     }
     catch (\Exception $e) {
-      // If categories vocabulary doesn't exist, provide empty array.
       $variables['categories'] = [];
-    }
-    
-    // Load and render category pie chart block.
-    try {
-      $block_manager = \Drupal::service('plugin.manager.block');
-      $pie_chart_block = $block_manager->createInstance('category_pie_chart_block', []);
-      if ($pie_chart_block && $pie_chart_block->access(\Drupal::currentUser())) {
-        $build = $pie_chart_block->build();
-        if (!empty($build)) {
-          $variables['category_pie_chart'] = $build;
-        }
-      }
-    }
-    catch (\Exception $e) {
-      // Pie chart block not available, continue without it.
-      $variables['category_pie_chart'] = NULL;
     }
   }
 }

@@ -71,3 +71,14 @@ services:
     tags:
       - { name: event_subscriber }
 
+  myeventlane_core.category_color:
+    class: Drupal\myeventlane_core\Service\CategoryColorService
+
+  myeventlane_core.front_category_stats:
+    class: Drupal\myeventlane_core\Service\FrontCategoryStatsService
+    arguments:
+      - '@entity_type.manager'
+      - '@cache.data'
+      - '@datetime.time'
+      - '@myeventlane_core.category_color'
+

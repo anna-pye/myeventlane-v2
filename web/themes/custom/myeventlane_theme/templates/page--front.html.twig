@@ -1,366 +1,79 @@
 {#
-/**
- * @file
- * Theme override for the front page.
- * Beautiful event platform landing with hero, events grid, and CTA.
- */
+  Front page wrapper.
+  Renders the new hero and above-the-cards UI, then your existing page content (event cards).
 #}
 
-<div class="mel-page mel-page--front">
+{% set page_attributes = create_attribute() %}
+{% set page_attributes = page_attributes.addClass('mel-page', 'mel-front') %}
+
+<div{{ page_attributes }}>
 
   {# Skip to main content #}
   <a href="#main-content" class="visually-hidden focusable skip-link">
     {{ 'Skip to main content'|t }}
   </a>
 
+  {{ title_prefix }}
+  {{ title_suffix }}
+
   {# ==================== HEADER ==================== #}
   <div class="mel-region-header">
     {% include '@myeventlane_theme/includes/header.html.twig' %}
   </div>
 
-  {# ==================== HERO ==================== #}
-  <div class="mel-region-hero">
-    <section class="mel-hero">
-      <div class="mel-container mel-hero-inner">
-        <div class="mel-hero-header">
-          <div class="mel-hero-brand">
-            {# Logo + Large headline #}
-            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-              <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 64px; height: 64px;" aria-hidden="true">
-                <rect width="64" height="64" rx="12" fill="#ff6f61"/>
-                <path d="M16 64 C16 64 16 44 24 36 C28 32 34 34 38 32 C44 29 42 22 38 18 C34 14 28 16 24 22 C20 28 20 36 20 36" fill="#faf7fb"/>
-                <line x1="40" y1="14" x2="48" y2="6" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
-                <line x1="46" y1="20" x2="56" y2="16" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
-                <line x1="48" y1="28" x2="58" y2="28" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
-              </svg>
-              <div>
-                <span style="color: #ff6f61; font-size: 1.25rem; font-weight: 600; display: block;">My</span>
-                <span style="color: #ff6f61; font-size: 1.75rem; font-weight: 800; display: block; margin-top: -0.25rem;">EventLane</span>
-              </div>
-            </div>
-            <h1 style="color: #ff6f61; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 3.5rem; line-height: 1.05; margin: 0; letter-spacing: -0.02em;">
-              {{ hero_headline|default('Your lane to great events.') }}
-            </h1>
-            <p class="mel-hero-tagline" style="font-size: 1.25rem; margin-top: 0.75rem; color: #1a1a2e;">{{ hero_subheading|default('Create, share, and celebrate local stories.') }}</p>
-            <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;">
-              {% for badge in hero_badges|default([]) %}
-                <span style="font-size: 0.875rem; color: #5c5c6f; padding: 0.25rem 0.75rem; background: #f5f5f7; border-radius: 999px;">{{ badge }}</span>
-              {% endfor %}
-            </div>
-            <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
-              {% if hero_primary_cta %}
-                <a href="{{ hero_primary_cta.url }}" class="button button--primary mel-btn mel-btn-lg">{{ hero_primary_cta.text }}</a>
-              {% else %}
-                <a href="/create-event" class="button button--primary mel-btn mel-btn-lg">{{ 'Create your event'|t }}</a>
-              {% endif %}
-              {% if hero_secondary_cta %}
-                <a href="{{ hero_secondary_cta.url }}" class="button button--secondary mel-btn mel-btn-ghost mel-btn-lg">{{ hero_secondary_cta.text }}</a>
-              {% else %}
-                <a href="/events" class="button button--secondary mel-btn mel-btn-ghost mel-btn-lg">{{ 'Explore events'|t }}</a>
-              {% endif %}
-            </div>
-          </div>
-          <div class="mel-hero-illustration" aria-hidden="true" style="width: 180px; height: 180px;">
-            <div class="mel-hero-pie"></div>
-          </div>
-        </div>
-        <div class="mel-hero-categories">
-          <a href="/events" class="mel-category-chip mel-category-chip--coral is-active">All Events</a>
-          {% if event_categories is defined and event_categories|length %}
-            {% set chip_colors = ['', 'mel-category-chip--purple', 'mel-category-chip--blue', 'mel-category-chip--teal', '', 'mel-category-chip--purple'] %}
-            {% for category in event_categories %}
-              <a href="{{ category.url }}" class="mel-category-chip {{ chip_colors[loop.index0 % 6] }}">
-                {{ category.name }}
-              </a>
-            {% endfor %}
-          {% endif %}
-        </div>
-        <form class="mel-hero-search" action="/events" method="get">
-          <div class="mel-hero-search-box">
-            <input type="text" name="q" placeholder="Search events..." aria-label="Search events">
-            <button type="submit" class="mel-hero-search-btn">Search</button>
-          </div>
-        </form>
-      </div>
-    </section>
-  </div>
+  <section class="mel-front-hero">
+    <div class="mel-front-hero__inner">
 
-  {# ==================== MAIN CONTENT ==================== #}
-  <main id="main-content" class="mel-main">
-    <div class="mel-container">
-      <div class="homepage-wrapper">
-        <div class="homepage-main">
+      <div class="mel-front-hero__left">
+        {% include '@myeventlane_theme/components/front/_front-hero.html.twig' with {
+          front: mel_front|default({})
+        } only %}
 
-      {# Feature Block Section (icon-less horizontal strip) #}
-      <section class="mel-section">
-        {% include '@myeventlane_theme/block/block--features.html.twig' %}
-      </section>
+        {% include '@myeventlane_theme/components/front/_front-search.html.twig' with {
+          front: mel_front|default({})
+        } only %}
 
-      {# Featured Events Section #}
-      <section class="mel-section mel-featured-events-section">
-        <div class="mel-section-header">
-          <h2 class="mel-section-title">{{ 'Featured Events'|t }}</h2>
-          <a href="/create-event" class="mel-btn mel-btn-primary mel-btn-pill">{{ 'Create your event'|t }}</a>
-        </div>
-        
-        {# Render Featured Events View (hardcoded) #}
-        {% if featured_events %}
-          <div class="mel-events-section" style="width: 100%;">
-            <style>
-              /* Hide view headers - match taxonomy page exactly */
-              .mel-events-section h2:not(.mel-section-title),
-              .mel-events-section h3:not(.mel-event-card-title),
-              .mel-events-section .view-header { 
-                display: none !important; 
-              }
-              
-              /* CRITICAL: Target view-content with maximum specificity */
-              .mel-events-section .view.view-featured-events .view-content,
-              .mel-events-section .view .view-content,
-              .mel-events-section .view-content {
-                display: grid !important;
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 1.5rem !important;
-                width: 100% !important;
-                max-width: 100% !important;
-              }
-              
-              /* Fallback for views without .view-content wrapper */
-              .mel-events-section .view > div:not(.view-header):not(.view-filters):not(.view-empty) {
-                display: grid !important;
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 1.5rem !important;
-                width: 100% !important;
-              }
-              
-              /* Ensure cards are flex and grid items */
-              .mel-events-section .mel-event-card,
-              .mel-events-section .view-content > *,
-              .mel-events-section .view-content article {
-                display: flex !important;
-                flex-direction: column !important;
-              }
-              
-              /* Fix title overflow */
-              .mel-events-section .mel-event-card-title,
-              .mel-events-section .mel-event-card-title a {
-                overflow: visible !important;
-                text-overflow: clip !important;
-                white-space: normal !important;
-                -webkit-line-clamp: unset !important;
-                line-clamp: unset !important;
-                display: block !important;
-                height: auto !important;
-                max-height: none !important;
-                word-wrap: break-word !important;
-              }
-              
-              /* Fix card body overflow */
-              .mel-events-section .mel-event-card-body {
-                overflow: visible !important;
-                min-height: 0 !important;
-              }
-              
-              @media (max-width: 1024px) {
-                .mel-events-section .view.view-featured-events .view-content,
-                .mel-events-section .view .view-content,
-                .mel-events-section .view-content,
-                .mel-events-section .view > div:not(.view-header):not(.view-filters):not(.view-empty) { 
-                  grid-template-columns: repeat(2, 1fr) !important; 
-                }
-              }
-              @media (max-width: 640px) {
-                .mel-events-section .view.view-featured-events .view-content,
-                .mel-events-section .view .view-content,
-                .mel-events-section .view-content,
-                .mel-events-section .view > div:not(.view-header):not(.view-filters):not(.view-empty) { 
-                  grid-template-columns: 1fr !important; 
-                }
-              }
-            </style>
-            {{ featured_events }}
-          </div>
-        {% endif %}
-      </section>
+        {% include '@myeventlane_theme/components/front/_front-pills.html.twig' with {
+          front: mel_front|default({})
+        } only %}
 
-      {# New Events Section #}
-      <section class="mel-section mel-new-events-section">
-        <div class="mel-section-header">
-          <h2 class="mel-section-title">{{ 'New Events'|t }}</h2>
-          <a href="/events" class="mel-section-link">{{ 'View All Events'|t }} →</a>
-        </div>
-        
-        {# Render New Events View (hardcoded) #}
-        {% if new_events %}
-          <div class="mel-events-section" style="width: 100%;">
-            <style>
-              /* Hide view headers - match taxonomy page exactly */
-              .mel-events-section h2:not(.mel-section-title),
-              .mel-events-section h3:not(.mel-event-card-title),
-              .mel-events-section .view-header { 
-                display: none !important; 
-              }
-              
-              /* CRITICAL: Target view-content with maximum specificity */
-              .mel-events-section .view.view-new-events .view-content,
-              .mel-events-section .view .view-content,
-              .mel-events-section .view-content {
-                display: grid !important;
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 1.5rem !important;
-                width: 100% !important;
-                max-width: 100% !important;
-              }
-              
-              /* Fallback for views without .view-content wrapper */
-              .mel-events-section .view > div:not(.view-header):not(.view-filters):not(.view-empty) {
-                display: grid !important;
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 1.5rem !important;
-                width: 100% !important;
-              }
-              
-              /* Ensure cards are flex and grid items */
-              .mel-events-section .mel-event-card,
-              .mel-events-section .view-content > *,
-              .mel-events-section .view-content article {
-                display: flex !important;
-                flex-direction: column !important;
-              }
-              
-              /* Fix title overflow */
-              .mel-events-section .mel-event-card-title,
-              .mel-events-section .mel-event-card-title a {
-                overflow: visible !important;
-                text-overflow: clip !important;
-                white-space: normal !important;
-                -webkit-line-clamp: unset !important;
-                line-clamp: unset !important;
-                display: block !important;
-                height: auto !important;
-                max-height: none !important;
-                word-wrap: break-word !important;
-              }
-              
-              /* Fix card body overflow */
-              .mel-events-section .mel-event-card-body {
-                overflow: visible !important;
-                min-height: 0 !important;
-              }
-              
-              @media (max-width: 1024px) {
-                .mel-events-section .view.view-new-events .view-content,
-                .mel-events-section .view .view-content,
-                .mel-events-section .view-content,
-                .mel-events-section .view > div:not(.view-header):not(.view-filters):not(.view-empty) { 
-                  grid-template-columns: repeat(2, 1fr) !important; 
-                }
-              }
-              @media (max-width: 640px) {
-                .mel-events-section .view.view-new-events .view-content,
-                .mel-events-section .view .view-content,
-                .mel-events-section .view-content,
-                .mel-events-section .view > div:not(.view-header):not(.view-filters):not(.view-empty) { 
-                  grid-template-columns: 1fr !important; 
-                }
-              }
-            </style>
-            {{ new_events }}
-          </div>
-        {% endif %}
-      </section>
-
-        </div>
-
-        {# ==================== SIDEBAR CALENDAR ==================== #}
-        {% if calendar is defined %}
-        <aside class="sidebar-calendar">
-          <div class="mel-calendar-section" style="background: #fff; border-radius: 28px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <h2 style="font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin: 0;">Events Calendar</h2>
-            <div style="display: flex; align-items: center; gap: 1rem;">
-              <span style="font-size: 1.1rem; font-weight: 600; color: #1a1a2e;">{{ calendar.month_name }} {{ calendar.year }}</span>
-              <a href="/calendar" class="mel-btn mel-btn-ghost" style="padding: 0.5rem 1rem; font-size: 0.875rem;">View Full Calendar</a>
-            </div>
-          </div>
-          
-          {# Mini Calendar Grid #}
-          <div class="mel-mini-calendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; text-align: center;">
-            {# Day headers #}
-            {% for day in ['S', 'M', 'T', 'W', 'T', 'F', 'S'] %}
-              <div style="padding: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #8888a0; text-transform: uppercase;">{{ day }}</div>
-            {% endfor %}
-            
-            {# Empty cells for days before month starts #}
-            {% for i in 1..calendar.start_day %}
-              <div style="padding: 0.75rem; color: #ccc;"></div>
-            {% endfor %}
-            
-            {# Days of the month #}
-            {% for day in 1..calendar.days_in_month %}
-              {% set has_events = calendar.events_by_day[day] is defined %}
-              {% set is_today = calendar.is_current_month and day == calendar.today %}
-              <div style="
-                padding: 0.75rem;
-                border-radius: 12px;
-                font-size: 0.875rem;
-                font-weight: {% if has_events or is_today %}600{% else %}400{% endif %};
-                cursor: {% if has_events %}pointer{% else %}default{% endif %};
-                position: relative;
-                {% if is_today %}
-                  background: #8d79f6;
-                  color: #fff;
-                {% elseif has_events %}
-                  background: #fff5f4;
-                  color: #ff6f61;
-                {% else %}
-                  color: #1a1a2e;
-                {% endif %}
-              " {% if has_events %}title="{{ calendar.events_by_day[day]|length }} event(s)"{% endif %}>
-                {{ day }}
-                {% if has_events and not is_today %}
-                  <span style="position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: #ff6f61; border-radius: 50%;"></span>
-                {% endif %}
-              </div>
-            {% endfor %}
-          </div>
-          
-          {# Legend #}
-          <div style="display: flex; gap: 1.5rem; margin-top: 1rem; font-size: 0.75rem; color: #5c5c6f;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span style="width: 12px; height: 12px; background: #8d79f6; border-radius: 4px;"></span>
-              Today
-            </div>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span style="width: 12px; height: 12px; background: #fff5f4; border: 1px solid #ff6f61; border-radius: 4px;"></span>
-              Has Events
-            </div>
-          </div>
-        </aside>
-        {% endif %}
+        {% include '@myeventlane_theme/components/front/_front-values.html.twig' with {
+          front: mel_front|default({})
+        } only %}
       </div>
 
-      {# Category Pie Chart Section #}
-      {% if category_pie_chart %}
-        <section class="mel-section">
-          {{ category_pie_chart }}
-        </section>
-      {% endif %}
+      <div class="mel-front-hero__right">
+        {% include '@myeventlane_theme/components/front/_front-pie.html.twig' with {
+          front: mel_front|default({})
+        } only %}
+      </div>
 
-      {# CTA Banner #}
-      <section class="mel-cta-banner">
-        <h2 class="mel-cta-title">{{ 'Ready to host your event?'|t }}</h2>
-        <p class="mel-cta-text">{{ 'Create and manage events with ease. Free to list, always.'|t }}</p>
-        <div class="mel-cta-actions">
-          <a href="/create-event" class="mel-btn mel-btn-accent mel-btn-lg">{{ 'Create your event'|t }}</a>
-          <a href="/organisers" class="mel-btn mel-btn-ghost mel-btn-lg" style="color: white; border-color: rgba(255,255,255,0.5);">{{ 'For Vendors'|t }}</a>
-        </div>
-      </section>
+    </div>
+  </section>
 
-        </div>
+  {# Pre-Content (messages, etc.) #}
+  {% if page.pre_content %}
+    <div class="mel-region-pre-content">
+      <div class="mel-container">
+        {{ page.pre_content }}
       </div>
     </div>
+  {% endif %}
+
+  <main id="main-content" class="mel-main mel-front-content" role="main">
+    <div class="mel-front-content__inner">
+      {{ page.content }}
+    </div>
   </main>
+
+  {# Pre-Footer #}
+  {% if page.pre_footer %}
+    <div class="mel-pre-footer">
+      <div class="mel-container">
+        {{ page.pre_footer }}
+      </div>
+    </div>
+  {% endif %}
 
   {# ==================== FOOTER ==================== #}
   <div class="mel-region-footer">

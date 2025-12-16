@@ -51,12 +51,31 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, 'src/js/main.js'),
         'account-dropdown': path.resolve(__dirname, 'src/js/account-dropdown.js'),
+        'front-pie': path.resolve(__dirname, 'src/js/front-pie.js'),
+        front: path.resolve(__dirname, 'src/scss/front.scss'),
       },
       output: {
         // Stable filenames for Drupal libraries.yml compatibility
-        entryFileNames: '[name].js',
+        entryFileNames: (chunkInfo) => {
+          // Preserve existing stable root outputs.
+          if (chunkInfo.name === 'main' || chunkInfo.name === 'account-dropdown') {
+            return '[name].js';
+          }
+          // New entrypoints go into dist/js/.
+          return 'js/[name].js';
+        },
         chunkFileNames: '[name].js',
-        assetFileNames: '[name][extname]',
+        assetFileNames: (assetInfo) => {
+          // Preserve existing main.css at dist/main.css.
+          if (assetInfo.name === 'main.css') {
+            return '[name][extname]';
+          }
+          // New CSS assets go into dist/css/.
+          if ((assetInfo.name || '').endsWith('.css')) {
+            return 'css/[name][extname]';
+          }
+          return '[name][extname]';
+        },
       },
       // Ensure we don't tree-shake or bundle external Commerce/Stripe JS
       external: [],
