@@ -18,24 +18,26 @@
 // ---------------------------------------------------------------------------
 
 .mel-event-card {
-  background: colors.$mel-color-surface;
-  border-radius: radii.$mel-radius-xl;
-  box-shadow: shadows.$mel-shadow-sm;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.08);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
   min-height: 300px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
   position: relative;
   
   // Allow title to overflow if needed (for front page grid)
   .mel-page--front & {
-    .mel-event-card-body {
+    .mel-event-card-body,
+    .mel-event-card__body {
       overflow: visible;
     }
-    .mel-event-card-title {
+    .mel-event-card-title,
+    .mel-event-card__title {
       overflow: visible;
       text-overflow: clip;
       white-space: normal;
@@ -47,8 +49,8 @@
   }
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: shadows.$mel-shadow-md;
+    transform: translateY(-2px);
+    box-shadow: 0 16px 36px rgba(16, 24, 40, 0.12);
   }
 
   &:focus-within {
@@ -60,24 +62,18 @@
 // Card Image
 // ---------------------------------------------------------------------------
 
-.mel-event-card-image {
+.mel-event-card-image,
+.mel-event-card__media {
   position: relative;
   width: 100%;
-  height: 160px;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: colors.$mel-color-surface-alt;
-  border-radius: radii.$mel-radius-md;
-  margin-bottom: spacing.mel-space(3);
-
-  @include breakpoints.mel-break(md) {
-    height: 180px;
-  }
+  background: #f3f4f6;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: radii.$mel-radius-md;
     transition: transform 0.3s ease;
   }
 
@@ -166,11 +162,13 @@
 // Card Body
 // ---------------------------------------------------------------------------
 
-.mel-event-card-body {
+.mel-event-card-body,
+.mel-event-card__body {
   padding: spacing.mel-space(4);
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  gap: 8px;
 }
 
 // ---------------------------------------------------------------------------
@@ -196,8 +194,9 @@
 // Card Title
 // ---------------------------------------------------------------------------
 
-.mel-event-card-title {
-  margin: 0 0 spacing.mel-space(2) 0;
+.mel-event-card-title,
+.mel-event-card__title {
+  margin: 0;
   font-size: typography.mel-font-size(md);
   font-weight: typography.$mel-font-bold;
   line-height: typography.$mel-leading-snug;
@@ -234,11 +233,14 @@
 // Card Meta (Date, Location, Time)
 // ---------------------------------------------------------------------------
 
-.mel-event-card-meta {
+.mel-event-card-meta,
+.mel-event-card__meta {
   display: flex;
   flex-direction: column;
   gap: spacing.mel-space(1);
   margin-bottom: spacing.mel-space(3);
+  font-size: 0.875rem;
+  color: #6b7280;
 }
 
 .mel-event-card-meta-item {
@@ -330,7 +332,12 @@
   font-weight: typography.$mel-font-semibold;
 }
 
-.mel-event-card-cta {
+.mel-event-card-cta,
+.mel-event-card__cta {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+
   // Small inline CTA button
   .mel-btn {
     padding: spacing.mel-space(1) spacing.mel-space(3);
@@ -412,30 +419,8 @@
 // ---------------------------------------------------------------------------
 // Event Grid
 // ---------------------------------------------------------------------------
-
-.mel-event-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: spacing.mel-space(4);
-
-  @include breakpoints.mel-break(sm) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @include breakpoints.mel-break(lg) {
-    grid-template-columns: repeat(3, 1fr);
-    gap: spacing.mel-space(5);
-  }
-}
-
-// Tighter grid for more cards
-.mel-event-grid--compact {
-  gap: spacing.mel-space(3);
-
-  @include breakpoints.mel-break(lg) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
+// REMOVED: Grid definition moved to components/_event-grid.scss
+// This ensures a single canonical grid pattern across all event listings.
 
 // ---------------------------------------------------------------------------
 // Empty State

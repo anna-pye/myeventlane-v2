@@ -1,16 +1,13 @@
-{% extends "page.html.twig" %}
+{#
+/**
+ * @file
+ * Taxonomy term page template.
+ * Simplified to avoid double-page layout - only renders title and content.
+ * Event grid is applied by views-view-unformatted.html.twig.
+ */
+#}
+{{ title_prefix }}
+<h1>{{ name }}</h1>
+{{ title_suffix }}
 
-{% block content %}
-  <section class="mel-content">
-    <header class="mel-section-header">
-      <h1>{{ term.name.value }}</h1>
-      {% if term.description.value %}
-        <p>{{ term.description.value }}</p>
-      {% endif %}
-    </header>
-
-    <div class="mel-event-grid">
-      {{ content }}
-    </div>
-  </section>
-{% endblock %}
+{{ content }}

@@ -58,9 +58,19 @@
   {# ==================== MAIN (TWO VIEWS ONLY) ==================== #}
   <main id="main-content" class="mel-main mel-front-content" role="main">
     <div class="mel-container">
-      {{ drupal_block('views_block:featured_events-block_featured') }}
+      <section class="mel-section">
+        <h2>Featured Events</h2>
+        {% if featured_events is defined and featured_events %}
+          {{ featured_events }}
+        {% else %}
+          {{ drupal_block('views_block:featured_events-block_featured') }}
+        {% endif %}
+      </section>
 
-      {{ drupal_block('views_block:all_events-block_all') }}
+      <section class="mel-section">
+        <h2>All Events</h2>
+        {{ drupal_view('upcoming_events', 'block_upcoming') }}
+      </section>
     </div>
   </main>
 

@@ -119,7 +119,7 @@ display:
         options:
           grouping: {  }
           row_class: ''
-          default_row_class: true
+          default_row_class: false
       row:
         type: 'entity:node'
         options:
@@ -167,3 +167,13 @@ display:
         - 'user.node_grants:view'
         - user.permissions
       tags: {  }
+
+
+
+
+
+
+
+
+
+
