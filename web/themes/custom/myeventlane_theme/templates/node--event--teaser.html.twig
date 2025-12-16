@@ -177,6 +177,11 @@
 
   <div class="mel-event-card-body">
 
+  {# Title #}
+    <h3 class="mel-event-card-title">
+      <a href="{{ url }}">{{ label|default(node.label) }}</a>
+    </h3>
+
     {# Category Tag #}
     {% if category_label %}
       <div class="mel-event-card-tags" style="margin-bottom: 0.5rem;">
@@ -198,10 +203,7 @@
       </div>
     {% endif %}
 
-    {# Title #}
-    <h3 class="mel-event-card-title">
-      <a href="{{ url }}">{{ label|default(node.label) }}</a>
-    </h3>
+    
 
     {# Meta #}
     <div class="mel-event-card-meta">

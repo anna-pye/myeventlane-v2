@@ -47,15 +47,29 @@ final class EventFormAlter {
     
     // Ensure critical fields are accessible - they might be hidden by conditional_fields
     $critical_fields = ['field_category', 'field_accessibility', 'field_ticket_types'];
+    $logger = \Drupal::logger('myeventlane_event');
+    $top_level_keys = array_filter(array_keys($form), function($key) {
+      return !str_starts_with($key, '#');
+    });
+    $logger->debug('EventFormAlter START - Top-level form keys: @keys', [
+      '@keys' => implode(', ', $top_level_keys),
+    ]);
     foreach ($critical_fields as $field_name) {
       if (isset($form[$field_name])) {
         $form[$field_name]['#access'] = TRUE;
         if (isset($form[$field_name]['widget'])) {
           $form[$field_name]['widget']['#access'] = TRUE;
         }
-        \Drupal::logger('myeventlane_event')->debug('Field @field found in form at alterForm start', ['@field' => $field_name]);
+        $logger->debug('Field @field found in form at alterForm start', ['@field' => $field_name]);
+        // Log widget structure.
+        if (isset($form[$field_name]['widget'])) {
+          $logger->debug('Field @field widget type: @type', [
+            '@field' => $field_name,
+            '@type' => $form[$field_name]['widget']['#type'] ?? 'unknown',
+          ]);
+        }
       } else {
-        \Drupal::logger('myeventlane_event')->warning('Field @field NOT found in form at alterForm start', ['@field' => $field_name]);
+        $logger->warning('Field @field NOT found in form at alterForm start', ['@field' => $field_name]);
       }
     }
 
@@ -548,6 +562,7 @@ final class EventFormAlter {
       }
 
       if (isset($form['field_ticket_types']) && is_array($form['field_ticket_types'])) {
+        \Drupal::logger('myeventlane_event')->debug('Found field_ticket_types, moving to booking_config.content.paid_fields');
         // Remove any existing #states from ticket_types - the parent container handles visibility.
         if (isset($form['field_ticket_types']['#states'])) {
           unset($form['field_ticket_types']['#states']);
@@ -567,7 +582,10 @@ final class EventFormAlter {
         $form['field_ticket_types']['#weight'] = 2;
         // Move ticket types into paid_fields container - visibility is controlled by container's #states.
         $form['booking_config']['content']['paid_fields']['field_ticket_types'] = $form['field_ticket_types'];
+        \Drupal::logger('myeventlane_event')->debug('Moved field_ticket_types to booking_config.content.paid_fields');
         unset($form['field_ticket_types']);
+      } else {
+        \Drupal::logger('myeventlane_event')->warning('field_ticket_types NOT found when trying to move to booking_config');
       }
     }
 
@@ -642,6 +660,7 @@ final class EventFormAlter {
         // Log for debugging
         \Drupal::logger('myeventlane_event')->debug('Moving field @field to visibility section', ['@field' => $field_name]);
         $form['visibility']['content'][$field_name] = $form[$field_name];
+        \Drupal::logger('myeventlane_event')->debug('Successfully moved field @field to visibility.content', ['@field' => $field_name]);
         unset($form[$field_name]);
       } else {
         // Log if field is missing

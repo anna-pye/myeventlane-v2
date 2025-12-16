@@ -1,0 +1,197 @@
+// ==========================================================================
+// Homepage Layout
+// ==========================================================================
+// Grid layout with sticky sidebar calendar for homepage.
+
+@use '../tokens/colors';
+@use '../tokens/spacing';
+@use '../tokens/typography';
+@use '../tokens/radii';
+@use '../tokens/shadows';
+@use '../tokens/breakpoints';
+
+// ---------------------------------------------------------------------------
+// Homepage Wrapper
+// ---------------------------------------------------------------------------
+
+.homepage-wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: spacing.mel-space(5);
+
+  @include breakpoints.mel-break(lg) {
+    grid-template-columns: 1fr 320px;
+    gap: spacing.mel-space(8);
+    align-items: start;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Main Content Area
+// ---------------------------------------------------------------------------
+
+.homepage-main {
+  min-width: 0; // Prevent grid overflow
+}
+
+// ---------------------------------------------------------------------------
+// Sidebar Calendar
+// ---------------------------------------------------------------------------
+
+.sidebar-calendar {
+  @include breakpoints.mel-break(lg) {
+    position: sticky;
+    top: 120px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Mobile: Calendar becomes dropdown/filter
+// ---------------------------------------------------------------------------
+
+@include breakpoints.mel-break(lg, max) {
+  .sidebar-calendar {
+    margin-top: spacing.mel-space(6);
+    order: -1; // Move calendar above content on mobile
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Homepage Hero (mobile-first)
+// ---------------------------------------------------------------------------
+
+.homepage-hero {
+  display: flex;
+  flex-direction: column;
+  padding: spacing.mel-space(6) 0;
+
+  &__left {
+    width: 100%;
+  }
+
+  &__headline {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #FC675A;
+    margin: 0 0 spacing.mel-space(3) 0;
+  }
+
+  &__intro {
+    font-size: 1.125rem;
+    margin: 0 0 spacing.mel-space(3) 0;
+    color: colors.$mel-color-text;
+  }
+
+  &__bullets {
+    margin: 0 0 spacing.mel-space(5) 0;
+    padding-left: 1.25rem;
+    list-style-type: disc;
+
+    li {
+      margin-bottom: 0.25rem;
+      color: #555;
+    }
+  }
+
+  &__categories {
+    margin-bottom: spacing.mel-space(5);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  &__search {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: spacing.mel-space(6);
+
+    input[type="search"] {
+      padding: 0.75rem 1rem;
+      border-radius: 30px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 0.75rem 1rem;
+      background: #FC675A;
+      color: #fff;
+      border: none;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  }
+
+  &__features {
+    h3 {
+      font-size: 1rem;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: #444;
+      margin: 0;
+    }
+  }
+
+  &__right {
+    margin-top: spacing.mel-space(8);
+
+    canvas {
+      width: 100%;
+      height: auto;
+    }
+  }
+}
+
+@media (min-width: 768px) {
+  .homepage-hero {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 4rem;
+
+    &__left {
+      width: 60%;
+    }
+
+    &__right {
+      width: 35%;
+      margin-top: 0;
+    }
+
+    &__search {
+      flex-direction: row;
+      gap: 0;
+
+      input[type="search"] {
+        border-radius: 30px 0 0 30px;
+        flex-grow: 1;
+      }
+
+      button {
+        border-radius: 0 30px 30px 0;
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Featured/New events sections
+// ---------------------------------------------------------------------------
+
+.homepage-events {
+  padding: spacing.mel-space(6) 0;
+
+  &__title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 spacing.mel-space(5) 0;
+    color: colors.$mel-color-text;
+  }
+}

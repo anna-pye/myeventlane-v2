@@ -1,0 +1,32 @@
+// ==========================================================================
+// Front Pie (Front page only)
+// ==========================================================================
+
+.mel-front-pie {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.mel-pie-float {
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.6)
+  );
+  border-radius: 50%;
+  padding: 1.5rem;
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.mel-front-pie path {
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.mel-front-pie path:hover {
+  transform: scale(1.04);
+  filter: brightness(1.1);
+}
+

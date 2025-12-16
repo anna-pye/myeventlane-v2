@@ -59,3 +59,13 @@ vendor_detail_analytics:
   dependencies:
     - core/drupal
 
+simple_tabs:
+  version: 1.x
+  js:
+    js/simple-tabs.js: {}
+  css:
+    component:
+      css/simple-tabs.css: {}
+  dependencies:
+    - core/drupal
+

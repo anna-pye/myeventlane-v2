@@ -1,0 +1,71 @@
+{#
+/**
+ * @file
+ * Theme override for Home Hero block.
+ *
+ * Available variables:
+ * - content: The block content.
+ * - attributes: HTML attributes for the block wrapper.
+ * - categories: Array of category terms (from preprocess).
+ * - category_pie_chart: Rendered pie chart block (from preprocess).
+ */
+#}
+<section class="homepage-hero"{{ attributes }}>
+  <div class="homepage-hero__content">
+    <h1 class="homepage-hero__title">
+      {% if label %}
+        {{ label }}
+      {% elseif content['#block_content'] and content['#block_content'].info %}
+        {{ content['#block_content'].info.value }}
+      {% else %}
+        {{ 'Run Your Show'|t }}
+      {% endif %}
+    </h1>
+    {% if content.field_subtitle %}
+      <p class="homepage-hero__subtitle">{{ content.field_subtitle }}</p>
+    {% else %}
+      <p class="homepage-hero__subtitle">{{ 'Empowering Event Creators'|t }}</p>
+    {% endif %}
+
+    <div class="homepage-hero__category-buttons">
+      {% if categories is defined and categories|length %}
+        {% for term in categories %}
+          {% set term_normalized = term.name|lower|replace({' ': '-', '&': 'and', '+': ''}) %}
+          <a href="/events?category={{ term.tid }}" class="category-button tag-{{ term_normalized }}">
+            {{ term.name }}
+          </a>
+        {% endfor %}
+      {% else %}
+        {# Fallback categories if not provided #}
+        <a href="/events" class="category-button tag-all">All Events</a>
+        <a href="/events?category=workshop" class="category-button tag-workshop">Workshop</a>
+        <a href="/events?category=music" class="category-button tag-music">Music</a>
+        <a href="/events?category=community" class="category-button tag-community">Community</a>
+        <a href="/events?category=food-drink" class="category-button tag-food-drink">Food & Drink</a>
+        <a href="/events?category=lgbtq" class="category-button tag-lgbtq">LGBTQ+</a>
+      {% endif %}
+    </div>
+
+    <form class="homepage-hero__search" action="/events" method="get">
+      <input 
+        type="search" 
+        name="q" 
+        placeholder="{{ 'Search events...'|t }}"
+        aria-label="{{ 'Search events'|t }}"
+      >
+      <button type="submit">{{ 'Search'|t }}</button>
+    </form>
+  </div>
+
+  <div class="homepage-hero__visual">
+    {% if category_pie_chart %}
+      {{ category_pie_chart }}
+    {% else %}
+      {# Fallback: try to render pie chart block #}
+      {% set pie_chart = drupal_block('category_pie_chart_block') %}
+      {% if pie_chart %}
+        {{ pie_chart }}
+      {% endif %}
+    {% endif %}
+  </div>
+</section>

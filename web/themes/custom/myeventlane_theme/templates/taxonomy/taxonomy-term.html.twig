@@ -1,0 +1,16 @@
+{% extends "page.html.twig" %}
+
+{% block content %}
+  <section class="mel-content">
+    <header class="mel-section-header">
+      <h1>{{ term.name.value }}</h1>
+      {% if term.description.value %}
+        <p>{{ term.description.value }}</p>
+      {% endif %}
+    </header>
+
+    <div class="mel-event-grid">
+      {{ content }}
+    </div>
+  </section>
+{% endblock %}

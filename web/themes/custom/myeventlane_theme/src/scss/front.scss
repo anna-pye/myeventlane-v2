@@ -1,0 +1,8 @@
+// ==========================================================================
+// Front (above-the-cards UI) — separate build entry
+// ==========================================================================
+
+@use 'front/front-hero';
+@use 'components/category-pills';
+@use 'components/value-cards';
+@use 'components/front-pie';

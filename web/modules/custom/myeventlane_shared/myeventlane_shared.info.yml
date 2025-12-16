@@ -1,0 +1,5 @@
+name: 'MyEventLane Shared'
+type: module
+description: 'Shared services and utilities used across MyEventLane modules, including centralized color definitions.'
+package: MyEventLane
+core_version_requirement: ^11

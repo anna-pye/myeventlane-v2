@@ -626,7 +626,10 @@ header:has(~ .mel-nav-toggle-checkbox:checked) .mel-nav-mobile-wrapper {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: zindex.mel-z(nav) - 1;
+  // Keep the backdrop *below* the sticky header stacking context so the
+  // fixed mobile drawer (rendered inside `.mel-header`) is never dimmed or
+  // blocked by the overlay.
+  z-index: zindex.mel-z(header) - 1;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.5s ease, visibility 0.5s ease;

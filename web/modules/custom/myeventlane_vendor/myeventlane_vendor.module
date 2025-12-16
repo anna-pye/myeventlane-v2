@@ -289,6 +289,31 @@ function myeventlane_vendor_form_node_event_form_alter(array &$form, \Drupal\Cor
     return;
   }
   
+  // Debug: Log form structure before wrapping.
+  $logger = \Drupal::logger('myeventlane_vendor');
+  $top_level_keys = array_filter(array_keys($form), function($key) {
+    return !str_starts_with($key, '#');
+  });
+  $logger->debug('Vendor form alter START - Top-level form keys: @keys', [
+    '@keys' => implode(', ', $top_level_keys),
+  ]);
+  $logger->debug('Has booking_config: @has', ['@has' => isset($form['booking_config']) ? 'YES' : 'NO']);
+  $logger->debug('Has visibility: @has', ['@has' => isset($form['visibility']) ? 'YES' : 'NO']);
+  if (isset($form['booking_config'])) {
+    $logger->debug('booking_config keys: @keys', [
+      '@keys' => implode(', ', array_filter(array_keys($form['booking_config']), function($k) {
+        return !str_starts_with($k, '#');
+      })),
+    ]);
+  }
+  if (isset($form['visibility'])) {
+    $logger->debug('visibility keys: @keys', [
+      '@keys' => implode(', ', array_filter(array_keys($form['visibility']), function($k) {
+        return !str_starts_with($k, '#');
+      })),
+    ]);
+  }
+  
   // Add marker class for JS.
   if (!isset($form['#attributes'])) {
     $form['#attributes'] = [];
@@ -382,33 +407,96 @@ function myeventlane_vendor_form_node_event_form_alter(array &$form, \Drupal\Cor
   // Wrap each section in a tab pane.
   foreach ($tab_mappings as $section => $config) {
     if (isset($form[$section]) && is_array($form[$section])) {
+      $logger->debug('Wrapping section: @section', ['@section' => $section]);
       // Store original content.
       $original = $form[$section];
       $weight = $original['#weight'] ?? 0;
       
-      // Create new structure with tab pane wrapper.
-      $form[$section] = [
-        '#type' => 'container',
-        '#attributes' => [
-          'class' => ['mel-tab-pane', 'mel-simple-tab-pane'],
+      // If section already has 'content' key (from EventFormAlter), preserve it exactly.
+      // This prevents double-nesting: booking_config.content.paid_fields stays accessible.
+      if (isset($original['content']) && is_array($original['content'])) {
+        // Preserve the existing structure exactly, only add wrapper attributes.
+        $existing_attributes = $original['#attributes'] ?? [];
+        $existing_classes = $existing_attributes['class'] ?? [];
+        if (!is_array($existing_classes)) {
+          $existing_classes = [$existing_classes];
+        }
+        
+        // Add tab pane classes.
+        $tab_classes = ['mel-tab-pane', 'mel-simple-tab-pane'];
+        $merged_classes = array_unique(array_merge($existing_classes, $tab_classes));
+        
+        // Build attributes.
+        $wrapper_attributes = array_merge($existing_attributes, [
+          'class' => $merged_classes,
           'data-tab-pane' => $config['tab'],
           'data-simple-tab-pane' => $config['tab'],
           'role' => 'tabpanel',
-        ],
-        '#weight' => $weight,
-      ];
-      
-      // Add 'is-active' class only to the default tab.
-      if ($config['active']) {
-        $form[$section]['#attributes']['class'][] = 'is-active';
+        ]);
+        
+        // Add 'is-active' class only to the default tab.
+        if ($config['active']) {
+          $wrapper_attributes['class'][] = 'is-active';
+        }
+        
+        // Preserve original structure exactly - don't create content.content.*
+        $form[$section] = $original;
+        $form[$section]['#attributes'] = $wrapper_attributes;
+        $form[$section]['#weight'] = $weight;
+        
+        // Preserve all non-# keys (like 'header', 'content') - they're already in place.
+        $logger->debug('Preserved existing content structure for @section', ['@section' => $section]);
+        
+        // Debug: Verify fields exist at expected paths.
+        if ($section === 'booking_config' && isset($form[$section]['content']['paid_fields'])) {
+          $paid_keys = array_filter(array_keys($form[$section]['content']['paid_fields']), function($k) {
+            return !str_starts_with($k, '#');
+          });
+          $logger->debug('booking_config.content.paid_fields keys: @keys', ['@keys' => implode(', ', $paid_keys)]);
+        }
+        if ($section === 'visibility' && isset($form[$section]['content'])) {
+          $vis_keys = array_filter(array_keys($form[$section]['content']), function($k) {
+            return !str_starts_with($k, '#');
+          });
+          $logger->debug('visibility.content keys: @keys', ['@keys' => implode(', ', $vis_keys)]);
+        }
       }
-      
-      // Move original content inside.
-      $form[$section]['content'] = $original;
-      // Remove weight from inner content to prevent double weighting.
-      unset($form[$section]['content']['#weight']);
+      else {
+        // Original wrapping logic for sections without 'content' key.
+        $form[$section] = [
+          '#type' => 'container',
+          '#attributes' => [
+            'class' => ['mel-tab-pane', 'mel-simple-tab-pane'],
+            'data-tab-pane' => $config['tab'],
+            'data-simple-tab-pane' => $config['tab'],
+            'role' => 'tabpanel',
+          ],
+          '#weight' => $weight,
+        ];
+        
+        // Add 'is-active' class only to the default tab.
+        if ($config['active']) {
+          $form[$section]['#attributes']['class'][] = 'is-active';
+        }
+        
+        // Move original content inside (only if it doesn't already have 'content').
+        $form[$section]['content'] = $original;
+        // Remove weight from inner content to prevent double weighting.
+        unset($form[$section]['content']['#weight']);
+        $logger->debug('Wrapped section @section without existing content key', ['@section' => $section]);
+      }
+    } else {
+      $logger->warning('Section @section not found in form when attempting to wrap', ['@section' => $section]);
     }
   }
+  
+  // Debug: Log final structure after wrapping.
+  $final_keys = array_filter(array_keys($form), function($key) {
+    return !str_starts_with($key, '#');
+  });
+  $logger->debug('Vendor form alter END - Top-level form keys: @keys', [
+    '@keys' => implode(', ', $final_keys),
+  ]);
   
   // Create addons tab pane.
   $form['addons_tab'] = [
@@ -477,25 +565,8 @@ function myeventlane_vendor_form_node_event_form_alter(array &$form, \Drupal\Cor
   }
   $form['#attached']['library'][] = 'myeventlane_vendor_theme/event-form';
   $form['#attached']['library'][] = 'myeventlane_location/address_autocomplete';
-
-  // Inline CSS/JS to drive simple tabs if theme tabs are missing.
-  $form['#attached']['html_head'][] = [
-    [
-      '#type' => 'html_tag',
-      '#tag' => 'style',
-      '#value' => '.mel-simple-tabs__buttons{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.mel-simple-tab{border:1px solid #e2e8f0;background:#fff;color:#1a1a2e;padding:8px 12px;border-radius:10px;cursor:pointer;font-size:14px}.mel-simple-tab.is-active{background:#2563eb;color:#fff;border-color:#2563eb;box-shadow:0 3px 8px rgba(37,99,235,0.15)}.mel-simple-tab-pane{display:none !important}.mel-simple-tab-pane.is-active{display:block !important}',
-    ],
-    'myeventlane_vendor_simple_tabs_css',
-  ];
-  $form['#attached']['html_head'][] = [
-    [
-      '#type' => 'html_tag',
-      '#tag' => 'script',
-      '#attributes' => ['type' => 'text/javascript'],
-      '#value' => "(function(){\n  var tabs=document.querySelectorAll('.mel-simple-tab');\n  var panes=document.querySelectorAll('.mel-simple-tab-pane');\n  if(!tabs.length||!panes.length){return;}\n  function activate(id){\n    for(var i=0;i<tabs.length;i++){\n      var t=tabs[i];\n      var active=t.getAttribute('data-simple-tab')===id;\n      t.classList.toggle('is-active',active);\n      t.setAttribute('aria-selected',active?'true':'false');\n    }\n    for(var j=0;j<panes.length;j++){\n      var p=panes[j];\n      var paneActive=p.getAttribute('data-simple-tab-pane')===id;\n      p.classList.toggle('is-active',paneActive);\n      p.setAttribute('aria-hidden',paneActive?'false':'true');\n    }\n  }\n  activate('basics');\n  for(var k=0;k<tabs.length;k++){\n    tabs[k].addEventListener('click',function(){\n      activate(this.getAttribute('data-simple-tab'));\n    });\n  }\n})();",
-    ],
-    'myeventlane_vendor_simple_tabs_js',
-  ];
+  // Attach dedicated simple tabs library for tab functionality.
+  $form['#attached']['library'][] = 'myeventlane_vendor/simple_tabs';
   
   // Customize actions.
   if (isset($form['actions'])) {

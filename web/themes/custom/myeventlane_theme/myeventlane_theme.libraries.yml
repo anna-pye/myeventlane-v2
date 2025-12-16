@@ -31,7 +31,7 @@ front:
     theme:
       dist/css/front.css: {}
   js:
-    dist/js/front-pie.js: { attributes: { type: module } }
+    dist/js/front-pie.js: {}
   dependencies:
     - core/drupal
     - core/once

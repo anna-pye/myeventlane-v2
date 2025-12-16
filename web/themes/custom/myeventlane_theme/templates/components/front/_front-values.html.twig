@@ -1,0 +1,12 @@
+{% set values = front.values|default([]) %}
+
+{% if values|length %}
+  <div class="mel-front-values" aria-label="Platform highlights">
+    {% for v in values %}
+      <div class="mel-value-card">
+        <div class="mel-front-value__title">{{ v.title }}</div>
+        <div class="mel-front-value__text">{{ v.text }}</div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
