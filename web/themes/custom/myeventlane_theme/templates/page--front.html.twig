@@ -1,10 +1,10 @@
 {#
   Front page wrapper.
-  Renders the new hero and above-the-cards UI, then your existing page content (event cards).
+  Renders the custom hero, then exactly two Views blocks.
 #}
 
 {% set page_attributes = create_attribute() %}
-{% set page_attributes = page_attributes.addClass('mel-page', 'mel-front') %}
+{% set page_attributes = page_attributes.addClass('mel-page', 'mel-page--front', 'mel-front') %}
 
 <div{{ page_attributes }}>
 
@@ -21,59 +21,48 @@
     {% include '@myeventlane_theme/includes/header.html.twig' %}
   </div>
 
+  {# ==================== HERO (CUSTOM TWIG) ==================== #}
   <section class="mel-front-hero">
-    <div class="mel-front-hero__inner">
+    <div class="mel-container">
+      <div class="mel-front-hero__inner">
 
-      <div class="mel-front-hero__left">
-        {% include '@myeventlane_theme/components/front/_front-hero.html.twig' with {
-          front: mel_front|default({})
-        } only %}
+        <div class="mel-front-hero__left">
+          {% include '@myeventlane_theme/components/front/_front-hero.html.twig' with {
+            front: mel_front|default({}),
+            logo_src: '/themes/custom/myeventlane_theme/images/logo.svg'
+          } only %}
 
-        {% include '@myeventlane_theme/components/front/_front-search.html.twig' with {
-          front: mel_front|default({})
-        } only %}
+          {% include '@myeventlane_theme/components/front/_front-search.html.twig' with {
+            front: mel_front|default({})
+          } only %}
 
-        {% include '@myeventlane_theme/components/front/_front-pills.html.twig' with {
-          front: mel_front|default({})
-        } only %}
+          {% include '@myeventlane_theme/components/front/_front-pills.html.twig' with {
+            front: mel_front|default({})
+          } only %}
 
-        {% include '@myeventlane_theme/components/front/_front-values.html.twig' with {
-          front: mel_front|default({})
-        } only %}
+          {% include '@myeventlane_theme/components/front/_front-values.html.twig' with {
+            front: mel_front|default({})
+          } only %}
+        </div>
+
+        <div class="mel-front-hero__right">
+          {% include '@myeventlane_theme/components/front/_front-pie.html.twig' with {
+            front: mel_front|default({})
+          } only %}
+        </div>
+
       </div>
-
-      <div class="mel-front-hero__right">
-        {% include '@myeventlane_theme/components/front/_front-pie.html.twig' with {
-          front: mel_front|default({})
-        } only %}
-      </div>
-
     </div>
   </section>
 
-  {# Pre-Content (messages, etc.) #}
-  {% if page.pre_content %}
-    <div class="mel-region-pre-content">
-      <div class="mel-container">
-        {{ page.pre_content }}
-      </div>
-    </div>
-  {% endif %}
-
+  {# ==================== MAIN (TWO VIEWS ONLY) ==================== #}
   <main id="main-content" class="mel-main mel-front-content" role="main">
-    <div class="mel-front-content__inner">
-      {{ page.content }}
+    <div class="mel-container">
+      {{ drupal_block('views_block:featured_events-block_featured') }}
+
+      {{ drupal_block('views_block:all_events-block_all') }}
     </div>
   </main>
-
-  {# Pre-Footer #}
-  {% if page.pre_footer %}
-    <div class="mel-pre-footer">
-      <div class="mel-container">
-        {{ page.pre_footer }}
-      </div>
-    </div>
-  {% endif %}
 
   {# ==================== FOOTER ==================== #}
   <div class="mel-region-footer">

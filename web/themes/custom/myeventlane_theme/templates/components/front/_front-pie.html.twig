@@ -1,0 +1,30 @@
+{% set pie = front.pie|default({}) %}
+{% set slices = pie.slices|default([]) %}
+
+{% if slices|length %}
+  {% set svg %}
+    <svg class="mel-front-pie__svg"
+         viewBox="0 0 {{ pie.size|default(220) }} {{ pie.size|default(220) }}"
+         role="img"
+         aria-label="Event category distribution pie chart">
+      {% for s in slices %}
+        <path class="mel-front-pie__slice"
+              d="{{ s.d }}"
+              fill="{{ s.color }}"
+              data-mel-slice="{{ s.tid }}"
+              data-mel-label="{{ s.label|e }}"
+              data-mel-count="{{ s.count }}"
+              data-mel-percent="{{ s.percent }}" />
+      {% endfor %}
+      <circle class="mel-front-pie__hole" cx="{{ pie.cx }}" cy="{{ pie.cy }}" r="{{ pie.r_inner }}" />
+    </svg>
+  {% endset %}
+{% endif %}
+
+<div class="mel-front-pie" data-mel-pie>
+  {% if slices|length %}
+    <div class="mel-pie-float">
+      {{ svg }}
+    </div>
+  {% endif %}
+</div>
