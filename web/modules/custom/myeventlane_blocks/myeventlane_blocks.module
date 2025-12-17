@@ -20,6 +20,16 @@ function myeventlane_blocks_theme($existing, $type, $theme, $path) {
       ],
       'template' => 'category-pie-chart',
     ],
+    'myeventlane_search_block' => [
+      'variables' => [],
+      'template' => 'myeventlane-search-block',
+    ],
+    'myeventlane_category_pills' => [
+      'variables' => [
+        'categories' => [],
+      ],
+      'template' => 'myeventlane-category-pills',
+    ],
   ];
 }
 

@@ -6,8 +6,10 @@
  * Event grid is applied by views-view-unformatted.html.twig.
  */
 #}
-{{ title_prefix }}
-<h1>{{ name }}</h1>
-{{ title_suffix }}
+{% include '@myeventlane_theme/components/mel-page-header.html.twig' with {
+  title: name,
+  show_search: true,
+  show_categories: true
+} %}
 
 {{ content }}

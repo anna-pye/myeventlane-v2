@@ -1,0 +1,33 @@
+{#
+/**
+ * @file
+ * MEL page header component.
+ *
+ * Pure presentation-only header for listing pages (taxonomy, search, filters).
+ *
+ * Available variables:
+ * - title: Page title string.
+ * - show_search: Boolean; when TRUE renders the MEL search block.
+ * - show_categories: Boolean; when TRUE renders the MEL category pills block.
+ */
+#}
+{% set show_search = show_search|default(false) %}
+{% set show_categories = show_categories|default(false) %}
+
+<section class="mel-page-header">
+  <h1 class="mel-page-title">
+    {{ title }}
+  </h1>
+
+  <p class="mel-page-tagline">
+    Your lane to great events.
+  </p>
+
+  {% if show_search %}
+    {{ drupal_block('myeventlane_search_block') }}
+  {% endif %}
+
+  {% if show_categories %}
+    {{ drupal_block('myeventlane_category_pills') }}
+  {% endif %}
+</section>
