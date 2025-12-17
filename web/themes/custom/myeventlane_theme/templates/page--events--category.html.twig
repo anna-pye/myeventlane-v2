@@ -2,7 +2,8 @@
 /**
  * @file
  * Theme override for category filtered events pages.
- * Styled similar to the front page with hero and grid.
+ * Adds the MEL page header (title + tagline + search + category pills)
+ * above the page content, without changing the results view output.
  */
 #}
 
@@ -18,115 +19,19 @@
     {% include '@myeventlane_theme/includes/header.html.twig' %}
   </div>
 
-  {# ==================== HERO ==================== #}
-  <div class="mel-region-hero">
-    <section class="mel-hero" style="padding: 2rem 0;">
-      <div class="mel-container mel-hero-inner">
-        <div class="mel-hero-header">
-          <div class="mel-hero-brand">
-            <h1 style="color: #ff6f61; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 2.5rem; line-height: 1.1; margin: 0;">
-              {% if current_category is defined %}
-                {{ current_category.name }} Events
-              {% else %}
-                Browse Events
-              {% endif %}
-            </h1>
-            <p class="mel-hero-tagline" style="font-size: 1.1rem; margin-top: 0.5rem; color: #5c5c6f;">
-              Discover amazing events in this category
-            </p>
-          </div>
-        </div>
-        
-        {# Category Chips #}
-        <div class="mel-hero-categories" style="margin-top: 1.5rem;">
-          <a href="/events" class="mel-category-chip {% if current_category is not defined %}is-active{% endif %}">All Events</a>
-          {% if event_categories is defined and event_categories|length %}
-            {% set chip_colors = ['', 'mel-category-chip--purple', 'mel-category-chip--blue', 'mel-category-chip--teal', '', 'mel-category-chip--purple'] %}
-            {% for category in event_categories %}
-              <a href="{{ category.url }}" class="mel-category-chip {{ chip_colors[loop.index0 % 6] }} {% if current_category is defined and current_category.tid == category.tid %}is-active{% endif %}">
-                {{ category.name }}
-              </a>
-            {% endfor %}
-          {% endif %}
-        </div>
-
-        {# Search Bar #}
-        <form class="mel-hero-search" action="/events" method="get" style="margin-top: 1.5rem;">
-          <div class="mel-hero-search-box">
-            <input type="text" name="q" placeholder="Search events..." aria-label="Search events">
-            <button type="submit" class="mel-hero-search-btn">Search</button>
-          </div>
-        </form>
-      </div>
-    </section>
-  </div>
-
   {# ==================== MAIN CONTENT ==================== #}
   <main id="main-content" class="mel-main">
     <div class="mel-container">
+      <div class="mel-content">
+        {% set header_title = (current_category is defined) ? current_category.name : 'Events' %}
+        {% include '@myeventlane_theme/components/mel-page-header.html.twig' with {
+          title: header_title,
+          show_search: true,
+          show_categories: true
+        } %}
 
-      <section class="mel-section">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-          <h2 style="font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin: 0;">
-            {% if current_category is defined %}
-              {{ current_category.name }}
-            {% else %}
-              Events
-            {% endif %}
-          </h2>
-          <a href="/create-event" class="mel-btn mel-btn-primary" style="padding: 0.5rem 1.5rem; border-radius: 999px;">{{ 'Create your event'|t }}</a>
-        </div>
-        
-        {# CSS for event grid #}
-        <style>
-          .mel-events-section h2:not(.mel-section-title),
-          .mel-events-section h3,
-          .mel-events-section .view-header { display: none !important; }
-          
-          .mel-events-section .view-content {
-            display: grid !important;
-            grid-template-columns: repeat(3, 1fr) !important;
-            gap: 1.5rem !important;
-          }
-          
-          .mel-events-section .view > div:not(.view-header):not(.view-filters) {
-            display: grid !important;
-            grid-template-columns: repeat(3, 1fr) !important;
-            gap: 1.5rem !important;
-          }
-          
-          .mel-events-section .mel-event-card {
-            display: flex !important;
-            flex-direction: column !important;
-          }
-          
-          @media (max-width: 1024px) {
-            .mel-events-section .view-content,
-            .mel-events-section .view > div:not(.view-header):not(.view-filters) { 
-              grid-template-columns: repeat(2, 1fr) !important; 
-            }
-          }
-          @media (max-width: 640px) {
-            .mel-events-section .view-content,
-            .mel-events-section .view > div:not(.view-header):not(.view-filters) { 
-              grid-template-columns: 1fr !important; 
-            }
-          }
-        </style>
-        
-        <div class="mel-events-section">
-          {{ page.content }}
-        </div>
-      </section>
-
-      {# CTA Banner #}
-      <section class="mel-cta-banner" style="margin-top: 3rem;">
-        <h2 class="mel-cta-title">{{ 'Have an event to share?'|t }}</h2>
-        <p class="mel-cta-text">{{ 'Create and promote your event to our community!'|t }}</p>
-        <div class="mel-cta-actions">
-          <a href="/create-event" class="mel-btn mel-btn-accent mel-btn-lg">{{ 'Create your event'|t }}</a>
-        </div>
-      </section>
+        {{ page.content }}
+      </div>
 
     </div>
   </main>

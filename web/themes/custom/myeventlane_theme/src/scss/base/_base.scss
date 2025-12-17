@@ -18,6 +18,10 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root {
+  --mel-coral: #{colors.$mel-color-primary};
+}
+
 body {
   margin: 0;
   padding: 0;

@@ -1,0 +1,18 @@
+.mel-page-header {
+  max-width: 1200px;
+  margin: 0 auto 32px;
+  padding: 32px 24px 16px;
+}
+
+.mel-page-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  color: var(--mel-coral);
+  margin-bottom: 8px;
+}
+
+.mel-page-tagline {
+  font-size: 1.125rem;
+  color: #475467;
+  margin-bottom: 24px;
+}

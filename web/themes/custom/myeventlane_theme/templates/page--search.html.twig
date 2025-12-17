@@ -1,0 +1,66 @@
+{#
+/**
+ * @file
+ * Theme override for the search results page.
+ *
+ * Adds the MEL page header (title + tagline + search + category pills)
+ * above the page content, without changing the results view output.
+ */
+#}
+{% set page_attributes = create_attribute() %}
+{% set page_attributes = page_attributes.addClass('mel-page', 'mel-page--search') %}
+
+<div{{ page_attributes }}>
+  {{ title_prefix }}
+  {{ title_suffix }}
+
+  {# ==================== HEADER ==================== #}
+  <div class="mel-region-header">
+    {% include '@myeventlane_theme/includes/header.html.twig' %}
+  </div>
+
+  {# Hero (for pages with hero region) #}
+  {% if page.hero %}
+    <div class="mel-region-hero">
+      {{ page.hero }}
+    </div>
+  {% endif %}
+
+  {# Pre-Content #}
+  {% if page.pre_content %}
+    <div class="mel-region-pre-content">
+      <div class="mel-container">
+        {{ page.pre_content }}
+      </div>
+    </div>
+  {% endif %}
+
+  {# Main Content Area #}
+  <main id="main-content" class="mel-main" role="main">
+    <div class="mel-container">
+      <div class="mel-content">
+        {% include '@myeventlane_theme/components/mel-page-header.html.twig' with {
+          title: 'Search results',
+          show_search: true,
+          show_categories: true
+        } %}
+
+        {{ page.content }}
+      </div>
+    </div>
+  </main>
+
+  {# Pre-Footer #}
+  {% if page.pre_footer %}
+    <div class="mel-pre-footer">
+      <div class="mel-container">
+        {{ page.pre_footer }}
+      </div>
+    </div>
+  {% endif %}
+
+  {# ==================== FOOTER ==================== #}
+  <div class="mel-region-footer">
+    {% include '@myeventlane_theme/includes/footer.html.twig' %}
+  </div>
+</div>

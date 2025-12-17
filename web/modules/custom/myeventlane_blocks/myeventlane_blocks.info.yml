@@ -3,3 +3,6 @@ type: module
 description: Custom blocks for MyEventLane homepage including feature block and category pie chart.
 core_version_requirement: ^11
 package: MyEventLane
+
+dependencies:
+  - myeventlane_core:myeventlane_core
