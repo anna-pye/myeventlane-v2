@@ -1,0 +1,13 @@
+chartjs:
+  remote: https://cdn.jsdelivr.net/npm/chart.js
+  version: 4.x
+  license:
+    name: MIT
+    url: https://github.com/chartjs/Chart.js/blob/master/LICENSE.md
+    gpl-compatible: true
+  js:
+    https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js:
+      type: external
+      minified: true
+      attributes:
+        defer: true

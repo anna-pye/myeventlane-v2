@@ -1,8 +1,8 @@
-boost_ui:
+boost:
   version: 1.x
   css:
     component:
-      css/styles.css: {}
+      css/boost.css: {}
   js:
     js/boost-ui.js: {}
   dependencies:

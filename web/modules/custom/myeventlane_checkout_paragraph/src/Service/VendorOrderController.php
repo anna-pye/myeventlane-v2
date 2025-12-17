@@ -1,34 +1,50 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\myeventlane_checkout_paragraph\Controller;
 
-use Drupal\Core\Controller\ControllerBase;
 use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\myeventlane_checkout_paragraph\Service\TicketAttendeeRenderer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class VendorOrderController extends ControllerBase {
+/**
+ * Controller for vendor order attendee rendering.
+ */
+final class VendorOrderController extends ControllerBase implements ContainerInjectionInterface {
 
-  protected $attendeeRenderer;
+  /**
+   * Renders attendees for an order.
+   */
+  public function __construct(
+    private readonly TicketAttendeeRenderer $attendeeRenderer,
+  ) {}
 
-  public function __construct($attendeeRenderer) {
-    $this->attendeeRenderer = $attendeeRenderer;
-  }
-
-  public static function create(ContainerInterface $container) {
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): static {
     return new static(
-      $container->get('myeventlane_checkout_paragraph.attendee_renderer')
+      $container->get('myeventlane_checkout_paragraph.attendee_renderer'),
     );
   }
 
-  public function attendees(OrderInterface $commerce_order) {
-    $build = [
+  /**
+   * Displays a simple attendee table for a commerce order.
+   */
+  public function attendees(OrderInterface $commerce_order): array {
+    return [
       '#theme' => 'table',
-      '#header' => ['First Name', 'Last Name', 'Email'],
+      '#header' => [
+        $this->t('First Name'),
+        $this->t('Last Name'),
+        $this->t('Email'),
+      ],
       '#rows' => $this->attendeeRenderer->renderForOrder($commerce_order),
       '#cache' => ['max-age' => 0],
     ];
-
-    return $build;
   }
 
 }

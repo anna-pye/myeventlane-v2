@@ -1,0 +1,12 @@
+access analytics dashboard:
+  title: 'Access analytics dashboard'
+  description: 'View analytics and reports for events.'
+  restrict access: true
+
+
+
+
+
+
+
+

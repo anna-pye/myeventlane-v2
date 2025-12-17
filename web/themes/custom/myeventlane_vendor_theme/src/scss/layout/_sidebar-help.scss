@@ -1,0 +1,292 @@
+/**
+ * @file
+ * Right-hand help/blog sidebar for MyEventLane Vendor Theme.
+ *
+ * mel-helper-sidebar: Future-ready sidebar for contextual help,
+ * blog entries, help guides, and release notes.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/shadows' as *;
+@use '../tokens/breakpoints' as *;
+
+// ============================================================================
+// HELPER SIDEBAR
+// ============================================================================
+
+.mel-helper-sidebar {
+  max-width: $layout-sidebar-help-width;
+  padding-left: $layout-gutter;
+  border-left: 1px solid $ml-vendor-border;
+  
+  // Hidden on smaller screens
+  @include respond-down(xl) {
+    display: none;
+  }
+}
+
+// Mobile drawer variant
+.mel-helper-sidebar--drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 320px;
+  padding: $spacing-6;
+  background: $bg-primary;
+  border-left: 1px solid $border-color;
+  box-shadow: $shadow-xl;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 50;
+  overflow-y: auto;
+  
+  &.is-open {
+    transform: translateX(0);
+  }
+}
+
+// Drawer overlay
+.mel-helper-sidebar__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  z-index: 49;
+  
+  &.is-visible {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+// Drawer toggle button (appears on mobile)
+.mel-helper-sidebar__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-2;
+  padding: $spacing-2 $spacing-4;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+  background: $bg-primary;
+  border: 1px solid $border-color;
+  border-radius: $radius-button;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    background: $bg-secondary;
+    color: $text-primary;
+  }
+  
+  // Only show on screens where sidebar is hidden
+  @include respond-to(xl) {
+    display: none;
+  }
+}
+
+// Drawer close button
+.mel-helper-sidebar__close {
+  position: absolute;
+  top: $spacing-4;
+  right: $spacing-4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: $font-size-xl;
+  color: $text-secondary;
+  background: transparent;
+  border: none;
+  border-radius: $radius-md;
+  cursor: pointer;
+  
+  &:hover {
+    background: $bg-secondary;
+    color: $text-primary;
+  }
+}
+
+// ============================================================================
+// SIDEBAR CONTENT
+// ============================================================================
+
+.mel-helper-sidebar__header {
+  margin-bottom: $spacing-6;
+  padding-bottom: $spacing-4;
+  border-bottom: 1px solid $border-color-light;
+}
+
+.mel-helper-sidebar__title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin: 0;
+}
+
+.mel-helper-sidebar__section {
+  margin-bottom: $spacing-6;
+}
+
+.mel-helper-sidebar__section-title {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: $spacing-3;
+}
+
+// ============================================================================
+// HELP LINKS LIST
+// ============================================================================
+
+.mel-help-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mel-help-links__item {
+  margin-bottom: $spacing-1;
+}
+
+.mel-help-links__link {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-3;
+  padding: $spacing-3;
+  color: $text-primary;
+  text-decoration: none;
+  border-radius: $radius-md;
+  transition: background-color 0.15s ease-in-out;
+  
+  &:hover {
+    background: $bg-secondary;
+    text-decoration: none;
+  }
+}
+
+.mel-help-links__icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: $text-secondary;
+}
+
+.mel-help-links__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.mel-help-links__label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-tight;
+}
+
+.mel-help-links__desc {
+  font-size: $font-size-xs;
+  color: $text-secondary;
+  margin-top: $spacing-1;
+}
+
+// ============================================================================
+// CONTEXTUAL TIP CARD
+// ============================================================================
+
+.mel-tip-card {
+  padding: $spacing-4;
+  background: $ml-accent-yellow;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-4;
+}
+
+.mel-tip-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-bottom: $spacing-2;
+  font-size: $font-size-lg;
+}
+
+.mel-tip-card__title {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin-bottom: $spacing-2;
+}
+
+.mel-tip-card__text {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  line-height: $line-height-normal;
+}
+
+// ============================================================================
+// RELEASE NOTES CARD
+// ============================================================================
+
+.mel-release-card {
+  padding: $spacing-4;
+  background: $bg-secondary;
+  border-radius: $radius-lg;
+  border: 1px solid $border-color-light;
+}
+
+.mel-release-card__badge {
+  display: inline-flex;
+  padding: $spacing-1 $spacing-2;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $primary;
+  background: rgba($primary, 0.1);
+  border-radius: $radius-badge;
+  margin-bottom: $spacing-2;
+}
+
+.mel-release-card__title {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin-bottom: $spacing-2;
+}
+
+.mel-release-card__text {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  line-height: $line-height-normal;
+}
+
+.mel-release-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-1;
+  margin-top: $spacing-3;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $primary;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+
+
+
+
+
+

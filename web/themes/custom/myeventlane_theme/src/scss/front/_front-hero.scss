@@ -1,0 +1,265 @@
+@use '../tokens/colors';
+@use '../tokens/spacing';
+@use '../tokens/radii';
+@use '../tokens/shadows';
+@use '../tokens/breakpoints';
+
+// ---------------------------------------------------------------------------
+// Page-level background (shared across hero + content to avoid seams).
+// Subtle radials only (no hard panels).
+// ---------------------------------------------------------------------------
+
+.mel-front {
+  background-color: colors.$mel-color-bg;
+  background-image:
+    radial-gradient(1200px 640px at 14% 16%, rgba(252, 103, 90, 0.14), transparent 62%),
+    radial-gradient(980px 560px at 84% 10%, rgba(168, 200, 255, 0.22), transparent 60%),
+    radial-gradient(900px 620px at 70% 78%, rgba(244, 185, 239, 0.14), transparent 62%);
+}
+
+.mel-front-hero {
+  position: relative;
+  padding: spacing.mel-space(5) 0 spacing.mel-space(3);
+  background: transparent;
+}
+
+.mel-front-hero__inner {
+  display: grid;
+  gap: spacing.mel-space(3);
+  grid-template-columns: 1fr;
+}
+
+.mel-front-hero__left {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(2);
+}
+
+.mel-front-hero__right {
+  order: 3;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+
+@include breakpoints.mel-break(lg) {
+  .mel-front-hero {
+    padding: spacing.mel-space(7) 0 spacing.mel-space(4);
+  }
+
+  .mel-front-hero__inner {
+    grid-template-columns: 1.15fr 0.85fr;
+    align-items: start;
+    gap: spacing.mel-space(5);
+  }
+
+  .mel-front-hero__right {
+    order: 0;
+    justify-content: flex-end;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Hero typography + logo scale (front-page hero only)
+// ---------------------------------------------------------------------------
+
+.mel-hero-title {
+  font-size: clamp(2.8rem, 5vw, 4.2rem);
+  font-weight: 800;
+  color: colors.$mel-color-primary;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.mel-hero-subtitle {
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: colors.$mel-color-text;
+  margin-top: 0.5rem;
+}
+
+.mel-hero-logo {
+  display: flex;
+  align-items: center;
+  gap: spacing.mel-space(2);
+  margin-bottom: spacing.mel-space(2);
+}
+
+.mel-hero-logo img {
+  width: 140px;
+  height: auto;
+}
+
+// ---------------------------------------------------------------------------
+// Search
+// ---------------------------------------------------------------------------
+
+.mel-front-search {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: spacing.mel-space(2);
+}
+
+.mel-front-search__input {
+  width: 100%;
+  border-radius: radii.$mel-radius-full;
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  padding: 0.95rem 1rem;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(10px);
+  box-shadow: shadows.$mel-shadow-sm;
+}
+
+.mel-front-search__btn {
+  border: 0;
+  border-radius: radii.$mel-radius-full;
+  padding: 0.95rem 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: colors.$mel-color-primary;
+  color: colors.$mel-color-text-inverse;
+  box-shadow: 0 10px 24px rgba(252, 103, 90, 0.22);
+}
+
+@include breakpoints.mel-break(sm) {
+  .mel-front-search {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .mel-front-search__btn {
+    min-width: 140px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Category pills
+// ---------------------------------------------------------------------------
+
+.mel-front-pills {
+  margin-top: 2px;
+}
+
+.mel-front-pills__scroller {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mel-front-pills__scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.mel-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: radii.$mel-radius-full;
+  text-decoration: none;
+  background: linear-gradient(
+    135deg,
+    var(--pill-color),
+    rgba(255, 255, 255, 0.15)
+  );
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+  white-space: nowrap;
+  transition: transform 0.15s ease;
+}
+
+.mel-pill:hover {
+  transform: translateY(-2px);
+}
+
+// ---------------------------------------------------------------------------
+// Value cards
+// ---------------------------------------------------------------------------
+
+.mel-front-values {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: spacing.mel-space(2);
+}
+
+@include breakpoints.mel-break(lg) {
+  .mel-front-values {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.mel-front-value {
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(255, 255, 255, 0.75)
+  );
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+  border-left: 6px solid colors.$mel-color-primary;
+  padding: 14px 14px;
+}
+
+.mel-front-value:nth-child(2) {
+  border-left-color: colors.$mel-color-accent;
+}
+
+.mel-front-value:nth-child(3) {
+  border-left-color: colors.$mel-color-secondary;
+}
+
+.mel-front-value__title {
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.mel-front-value__text {
+  opacity: 0.85;
+}
+
+// ---------------------------------------------------------------------------
+// Pie chart — pop + transparency
+// ---------------------------------------------------------------------------
+
+.mel-front-pie {
+  width: 100%;
+  max-width: 440px;
+  display: block;
+}
+
+.mel-pie-wrap {
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.65)
+  );
+  border-radius: 50%;
+  padding: 1.25rem;
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.mel-front-pie path {
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.mel-front-pie path:hover {
+  transform: scale(1.03);
+  filter: brightness(1.08);
+}
+
+.mel-front-content {
+  padding: spacing.mel-space(3) 0 spacing.mel-space(7);
+}
+
+.mel-front-content .homepage-events__title,
+.mel-front-content h2 {
+  margin-top: spacing.mel-space(1);
+}

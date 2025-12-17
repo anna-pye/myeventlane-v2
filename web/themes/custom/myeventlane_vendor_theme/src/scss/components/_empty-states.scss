@@ -1,0 +1,193 @@
+/**
+ * @file
+ * Empty state styles for MyEventLane Vendor Theme.
+ *
+ * Consistent empty states for dashboard sections and lists.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/radii' as *;
+
+// ============================================================================
+// EMPTY STATE
+// ============================================================================
+
+.mel-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-12 $spacing-6;
+  text-align: center;
+}
+
+.mel-empty-state--compact {
+  padding: $spacing-6;
+}
+
+.mel-empty-state__icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: $spacing-6;
+  color: $text-muted;
+  opacity: 0.5;
+}
+
+.mel-empty-state__icon--sm {
+  width: 48px;
+  height: 48px;
+  margin-bottom: $spacing-4;
+}
+
+.mel-empty-state__title {
+  @include section-title;
+  color: $text-primary;
+  margin-bottom: $spacing-2;
+}
+
+.mel-empty-state__text {
+  font-size: $font-size-body;
+  color: $text-secondary;
+  max-width: 400px;
+  margin-bottom: $spacing-6;
+  
+  .mel-empty-state--compact & {
+    margin-bottom: $spacing-4;
+  }
+}
+
+.mel-empty-state__actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+// ============================================================================
+// EMPTY STATE VARIANTS
+// ============================================================================
+
+// Illustrated empty state
+.mel-empty-state--illustrated {
+  .mel-empty-state__illustration {
+    max-width: 200px;
+    margin-bottom: $spacing-6;
+  }
+}
+
+// Card empty state (inside mel-card)
+.mel-card .mel-empty-state {
+  padding: $spacing-8 $spacing-4;
+}
+
+// ============================================================================
+// LOADING SKELETON
+// ============================================================================
+
+.mel-skeleton {
+  background: linear-gradient(
+    90deg,
+    $bg-secondary 25%,
+    $bg-tertiary 50%,
+    $bg-secondary 75%
+  );
+  background-size: 200% 100%;
+  animation: mel-skeleton-pulse 1.5s ease-in-out infinite;
+  border-radius: $radius-md;
+}
+
+@keyframes mel-skeleton-pulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.mel-skeleton--text {
+  height: 16px;
+  margin-bottom: $spacing-2;
+  
+  &:last-child {
+    width: 60%;
+  }
+}
+
+.mel-skeleton--title {
+  height: 24px;
+  width: 50%;
+  margin-bottom: $spacing-4;
+}
+
+.mel-skeleton--avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-full;
+}
+
+.mel-skeleton--card {
+  height: 120px;
+}
+
+.mel-skeleton--kpi {
+  height: 100px;
+}
+
+.mel-skeleton--chart {
+  height: 280px;
+}
+
+// ============================================================================
+// INLINE LOADING
+// ============================================================================
+
+.mel-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-6;
+}
+
+.mel-loading__spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid $border-color;
+  border-top-color: $primary;
+  border-radius: 50%;
+  animation: mel-spin 0.8s linear infinite;
+}
+
+.mel-loading__spinner--sm {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.mel-loading__spinner--lg {
+  width: 48px;
+  height: 48px;
+  border-width: 4px;
+}
+
+@keyframes mel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.mel-loading__text {
+  margin-left: $spacing-3;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+
+
+
+
+
+

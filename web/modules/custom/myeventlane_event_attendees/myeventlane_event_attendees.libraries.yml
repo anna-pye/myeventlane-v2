@@ -1,0 +1,21 @@
+waitlist-management:
+  css:
+    theme:
+      css/waitlist-management.css: {}
+  dependencies:
+    - core/drupal
+
+waitlist-position:
+  css:
+    theme:
+      css/waitlist-position.css: {}
+  dependencies:
+    - core/drupal
+
+waitlist-signup:
+  css:
+    theme:
+      css/waitlist-signup.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.form

@@ -1,0 +1,133 @@
+/**
+ * @file
+ * Styles for waitlist signup form.
+ */
+
+.mel-waitlist-signup-form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mel-waitlist-signup-form__header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.mel-waitlist-signup-form__title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 0.5rem 0;
+}
+
+.mel-waitlist-signup-form__subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+.mel-waitlist-signup-form__body {
+  margin-top: 1.5rem;
+}
+
+.mel-waitlist-description {
+  font-size: 0.9375rem;
+  color: #555;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+.mel-waitlist-user-info {
+  font-size: 0.9375rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: #e8f5e9;
+  border-radius: 8px;
+  border-left: 4px solid #4caf50;
+}
+
+.mel-waitlist-signup-form__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.mel-form-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.mel-waitlist-signup-form__actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.mel-waitlist-message {
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.mel-waitlist-message--info {
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  color: #1565c0;
+}
+
+.mel-waitlist-message p {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+/* Form field styling */
+.mel-waitlist-signup-form input[type="text"],
+.mel-waitlist-signup-form input[type="email"],
+.mel-waitlist-signup-form input[type="tel"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+
+.mel-waitlist-signup-form input[type="text"]:focus,
+.mel-waitlist-signup-form input[type="email"]:focus,
+.mel-waitlist-signup-form input[type="tel"]:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.mel-waitlist-signup-form label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.mel-waitlist-signup-form .description {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mel-waitlist-signup-form {
+    padding: 1.5rem;
+  }
+
+  .mel-waitlist-signup-form__title {
+    font-size: 1.5rem;
+  }
+}

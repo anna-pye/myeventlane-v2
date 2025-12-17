@@ -1,0 +1,39 @@
+{#
+  Base console page layout for vendor routes.
+  Expects:
+  - title
+  - header_actions[]
+  - tabs[] (label, url, active)
+  - body render array
+#}
+<div class="mel-console">
+  <div class="mel-console__header">
+    {% if title %}
+      <h1 class="mel-console__title">{{ title }}</h1>
+    {% endif %}
+    {% if header_actions %}
+      <div class="mel-console__actions">
+        {% for action in header_actions %}
+          <a class="mel-btn {{ action.class|default('mel-btn--primary') }}" href="{{ action.url }}">{{ action.label }}</a>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+  {% if tabs %}
+    <div class="mel-console__tabs" role="tablist">
+      {% for tab in tabs %}
+        <a class="mel-console__tab{% if tab.active %} is-active{% endif %}"
+           href="{{ tab.url }}"
+           role="tab"
+           aria-selected="{{ tab.active ? 'true' : 'false' }}">
+          {{ tab.label }}
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="mel-console__body">
+    {{ body }}
+  </div>
+</div>

@@ -1,0 +1,144 @@
+/**
+ * @file
+ * Color tokens for MyEventLane Vendor Theme.
+ *
+ * Style Guide compliant color system with semantic naming.
+ */
+
+// ============================================================================
+// VENDOR CONSOLE COLOR SYSTEM
+// ============================================================================
+
+// Primary Brand Colors
+$ml-vendor-navy:        #0D1520;
+$ml-vendor-slate:       #637185;
+$ml-vendor-text-dark:   #1A1A1A;
+
+// Background Colors
+$ml-vendor-bg:          #F7F8FA;
+$ml-vendor-card:        #FFFFFF;
+$ml-vendor-border:      #E6E6E6;
+
+// Accent Colors
+$ml-accent-coral:       #FF8A8A;
+$ml-accent-coral-light: #FFE0E0;
+$ml-accent-green:       #5CC98B;
+$ml-accent-yellow:      #FFEAAA;
+
+// ============================================================================
+// EXTENDED PALETTE (for gradients, hover states, etc.)
+// ============================================================================
+
+// Navy Scale
+$ml-navy-50:  #F0F4F8;
+$ml-navy-100: #D9E2EC;
+$ml-navy-200: #BCCCDC;
+$ml-navy-300: #9FB3C8;
+$ml-navy-400: #829AB1;
+$ml-navy-500: #627D98;
+$ml-navy-600: #486581;
+$ml-navy-700: #334E68;
+$ml-navy-800: #243B53;
+$ml-navy-900: #102A43;
+
+// Slate Scale
+$ml-slate-50:  #F8FAFC;
+$ml-slate-100: #F1F5F9;
+$ml-slate-200: #E2E8F0;
+$ml-slate-300: #CBD5E1;
+$ml-slate-400: #94A3B8;
+$ml-slate-500: #64748B;
+$ml-slate-600: #475569;
+$ml-slate-700: #334155;
+$ml-slate-800: #1E293B;
+$ml-slate-900: #0F172A;
+
+// Neutral Grays
+$gray-50:  #F9FAFB;
+$gray-100: #F3F4F6;
+$gray-200: #E5E7EB;
+$gray-300: #D1D5DB;
+$gray-400: #9CA3AF;
+$gray-500: #6B7280;
+$gray-600: #4B5563;
+$gray-700: #374151;
+$gray-800: #1F2937;
+$gray-900: #111827;
+
+// ============================================================================
+// SEMANTIC COLORS
+// ============================================================================
+
+// Text
+$text-primary:   $ml-vendor-text-dark;
+$text-secondary: $ml-vendor-slate;
+$text-muted:     $gray-500;
+$text-inverse:   #FFFFFF;
+
+// Backgrounds
+$bg-primary:    $ml-vendor-card;
+$bg-secondary:  $ml-vendor-bg;
+$bg-tertiary:   $gray-100;
+$bg-sidebar:    $ml-vendor-navy;
+
+// Borders
+$border-color:       $ml-vendor-border;
+$border-color-light: $gray-200;
+$border-color-dark:  $gray-300;
+
+// Interactive States
+$primary:       #2563EB;
+$primary-dark:  #1D4ED8;
+$primary-light: #3B82F6;
+
+// Status Colors
+$success:       $ml-accent-green;
+$success-light: #D1FAE5;
+$warning:       #F59E0B;
+$warning-light: $ml-accent-yellow;
+$danger:        $ml-accent-coral;
+$danger-light:  $ml-accent-coral-light;
+$info:          #0EA5E9;
+$info-light:    #E0F2FE;
+
+// ============================================================================
+// FORM COLORS
+// ============================================================================
+
+$input-bg:           $bg-primary;
+$input-border:       $ml-vendor-border;
+$input-border-focus: $primary;
+$input-text:         $text-primary;
+$input-placeholder:  $gray-400;
+
+// ============================================================================
+// CHART COLORS
+// ============================================================================
+
+$chart-primary:   $primary;
+$chart-secondary: $ml-accent-coral;
+$chart-tertiary:  $ml-accent-green;
+$chart-quaternary: $ml-accent-yellow;
+$chart-grid:      $gray-200;
+$chart-label:     $text-secondary;
+
+// ============================================================================
+// EXPORTS (for JavaScript access)
+// ============================================================================
+
+:export {
+  vendorNavy: $ml-vendor-navy;
+  vendorSlate: $ml-vendor-slate;
+  vendorBg: $ml-vendor-bg;
+  accentCoral: $ml-accent-coral;
+  accentGreen: $ml-accent-green;
+  accentYellow: $ml-accent-yellow;
+  primary: $primary;
+  primaryDark: $primary-dark;
+  textPrimary: $text-primary;
+  textSecondary: $text-secondary;
+  chartPrimary: $chart-primary;
+  chartSecondary: $chart-secondary;
+  chartTertiary: $chart-tertiary;
+}
+

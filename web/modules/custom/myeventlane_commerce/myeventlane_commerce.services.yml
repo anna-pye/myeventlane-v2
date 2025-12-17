@@ -1,4 +1,9 @@
 services:
+  # Logger channel for commerce module.
+  logger.channel.myeventlane_commerce:
+    parent: logger.channel_base
+    arguments: ['myeventlane_commerce']
+
   myeventlane_commerce.paragraph_question_mapper:
     class: Drupal\myeventlane_commerce\Service\ParagraphQuestionMapper
 
@@ -14,3 +19,10 @@ services:
       - '@logger.factory'
     tags:
       - { name: event_subscriber }
+
+  myeventlane_commerce.stripe_connect_payment:
+    class: Drupal\myeventlane_commerce\Service\StripeConnectPaymentService
+    arguments:
+      - '@entity_type.manager'
+      - '@myeventlane_core.stripe'
+      - '@logger.channel.myeventlane_commerce'

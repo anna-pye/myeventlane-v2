@@ -1,0 +1,50 @@
+{
+    "drupal-version": "11.2.10",
+    "uri": "https://myeventlane.ddev.site",
+    "db-driver": "mysql",
+    "db-hostname": "db",
+    "db-port": 3306,
+    "db-username": "db",
+    "db-password": "db",
+    "db-name": "db",
+    "db-status": "Connected",
+    "bootstrap": "Successful",
+    "theme": "myeventlane_theme",
+    "admin-theme": "gin",
+    "php-bin": "/usr/bin/php8.3",
+    "php-conf": [
+        "/etc/php/8.3/cli/php.ini"
+    ],
+    "php-os": "Linux",
+    "php-version": "8.3.23",
+    "drush-script": "/var/www/html/vendor/bin/drush.php",
+    "drush-version": "13.7.0.0",
+    "drush-temp": "/tmp",
+    "drush-conf": [
+        "/var/www/html/vendor/drush/drush/drush.yml"
+    ],
+    "drush-alias-files": [],
+    "alias-searchpaths": [],
+    "install-profile": "standard",
+    "root": "/var/www/html/web",
+    "drupal-settings-file": "sites/default/settings.php",
+    "site": "sites/default",
+    "themes": "sites/all/themes",
+    "modules": "sites/all/modules",
+    "files": "sites/default/files",
+    "private": "sites/default/files/private",
+    "temp": "/tmp",
+    "config-sync": "sites/default/config/sync",
+    "config": "sites/default/config/sync",
+    "%paths": {
+        "%root": "/var/www/html/web",
+        "%site": "sites/default",
+        "%modules": "sites/all/modules",
+        "%themes": "sites/all/themes",
+        "%config-sync": "sites/default/config/sync",
+        "%config": "sites/default/config/sync",
+        "%files": "sites/default/files",
+        "%temp": "/tmp",
+        "%private": "sites/default/files/private"
+    }
+}

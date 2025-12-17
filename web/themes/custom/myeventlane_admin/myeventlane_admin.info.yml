@@ -1,0 +1,27 @@
+name: MyEventLane Admin
+type: theme
+base theme: stable9
+core_version_requirement: ^11
+description: 'Bootstrap 5 admin theme for vendor and admin workflows in MyEventLane'
+version: 1.0.0
+
+libraries:
+  - myeventlane_admin/bootstrap
+  - myeventlane_admin/admin
+
+regions:
+  header: Header
+  content: Content
+  sidebar_first: Sidebar First
+  sidebar_second: Sidebar Second
+  footer: Footer
+
+hidden: false
+
+
+
+
+
+
+
+

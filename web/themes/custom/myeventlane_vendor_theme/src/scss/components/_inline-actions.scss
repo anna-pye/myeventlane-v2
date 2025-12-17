@@ -1,0 +1,280 @@
+/**
+ * @file
+ * Inline action styles for MyEventLane Vendor Theme.
+ *
+ * mel-inline-actions: Action buttons and menus for list/table rows.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/shadows' as *;
+
+// ============================================================================
+// INLINE ACTIONS (mel-inline-actions)
+// ============================================================================
+
+.mel-inline-actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-1;
+}
+
+.mel-inline-actions__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: $radius-md;
+  color: $text-muted;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    background: $bg-secondary;
+    color: $text-primary;
+  }
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.mel-inline-actions__btn--danger {
+  &:hover {
+    background: $danger-light;
+    color: $danger;
+  }
+}
+
+// ============================================================================
+// DROPDOWN MENU
+// ============================================================================
+
+.mel-dropdown {
+  position: relative;
+}
+
+.mel-dropdown__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: $radius-md;
+  color: $text-muted;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover,
+  &[aria-expanded="true"] {
+    background: $bg-secondary;
+    border-color: $border-color;
+    color: $text-primary;
+  }
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.mel-dropdown__menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 180px;
+  margin-top: $spacing-1;
+  padding: $spacing-2;
+  background: $bg-primary;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-dropdown;
+  z-index: 100;
+  
+  &[hidden] {
+    display: none;
+  }
+}
+
+.mel-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  width: 100%;
+  padding: $spacing-2 $spacing-3;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+  background: transparent;
+  border: none;
+  border-radius: $radius-md;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  transition: background-color 0.1s ease-in-out;
+  
+  &:hover {
+    background: $bg-secondary;
+    text-decoration: none;
+  }
+}
+
+.mel-dropdown__item--danger {
+  color: $danger;
+  
+  &:hover {
+    background: $danger-light;
+  }
+}
+
+.mel-dropdown__item-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: $text-muted;
+  
+  .mel-dropdown__item--danger & {
+    color: $danger;
+  }
+}
+
+.mel-dropdown__divider {
+  margin: $spacing-2 0;
+  border: none;
+  border-top: 1px solid $border-color-light;
+}
+
+// ============================================================================
+// ACTION BAR (bulk actions)
+// ============================================================================
+
+.mel-action-bar {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  padding: $spacing-3 $spacing-4;
+  background: $ml-vendor-navy;
+  color: $text-inverse;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-4;
+}
+
+.mel-action-bar__count {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.mel-action-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  margin-left: auto;
+}
+
+.mel-action-bar__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-2 $spacing-3;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-inverse;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.mel-action-bar__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  border-radius: $radius-md;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: $text-inverse;
+  }
+}
+
+// ============================================================================
+// QUICK ACTIONS ROW (Dashboard tools)
+// ============================================================================
+
+.mel-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: $spacing-4;
+}
+
+.mel-quick-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-3;
+  padding: $spacing-5;
+  background: $bg-primary;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  text-decoration: none;
+  color: $text-primary;
+  text-align: center;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    border-color: $primary;
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+    text-decoration: none;
+  }
+}
+
+.mel-quick-action__icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg-secondary;
+  border-radius: $radius-md;
+  color: $text-secondary;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.mel-quick-action__label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+
+
+
+
+
+

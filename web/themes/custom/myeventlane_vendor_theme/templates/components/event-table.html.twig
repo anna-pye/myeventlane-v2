@@ -1,0 +1,94 @@
+{#
+/**
+ * @file
+ * Events table component with actions menu.
+ *
+ * Variables:
+ * - events: Array of event objects
+ * - show_all_link: Boolean to show "View all" link
+ * - limit: Optional limit of events to show
+ */
+#}
+{% set display_events = limit ? events|slice(0, limit) : events %}
+
+<div class="mel-event-table">
+  {% if events %}
+    <div class="mel-event-table__head">
+      <div class="mel-event-table__col mel-event-table__col--event">{{ 'Event'|t }}</div>
+      <div class="mel-event-table__col mel-event-table__col--date">{{ 'Date'|t }}</div>
+      <div class="mel-event-table__col mel-event-table__col--tickets">{{ 'Tickets'|t }}</div>
+      <div class="mel-event-table__col mel-event-table__col--revenue">{{ 'Revenue'|t }}</div>
+      <div class="mel-event-table__col mel-event-table__col--status">{{ 'Status'|t }}</div>
+      <div class="mel-event-table__col mel-event-table__col--actions">{{ 'Actions'|t }}</div>
+    </div>
+    
+    <div class="mel-event-table__body">
+      {% for event in display_events %}
+        <div class="mel-event-table__row">
+          <div class="mel-event-table__col mel-event-table__col--event">
+            <a href="{{ event.manage_url }}" class="mel-event-table__title">{{ event.title }}</a>
+            {% if event.venue %}
+              <span class="mel-event-table__venue">{{ event.venue }}</span>
+            {% endif %}
+          </div>
+          <div class="mel-event-table__col mel-event-table__col--date">{{ event.date }}</div>
+          <div class="mel-event-table__col mel-event-table__col--tickets">{{ event.tickets_sold }}</div>
+          <div class="mel-event-table__col mel-event-table__col--revenue">{{ event.revenue_formatted }}</div>
+          <div class="mel-event-table__col mel-event-table__col--status">
+            <span class="mel-badge mel-badge--{{ event.status }}">{{ event.status_label }}</span>
+          </div>
+          <div class="mel-event-table__col mel-event-table__col--actions">
+            <div class="mel-actions-menu">
+              <button class="mel-actions-menu__trigger" type="button" aria-label="{{ 'Actions'|t }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>
+                </svg>
+              </button>
+              <div class="mel-actions-menu__dropdown">
+                <a href="{{ event.edit_url }}" class="mel-actions-menu__item">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                  {{ 'Edit Event'|t }}
+                </a>
+                <a href="{{ event.tickets_url }}" class="mel-actions-menu__item">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+                  </svg>
+                  {{ 'Manage Tickets'|t }}
+                </a>
+                <a href="{{ event.analytics_url }}" class="mel-actions-menu__item">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+                  </svg>
+                  {{ 'View Analytics'|t }}
+                </a>
+                <a href="{{ event.attendees_url }}" class="mel-actions-menu__item">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                  </svg>
+                  {{ 'Manage Attendees'|t }}
+                </a>
+                <a href="/event/{{ event.id }}/boost" class="mel-actions-menu__item">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                  {{ 'Boost Event'|t }}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="mel-empty-state mel-empty-state--compact">
+      <svg class="mel-empty-state__icon mel-empty-state__icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      <p class="mel-empty-state__text">{{ 'No events yet. Create your first event to get started.'|t }}</p>
+      <a href="/vendor/events/add" class="mel-btn mel-btn--primary">{{ 'Create Event'|t }}</a>
+    </div>
+  {% endif %}
+</div>
+

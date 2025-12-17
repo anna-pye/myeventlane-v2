@@ -1,6 +1,6 @@
 # User account menu link for "My Events".
 myeventlane_dashboard.my_events:
-  title: 'My Events'
+  title: 'Your Events'
   description: 'View your RSVPs and purchased tickets'
   route_name: myeventlane_dashboard.customer
   menu_name: account

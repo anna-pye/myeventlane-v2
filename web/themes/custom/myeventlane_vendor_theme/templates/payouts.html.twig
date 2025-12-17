@@ -1,0 +1,55 @@
+{#
+  Payouts view.
+  Variables: summary, history.
+#}
+<div class="mel-grid mel-grid--2">
+  <div class="mel-card">
+    <div class="mel-card__header">
+      <div class="mel-card__title">{{ 'Stripe account'|t }}</div>
+    </div>
+    <div class="mel-list">
+      <div class="mel-list__item">
+        <div>{{ 'Balance'|t }}</div>
+        <div class="mel-list__meta">{{ summary.balance|default('$0') }}</div>
+      </div>
+      <div class="mel-list__item">
+        <div>{{ 'Next payout'|t }}</div>
+        <div class="mel-list__meta">{{ summary.next_payout|default('-') }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mel-card">
+    <div class="mel-card__header">
+      <div class="mel-card__title">{{ 'Actions'|t }}</div>
+    </div>
+    <div class="mel-list mel-list--actions">
+      <a class="mel-list__item" href="/vendor/stripe/connect">{{ 'Connect Stripe'|t }}</a>
+      <a class="mel-list__item" href="/vendor/stripe/manage">{{ 'Open Stripe dashboard'|t }}</a>
+    </div>
+  </div>
+</div>
+
+<div class="mel-card">
+  <div class="mel-card__header">
+    <div class="mel-card__title">{{ 'Payout history'|t }}</div>
+  </div>
+  <div class="mel-table">
+    <div class="mel-table__head">
+      <div>{{ 'Date'|t }}</div>
+      <div>{{ 'Amount'|t }}</div>
+      <div>{{ 'Status'|t }}</div>
+    </div>
+    <div class="mel-table__body">
+      {% for item in history %}
+        <div class="mel-table__row">
+          <div>{{ item.date }}</div>
+          <div>{{ item.amount }}</div>
+          <div>{{ item.status }}</div>
+        </div>
+      {% else %}
+        <div class="mel-table__empty">{{ 'No payouts yet.'|t }}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

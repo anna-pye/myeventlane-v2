@@ -57,17 +57,27 @@ class DashboardEventLoader {
   public function loadEvents(bool $admin = FALSE, int $limit = 10): array {
     try {
       $storage = $this->entityTypeManager->getStorage('node');
+      $userId = (int) $this->currentUser->id();
+
+      // If user is anonymous and not admin, return empty.
+      if (!$admin && $userId === 0) {
+        return [];
+      }
 
       $query = $storage->getQuery()
-        ->accessCheck(TRUE)
+        ->accessCheck($admin)
         ->condition('type', 'event')
-        ->condition('status', NodeInterface::PUBLISHED)
         ->sort('created', 'DESC')
         ->range(0, $limit);
 
-      // Vendors only see their own events.
+      // Vendors only see their own events (including unpublished).
       if (!$admin) {
-        $query->condition('uid', $this->currentUser->id());
+        $query->condition('uid', $userId);
+        // Don't filter by status for vendors - they should see all their events.
+      }
+      else {
+        // Admins see only published events.
+        $query->condition('status', NodeInterface::PUBLISHED);
       }
 
       $ids = $query->execute();
@@ -75,7 +85,17 @@ class DashboardEventLoader {
         return [];
       }
 
-      return $storage->loadMultiple($ids);
+      $events = $storage->loadMultiple($ids);
+      
+      // Filter out events the user doesn't have access to (for unpublished events).
+      if (!$admin) {
+        $events = array_filter($events, function(NodeInterface $event) use ($userId) {
+          // User owns the event, so they can see it regardless of status.
+          return (int) $event->getOwnerId() === $userId;
+        });
+      }
+
+      return $events;
     }
     catch (\Exception $e) {
       return [];
@@ -96,7 +116,7 @@ class DashboardEventLoader {
       $query = $this->entityTypeManager
         ->getStorage('node')
         ->getQuery()
-        ->accessCheck(TRUE)
+        ->accessCheck($admin)
         ->condition('type', 'event')
         ->condition('status', NodeInterface::PUBLISHED);
 

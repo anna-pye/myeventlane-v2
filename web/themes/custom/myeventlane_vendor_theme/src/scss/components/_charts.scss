@@ -1,0 +1,277 @@
+/**
+ * @file
+ * Chart wrapper styles for MyEventLane Vendor Theme.
+ *
+ * mel-chart: Wrappers and styling for Chart.js visualizations.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/shadows' as *;
+@use '../tokens/breakpoints' as *;
+
+// ============================================================================
+// CHART CARD WRAPPER
+// ============================================================================
+
+.mel-chart-card {
+  background: $ml-vendor-card;
+  border: 1px solid $ml-vendor-border;
+  border-radius: $radius-card;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+}
+
+.mel-chart-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-4;
+  padding: $spacing-5;
+  border-bottom: 1px solid $border-color-light;
+}
+
+.mel-chart-card__title {
+  @include section-title;
+  margin: 0;
+}
+
+.mel-chart-card__subtitle {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin-top: $spacing-1;
+}
+
+.mel-chart-card__actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+}
+
+.mel-chart-card__body {
+  padding: $spacing-5;
+}
+
+// ============================================================================
+// CHART CONTAINER (mel-chart)
+// ============================================================================
+
+.mel-chart {
+  position: relative;
+  width: 100%;
+  
+  canvas {
+    width: 100% !important;
+    height: auto !important;
+  }
+}
+
+// Fixed aspect ratio variants
+.mel-chart--16x9 {
+  aspect-ratio: 16 / 9;
+}
+
+.mel-chart--4x3 {
+  aspect-ratio: 4 / 3;
+}
+
+.mel-chart--square {
+  aspect-ratio: 1 / 1;
+}
+
+// Fixed height variants
+.mel-chart--sm {
+  height: 200px;
+}
+
+.mel-chart--md {
+  height: 280px;
+}
+
+.mel-chart--lg {
+  height: 360px;
+}
+
+.mel-chart--xl {
+  height: 480px;
+}
+
+// ============================================================================
+// CHART LEGEND
+// ============================================================================
+
+.mel-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-4;
+  padding: $spacing-4 $spacing-5;
+  border-top: 1px solid $border-color-light;
+}
+
+.mel-chart-legend__item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+.mel-chart-legend__color {
+  width: 12px;
+  height: 12px;
+  border-radius: $radius-sm;
+  flex-shrink: 0;
+}
+
+.mel-chart-legend__label {
+  font-weight: $font-weight-medium;
+}
+
+.mel-chart-legend__value {
+  color: $text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+// ============================================================================
+// CHART PERIOD SELECTOR
+// ============================================================================
+
+.mel-chart-period {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-1;
+  padding: $spacing-1;
+  background: $bg-secondary;
+  border-radius: $radius-md;
+}
+
+.mel-chart-period__btn {
+  padding: $spacing-2 $spacing-3;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+  background: transparent;
+  border: none;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    color: $text-primary;
+  }
+  
+  &.is-active {
+    color: $text-primary;
+    background: $bg-primary;
+    box-shadow: $shadow-sm;
+  }
+}
+
+// ============================================================================
+// CHART LOADING STATE
+// ============================================================================
+
+.mel-chart--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  
+  &::after {
+    content: '';
+    width: 32px;
+    height: 32px;
+    border: 3px solid $border-color;
+    border-top-color: $primary;
+    border-radius: 50%;
+    animation: mel-chart-spin 0.8s linear infinite;
+  }
+}
+
+@keyframes mel-chart-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ============================================================================
+// CHART EMPTY STATE
+// ============================================================================
+
+.mel-chart--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: $spacing-6;
+  text-align: center;
+}
+
+.mel-chart__empty-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: $spacing-4;
+  color: $text-muted;
+}
+
+.mel-chart__empty-text {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+// ============================================================================
+// DONUT CHART CENTER LABEL
+// ============================================================================
+
+.mel-chart--donut {
+  position: relative;
+}
+
+.mel-chart__center-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.mel-chart__center-value {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  line-height: $line-height-tight;
+}
+
+.mel-chart__center-text {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+// ============================================================================
+// CHART GRID (for multiple charts)
+// ============================================================================
+
+.mel-chart-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-6;
+  
+  @include respond-to(lg) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.mel-chart-grid--full {
+  grid-template-columns: 1fr;
+}
+
+
+
+
+
+
+

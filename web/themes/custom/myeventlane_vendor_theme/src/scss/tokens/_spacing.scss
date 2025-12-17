@@ -1,0 +1,79 @@
+/**
+ * @file
+ * Spacing tokens for MyEventLane Vendor Theme.
+ *
+ * Consistent spacing scale with layout-specific values.
+ */
+
+// ============================================================================
+// BASE SPACING UNIT
+// ============================================================================
+
+$spacing-unit: 0.5rem; // 8px
+
+// ============================================================================
+// SPACING SCALE
+// ============================================================================
+
+$spacing-0:  0;
+$spacing-1:  0.25rem;             // 4px
+$spacing-2:  $spacing-unit;       // 8px
+$spacing-3:  0.75rem;             // 12px
+$spacing-4:  1rem;                // 16px
+$spacing-5:  1.25rem;             // 20px
+$spacing-6:  1.5rem;              // 24px
+$spacing-8:  2rem;                // 32px (gutters)
+$spacing-10: 2.5rem;              // 40px
+$spacing-12: 3rem;                // 48px
+$spacing-16: 4rem;                // 64px
+$spacing-20: 5rem;                // 80px
+$spacing-24: 6rem;                // 96px
+
+// ============================================================================
+// LAYOUT DIMENSIONS
+// ============================================================================
+
+// Main content max-width: 1080px
+$layout-content-max-width: 67.5rem;  // 1080px
+
+// Right-hand sidebar max-width: 300px
+$layout-sidebar-help-width: 18.75rem; // 300px
+
+// Left sidebar width
+$layout-sidebar-nav-width: 16.25rem;  // 260px
+$layout-sidebar-nav-width-lg: 17.5rem; // 280px
+
+// Gutters: 32px
+$layout-gutter: $spacing-8;           // 32px
+
+// Container max width
+$layout-container-max: 90rem;         // 1440px
+
+// ============================================================================
+// FORM FIELD SPACING
+// ============================================================================
+
+$form-field-padding-y: $spacing-4;       // 16px
+$form-field-padding-x: $spacing-4;       // 16px
+$form-field-margin-bottom: $spacing-6;   // 24px
+$form-group-gap: $spacing-6;             // 24px
+
+// ============================================================================
+// COMPONENT SPACING
+// ============================================================================
+
+$card-padding: $spacing-6;              // 24px
+$card-padding-sm: $spacing-4;           // 16px
+$card-gap: $spacing-6;                  // 24px
+
+$section-gap: $spacing-8;               // 32px
+$section-gap-lg: $spacing-12;           // 48px
+
+// ============================================================================
+// GRID GAPS
+// ============================================================================
+
+$grid-gap-sm: $spacing-4;               // 16px
+$grid-gap-md: $spacing-6;               // 24px
+$grid-gap-lg: $spacing-8;               // 32px
+

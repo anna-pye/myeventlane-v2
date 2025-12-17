@@ -1,0 +1,71 @@
+vendor_onboard_tooltip:
+  version: 1.x
+  js:
+    js/vendor_onboard_tooltip.js: {}
+  dependencies:
+    - core/drupal
+
+manage_event:
+  version: 1.x
+  css:
+    component:
+      css/manage-event.css: {}
+  dependencies:
+    - core/drupal
+
+hide_admin_sidebar:
+  version: 1.x
+  css:
+    component:
+      css/hide-admin-sidebar.css: {}
+  dependencies:
+    - core/drupal
+
+onboarding:
+  version: 1.x
+  css:
+    component:
+      css/onboarding.css: {}
+  dependencies:
+    - core/drupal
+    - myeventlane_theme/global-styling
+
+bulk_actions:
+  version: 1.x
+  js:
+    js/bulk-actions.js: {}
+  css:
+    component:
+      css/bulk-actions.css: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+vendor_settings:
+  version: 1.x
+  css:
+    component:
+      css/vendor-settings.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.vertical_tabs
+    - myeventlane_vendor_theme/global-styling
+
+vendor_detail_analytics:
+  version: 1.x
+  css:
+    component:
+      css/vendor-analytics.css: {}
+  dependencies:
+    - core/drupal
+
+simple_tabs:
+  version: 1.x
+  js:
+    js/simple-tabs.js: {}
+  css:
+    component:
+      css/simple-tabs.css: {}
+  dependencies:
+    - core/drupal
+

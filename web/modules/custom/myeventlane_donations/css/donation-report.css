@@ -1,0 +1,274 @@
+/**
+ * @file
+ * Donation report page styles.
+ */
+
+.mel-donation-report {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.mel-donation-report__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.mel-donation-report__header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.mel-donation-report__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.mel-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  transition: box-shadow 0.3s ease;
+}
+
+.mel-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mel-card h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.mel-stats {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.mel-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 120px;
+}
+
+.mel-stat__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mel-stat__value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #c0392b;
+  line-height: 1.2;
+}
+
+.mel-donation-report__tables {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+}
+
+.mel-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  margin-top: 1rem;
+}
+
+.mel-table thead {
+  background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+}
+
+.mel-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.mel-table th:last-child {
+  text-align: right;
+}
+
+.mel-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  color: #555;
+  font-size: 0.9375rem;
+}
+
+.mel-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.mel-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.mel-table tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.mel-table tbody tr:nth-child(even):hover {
+  background-color: #f0f0f0;
+}
+
+.mel-table td:last-child {
+  text-align: right;
+  font-weight: 600;
+  color: #333;
+}
+
+.mel-table td:nth-child(2) {
+  text-align: right;
+  font-weight: 600;
+  color: #c0392b;
+}
+
+.mel-btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+}
+
+.mel-btn-primary {
+  background: linear-gradient(to bottom, #c0392b, #a93226);
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(192, 57, 43, 0.3);
+}
+
+.mel-btn-primary:hover {
+  background: linear-gradient(to bottom, #a93226, #922b21);
+  box-shadow: 0 4px 8px rgba(192, 57, 43, 0.4);
+  transform: translateY(-1px);
+}
+
+.mel-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(192, 57, 43, 0.3);
+}
+
+/* Empty state styling */
+.mel-table tbody:empty::after {
+  content: 'No donations recorded for this period.';
+  display: block;
+  padding: 2rem;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
+
+.mel-table tbody:empty::after {
+  content: '';
+}
+
+.mel-table tbody:empty + tr::after,
+.mel-table tbody tr:only-child::after {
+  content: 'No donations recorded for this period.';
+  display: block;
+  padding: 2rem;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
+
+/* Empty table message */
+.mel-table-empty {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .mel-donation-report {
+    padding: 1rem 0.5rem;
+  }
+
+  .mel-donation-report__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .mel-donation-report__header h1 {
+    font-size: 2rem;
+  }
+
+  .mel-donation-report__summary {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .mel-donation-report__tables {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .mel-card {
+    padding: 1.5rem;
+  }
+
+  .mel-stats {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .mel-table {
+    font-size: 0.875rem;
+  }
+
+  .mel-table th,
+  .mel-table td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .mel-donation-report__header {
+    page-break-after: avoid;
+  }
+
+  .mel-card {
+    page-break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+
+  .mel-btn-primary {
+    display: none;
+  }
+}

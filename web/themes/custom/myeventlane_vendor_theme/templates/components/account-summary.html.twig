@@ -1,0 +1,60 @@
+{#
+/**
+ * @file
+ * Account summary widget component.
+ *
+ * Variables:
+ * - account: Account object with:
+ *   - display_name: User display name
+ *   - email: User email
+ *   - store_name: Vendor store name
+ *   - last_login: Last login date/time
+ */
+#}
+<div class="mel-account-summary">
+  <div class="mel-account-summary__header">
+    <div class="mel-account-summary__avatar">
+      {{ account.display_name|first|upper }}
+    </div>
+    <div class="mel-account-summary__info">
+      <div class="mel-account-summary__name">{{ account.display_name }}</div>
+      {% if account.store_name %}
+        <div class="mel-account-summary__store">{{ account.store_name }}</div>
+      {% endif %}
+    </div>
+  </div>
+  
+  <div class="mel-account-summary__details">
+    <div class="mel-account-summary__item">
+      <span class="mel-account-summary__label">{{ 'Email'|t }}</span>
+      <span class="mel-account-summary__value">{{ account.email }}</span>
+    </div>
+    {% if account.last_login %}
+      <div class="mel-account-summary__item">
+        <span class="mel-account-summary__label">{{ 'Last Login'|t }}</span>
+        <span class="mel-account-summary__value">{{ account.last_login }}</span>
+      </div>
+    {% endif %}
+  </div>
+  
+  <div class="mel-account-summary__links">
+    <a href="/vendor/settings" class="mel-account-summary__link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+      {{ 'Edit Profile'|t }}
+    </a>
+    <a href="/vendor/payouts" class="mel-account-summary__link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+      </svg>
+      {{ 'Billing & Payouts'|t }}
+    </a>
+  </div>
+</div>
+
+
+
+
+
+

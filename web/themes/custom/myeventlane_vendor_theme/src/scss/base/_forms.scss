@@ -1,0 +1,312 @@
+/**
+ * @file
+ * Form styles for MyEventLane Vendor Theme.
+ *
+ * Large, accessible form fields with strong contrast.
+ * mel-input, mel-select, mel-textarea, mel-form-group, mel-help-text components.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/shadows' as *;
+@use '../tokens/breakpoints' as *;
+
+// ============================================================================
+// FORM CONTAINER
+// ============================================================================
+
+.form-item,
+.form-wrapper,
+.mel-form-group {
+  margin-bottom: $form-field-margin-bottom;
+}
+
+.mel-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+}
+
+.mel-form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-6;
+  
+  @include respond-to(md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.mel-form-row--3 {
+  @include respond-to(lg) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// ============================================================================
+// LABELS
+// ============================================================================
+
+label,
+.form-item label,
+.form-item__label,
+.mel-label {
+  display: block;
+  @include label-text;
+  color: $text-primary;
+  margin-bottom: $spacing-2;
+}
+
+.form-required,
+.mel-required {
+  color: $danger;
+  margin-left: $spacing-1;
+}
+
+// ============================================================================
+// TEXT INPUTS (mel-input)
+// ============================================================================
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+.mel-input {
+  display: block;
+  width: 100%;
+  padding: $form-field-padding-y $form-field-padding-x;
+  font-size: $font-size-body;
+  font-family: $font-family-sans;
+  line-height: $line-height-normal;
+  color: $input-text;
+  background-color: $input-bg;
+  border: 1px solid $input-border;
+  border-radius: $radius-input;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:focus {
+    outline: none;
+    border-color: $input-border-focus;
+    box-shadow: $shadow-focus;
+  }
+
+  &::placeholder {
+    color: $input-placeholder;
+    opacity: 1;
+  }
+
+  &:disabled {
+    background-color: $gray-100;
+    color: $gray-500;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+// Large input variant
+.mel-input--lg {
+  padding: $spacing-5 $spacing-5;
+  font-size: $font-size-lg;
+}
+
+// ============================================================================
+// TEXTAREAS (mel-textarea)
+// ============================================================================
+
+textarea,
+.mel-textarea {
+  display: block;
+  width: 100%;
+  min-height: 120px;
+  padding: $form-field-padding-y $form-field-padding-x;
+  font-size: $font-size-body;
+  font-family: $font-family-sans;
+  line-height: $line-height-normal;
+  color: $input-text;
+  background-color: $input-bg;
+  border: 1px solid $input-border;
+  border-radius: $radius-input;
+  resize: vertical;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:focus {
+    outline: none;
+    border-color: $input-border-focus;
+    box-shadow: $shadow-focus;
+  }
+
+  &::placeholder {
+    color: $input-placeholder;
+    opacity: 1;
+  }
+}
+
+.mel-textarea--tall {
+  min-height: 200px;
+}
+
+// ============================================================================
+// SELECTS (mel-select)
+// ============================================================================
+
+select,
+.mel-select {
+  display: block;
+  width: 100%;
+  padding: $form-field-padding-y $form-field-padding-x;
+  padding-right: $spacing-10;
+  font-size: $font-size-body;
+  font-family: $font-family-sans;
+  line-height: $line-height-normal;
+  color: $input-text;
+  background-color: $input-bg;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23637185' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right $spacing-3 center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  border: 1px solid $input-border;
+  border-radius: $radius-input;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:focus {
+    outline: none;
+    border-color: $input-border-focus;
+    box-shadow: $shadow-focus;
+  }
+}
+
+// ============================================================================
+// CHECKBOXES & RADIOS
+// ============================================================================
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: $spacing-2;
+  cursor: pointer;
+  accent-color: $primary;
+}
+
+.form-checkbox,
+.form-radio,
+.mel-checkbox,
+.mel-radio {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-3;
+  
+  label {
+    margin-bottom: 0;
+    font-weight: $font-weight-normal;
+    cursor: pointer;
+  }
+}
+
+// ============================================================================
+// FORM ACTIONS
+// ============================================================================
+
+.form-actions,
+.mel-form-actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  margin-top: $spacing-8;
+  padding-top: $spacing-6;
+  border-top: 1px solid $border-color;
+  
+  &--sticky {
+    position: sticky;
+    bottom: 0;
+    background: $bg-primary;
+    margin-left: -$spacing-6;
+    margin-right: -$spacing-6;
+    padding: $spacing-4 $spacing-6;
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// ============================================================================
+// HELP TEXT (mel-help-text)
+// ============================================================================
+
+.form-item__description,
+.description,
+.mel-help-text {
+  @include small-text;
+  color: $text-secondary;
+  margin-top: $spacing-2;
+}
+
+.mel-help-text--info {
+  color: $info;
+}
+
+// ============================================================================
+// ERROR STATES
+// ============================================================================
+
+.form-item--error,
+.mel-form-group--error {
+  input,
+  textarea,
+  select,
+  .mel-input,
+  .mel-textarea,
+  .mel-select {
+    border-color: $danger;
+    
+    &:focus {
+      box-shadow: $shadow-focus-danger;
+    }
+  }
+  
+  .form-item__error-message,
+  .mel-error-message {
+    color: $danger;
+    @include small-text;
+    font-weight: $font-weight-medium;
+    margin-top: $spacing-2;
+  }
+}
+
+// ============================================================================
+// SUCCESS STATES
+// ============================================================================
+
+.form-item--success,
+.mel-form-group--success {
+  input,
+  textarea,
+  select {
+    border-color: $success;
+    
+    &:focus {
+      box-shadow: $shadow-focus-success;
+    }
+  }
+}
+
+// ============================================================================
+// SECTION TITLE FOR FORMS
+// ============================================================================
+
+.mel-section-title {
+  @include section-title;
+  color: $text-primary;
+  margin-bottom: $spacing-4;
+  padding-bottom: $spacing-3;
+  border-bottom: 1px solid $border-color-light;
+}
+

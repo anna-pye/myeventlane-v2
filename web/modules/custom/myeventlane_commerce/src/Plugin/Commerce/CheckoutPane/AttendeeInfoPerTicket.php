@@ -84,6 +84,15 @@ class AttendeeInfoPerTicket extends CheckoutPaneBase implements CheckoutPaneInte
           'email' => ['#type' => 'email', '#title' => $this->t('Email'), '#required' => TRUE, '#default_value' => $defaults['email'] ?? ''],
         ];
 
+        // Add accessibility needs field (optional).
+        $card['accessibility_needs'] = [
+          '#type' => 'checkboxes',
+          '#title' => $this->t('Accessibility needs (optional)'),
+          '#description' => $this->t('Let us know if you have any accessibility requirements. This helps us ensure the event is accessible for everyone.'),
+          '#options' => $this->getAccessibilityOptions(),
+          '#default_value' => $defaults['accessibility_needs'] ?? [],
+        ];
+
         // Vendor-defined questions via Paragraphs mapper.
         $card += $this->questionMapper->buildElements($event, $defaults);
 
@@ -146,6 +155,27 @@ class AttendeeInfoPerTicket extends CheckoutPaneBase implements CheckoutPaneInte
   protected function getExistingTicketData(OrderItemInterface $order_item, int $n): array {
     // If you later store JSON/map, hydrate specific ticket_n defaults here.
     return [];
+  }
+
+  /**
+   * Gets accessibility taxonomy term options.
+   *
+   * @return array
+   *   Array of term ID => term name.
+   */
+  protected function getAccessibilityOptions(): array {
+    try {
+      $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+      $terms = $storage->loadByProperties(['vid' => 'accessibility']);
+      $options = [];
+      foreach ($terms as $term) {
+        $options[$term->id()] = $term->label();
+      }
+      return $options;
+    }
+    catch (\Exception) {
+      return [];
+    }
   }
 
 }

@@ -1,0 +1,75 @@
+{#
+/**
+ * @file
+ * Event type pill component.
+ *
+ * A reusable pill badge component for displaying event types consistently
+ * across the site (teasers, full pages, listings, etc.).
+ *
+ * Available variables:
+ * - type: Event type ('rsvp', 'paid', 'both', 'external', 'featured', 'none').
+ * - label: Optional custom label. If not provided, defaults based on type.
+ * - size: Pill size ('sm', 'md', 'lg'). Default: 'sm'.
+ * - icon: Optional icon/emoji to show before label.
+ * - class: Additional CSS classes.
+ *
+ * Usage:
+ * {% include '@myeventlane_theme/components/event-type-pill.html.twig' with {
+ *   type: event_type,
+ *   label: event_type_label,
+ *   size: 'sm',
+ * } only %}
+ *
+ * @ingroup themeable
+ */
+#}
+
+{% set type = type|default('none') %}
+{% set size = size|default('sm') %}
+
+{# Default labels per type #}
+{% set default_labels = {
+  'rsvp': 'RSVP',
+  'paid': 'Tickets',
+  'both': 'RSVP & Tickets',
+  'external': 'External',
+  'featured': 'Featured',
+  'none': 'Unavailable',
+} %}
+
+{% set pill_label = label|default(default_labels[type]|default('Event')) %}
+
+{# Default icons per type #}
+{% set default_icons = {
+  'rsvp': '✓',
+  'paid': '🎟️',
+  'both': '🎟️',
+  'external': '↗',
+  'featured': '⭐',
+  'none': '',
+} %}
+
+{% set pill_icon = icon|default(default_icons[type]|default('')) %}
+
+{# Build CSS classes #}
+{% set pill_classes = [
+  'mel-event-pill',
+  'mel-event-pill--' ~ type,
+  'mel-event-pill--' ~ size,
+] %}
+
+{% if class is defined and class %}
+  {% set pill_classes = pill_classes|merge([class]) %}
+{% endif %}
+
+<span class="{{ pill_classes|join(' ') }}">
+  {% if pill_icon %}
+    <span class="mel-event-pill__icon" aria-hidden="true">{{ pill_icon }}</span>
+  {% endif %}
+  <span class="mel-event-pill__label">{{ pill_label }}</span>
+</span>
+
+
+
+
+

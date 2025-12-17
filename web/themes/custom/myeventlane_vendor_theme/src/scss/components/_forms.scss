@@ -1,0 +1,346 @@
+/**
+ * @file
+ * Advanced form component styles for MyEventLane Vendor Theme.
+ *
+ * Extends base form styles with specialized components.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/shadows' as *;
+@use '../tokens/breakpoints' as *;
+
+// ============================================================================
+// FORM SECTIONS
+// ============================================================================
+
+.mel-form-section {
+  margin-bottom: $section-gap;
+  padding-bottom: $section-gap;
+  border-bottom: 1px solid $border-color-light;
+  
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+}
+
+.mel-form-section__header {
+  margin-bottom: $spacing-6;
+}
+
+.mel-form-section__title {
+  @include section-title;
+  margin: 0 0 $spacing-2 0;
+}
+
+.mel-form-section__description {
+  @include small-text;
+  color: $text-secondary;
+}
+
+// ============================================================================
+// INPUT WITH ADDON
+// ============================================================================
+
+.mel-input-group {
+  display: flex;
+  
+  .mel-input {
+    flex: 1;
+    border-radius: 0;
+    
+    &:first-child {
+      border-radius: $radius-input 0 0 $radius-input;
+    }
+    
+    &:last-child {
+      border-radius: 0 $radius-input $radius-input 0;
+    }
+  }
+}
+
+.mel-input-group__addon {
+  display: flex;
+  align-items: center;
+  padding: $spacing-3 $spacing-4;
+  font-size: $font-size-body;
+  color: $text-secondary;
+  background: $bg-secondary;
+  border: 1px solid $input-border;
+  
+  &:first-child {
+    border-right: none;
+    border-radius: $radius-input 0 0 $radius-input;
+  }
+  
+  &:last-child {
+    border-left: none;
+    border-radius: 0 $radius-input $radius-input 0;
+  }
+}
+
+// ============================================================================
+// SWITCH / TOGGLE
+// ============================================================================
+
+.mel-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-3;
+  cursor: pointer;
+}
+
+.mel-switch__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.mel-switch__track {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: $gray-300;
+  border-radius: $radius-full;
+  transition: background-color 0.2s ease-in-out;
+  
+  .mel-switch__input:checked + & {
+    background: $primary;
+  }
+  
+  .mel-switch__input:focus + & {
+    box-shadow: $shadow-focus;
+  }
+  
+  .mel-switch__input:disabled + & {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.mel-switch__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: $bg-primary;
+  border-radius: $radius-full;
+  box-shadow: $shadow-sm;
+  transition: transform 0.2s ease-in-out;
+  
+  .mel-switch__input:checked ~ .mel-switch__track & {
+    transform: translateX(20px);
+  }
+}
+
+.mel-switch__label {
+  @include label-text;
+}
+
+// ============================================================================
+// DATE/TIME PICKER WRAPPER
+// ============================================================================
+
+.mel-datetime {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-4;
+  
+  @include respond-down(sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mel-datetime__field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+}
+
+// ============================================================================
+// AUTOCOMPLETE / COMBOBOX
+// ============================================================================
+
+.mel-autocomplete {
+  position: relative;
+}
+
+.mel-autocomplete__input {
+  width: 100%;
+}
+
+.mel-autocomplete__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: $spacing-1;
+  background: $bg-primary;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  box-shadow: $shadow-dropdown;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+  
+  &[hidden] {
+    display: none;
+  }
+}
+
+.mel-autocomplete__option {
+  padding: $spacing-3 $spacing-4;
+  cursor: pointer;
+  transition: background-color 0.1s ease-in-out;
+  
+  &:hover,
+  &.is-highlighted {
+    background: $bg-secondary;
+  }
+  
+  &.is-selected {
+    background: rgba($primary, 0.1);
+    color: $primary;
+  }
+}
+
+.mel-autocomplete__no-results {
+  padding: $spacing-4;
+  text-align: center;
+  color: $text-muted;
+  font-size: $font-size-sm;
+}
+
+// ============================================================================
+// TAG INPUT
+// ============================================================================
+
+.mel-tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-2 $spacing-3;
+  background: $input-bg;
+  border: 1px solid $input-border;
+  border-radius: $radius-input;
+  min-height: 48px;
+  cursor: text;
+  
+  &:focus-within {
+    border-color: $input-border-focus;
+    box-shadow: $shadow-focus;
+  }
+}
+
+.mel-tag-input__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-1;
+  padding: $spacing-1 $spacing-2;
+  background: $bg-secondary;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+}
+
+.mel-tag-input__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: $text-muted;
+  cursor: pointer;
+  border-radius: $radius-sm;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: $danger;
+  }
+}
+
+.mel-tag-input__input {
+  flex: 1;
+  min-width: 100px;
+  padding: $spacing-1;
+  border: none;
+  background: transparent;
+  font-size: $font-size-body;
+  
+  &:focus {
+    outline: none;
+  }
+}
+
+// ============================================================================
+// RICH TEXT EDITOR WRAPPER
+// ============================================================================
+
+.mel-editor {
+  border: 1px solid $input-border;
+  border-radius: $radius-input;
+  overflow: hidden;
+  
+  &:focus-within {
+    border-color: $input-border-focus;
+    box-shadow: $shadow-focus;
+  }
+}
+
+.mel-editor__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-1;
+  padding: $spacing-2 $spacing-3;
+  background: $bg-secondary;
+  border-bottom: 1px solid $border-color-light;
+}
+
+.mel-editor__toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: $radius-sm;
+  color: $text-secondary;
+  cursor: pointer;
+  
+  &:hover {
+    background: $bg-primary;
+    color: $text-primary;
+  }
+  
+  &.is-active {
+    background: $primary;
+    color: $text-inverse;
+  }
+}
+
+.mel-editor__content {
+  min-height: 200px;
+  padding: $spacing-4;
+  
+  &:focus {
+    outline: none;
+  }
+}
+
+
+
+
+
+
+

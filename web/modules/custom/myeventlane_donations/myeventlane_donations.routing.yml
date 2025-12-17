@@ -1,0 +1,79 @@
+# Admin settings page.
+myeventlane_donations.settings:
+  path: '/admin/config/myeventlane/donations'
+  defaults:
+    _form: '\Drupal\myeventlane_donations\Form\DonationSettingsForm'
+    _title: 'Donation settings'
+  requirements:
+    _permission: 'administer myeventlane donations'
+  options:
+    _admin_route: TRUE
+
+# Platform donation form (vendor -> MyEventLane).
+myeventlane_donations.platform:
+  path: '/vendor/donate'
+  defaults:
+    _controller: '\Drupal\myeventlane_donations\Controller\DonationPlatformController::donate'
+    _title: 'Support MyEventLane'
+  requirements:
+    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_donations\Access\DonationAccess::platformAccess'
+  options:
+    _maintenance_access: FALSE
+
+# Platform donation success callback.
+myeventlane_donations.platform_success:
+  path: '/vendor/donate/success'
+  defaults:
+    _controller: '\Drupal\myeventlane_donations\Controller\DonationPlatformController::success'
+    _title: 'Thank you for your donation'
+  requirements:
+    _permission: 'access vendor console'
+  options:
+    _maintenance_access: FALSE
+
+# Platform donation cancel callback.
+myeventlane_donations.platform_cancel:
+  path: '/vendor/donate/cancel'
+  defaults:
+    _controller: '\Drupal\myeventlane_donations\Controller\DonationPlatformController::cancel'
+    _title: 'Donation cancelled'
+  requirements:
+    _permission: 'access vendor console'
+  options:
+    _maintenance_access: FALSE
+
+# Vendor donations list page.
+myeventlane_donations.vendor_list:
+  path: '/vendor/donations'
+  defaults:
+    _controller: '\Drupal\myeventlane_donations\Controller\DonationVendorController::list'
+    _title: 'Donations received'
+  requirements:
+    _permission: 'access vendor console'
+    _custom_access: '\Drupal\myeventlane_donations\Access\DonationAccess::vendorAccess'
+  options:
+    _maintenance_access: FALSE
+
+# Admin donation report.
+myeventlane_donations.admin_report:
+  path: '/admin/reports/myeventlane/donations'
+  defaults:
+    _controller: '\Drupal\myeventlane_donations\Controller\DonationReportController::report'
+    _title: 'Donation reports'
+  requirements:
+    _permission: 'administer myeventlane donations'
+  options:
+    _admin_route: TRUE
+
+# Admin donation CSV export.
+myeventlane_donations.admin_export:
+  path: '/admin/reports/myeventlane/donations/export'
+  defaults:
+    _controller: '\Drupal\myeventlane_donations\Controller\DonationReportController::export'
+    _title: 'Export donations'
+  requirements:
+    _permission: 'administer myeventlane donations'
+  options:
+    _admin_route: TRUE
+

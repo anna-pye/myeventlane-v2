@@ -1,0 +1,71 @@
+// ==========================================================================
+// Feature Strip Component
+// ==========================================================================
+// Icon-less horizontal feature strip for homepage.
+
+@use '../tokens/colors';
+@use '../tokens/typography';
+@use '../tokens/spacing';
+@use '../tokens/radii';
+@use '../tokens/breakpoints';
+
+// ---------------------------------------------------------------------------
+// Feature Strip Container
+// ---------------------------------------------------------------------------
+
+.feature-strip {
+  display: flex;
+  justify-content: space-between;
+  gap: spacing.mel-space(8);
+  margin: spacing.mel-space(10) 0;
+  padding: spacing.mel-space(8) 0;
+  border-top: 1px solid colors.$mel-color-border;
+  border-bottom: 1px solid colors.$mel-color-border;
+
+  @include breakpoints.mel-break(md) {
+    gap: spacing.mel-space(10);
+  }
+
+  // Mobile: stack vertically
+  @include breakpoints.mel-break(md, max) {
+    flex-direction: column;
+    gap: spacing.mel-space(6);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Individual Feature
+// ---------------------------------------------------------------------------
+
+.feature-strip .feature {
+  flex: 1;
+  padding: 0 spacing.mel-space(4);
+
+  @include breakpoints.mel-break(md, max) {
+    padding: 0;
+    text-align: center;
+  }
+
+  h4 {
+    font-size: typography.mel-font-size(base);
+    font-weight: typography.$mel-font-semibold;
+    margin: 0 0 spacing.mel-space(2) 0;
+    color: colors.$mel-color-text;
+
+    @include breakpoints.mel-break(md) {
+      font-size: typography.mel-font-size(lg);
+      font-weight: typography.$mel-font-bold;
+    }
+  }
+
+  p {
+    font-size: typography.mel-font-size(sm);
+    line-height: typography.$mel-leading-relaxed;
+    color: colors.$mel-color-text-muted;
+    margin: 0;
+
+    @include breakpoints.mel-break(md) {
+      font-size: typography.mel-font-size(base);
+    }
+  }
+}

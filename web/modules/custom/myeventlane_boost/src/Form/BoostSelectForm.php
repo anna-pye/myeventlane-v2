@@ -69,12 +69,33 @@ final class BoostSelectForm extends FormBase {
     }
 
     // Load published products of type "boost_upgrade".
+    // Prefer "Event Boost" product, otherwise use the most recent one.
     $productStorage = $this->entityTypeManager->getStorage('commerce_product');
     $pids = $productStorage->getQuery()
       ->condition('type', 'boost_upgrade')
       ->condition('status', 1)
       ->accessCheck(FALSE)
+      ->sort('created', 'DESC')
       ->execute();
+    
+    // If multiple products exist, prefer "Event Boost" or the most recent.
+    if (count($pids) > 1) {
+      $products = $productStorage->loadMultiple($pids);
+      $preferred = NULL;
+      foreach ($products as $pid => $product) {
+        if ($product->label() === 'Event Boost') {
+          $preferred = $pid;
+          break;
+        }
+      }
+      if ($preferred) {
+        $pids = [$preferred];
+      }
+      else {
+        // Use the most recent (first in sorted list).
+        $pids = [reset($pids)];
+      }
+    }
 
     $form['#prefix'] = '<div class="boost-card">';
     $form['#suffix'] = '</div>';
@@ -102,9 +123,20 @@ final class BoostSelectForm extends FormBase {
           continue;
         }
 
+        // Only include published variations with valid data.
+        if (!$variation->isPublished()) {
+          continue;
+        }
+
         $days = (int) ($variation->get('field_boost_days')->value ?? 0);
         $price = $variation->getPrice();
-        $priceStr = $price ? $this->currencyFormatter->format($price->getNumber(), $price->getCurrencyCode()) : '';
+        
+        // Skip variations without valid days or price.
+        if ($days <= 0 || !$price) {
+          continue;
+        }
+        
+        $priceStr = $this->currencyFormatter->format($price->getNumber(), $price->getCurrencyCode());
 
         $options[$variation->id()] = $this->t('@days days — @price', [
           '@days' => $days,
@@ -135,6 +167,9 @@ final class BoostSelectForm extends FormBase {
           'price' => [
             '#markup' => '<div class="boost-row__price">' . $priceStr . '</div>',
           ],
+          'radio_indicator' => [
+            '#markup' => '<div class="boost-row__radio-indicator" aria-hidden="true" role="presentation"><span class="boost-row__radio-checkmark">✓</span></div>',
+          ],
         ];
       }
     }
@@ -150,8 +185,15 @@ final class BoostSelectForm extends FormBase {
       '#title' => $this->t('Choose a boost duration'),
       '#options' => $options,
       '#required' => TRUE,
-      '#attributes' => ['class' => ['mel-boost-radios', 'visually-hidden']],
+      '#default_value' => !empty($options) ? array_key_first($options) : NULL,
+      '#attributes' => [
+        'class' => ['mel-boost-radios', 'visually-hidden'],
+        'required' => 'required',
+      ],
     ];
+    
+    // Add form class for JavaScript targeting.
+    $form['#attributes']['class'][] = 'myeventlane-boost-select-form';
 
     // Styled list for visual display.
     $form['styled_list'] = [
@@ -167,12 +209,11 @@ final class BoostSelectForm extends FormBase {
     }
 
     $form['actions'] = [
-      '#type' => 'container',
+      '#type' => 'actions',
       '#attributes' => ['class' => ['boost-footer']],
       'submit' => [
         '#type' => 'submit',
         '#value' => $this->t('Continue to checkout'),
-        '#button_type' => 'primary',
         '#attributes' => ['class' => ['button', 'button--primary']],
       ],
     ];

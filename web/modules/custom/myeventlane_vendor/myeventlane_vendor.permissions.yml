@@ -1,3 +1,7 @@
 administer myeventlane vendor:
   title: 'Administer vendors / organisers'
   description: 'Manage vendor entities and settings.'
+
+access vendor console:
+  title: 'Access vendor console'
+  description: 'View and manage vendor console pages on vendor domain.'

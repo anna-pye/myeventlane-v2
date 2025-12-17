@@ -36,15 +36,8 @@ class VendorPublicController extends ControllerBase {
     ];
   }
 
-}
-
-/**
- * Title callback for vendor canonical pages.
- */
-class VendorTitleController extends ControllerBase {
-
   /**
-   * Returns the page title for a vendor.
+   * Title callback for vendor canonical pages.
    *
    * @param \Drupal\myeventlane_vendor\Entity\Vendor $myeventlane_vendor
    *   The vendor entity.

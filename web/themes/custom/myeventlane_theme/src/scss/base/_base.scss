@@ -1,6 +1,6 @@
 // ==========================================================================
 // Base Styles
-// ==========================================================================
+// ===========================================================================
 // Global element defaults using design tokens.
 
 @use '../tokens/colors';
@@ -21,7 +21,11 @@ html {
 body {
   margin: 0;
   padding: 0;
-  background-color: colors.$mel-color-bg;
+  background:
+    radial-gradient(circle at 12% 15%, rgba(242, 109, 91, 0.08), transparent 45%),
+    radial-gradient(circle at 88% 22%, rgba(110, 126, 242, 0.08), transparent 45%),
+    radial-gradient(circle at 30% 88%, rgba(255, 196, 77, 0.08), transparent 50%),
+    #fafafa;
   color: colors.$mel-color-text;
   font-family: typography.$mel-font-family;
   font-weight: typography.$mel-font-regular;

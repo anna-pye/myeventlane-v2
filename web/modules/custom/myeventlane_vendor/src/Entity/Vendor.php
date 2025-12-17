@@ -18,7 +18,7 @@ use Drupal\user\EntityOwnerTrait;
  * Defines the Vendor entity.
  *
  * Vendors represent event organisers in MyEventLane. Each vendor can be
- * linked to a Commerce store and has a public-facing page at /organisers/{id}.
+ * linked to a Commerce store and has a public-facing page at /vendor/{id}.
  *
  * @ContentEntityType(
  *   id = "myeventlane_vendor",
@@ -36,9 +36,9 @@ use Drupal\user\EntityOwnerTrait;
  *     "list_builder" = "Drupal\myeventlane_vendor\VendorListBuilder",
  *     "access" = "Drupal\myeventlane_vendor\Entity\VendorAccessControlHandler",
  *     "form" = {
- *       "default" = "Drupal\Core\Entity\ContentEntityForm",
- *       "add" = "Drupal\Core\Entity\ContentEntityForm",
- *       "edit" = "Drupal\Core\Entity\ContentEntityForm",
+ *       "default" = "Drupal\myeventlane_vendor\Form\VendorForm",
+ *       "add" = "Drupal\myeventlane_vendor\Form\VendorForm",
+ *       "edit" = "Drupal\myeventlane_vendor\Form\VendorForm",
  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm"
  *     },
  *     "route_provider" = {
@@ -46,6 +46,7 @@ use Drupal\user\EntityOwnerTrait;
  *     }
  *   },
  *   base_table = "myeventlane_vendor",
+ *   data_table = "myeventlane_vendor_field_data",
  *   admin_permission = "administer myeventlane vendor",
  *   field_ui_base_route = "myeventlane_vendor.settings",
  *   entity_keys = {
@@ -55,11 +56,11 @@ use Drupal\user\EntityOwnerTrait;
  *     "owner" = "uid"
  *   },
  *   links = {
- *     "canonical" = "/organisers/{myeventlane_vendor}",
- *     "collection" = "/admin/content/organisers",
- *     "add-form" = "/admin/content/organisers/add",
- *     "edit-form" = "/admin/content/organisers/{myeventlane_vendor}/edit",
- *     "delete-form" = "/admin/content/organisers/{myeventlane_vendor}/delete"
+ *     "canonical" = "/vendor/{myeventlane_vendor}",
+ *     "collection" = "/admin/structure/myeventlane/vendor",
+ *     "add-form" = "/admin/structure/myeventlane/vendor/add",
+ *     "edit-form" = "/admin/structure/myeventlane/vendor/{myeventlane_vendor}/edit",
+ *     "delete-form" = "/admin/structure/myeventlane/vendor/{myeventlane_vendor}/delete"
  *   }
  * )
  */
@@ -103,30 +104,6 @@ class Vendor extends ContentEntityBase implements EntityChangedInterface, Entity
         'label' => 'hidden',
         'type' => 'string',
         'weight' => -10,
-      ])
-      ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', TRUE);
-
-    // Logo image field.
-    $fields['logo'] = BaseFieldDefinition::create('image')
-      ->setLabel(new TranslatableMarkup('Logo'))
-      ->setDescription(new TranslatableMarkup('The vendor logo image.'))
-      ->setRequired(FALSE)
-      ->setSettings([
-        'file_directory' => 'vendor_logos',
-        'alt_field' => TRUE,
-        'alt_field_required' => FALSE,
-        'file_extensions' => 'png gif jpg jpeg webp svg',
-        'max_filesize' => '2 MB',
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'image_image',
-        'weight' => 0,
-      ])
-      ->setDisplayOptions('view', [
-        'label' => 'hidden',
-        'type' => 'image',
-        'weight' => 0,
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);

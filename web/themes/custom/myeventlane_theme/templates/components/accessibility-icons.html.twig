@@ -1,0 +1,155 @@
+{#
+/**
+ * @file
+ * Accessibility icons component.
+ *
+ * Displays accessibility features as icons/badges.
+ *
+ * Available variables:
+ * - accessibility_terms: Array of taxonomy term entities or term IDs.
+ * - variant: Display variant ('badges', 'icons', 'compact').
+ * - max_display: Maximum number of items to display (default: 4).
+ * - show_all: If true, show all items regardless of max_display.
+ */
+#}
+
+{% set variant = variant|default('badges') %}
+{% set max_display = max_display|default(4) %}
+{% set show_all = show_all|default(false) %}
+
+{# Accessibility icon mapping #}
+{% set accessibility_icons = {
+  'wheelchair_accessible': '♿',
+  'accessible_toilets': '🚻',
+  'sign_language_interpreter': '👋',
+  'hearing_loop': '🔊',
+  'quiet_space': '🔇',
+  'guide_dog_friendly': '🐕',
+  'accessible_parking': '🅿️',
+  'step_free_access': '♿',
+  'visual_impairment_support': '👁️',
+  'cognitive_accessibility': '🧠',
+  'dietary_requirements': '🥗',
+} %}
+
+{% set accessibility_labels = {
+  'wheelchair_accessible': 'Wheelchair Accessible',
+  'accessible_toilets': 'Accessible Toilets',
+  'sign_language_interpreter': 'Sign Language Interpreter',
+  'hearing_loop': 'Hearing Loop',
+  'quiet_space': 'Quiet Space',
+  'guide_dog_friendly': 'Guide Dog Friendly',
+  'accessible_parking': 'Accessible Parking',
+  'step_free_access': 'Step-Free Access',
+  'visual_impairment_support': 'Visual Support',
+  'cognitive_accessibility': 'Cognitive Accessibility',
+  'dietary_requirements': 'Dietary Accommodations',
+} %}
+
+{% if accessibility_terms is not empty %}
+  {% set terms_to_display = [] %}
+  
+  {# Process terms #}
+  {% for term in accessibility_terms %}
+    {% if term.entity %}
+      {% set term_entity = term.entity %}
+    {% elseif term.target_id %}
+      {% set term_entity = term %}
+    {% else %}
+      {% set term_entity = term %}
+    {% endif %}
+    
+    {% if term_entity %}
+      {% set term_id = term_entity.id.value|default(term_entity.id) %}
+      {% set term_name = term_entity.name.value|default(term_entity.label) %}
+      {% set term_machine_name = term_id|replace({'accessibility_': ''}) %}
+      
+      {% set icon = accessibility_icons[term_machine_name]|default('♿') %}
+      {% set label = accessibility_labels[term_machine_name]|default(term_name) %}
+      
+      {% set terms_to_display = terms_to_display|merge([{
+        'id': term_id,
+        'name': term_name,
+        'machine_name': term_machine_name,
+        'icon': icon,
+        'label': label,
+      }]) %}
+    {% endif %}
+  {% endfor %}
+  
+  {% if terms_to_display is not empty %}
+    {% set display_count = show_all ? terms_to_display|length : (terms_to_display|length > max_display ? max_display : terms_to_display|length) %}
+    
+    <div class="mel-accessibility-icons" data-variant="{{ variant }}">
+      {% if variant == 'badges' %}
+        <div class="mel-accessibility-badges" style="
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          align-items: center;
+        ">
+          {% for term in terms_to_display|slice(0, display_count) %}
+            <span class="mel-accessibility-badge" 
+                  title="{{ term.label }}"
+                  style="
+                    background-color: #e8f5e9;
+                    color: #2e7d32;
+                    padding: 0.25rem 0.5rem;
+                    font-size: 0.7rem;
+                    font-weight: 500;
+                    border-radius: 4px;
+                    border: 1px solid #a5d6a7;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.25rem;
+                    white-space: nowrap;
+                  ">
+              <span aria-hidden="true">{{ term.icon }}</span>
+              <span>{{ term.label }}</span>
+            </span>
+          {% endfor %}
+          {% if not show_all and terms_to_display|length > max_display %}
+            <span class="mel-accessibility-more" style="
+              color: #666;
+              font-size: 0.7rem;
+              font-weight: 500;
+            ">
+              +{{ terms_to_display|length - max_display }} more
+            </span>
+          {% endif %}
+        </div>
+      {% elseif variant == 'icons' %}
+        <div class="mel-accessibility-icons-list" style="
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          align-items: center;
+        ">
+          {% for term in terms_to_display|slice(0, display_count) %}
+            <span class="mel-accessibility-icon" 
+                  title="{{ term.label }}"
+                  style="
+                    font-size: 1.25rem;
+                    line-height: 1;
+                    cursor: help;
+                  ">
+              {{ term.icon }}
+            </span>
+          {% endfor %}
+        </div>
+      {% else %}
+        {# Compact variant #}
+        <div class="mel-accessibility-compact" style="
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+          font-size: 0.75rem;
+          color: #2e7d32;
+        ">
+          <span aria-hidden="true">♿</span>
+          <span>{{ display_count }} accessibility feature{{ display_count != 1 ? 's' : '' }}</span>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endif %}

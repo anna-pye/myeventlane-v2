@@ -1,0 +1,12 @@
+entity.escalation.collection:
+  title: 'Escalations'
+  description: 'Manage vendor-customer escalations and support requests'
+  route_name: entity.escalation.collection
+  parent: system.admin_config
+  weight: 100
+
+
+
+
+
+

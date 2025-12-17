@@ -64,3 +64,64 @@ myeventlane_event_attendees.vendor_checkin:
     parameters:
       event_attendee:
         type: entity:event_attendee
+
+# Get waitlist position for current user.
+myeventlane_event_attendees.waitlist_position:
+  path: '/event/{node}/waitlist/position'
+  defaults:
+    _controller: '\Drupal\myeventlane_event_attendees\Controller\WaitlistController::getPosition'
+    _format: json
+  requirements:
+    _custom_access: '\Drupal\myeventlane_event_attendees\Controller\WaitlistController::accessPosition'
+    node: '\d+'
+  options:
+    parameters:
+      node:
+        type: entity:node
+
+# Vendor: waitlist management for an event.
+myeventlane_event_attendees.waitlist_manage:
+  path: '/vendor/event/{node}/waitlist'
+  defaults:
+    _controller: '\Drupal\myeventlane_event_attendees\Controller\WaitlistManagementController::list'
+    _title_callback: '\Drupal\myeventlane_event_attendees\Controller\WaitlistManagementController::listTitle'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_event_attendees\Controller\WaitlistManagementController::access'
+    node: '\d+'
+  options:
+    parameters:
+      node:
+        type: entity:node
+        bundle:
+          - event
+
+# Vendor: export waitlist as CSV.
+myeventlane_event_attendees.waitlist_export:
+  path: '/vendor/event/{node}/waitlist/export'
+  defaults:
+    _controller: '\Drupal\myeventlane_event_attendees\Controller\WaitlistManagementController::export'
+    _title: 'Export Waitlist'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_event_attendees\Controller\WaitlistManagementController::access'
+    node: '\d+'
+  options:
+    parameters:
+      node:
+        type: entity:node
+        bundle:
+          - event
+
+# Public waitlist signup form.
+myeventlane_event_attendees.waitlist_signup:
+  path: '/event/{node}/waitlist/signup'
+  defaults:
+    _form: '\Drupal\myeventlane_event_attendees\Form\WaitlistSignupForm'
+    _title: 'Join Waitlist'
+  requirements:
+    node: '\d+'
+  options:
+    parameters:
+      node:
+        type: entity:node
+        bundle:
+          - event

@@ -1,0 +1,450 @@
+<?php
+
+/**
+ * @file
+ * Theme functions for MyEventLane Vendor Theme.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function myeventlane_vendor_theme_preprocess_page(array &$variables): void {
+  // Get current user info.
+  $current_user = \Drupal::currentUser();
+  $account = $current_user->getAccount();
+
+  // Set user info for sidebar/header.
+  if ($current_user->isAuthenticated()) {
+    $variables['page']['user_name'] = $account->getDisplayName();
+    $variables['page']['user_initials'] = _myeventlane_vendor_theme_get_initials($account->getDisplayName());
+    
+    // Check for vendor role.
+    $roles = $current_user->getRoles();
+    if (in_array('vendor', $roles)) {
+      $variables['page']['user_role'] = t('Vendor');
+    }
+    elseif (in_array('administrator', $roles)) {
+      $variables['page']['user_role'] = t('Administrator');
+    }
+    else {
+      $variables['page']['user_role'] = t('User');
+    }
+  }
+
+  // Get workspace/vendor name from current user's vendor entity if available.
+  // This is a placeholder - implement based on your vendor resolution logic.
+  $variables['page']['workspace_name'] = NULL;
+  
+  // Try to get vendor name from node context if viewing an event.
+  $route_match = \Drupal::routeMatch();
+  $node = $route_match->getParameter('node');
+  if ($node && $node instanceof \Drupal\node\NodeInterface && $node->bundle() === 'event') {
+    if ($node->hasField('field_event_vendor') && !$node->get('field_event_vendor')->isEmpty()) {
+      $vendor = $node->get('field_event_vendor')->entity;
+      if ($vendor) {
+        $variables['page']['workspace_name'] = $vendor->label();
+      }
+    }
+  }
+
+  // Set main site URL - build URL pointing to public domain.
+  try {
+    if (\Drupal::hasService('myeventlane_core.domain_detector')) {
+      $domain_detector = \Drupal::service('myeventlane_core.domain_detector');
+      $variables['page']['main_site_url'] = $domain_detector->buildDomainUrl('/', 'public');
+    }
+    else {
+      // Fallback: use current request to build public URL.
+      $request = \Drupal::requestStack()->getCurrentRequest();
+      if ($request) {
+        $scheme = $request->getScheme();
+        $host = $request->getHost();
+        // Remove vendor. or admin. prefix to get main domain.
+        $host = preg_replace('/^(vendor|admin)\./', '', $host);
+        $variables['page']['main_site_url'] = $scheme . '://' . $host . '/';
+      }
+      else {
+        $variables['page']['main_site_url'] = '/';
+      }
+    }
+  }
+  catch (\Exception $e) {
+    // Fallback to relative URL if service unavailable.
+    $variables['page']['main_site_url'] = '/';
+  }
+
+  // Set admin portal URL for administrators.
+  $variables['page']['is_admin'] = FALSE;
+  $variables['page']['admin_portal_url'] = NULL;
+  if ($current_user->isAuthenticated()) {
+    $roles = $current_user->getRoles();
+    if (in_array('administrator', $roles) || $current_user->id() === 1) {
+      $variables['page']['is_admin'] = TRUE;
+      
+      // Build admin portal URL using Drupal's URL generator to ensure proper route.
+      try {
+        $admin_url = \Drupal\Core\Url::fromRoute('myeventlane_admin_dashboard.overview', [], ['absolute' => TRUE]);
+        $variables['page']['admin_portal_url'] = $admin_url->toString(TRUE)->getGeneratedUrl();
+      }
+      catch (\Exception $e) {
+        // If route doesn't exist or URL generation fails, try DomainDetector.
+        try {
+          if (\Drupal::hasService('myeventlane_core.domain_detector')) {
+            $domain_detector = \Drupal::service('myeventlane_core.domain_detector');
+            $variables['page']['admin_portal_url'] = $domain_detector->buildDomainUrl('/admin/myeventlane', 'admin');
+          }
+        }
+        catch (\Exception $e2) {
+          // Service not available, use fallback.
+        }
+        
+        // Fallback: use current request to build admin URL.
+        if (empty($variables['page']['admin_portal_url'])) {
+          $request = \Drupal::requestStack()->getCurrentRequest();
+          if ($request) {
+            $scheme = $request->getScheme();
+            $host = $request->getHost();
+            // Replace 'vendor.' with 'admin.' in hostname.
+            $host = preg_replace('/^vendor\./', 'admin.', $host);
+            if (!str_starts_with($host, 'admin.')) {
+              $host = 'admin.' . preg_replace('/^(admin|vendor)\./', '', $host);
+            }
+            $variables['page']['admin_portal_url'] = $scheme . '://' . $host . '/admin/myeventlane';
+          }
+          else {
+            // Final fallback: relative URL.
+            $variables['page']['admin_portal_url'] = '/admin/myeventlane';
+          }
+        }
+      }
+    }
+  }
+
+  // Determine active section from route.
+  $route_name = $route_match->getRouteName();
+  $variables['page']['active_section'] = _myeventlane_vendor_theme_get_active_section($route_name);
+
+  // Build logout link.
+  $variables['page']['logout_link'] = [
+    '#type' => 'link',
+    '#title' => t('Log out'),
+    '#url' => \Drupal\Core\Url::fromRoute('user.logout'),
+  ];
+
+  // Build user menu for header.
+  if ($current_user->isAuthenticated()) {
+    $user_menu_items = [];
+    
+    // User profile link.
+    $user_menu_items[] = [
+      '#type' => 'link',
+      '#title' => t('Profile'),
+      '#url' => \Drupal\Core\Url::fromRoute('entity.user.canonical', ['user' => $current_user->id()]),
+      '#attributes' => ['class' => ['user-menu__item']],
+    ];
+    
+    // Logout link.
+    $user_menu_items[] = [
+      '#type' => 'link',
+      '#title' => t('Log out'),
+      '#url' => \Drupal\Core\Url::fromRoute('user.logout'),
+      '#attributes' => ['class' => ['user-menu__item']],
+    ];
+    
+    $variables['page']['user_menu'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['user-menu']],
+      'user_info' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['user-menu__info']],
+        'initials' => [
+          '#markup' => '<span class="user-menu__initials">' . ($variables['page']['user_initials'] ?? 'U') . '</span>',
+        ],
+        'name' => [
+          '#markup' => '<span class="user-menu__name">' . ($variables['page']['user_name'] ?? 'User') . '</span>',
+        ],
+      ],
+      'dropdown' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['user-menu__dropdown']],
+        'items' => $user_menu_items,
+      ],
+    ];
+  }
+  else {
+    $variables['page']['user_menu'] = [];
+  }
+
+  // Build quick actions for header (Admin Portal button for admins, Create Event always).
+  $variables['page']['quick_actions'] = [];
+  
+  // Admin Portal button (for administrators).
+  if ($variables['page']['is_admin'] && $variables['page']['admin_portal_url']) {
+    $variables['page']['quick_actions'][] = [
+      '#type' => 'link',
+      '#title' => t('Admin Portal'),
+      '#url' => \Drupal\Core\Url::fromUri($variables['page']['admin_portal_url']),
+      '#attributes' => [
+        'class' => ['mel-btn', 'mel-btn--secondary', 'mel-header__action-btn'],
+      ],
+    ];
+  }
+  
+  // Create Event button (always shown for vendors/admins).
+  if ($current_user->isAuthenticated()) {
+    $variables['page']['quick_actions'][] = [
+      '#type' => 'link',
+      '#title' => t('+ Create Event'),
+      '#url' => \Drupal\Core\Url::fromRoute('myeventlane_vendor.create_event_gateway'),
+      '#attributes' => [
+        'class' => ['mel-btn', 'mel-btn--primary', 'mel-header__action-btn'],
+      ],
+    ];
+  }
+
+  // Wrap vendor settings form in console page template.
+  if ($route_name === 'myeventlane_vendor.console.settings' && isset($variables['page']['content']['vendor_profile_settings'])) {
+    $form = $variables['page']['content']['vendor_profile_settings'];
+    $variables['page']['content']['vendor_profile_settings'] = [
+      '#theme' => 'myeventlane_vendor_console_page',
+      '#title' => 'Settings',
+      '#body' => $form,
+      '#attached' => $form['#attached'] ?? [],
+    ];
+  }
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function myeventlane_vendor_theme_preprocess_html(array &$variables): void {
+  // Add vendor theme body class.
+  $variables['attributes']['class'][] = 'mel-vendor-theme';
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function myeventlane_vendor_theme_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  // Style node event forms.
+  if (str_starts_with($form_id, 'node_event_')) {
+    $form['#attributes']['class'][] = 'mel-event-form';
+    $form['#attributes']['data-event-form'] = TRUE;
+    
+    // Attach event form library.
+    $form['#attached']['library'][] = 'myeventlane_vendor_theme/event-form';
+    
+    // CRITICAL: Attach required libraries for conditional fields and #states to work.
+    // These must be loaded for field visibility toggling based on event type.
+    $form['#attached']['library'][] = 'core/drupal.form';
+    $form['#attached']['library'][] = 'core/drupal.states';
+    
+    // Attach conditional_fields library if module is enabled.
+    if (\Drupal::moduleHandler()->moduleExists('conditional_fields')) {
+      $form['#attached']['library'][] = 'conditional_fields/conditional_fields';
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for page.
+ */
+function myeventlane_vendor_theme_theme_suggestions_page_alter(array &$suggestions, array $variables): void {
+  // Add page suggestions based on route.
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  
+  if ($route_name === 'myeventlane_vendor.dashboard') {
+    $suggestions[] = 'page__vendor__dashboard';
+  }
+  elseif (str_starts_with($route_name ?? '', 'myeventlane_vendor.')) {
+    $route_parts = explode('.', $route_name);
+    if (count($route_parts) >= 2) {
+      $suggestions[] = 'page__vendor__' . str_replace('.', '_', $route_parts[1]);
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_form_alter().
+ *
+ * Force a vendor-specific form template for the event node form so the
+ * console domain picks up the same layout (with Visibility & Promotion).
+ */
+function myeventlane_vendor_theme_theme_suggestions_form_alter(array &$suggestions, array $variables, string $hook): void {
+  $form_id = $variables['element']['#form_id'] ?? '';
+  if (in_array($form_id, ['node_event_form', 'node_event_edit_form'], TRUE)) {
+    $suggestions[] = 'form__node_event_form__vendor';
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function myeventlane_vendor_theme_theme(): array {
+  return [
+    'myeventlane_vendor_console_page' => [
+      'variables' => [
+        'title' => NULL,
+        'tabs' => [],
+        'header_actions' => [],
+        'body' => NULL,
+        'meta' => [],
+      ],
+      'template' => 'layout/console-page',
+    ],
+    'myeventlane_vendor_dashboard' => [
+      'variables' => [
+        'kpis' => [],
+        'charts' => [],
+        'events' => [],
+        'best_event' => NULL,
+        'stripe' => [],
+        'notifications' => [],
+        'account' => [],
+        'quick_actions' => [],
+        'upcoming_count' => 0,
+        'show_welcome' => FALSE,
+      ],
+      'template' => 'dashboard/dashboard',
+    ],
+    'myeventlane_vendor_analytics' => [
+      'variables' => [
+        'kpis' => [],
+        'charts' => [],
+        'tables' => [],
+        'date_range' => NULL,
+      ],
+      'template' => 'event/analytics',
+    ],
+    'myeventlane_vendor_event_analytics' => [
+      'variables' => [
+        'event' => NULL,
+        'overview' => [],
+        'charts' => [],
+      ],
+      'template' => 'event/analytics',
+    ],
+    'myeventlane_vendor_event_overview' => [
+      'variables' => [
+        'event' => NULL,
+        'overview' => [],
+        'charts' => [],
+      ],
+      'template' => 'event/overview',
+    ],
+    'myeventlane_vendor_event_attendees' => [
+      'variables' => [
+        'event' => NULL,
+        'attendees' => [],
+        'summary' => [],
+      ],
+      'template' => 'event/attendees',
+    ],
+    'myeventlane_vendor_payouts' => [
+      'variables' => [
+        'summary' => [],
+        'history' => [],
+        'stripe_manage_url' => NULL,
+      ],
+      'template' => 'vendor/payouts',
+    ],
+    'myeventlane_vendor_boost' => [
+      'variables' => [
+        'campaigns' => [],
+        'events' => [],
+      ],
+      'template' => 'vendor/boost',
+    ],
+    'myeventlane_vendor_audience' => [
+      'variables' => [
+        'attendees' => [],
+        'summary' => [],
+        'segments' => [],
+      ],
+      'template' => 'vendor/audience',
+    ],
+    'myeventlane_vendor_event_tickets' => [
+      'variables' => [
+        'event' => NULL,
+        'sales' => [],
+        'tickets' => [],
+      ],
+      'template' => 'event/tickets',
+    ],
+    'myeventlane_vendor_event_rsvps' => [
+      'variables' => [
+        'event' => NULL,
+        'summary' => [],
+        'series' => [],
+        'rsvps' => [],
+      ],
+      'template' => 'event/rsvps',
+    ],
+    'myeventlane_vendor_event_settings' => [
+      'variables' => [
+        'event' => NULL,
+      ],
+      'template' => 'event/settings',
+    ],
+  ];
+}
+
+/**
+ * Helper: Get user initials from display name.
+ */
+function _myeventlane_vendor_theme_get_initials(string $name): string {
+  $parts = explode(' ', trim($name));
+  $initials = '';
+  
+  foreach (array_slice($parts, 0, 2) as $part) {
+    if (!empty($part)) {
+      $initials .= mb_strtoupper(mb_substr($part, 0, 1));
+    }
+  }
+  
+  return $initials ?: 'U';
+}
+
+/**
+ * Helper: Determine active section from route name.
+ */
+function _myeventlane_vendor_theme_get_active_section(?string $route_name): string {
+  if (!$route_name) {
+    return 'dashboard';
+  }
+
+  // Map route names to sidebar active sections.
+  // Routes use myeventlane_vendor.console.* pattern.
+  $mapping = [
+    // Console routes.
+    'myeventlane_vendor.console.dashboard' => 'dashboard',
+    'myeventlane_vendor.console.events' => 'events',
+    'myeventlane_vendor.console.events_add' => 'events',
+    'myeventlane_vendor.console.event_overview' => 'events',
+    'myeventlane_vendor.console.event_tickets' => 'events',
+    'myeventlane_vendor.console.event_attendees' => 'events',
+    'myeventlane_vendor.console.event_rsvps' => 'events',
+    'myeventlane_vendor.console.event_analytics' => 'events',
+    'myeventlane_vendor.console.event_settings' => 'events',
+    // Analytics routes.
+    'myeventlane_analytics.dashboard' => 'analytics',
+    'myeventlane_analytics.event' => 'analytics',
+    // Donations routes.
+    'myeventlane_donations.vendor_list' => 'donations',
+    'myeventlane_donations.platform' => 'donations',
+    'myeventlane_vendor.console.payouts' => 'payouts',
+    'myeventlane_vendor.console.boost' => 'boost',
+    'myeventlane_vendor.console.audience' => 'audience',
+    'myeventlane_vendor.console.settings' => 'settings',
+    // Legacy/alternate routes.
+    'myeventlane_vendor.dashboard' => 'dashboard',
+    'myeventlane_dashboard.vendor' => 'dashboard',
+  ];
+
+  return $mapping[$route_name] ?? 'dashboard';
+}
+

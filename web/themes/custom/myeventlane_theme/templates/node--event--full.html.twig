@@ -8,12 +8,29 @@
  * - label: The title of the node.
  * - content: All node items (fields).
  * - url: Direct URL of the current node.
+ * - event_type: Event type ('rsvp', 'paid', 'both', 'external', 'none').
+ * - event_type_label: Human-readable label ('RSVP', 'Tickets', etc.).
+ * - event_cta_label: CTA button label.
+ * - event_is_free: TRUE if event is RSVP only (free).
+ * - event_is_bookable: TRUE if event can be booked.
+ * - event_is_rsvp: TRUE if event supports RSVP.
+ * - event_is_paid: TRUE if event has paid tickets.
  *
  * @see template_preprocess_node()
  */
 #}
 
 {{ attach_library('myeventlane_theme/global-styling') }}
+
+{# Check if event is featured (boosted and not expired) #}
+{% set is_featured = false %}
+{% if node.field_promoted.value == 1 and node.field_promo_expires.value is not empty %}
+  {% set expires_ts = node.field_promo_expires.value|date('U') %}
+  {% set now_ts = 'now'|date('U') %}
+  {% if expires_ts > now_ts %}
+    {% set is_featured = true %}
+  {% endif %}
+{% endif %}
 
 <article{{ attributes.addClass('mel-event-full') }}>
 
@@ -23,7 +40,36 @@
   {# Hero Section with Image #}
   <div class="mel-event-hero">
     {% if node.field_event_image.entity %}
-      <div class="mel-event-hero-image">
+      <div class="mel-event-hero-image" style="position: relative;">
+        {# Badges Container #}
+        <div class="mel-event-hero-badges" style="
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          align-items: flex-end;
+          z-index: 10;
+        ">
+          {# Featured Badge #}
+          {% if is_featured %}
+            {% include '@myeventlane_theme/components/event-type-pill.html.twig' with {
+              type: 'featured',
+              label: 'Featured',
+              size: 'md',
+            } only %}
+          {% endif %}
+
+          {# Event Type Badge #}
+          {% if event_type is defined and event_type != 'none' %}
+            {% include '@myeventlane_theme/components/event-type-pill.html.twig' with {
+              type: event_type,
+              label: event_type_label|default(''),
+              size: 'md',
+            } only %}
+          {% endif %}
+        </div>
         <img 
           src="{{ file_url(node.field_event_image.entity.uri.value) }}"
           alt="{{ node.field_event_image.alt }}"
@@ -31,7 +77,36 @@
         >
       </div>
     {% else %}
-      <div class="mel-event-hero-image mel-event-hero-image--placeholder">
+      <div class="mel-event-hero-image mel-event-hero-image--placeholder" style="position: relative;">
+        {# Badges Container #}
+        <div class="mel-event-hero-badges" style="
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          align-items: flex-end;
+          z-index: 10;
+        ">
+          {# Featured Badge #}
+          {% if is_featured %}
+            {% include '@myeventlane_theme/components/event-type-pill.html.twig' with {
+              type: 'featured',
+              label: 'Featured',
+              size: 'md',
+            } only %}
+          {% endif %}
+
+          {# Event Type Badge #}
+          {% if event_type is defined and event_type != 'none' %}
+            {% include '@myeventlane_theme/components/event-type-pill.html.twig' with {
+              type: event_type,
+              label: event_type_label|default(''),
+              size: 'md',
+            } only %}
+          {% endif %}
+        </div>
         <span class="mel-event-hero-icon">📅</span>
       </div>
     {% endif %}
@@ -133,22 +208,171 @@
           </div>
         {% endif %}
 
+        {# Accessibility Information Section #}
+        {% if node.field_accessibility and not node.field_accessibility.isEmpty() or 
+              node.field_accessibility_contact.value or 
+              node.field_accessibility_directions.value or 
+              node.field_accessibility_entry.value or 
+              node.field_accessibility_parking.value %}
+          <div class="mel-event-accessibility-section" style="
+            margin-top: 3rem;
+            padding: 2rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #2e7d32;
+          ">
+            <h2 class="mel-event-section-title" style="
+              margin-top: 0;
+              margin-bottom: 1.5rem;
+              font-size: 1.5rem;
+              color: #2e7d32;
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+            ">
+              <span aria-hidden="true">♿</span>
+              <span>{{ 'Accessibility Information'|t }}</span>
+            </h2>
+
+            {# Accessibility Features #}
+            {% if node.field_accessibility and not node.field_accessibility.isEmpty() %}
+              <div class="mel-event-accessibility-features" style="margin-bottom: 1.5rem;">
+                <h3 style="
+                  font-size: 1rem;
+                  font-weight: 600;
+                  margin-bottom: 0.75rem;
+                  color: #333;
+                ">{{ 'Accessibility Features'|t }}</h3>
+                {% include '@myeventlane_theme/components/accessibility-icons.html.twig' with {
+                  accessibility_terms: node.field_accessibility,
+                  variant: 'badges',
+                  max_display: 0,
+                  show_all: true,
+                } only %}
+              </div>
+            {% endif %}
+
+            {# Structured Accessibility Information #}
+            <div class="mel-event-accessibility-details" style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+              gap: 1.5rem;
+            ">
+              {% if node.field_accessibility_contact.value %}
+                <div class="mel-accessibility-detail-item">
+                  <h4 style="
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    margin-bottom: 0.5rem;
+                    color: #666;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  ">{{ 'Contact for Accessibility Inquiries'|t }}</h4>
+                  <p style="margin: 0; color: #333; line-height: 1.6;">
+                    {{ node.field_accessibility_contact.value }}
+                  </p>
+                </div>
+              {% endif %}
+
+              {% if node.field_accessibility_directions.value %}
+                <div class="mel-accessibility-detail-item">
+                  <h4 style="
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    margin-bottom: 0.5rem;
+                    color: #666;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  ">{{ 'Travel Directions'|t }}</h4>
+                  <p style="margin: 0; color: #333; line-height: 1.6;">
+                    {{ node.field_accessibility_directions.value }}
+                  </p>
+                </div>
+              {% endif %}
+
+              {% if node.field_accessibility_entry.value %}
+                <div class="mel-accessibility-detail-item">
+                  <h4 style="
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    margin-bottom: 0.5rem;
+                    color: #666;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  ">{{ 'Entry Information'|t }}</h4>
+                  <p style="margin: 0; color: #333; line-height: 1.6;">
+                    {{ node.field_accessibility_entry.value }}
+                  </p>
+                </div>
+              {% endif %}
+
+              {% if node.field_accessibility_parking.value %}
+                <div class="mel-accessibility-detail-item">
+                  <h4 style="
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    margin-bottom: 0.5rem;
+                    color: #666;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  ">{{ 'Parking Information'|t }}</h4>
+                  <p style="margin: 0; color: #333; line-height: 1.6;">
+                    {{ node.field_accessibility_parking.value }}
+                  </p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+
       </div>
 
       {# Right Column: Actions Sidebar #}
       <aside class="mel-event-sidebar">
         <div class="mel-event-actions-card">
 
-          {# Price / Free Badge #}
-          {% if node.field_event_price is defined and node.field_event_price.value is not empty %}
-            <div class="mel-event-price">
-              <span class="mel-event-price-label">From</span>
-              <span class="mel-event-price-value">${{ node.field_event_price.value|number_format(2) }}</span>
-            </div>
+          {# Price / Event Type Badge #}
+          {% if event_type is defined %}
+            {% if event_type == 'rsvp' %}
+              <div class="mel-event-price mel-event-price--free">
+                <span class="mel-event-price-value">{{ 'RSVP'|t }}</span>
+              </div>
+            {% elseif event_type == 'paid' or event_type == 'both' %}
+              {% if node.field_event_price is defined and node.field_event_price.value is not empty %}
+                <div class="mel-event-price">
+                  <span class="mel-event-price-label">From</span>
+                  <span class="mel-event-price-value">${{ node.field_event_price.value|number_format(2) }}</span>
+                </div>
+              {% else %}
+                <div class="mel-event-price">
+                  <span class="mel-event-price-value">Tickets Available</span>
+                </div>
+              {% endif %}
+            {% elseif event_type == 'external' %}
+              <div class="mel-event-price">
+                <span class="mel-event-price-value">External Booking</span>
+              </div>
+            {% else %}
+              <div class="mel-event-price mel-event-price--free">
+                <span class="mel-event-price-value">{{ 'RSVP'|t }}</span>
+              </div>
+            {% endif %}
           {% else %}
-            <div class="mel-event-price mel-event-price--free">
-              <span class="mel-event-price-value">Free</span>
-            </div>
+            {# Fallback: Check raw field #}
+            {% set raw_type = node.field_event_type.value|default('rsvp') %}
+            {% if raw_type == 'rsvp' %}
+              <div class="mel-event-price mel-event-price--free">
+                <span class="mel-event-price-value">{{ 'RSVP'|t }}</span>
+              </div>
+            {% elseif raw_type == 'paid' or raw_type == 'both' %}
+              <div class="mel-event-price">
+                <span class="mel-event-price-value">Tickets Available</span>
+              </div>
+            {% else %}
+              <div class="mel-event-price mel-event-price--free">
+                <span class="mel-event-price-value">{{ 'RSVP'|t }}</span>
+              </div>
+            {% endif %}
           {% endif %}
 
           {# CTA Buttons #}
@@ -156,14 +380,35 @@
             {# Prefer the unified Event CTAs provided by myeventlane_event. #}
             {% if content.event_ctas is defined and content.event_ctas %}
               {{ content.event_ctas }}
+            {% elseif event_type is defined %}
+              {# Use event type variables for CTA #}
+              {% if event_type == 'rsvp' %}
+                <a href="{{ path('myeventlane_commerce.event_book', {'node': node.id}) }}" class="mel-btn mel-btn-primary mel-btn-lg mel-btn-block">
+                  RSVP Now
+                </a>
+              {% elseif event_type == 'paid' or event_type == 'both' %}
+                <a href="{{ path('myeventlane_commerce.event_book', {'node': node.id}) }}" class="mel-btn mel-btn-primary mel-btn-lg mel-btn-block">
+                  Buy Tickets
+                </a>
+              {% elseif event_type == 'external' %}
+                {% if node.field_external_url.uri %}
+                  <a href="{{ node.field_external_url.uri }}" class="mel-btn mel-btn-primary mel-btn-lg mel-btn-block" target="_blank" rel="noopener noreferrer">
+                    Get Tickets
+                  </a>
+                {% endif %}
+              {% else %}
+                <a href="{{ url }}#register" class="mel-btn mel-btn-primary mel-btn-lg mel-btn-block">
+                  Register
+                </a>
+              {% endif %}
             {% elseif event_rsvp_enabled or event_tickets_enabled %}
-              {# Fallback: Use preprocess variables to build CTA. #}
+              {# Legacy fallback: Use preprocess variables to build CTA. #}
               {% if event_tickets_enabled %}
-                <a href="{{ url('myeventlane_commerce.event_book', {'node': node.id}) }}" class="mel-btn mel-btn-primary mel-btn-lg mel-btn-block">
+                <a href="{{ path('myeventlane_commerce.event_book', {'node': node.id}) }}" class="mel-btn mel-btn-primary mel-btn-lg mel-btn-block">
                   Buy Tickets
                 </a>
               {% elseif event_rsvp_enabled %}
-                <a href="{{ url('myeventlane_commerce.event_book', {'node': node.id}) }}" class="mel-btn mel-btn-primary mel-btn-lg mel-btn-block">
+                <a href="{{ path('myeventlane_commerce.event_book', {'node': node.id}) }}" class="mel-btn mel-btn-primary mel-btn-lg mel-btn-block">
                   RSVP Now
                 </a>
               {% endif %}
@@ -178,6 +423,13 @@
               <span>Share Event</span>
             </button>
           </div>
+
+          {# Waitlist Position Display #}
+          {% if waitlist_position is defined and waitlist_position.on_waitlist %}
+            <div class="mel-event-waitlist-position">
+              {{ include('@myeventlane_event_attendees/waitlist-position-block.html.twig', waitlist_position, with_context = false) }}
+            </div>
+          {% endif %}
 
           {# Organizer Info #}
           {% if node.uid.entity %}
@@ -242,5 +494,3 @@
   </div>
 
 </article>
-
-

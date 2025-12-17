@@ -1,0 +1,79 @@
+<?php
+
+/**
+ * @file
+ * MyEventLane Theme - Module file for hook implementations.
+ */
+
+/**
+ * Implements hook_page_attachments().
+ *
+ * Ensures Stripe.js loads on checkout pages and exports category colors to JS.
+ */
+function myeventlane_theme_page_attachments(array &$page) {
+  // Only on checkout pages.
+  $route = \Drupal::routeMatch()->getRouteName();
+  $is_checkout_route = strpos($route, 'commerce_checkout') === 0;
+
+  if ($is_checkout_route && \Drupal::moduleHandler()->moduleExists('commerce_stripe')) {
+    // Ensure Stripe.js library is attached on checkout pages.
+    if (!isset($page['#attached']['library'])) {
+      $page['#attached']['library'] = [];
+    }
+    $libraries = &$page['#attached']['library'];
+    if (!in_array('commerce_stripe/stripe', $libraries)) {
+      $libraries[] = 'commerce_stripe/stripe';
+    }
+    
+    // Also add via html_head as a direct fallback - this ensures it loads even if library system fails
+    $stripe_config = \Drupal::config('commerce_stripe.settings');
+    $user_fraud_signals = $stripe_config->get('collect_user_fraud_signals') ?? TRUE;
+    $stripe_src = 'https://js.stripe.com/v3/';
+    if (!$user_fraud_signals) {
+      $stripe_src .= '?advancedFraudSignals=false';
+    }
+    
+    $page['#attached']['html_head'][] = [
+      [
+        '#tag' => 'script',
+        '#attributes' => [
+          'src' => $stripe_src,
+          'id' => 'stripe-js-direct-injection',
+        ],
+      ],
+      'stripe_js_forced',
+      -100, // Very high priority - load early
+    ];
+  }
+
+  // Export category color map to JavaScript via drupalSettings.
+  if (\Drupal::hasService('myeventlane_shared.color_service')) {
+    try {
+      $color_service = \Drupal::service('myeventlane_shared.color_service');
+      $color_map = $color_service->getCategoryColors();
+
+      if (!isset($page['#attached']['drupalSettings'])) {
+        $page['#attached']['drupalSettings'] = [];
+      }
+      $page['#attached']['drupalSettings']['myeventlane'] = [
+        'categoryColors' => $color_map,
+      ];
+    }
+    catch (\Exception $e) {
+      // Silently fail if service is not available.
+      \Drupal::logger('myeventlane_theme')->warning('Could not load ColorService: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,40 @@
+{#
+/**
+ * @file
+ * Template for waitlist position display block.
+ *
+ * Available variables:
+ * - position: The waitlist position (1-based) or NULL.
+ * - total_waitlist: Total number of people on the waitlist.
+ * - event_id: The event node ID.
+ * - event_title: The event title.
+ * - on_waitlist: Boolean indicating if user is on waitlist.
+ */
+#}
+<div class="mel-waitlist-position" data-event-id="{{ event_id }}" id="mel-waitlist-position-{{ event_id }}">
+  {% if on_waitlist and position %}
+    <div class="mel-waitlist-position__card">
+      <div class="mel-waitlist-position__header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.5rem;">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        <h3 class="mel-waitlist-position__title">{{ 'You\'re on the waitlist'|t }}</h3>
+      </div>
+      <div class="mel-waitlist-position__content">
+        <div class="mel-waitlist-position__position">
+          <span class="mel-waitlist-position__number">{{ position }}</span>
+          <span class="mel-waitlist-position__label">
+            {% if total_waitlist > 1 %}
+              {{ 'of @total'|t({'@total': total_waitlist}) }}
+            {% else %}
+              {{ 'in line'|t }}
+            {% endif %}
+          </span>
+        </div>
+        <p class="mel-waitlist-position__message">
+          {{ 'You\'ll be notified by email if a spot becomes available.'|t }}
+        </p>
+      </div>
+    </div>
+  {% endif %}
+</div>

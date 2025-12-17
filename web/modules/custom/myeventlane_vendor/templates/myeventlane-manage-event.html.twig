@@ -1,0 +1,98 @@
+{#
+/**
+ * @file
+ * Template for the vendor "Manage Event" console layout.
+ *
+ * Available variables:
+ * - event: The event node entity
+ * - event_title: The event title
+ * - event_status: Status label (Published/Draft)
+ * - event_status_class: CSS class for status
+ * - steps: Array of navigation steps
+ * - current_step: Current step route name
+ * - content: Main content render array
+ * - page_title: Page title
+ * - preview_url: URL to preview the event
+ * - edit_url: URL to standard node edit
+ * - next_step_url: URL to next step
+ * - prev_step_url: URL to previous step
+ */
+#}
+<div class="mel-manage-event-wrapper">
+  <div class="mel-manage-event-header">
+    <div class="mel-manage-event-header-content">
+      <div class="mel-event-info">
+        <h1 class="mel-event-title">{{ event_title }}</h1>
+        <span class="mel-event-status {{ event_status_class }}">{{ event_status }}</span>
+      </div>
+      <div class="mel-header-actions">
+        {% if preview_url %}
+          <a href="{{ preview_url }}" class="mel-btn mel-btn-secondary" target="_blank">
+            {{ 'Preview'|t }}
+          </a>
+        {% endif %}
+        {% if event.isPublished() %}
+          <span class="mel-publish-status">{{ 'Published'|t }}</span>
+        {% else %}
+          <a href="{{ edit_url }}" class="mel-btn mel-btn-primary">
+            {{ 'Publish'|t }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="mel-manage-event-layout">
+    <aside class="mel-manage-event-sidebar">
+      <nav class="mel-step-nav">
+        <ul class="mel-step-nav-list">
+          {% for step in steps %}
+            <li class="mel-step-nav-item {{ step.active ? 'is-active' : '' }} {{ step.coming_soon ? 'is-coming-soon' : '' }}">
+              {% if step.url and not step.coming_soon %}
+                <a href="{{ step.url }}" class="mel-step-nav-link">
+                  <span class="mel-step-nav-icon">{{ step.icon }}</span>
+                  <span class="mel-step-nav-label">{{ step.label }}</span>
+                </a>
+              {% else %}
+                <span class="mel-step-nav-link mel-step-nav-link--disabled">
+                  <span class="mel-step-nav-icon">{{ step.icon }}</span>
+                  <span class="mel-step-nav-label">{{ step.label }}</span>
+                  {% if step.coming_soon %}
+                    <span class="mel-step-nav-badge">{{ 'Coming soon'|t }}</span>
+                  {% endif %}
+                </span>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="mel-manage-event-main">
+      <div class="mel-manage-event-content-wrapper">
+        <div class="mel-page-header">
+          <h2 class="mel-page-title">{{ page_title }}</h2>
+        </div>
+
+        <div class="mel-content-area">
+          {{ content }}
+        </div>
+
+        <div class="mel-manage-event-footer">
+          <div class="mel-footer-actions">
+            {% if prev_step_url %}
+              <a href="{{ prev_step_url }}" class="mel-btn mel-btn-secondary">
+                {{ 'Back'|t }}
+              </a>
+            {% endif %}
+            {% if next_step_url %}
+              <a href="{{ next_step_url }}" class="mel-btn mel-btn-primary">
+                {{ 'Continue'|t }}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

@@ -131,4 +131,81 @@ final class AttendanceWaitlistManager {
     return TRUE;
   }
 
+  /**
+   * Gets waitlist analytics for an event.
+   *
+   * @param int $eventId
+   *   The event node ID.
+   *
+   * @return array
+   *   Array with analytics data:
+   *   - total_waitlist: Total number of waitlisted attendees
+   *   - total_promoted: Number of attendees promoted from waitlist
+   *   - conversion_rate: Percentage of waitlisted who were promoted
+   *   - average_wait_time: Average time on waitlist (in hours)
+   *   - current_waitlist: Current waitlist count
+   */
+  public function getWaitlistAnalytics(int $eventId): array {
+    $storage = $this->entityTypeManager->getStorage('event_attendee');
+
+    // Get all waitlisted attendees (current and historical).
+    $waitlistQuery = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('event', $eventId)
+      ->condition('status', EventAttendee::STATUS_WAITLIST);
+    $currentWaitlistCount = (int) $waitlistQuery->count()->execute();
+
+    // Get all attendees who were ever on waitlist (including promoted).
+    $allWaitlistQuery = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('event', $eventId);
+    $allWaitlistIds = $allWaitlistQuery->execute();
+
+    $totalWaitlist = 0;
+    $totalPromoted = 0;
+    $totalWaitTime = 0;
+    $promotedCount = 0;
+
+    if (!empty($allWaitlistIds)) {
+      $attendees = $storage->loadMultiple($allWaitlistIds);
+      foreach ($attendees as $attendee) {
+        // Check if attendee was ever waitlisted (by checking created time vs promoted time).
+        if (!$attendee->get('promoted_at')->isEmpty()) {
+          // Was promoted.
+          $totalPromoted++;
+          $promotedCount++;
+          $created = (int) $attendee->get('created')->value;
+          $promoted = (int) $attendee->get('promoted_at')->value;
+          if ($promoted > $created) {
+            $waitTime = $promoted - $created;
+            $totalWaitTime += $waitTime;
+          }
+        }
+        elseif ($attendee->isWaitlisted()) {
+          // Currently waitlisted.
+          $totalWaitlist++;
+        }
+      }
+    }
+
+    // Calculate conversion rate.
+    $totalEverWaitlisted = $currentWaitlistCount + $totalPromoted;
+    $conversionRate = $totalEverWaitlisted > 0
+      ? round(($totalPromoted / $totalEverWaitlisted) * 100, 1)
+      : 0.0;
+
+    // Calculate average wait time.
+    $averageWaitTime = $promotedCount > 0
+      ? round($totalWaitTime / $promotedCount / 3600, 1) // Convert to hours
+      : 0.0;
+
+    return [
+      'total_waitlist' => $totalEverWaitlisted,
+      'total_promoted' => $totalPromoted,
+      'conversion_rate' => $conversionRate,
+      'average_wait_time' => $averageWaitTime,
+      'current_waitlist' => $currentWaitlistCount,
+    ];
+  }
+
 }

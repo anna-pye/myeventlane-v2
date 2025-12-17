@@ -1,0 +1,13 @@
+# BAS report permissions.
+view admin bas reports:
+  title: 'View admin BAS reports'
+  description: 'Access platform-wide BAS (Business Activity Statement) reports in the admin area.'
+  restrict access: TRUE
+
+view vendor bas reports:
+  title: 'View vendor BAS reports'
+  description: 'Access vendor-specific BAS (Business Activity Statement) reports.'
+  restrict access: TRUE
+
+
+

@@ -1,0 +1,76 @@
+/**
+ * @file
+ * Best performing event card styles.
+ */
+
+.mel-best-event {
+  &__header {
+    margin-bottom: 12px;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #92400e;
+
+    svg {
+      color: #f59e0b;
+    }
+  }
+
+  &__content {
+    margin-bottom: 16px;
+  }
+
+  &__title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--mel-color-text);
+    margin: 0 0 16px;
+  }
+
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 16px;
+  }
+
+  &__stat {
+    text-align: center;
+    padding: 12px;
+    background: var(--mel-color-bg-subtle);
+    border-radius: 8px;
+
+    &-value {
+      display: block;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--mel-color-text);
+      margin-bottom: 4px;
+    }
+
+    &-label {
+      font-size: 11px;
+      color: var(--mel-color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  &__footer {
+    padding-top: 16px;
+    border-top: 1px solid var(--mel-color-border);
+  }
+}
+
+
+
+
+
+

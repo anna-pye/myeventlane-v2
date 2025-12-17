@@ -1,0 +1,403 @@
+/**
+ * @file
+ * Event form page styles for MyEventLane Vendor Theme.
+ *
+ * Create/Edit Event form with stepper tabs.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/shadows' as *;
+@use '../tokens/breakpoints' as *;
+
+// ============================================================================
+// EVENT FORM PAGE LAYOUT
+// ============================================================================
+
+.mel-event-form-page {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 80px);
+}
+
+// ============================================================================
+// EVENT FORM HEADER
+// ============================================================================
+
+.mel-event-form__header {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+  margin-bottom: $spacing-6;
+  
+  @include respond-to(md) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.mel-event-form__title {
+  @include page-title;
+  margin: 0;
+}
+
+.mel-event-form__header-actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+}
+
+// ============================================================================
+// STEPPER TABS
+// ============================================================================
+
+.mel-event-form__stepper {
+  display: flex;
+  align-items: center;
+  gap: $spacing-1;
+  padding: $spacing-2;
+  background: $bg-secondary;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-8;
+  overflow-x: auto;
+  
+  // Hide scrollbar
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.mel-event-form__step {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-3 $spacing-4;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-muted;
+  background: transparent;
+  border: none;
+  border-radius: $radius-md;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover:not(:disabled) {
+    color: $text-secondary;
+    background: rgba(0, 0, 0, 0.03);
+  }
+  
+  &.is-active {
+    color: $text-primary;
+    background: $bg-primary;
+    box-shadow: $shadow-sm;
+  }
+  
+  &.is-completed {
+    color: $success;
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.mel-event-form__step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  background: $bg-tertiary;
+  border-radius: $radius-full;
+  
+  .is-active & {
+    background: $primary;
+    color: $text-inverse;
+  }
+  
+  .is-completed & {
+    background: $success;
+    color: $text-inverse;
+  }
+}
+
+.mel-event-form__step-label {
+  @include respond-down(lg) {
+    display: none;
+  }
+}
+
+// ============================================================================
+// EVENT FORM MAIN LAYOUT (2-column with sidebar)
+// ============================================================================
+
+.mel-event-form__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $layout-gutter;
+  
+  @include respond-to(xl) {
+    grid-template-columns: 1fr $layout-sidebar-help-width;
+  }
+}
+
+.mel-event-form__main {
+  max-width: $layout-content-max-width;
+}
+
+.mel-event-form__sidebar {
+  display: none;
+  
+  @include respond-to(xl) {
+    display: block;
+    padding-left: $layout-gutter;
+    border-left: 1px solid $border-color-light;
+  }
+}
+
+// ============================================================================
+// FORM PANEL
+// ============================================================================
+
+.mel-event-form__panel {
+  display: none;
+  
+  &.is-active {
+    display: block;
+  }
+}
+
+// ============================================================================
+// FORM SECTIONS
+// ============================================================================
+
+.mel-event-form__section {
+  background: $bg-primary;
+  border: 1px solid $border-color;
+  border-radius: $radius-card;
+  padding: $spacing-6;
+  margin-bottom: $spacing-6;
+}
+
+.mel-event-form__section-title {
+  @include section-title;
+  margin: 0 0 $spacing-2 0;
+}
+
+.mel-event-form__section-desc {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin-bottom: $spacing-6;
+}
+
+// ============================================================================
+// LOCATION SECTION
+// ============================================================================
+
+.mel-event-form__location {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-6;
+}
+
+.mel-event-form__map-preview {
+  height: 240px;
+  background: $bg-secondary;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  overflow: hidden;
+  
+  iframe,
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.mel-event-form__manual-address-toggle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  font-size: $font-size-sm;
+  color: $primary;
+  cursor: pointer;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ============================================================================
+// SCHEDULE SECTION
+// ============================================================================
+
+.mel-event-form__schedule {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-6;
+}
+
+.mel-event-form__date-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-4;
+  
+  @include respond-down(sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mel-event-form__recurring-options {
+  padding: $spacing-4;
+  background: $bg-secondary;
+  border-radius: $radius-md;
+  margin-top: $spacing-4;
+  
+  &[hidden] {
+    display: none;
+  }
+}
+
+// ============================================================================
+// TICKETS SECTION
+// ============================================================================
+
+.mel-event-form__tickets-table {
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  overflow: hidden;
+}
+
+.mel-event-form__tickets-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 60px;
+  gap: $spacing-4;
+  padding: $spacing-3 $spacing-4;
+  background: $bg-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $text-secondary;
+  border-bottom: 1px solid $border-color;
+}
+
+.mel-event-form__ticket-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 60px;
+  gap: $spacing-4;
+  padding: $spacing-4;
+  border-bottom: 1px solid $border-color-light;
+  align-items: center;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.mel-event-form__ticket-name {
+  font-weight: $font-weight-medium;
+}
+
+.mel-event-form__ticket-input {
+  padding: $spacing-2 $spacing-3;
+  font-size: $font-size-sm;
+}
+
+.mel-event-form__add-ticket {
+  padding: $spacing-4;
+  text-align: center;
+  border-top: 1px solid $border-color-light;
+}
+
+// ============================================================================
+// STICKY FORM ACTIONS
+// ============================================================================
+
+.mel-event-form__actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-4;
+  padding: $spacing-4 $spacing-6;
+  background: $bg-primary;
+  border-top: 1px solid $border-color;
+  margin: $spacing-8 (-$spacing-6) (-$spacing-6);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+  
+  @include respond-to(md) {
+    margin: $spacing-8 (-$spacing-8) (-$spacing-8);
+    padding: $spacing-4 $spacing-8;
+  }
+}
+
+.mel-event-form__actions-left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+}
+
+.mel-event-form__actions-right {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+}
+
+// ============================================================================
+// CONTEXTUAL HELP SIDEBAR
+// ============================================================================
+
+.mel-event-form__help {
+  position: sticky;
+  top: 100px;
+}
+
+.mel-event-form__help-section {
+  margin-bottom: $spacing-6;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.mel-event-form__help-title {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: $spacing-3;
+}
+
+.mel-event-form__help-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mel-event-form__help-item {
+  padding: $spacing-2 0;
+  
+  a {
+    display: flex;
+    align-items: center;
+    gap: $spacing-2;
+    font-size: $font-size-sm;
+    color: $text-primary;
+    text-decoration: none;
+    
+    &:hover {
+      color: $primary;
+    }
+  }
+}
+

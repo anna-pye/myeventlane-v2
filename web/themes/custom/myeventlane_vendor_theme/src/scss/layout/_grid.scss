@@ -1,0 +1,102 @@
+/**
+ * @file
+ * Grid system for MyEventLane Vendor Theme.
+ */
+
+@use '../tokens/spacing' as *;
+@use '../tokens/breakpoints' as *;
+
+// ============================================================================
+// BASE GRID
+// ============================================================================
+
+.mel-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $grid-gap-md;
+}
+
+// Two columns
+.mel-grid--2 {
+  @include respond-to(md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+// Three columns
+.mel-grid--3 {
+  @include respond-to(md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @include respond-to(lg) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// Four columns
+.mel-grid--4 {
+  @include respond-to(sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @include respond-to(lg) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// Auto-fit grid (responsive columns)
+.mel-grid--auto {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+// ============================================================================
+// GAP MODIFIERS
+// ============================================================================
+
+.mel-grid--gap-sm {
+  gap: $grid-gap-sm;
+}
+
+.mel-grid--gap-lg {
+  gap: $grid-gap-lg;
+}
+
+// ============================================================================
+// FLEX UTILITIES
+// ============================================================================
+
+.mel-stack {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.mel-stack--sm {
+  gap: $spacing-2;
+}
+
+.mel-stack--lg {
+  gap: $spacing-6;
+}
+
+.mel-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-4;
+}
+
+.mel-row--center {
+  align-items: center;
+}
+
+.mel-row--between {
+  justify-content: space-between;
+}
+
+
+
+
+
+
+

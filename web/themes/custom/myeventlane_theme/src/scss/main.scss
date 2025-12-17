@@ -45,9 +45,13 @@
 @use 'layout/container';
 @use 'layout/grid';
 @use 'layout/flex';
+@use 'layout/navigation';
+@use 'layout/header-layout';
 @use 'layout/page-grid';
 @use 'layout/regions';
-@use 'layout/event-grid';
+@use 'layout/event-grid' as layout_event_grid;
+@use 'layout/homepage';
+@use 'layout/page-home';
 
 // ---------------------------------------------------------------------------
 // 5. Components
@@ -62,10 +66,15 @@
 @use 'components/header';
 @use 'components/hero';
 @use 'components/event-card';
+@use "components/event-grid";
+@use 'components/event-type-pill';
 @use 'components/rsvp';
 @use 'components/cart';
 @use 'components/checkout';
 @use 'components/footer';
+@use 'components/vendor-detail';
+@use 'components/feature-block';
+@use 'components/taxonomy-tags';
 
 // ---------------------------------------------------------------------------
 // 6. Pages
@@ -80,6 +89,7 @@
 @use 'pages/auth';
 @use 'pages/vendor-form';
 @use 'pages/search';
+@use 'pages/profile';
 
 // ---------------------------------------------------------------------------
 // 7. Utilities

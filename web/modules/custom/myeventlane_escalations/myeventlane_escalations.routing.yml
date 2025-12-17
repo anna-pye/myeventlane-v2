@@ -1,0 +1,54 @@
+entity.escalation.collection:
+  path: '/admin/myeventlane/escalations'
+  defaults:
+    _entity_list: 'escalation'
+    _title: 'Escalations'
+  requirements:
+    _permission: 'access administration pages'
+  options:
+    _admin_route: TRUE
+
+entity.escalation.canonical:
+  path: '/admin/myeventlane/escalations/{escalation}'
+  defaults:
+    _entity_view: 'escalation.full'
+    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title'
+  requirements:
+    _permission: 'access administration pages'
+  options:
+    _admin_route: TRUE
+
+entity.escalation.add_form:
+  path: '/admin/myeventlane/escalations/add'
+  defaults:
+    _entity_form: 'escalation.default'
+    _title: 'Add Escalation'
+  requirements:
+    _permission: 'access administration pages'
+  options:
+    _admin_route: TRUE
+
+entity.escalation.edit_form:
+  path: '/admin/myeventlane/escalations/{escalation}/edit'
+  defaults:
+    _entity_form: 'escalation.default'
+    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::editTitle'
+  requirements:
+    _permission: 'access administration pages'
+  options:
+    _admin_route: TRUE
+
+entity.escalation.delete_form:
+  path: '/admin/myeventlane/escalations/{escalation}/delete'
+  defaults:
+    _entity_form: 'escalation.delete'
+  requirements:
+    _permission: 'access administration pages'
+  options:
+    _admin_route: TRUE
+
+
+
+
+
+

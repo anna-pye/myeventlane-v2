@@ -1,0 +1,403 @@
+/* Fallback styles for vendor console when Vite assets are not built. */
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+a {
+  color: #2563eb;
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+.mel-vendor-shell,
+.vendor-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+@media (max-width: 960px) {
+  .mel-vendor-shell,
+  .vendor-shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mel-vendor-shell__sidebar,
+.vendor-shell__sidebar {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 24px;
+}
+
+.mel-vendor-shell__main,
+.vendor-shell__main {
+  display: flex;
+  flex-direction: column;
+}
+
+.mel-vendor-shell__header,
+.vendor-shell__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.mel-vendor-shell__content,
+.vendor-shell__content {
+  padding: 24px;
+}
+
+.mel-vendor-shell__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+}
+
+.mel-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.mel-sidebar__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #e2e8f0;
+  font-weight: 700;
+}
+
+.mel-sidebar__logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.12);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.mel-sidebar__nav,
+.vendor-shell__nav {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+  display: grid;
+  gap: 4px;
+}
+
+.mel-sidebar__link,
+.vendor-shell__nav-link {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #cbd5e1;
+}
+
+.mel-sidebar__link:hover,
+.vendor-shell__nav-link:hover {
+  background: rgba(255,255,255,0.08);
+  color: #ffffff;
+}
+
+.mel-sidebar__link.is-active,
+.vendor-shell__nav-link.is-active {
+  background: rgba(37, 99, 235, 0.18);
+  color: #ffffff;
+}
+
+.mel-sidebar__footer {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+  color: #cbd5e1;
+}
+
+.mel-header,
+.vendor-shell__topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mel-header__title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.mel-header__subtitle {
+  font-size: 14px;
+  color: #475569;
+}
+
+.mel-page-title {
+  margin: 0 0 4px 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.mel-page-subtitle {
+  margin: 0;
+  color: #475569;
+}
+
+.mel-dashboard__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.mel-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.mel-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.mel-kpi__label {
+  color: #475569;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.mel-kpi__value {
+  font-size: 26px;
+  font-weight: 700;
+}
+.mel-kpi__delta {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #2563eb;
+}
+.mel-kpi__delta.is-negative {
+  color: #ef4444;
+}
+
+.mel-grid {
+  display: grid;
+  gap: 16px;
+}
+.mel-grid--2 {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.mel-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.mel-card__title {
+  font-weight: 600;
+}
+.mel-card__meta {
+  color: #475569;
+  font-size: 13px;
+}
+
+.mel-table {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mel-table__head,
+.mel-table__row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+}
+.mel-table__head {
+  font-size: 13px;
+  color: #475569;
+}
+.mel-table__row {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+}
+.mel-table__row:hover { border-color: #cbd5e1; }
+.mel-table__title { font-weight: 600; }
+.mel-table__meta { color: #475569; font-size: 13px; }
+.mel-table__empty { padding: 12px; color: #475569; }
+
+.mel-list { display: grid; gap: 8px; }
+.mel-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mel-list__meta { color: #475569; font-size: 13px; }
+
+.mel-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+  font-size: 12px;
+}
+
+.mel-empty { color: #475569; font-size: 14px; }
+
+.mel-btn, .button, .button--primary, .button--secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mel-btn--primary, .button, .button--primary {
+  background: #2563eb;
+  color: #fff;
+}
+.mel-btn--secondary, .button--secondary {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.mel-console {
+  display: grid;
+  gap: 16px;
+}
+.mel-console__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mel-console__tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.mel-console__tab {
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.08);
+}
+.mel-console__tab.is-active {
+  background: #2563eb;
+  color: #fff;
+}
+
+/* Event create form tabs */
+.mel-event-form-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.mel-tab-button {
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  white-space: nowrap;
+}
+
+.mel-tab-button:hover {
+  background: #f1f5f9;
+}
+
+.mel-tab-button.is-active {
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+}
+
+.mel-tab-pane {
+  display: none;
+}
+
+.mel-tab-pane.is-active {
+  display: block;
+}
+
+.mel-event-form-actions-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 2px solid #e2e8f0;
+  margin-top: 24px;
+}
+
+/* Hide duplicated raw lists injected before the shell when present. */
+body > nav,
+body > header,
+body > .header,
+body > .navbar,
+body > ul {
+  display: none !important;
+}
+
+/* Hide elements in the mel-form-hidden-elements container */
+.mel-form-hidden-elements {
+  /* Don't hide completely - form tokens need to submit */
+  /* Just hide any visual elements */
+}
+.mel-form-hidden-elements .mel-form-header,
+.mel-form-hidden-elements .mel-form-title,
+.mel-form-hidden-elements .mel-form-group,
+.mel-form-hidden-elements .mel-form-card,
+.mel-form-hidden-elements h2,
+.mel-form-hidden-elements h3,
+.mel-form-hidden-elements .form-item:not([type="hidden"]):not(:has(input[type="hidden"])) {
+  display: none !important;
+}
+
+/* Only show hidden inputs in the hidden elements container */
+.mel-form-hidden-elements > * {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+.mel-form-hidden-elements input[type="hidden"] {
+  display: block;
+}
+
+

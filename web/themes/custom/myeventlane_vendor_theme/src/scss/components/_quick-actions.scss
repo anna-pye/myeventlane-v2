@@ -1,0 +1,210 @@
+/**
+ * @file
+ * Quick actions component styles.
+ */
+
+// Table-based quick actions
+.mel-quick-actions-table {
+  background: var(--mel-color-bg);
+  border: 1px solid var(--mel-color-border);
+  border-radius: 12px;
+  overflow: hidden;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--mel-color-border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  td {
+    padding: 12px;
+    width: 33.333%;
+    text-align: center;
+    border-right: 1px solid var(--mel-color-border);
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  // Responsive - stack on mobile
+  @media (max-width: 768px) {
+    table, tbody, tr, td {
+      display: block;
+      width: 100%;
+    }
+
+    td {
+      border-right: none;
+      border-bottom: 1px solid var(--mel-color-border);
+      padding: 8px 12px;
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+}
+
+// Styled action buttons
+.mel-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  width: 100%;
+  min-height: 48px;
+  border: 2px solid transparent;
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  // Primary - Create Event (purple/brand)
+  &--primary {
+    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+    color: white;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+      background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    }
+  }
+
+  // Success - Payouts (green)
+  &--success {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+  }
+
+  // Info - Attendees (blue)
+  &--info {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: white;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    }
+  }
+
+  // Warning - Boost (amber/orange)
+  &--warning {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    color: white;
+    box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(217, 119, 6, 0.4);
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+  }
+
+  // Secondary - Email (indigo)
+  &--secondary {
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    color: white;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+  }
+
+  // Neutral - Settings (gray)
+  &--neutral {
+    background: var(--mel-color-bg);
+    color: var(--mel-color-text);
+    border: 2px solid var(--mel-color-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    &:hover {
+      transform: translateY(-2px);
+      border-color: var(--mel-color-primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      background: var(--mel-color-bg-subtle);
+    }
+  }
+}
+
+// Legacy vertical quick actions (kept for backwards compatibility)
+.mel-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mel-quick-action {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--mel-color-bg);
+  border: 1px solid var(--mel-color-border);
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: var(--mel-color-primary);
+    background: var(--mel-color-bg-subtle);
+  }
+
+  &__icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--mel-color-bg-subtle);
+    border-radius: 8px;
+    color: var(--mel-color-primary);
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  &:hover &__icon {
+    background: var(--mel-color-primary);
+    color: white;
+  }
+
+  &__label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--mel-color-text);
+  }
+}
+
+
+
+
+
+

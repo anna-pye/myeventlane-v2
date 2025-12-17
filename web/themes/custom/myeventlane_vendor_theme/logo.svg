@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80" fill="none">
+  <!-- Icon: Rounded square with waving person -->
+  <g>
+    <!-- Background rounded square -->
+    <rect x="4" y="8" width="64" height="64" rx="12" fill="#ff6f61"/>
+    
+    <!-- Person silhouette cutout (waving) -->
+    <path d="M20 72 C20 72 20 50 28 42 C32 38 38 40 42 38 C48 35 46 28 42 24 C38 20 32 22 28 28 C24 34 24 42 24 42" fill="#faf7fb"/>
+    
+    <!-- Celebration lines (yellow) -->
+    <line x1="44" y1="20" x2="52" y2="12" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+    <line x1="50" y1="26" x2="60" y2="22" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+    <line x1="52" y1="34" x2="62" y2="34" stroke="#ffd46f" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Text: My EventLane -->
+  <g fill="#ff6f61" font-family="Nunito, sans-serif">
+    <text x="80" y="35" font-size="24" font-weight="700">My</text>
+    <text x="80" y="62" font-size="24" font-weight="800">EventLane</text>
+  </g>
+</svg>

@@ -1,0 +1,10 @@
+# Admin menu link for BAS under Finance section.
+myeventlane_finance.admin_bas:
+  title: 'BAS'
+  description: 'View Business Activity Statement reports for the platform.'
+  route_name: myeventlane_finance.admin_bas
+  parent: myeventlane_admin_dashboard.overview
+  weight: 30
+
+
+

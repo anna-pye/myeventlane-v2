@@ -1,0 +1,11 @@
+<nav class="mel-category-pills" aria-label="Event categories">
+  {% for c in front.categories %}
+    <a
+      href="{{ path('entity.taxonomy_term.canonical', {'taxonomy_term': c.tid}) }}"
+      class="mel-pill"
+      style="--pill-color: {{ c.color }}"
+    >
+      {{ c.label }}
+    </a>
+  {% endfor %}
+</nav>

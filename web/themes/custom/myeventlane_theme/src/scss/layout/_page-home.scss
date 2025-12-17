@@ -1,0 +1,220 @@
+// ==========================================================================
+// Home Page (MyEventLane v2) — mobile-first hero layout
+// ==========================================================================
+
+.mel-region-hero {
+  // Soft pastel wash like the reference screenshot.
+  background: radial-gradient(1200px 600px at 20% 20%, rgba(252, 103, 90, 0.10), transparent 55%),
+    radial-gradient(900px 500px at 80% 30%, rgba(168, 200, 255, 0.18), transparent 55%),
+    #faf7fb;
+}
+
+.home-hero {
+  display: flex;
+  flex-direction: column;
+  padding: 4rem 1rem 2.5rem;
+  gap: 2rem;
+
+  &__content {
+    flex: 1;
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  &__brand-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #fc675a 0%, #a8c8ff 55%, #f4b9ef 100%);
+  }
+
+  &__brand-name {
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: #1a1a2e;
+    letter-spacing: -0.01em;
+  }
+
+  &__title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: #fc675a;
+    margin: 0 0 0.75rem 0;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+  }
+
+  &__subtitle {
+    font-size: 1.75rem;
+    margin: 0 0 1.5rem 0;
+    color: #1a1a2e;
+    font-weight: 700;
+  }
+
+  &__bullets {
+    list-style: none;
+    padding-left: 0;
+    margin: 0 0 1.75rem 0;
+
+    li {
+      color: #5c5c6f;
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+  }
+
+  &__search {
+    display: flex;
+    width: 100%;
+    gap: 1rem;
+    align-items: center;
+    max-width: 720px;
+
+    input[type="search"] {
+      flex: 1;
+      padding: 0.95rem 1.25rem;
+      border: 1px solid rgba(26, 26, 46, 0.12);
+      border-radius: 999px;
+      font-size: 1.05rem;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    button {
+      background: #fc675a;
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 0.95rem 1.75rem;
+      font-weight: 600;
+      font-size: 1.05rem;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(252, 103, 90, 0.28);
+    }
+  }
+
+  &__chart {
+    max-width: 420px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    // Keep the pie chart from expanding too large in the hero.
+    .category-pie-chart-container {
+      max-width: 420px;
+    }
+
+    // Hide title in hero like the reference mock.
+    .category-pie-chart-title {
+      display: none;
+    }
+
+    .category-pie-chart-wrapper {
+      background: transparent;
+      box-shadow: none;
+      padding: 0;
+      margin: 0;
+    }
+  }
+}
+
+// Tag pills (category buttons)
+.home-hero__tags .tag {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+
+  &--all { background-color: #f3b23f; color: #fff; }
+  &--music { background-color: #a8c8ff; }
+  &--workshop { background-color: #ff8b8b; }
+  &--lgbtq { background-color: #d6c6ff; }
+  &--community { background-color: #bbe9f3; color: #000; }
+  &--arts { background-color: #b7f1dc; color: #000; }
+  &--movie { background-color: #f4b9ef; color: #000; }
+  &--food-drink { background-color: #fbc6c6; color: #000; }
+  &--food-and-drink { background-color: #fbc6c6; color: #000; }
+}
+
+@media (min-width: 768px) {
+  .home-hero {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 3.5rem;
+
+    &__content {
+      width: 60%;
+    }
+
+    &__chart {
+      width: 35%;
+      max-width: none;
+      margin: 0;
+
+      .category-pie-chart-container {
+        max-width: 440px;
+      }
+    }
+  }
+}
+
+.home-info {
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  &__item h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+  }
+
+  &__item p {
+    font-size: 0.95rem;
+    color: #333;
+    margin: 0;
+  }
+}
+
+@media (min-width: 768px) {
+  .home-info {
+    flex-direction: row;
+    justify-content: space-between;
+
+    &__item {
+      width: 30%;
+    }
+  }
+}
+
+.homepage-events {
+  padding: 2rem 1rem;
+
+  &__title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+  }
+}
+

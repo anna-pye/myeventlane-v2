@@ -1,48 +1,51 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\myeventlane_checkout_paragraph\Service;
 
-use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\commerce_order\Entity\OrderInterface;
-use Drupal\Core\Render\RendererInterface;
-use Drupal\Core\Render\Markup;
+use Drupal\paragraphs\ParagraphInterface;
 
-class TicketAttendeeRenderer {
-
-  protected RendererInterface $renderer;
-
-  public function __construct(RendererInterface $renderer) {
-    $this->renderer = $renderer;
-  }
+/**
+ * Renders ticket holder data into table rows.
+ */
+final class TicketAttendeeRenderer {
 
   /**
-   * Renders ticket holders for an order.
+   * Builds render arrays for ticket holders in an order.
+   *
+   * @param \Drupal\commerce_order\Entity\OrderInterface $order
+   *   Order to render attendees from.
+   *
+   * @return array
+   *   Render arrays for table rows.
    */
   public function renderForOrder(OrderInterface $order): array {
-    $render_array = [];
+    $rows = [];
 
     foreach ($order->getItems() as $item) {
       if (!$item->hasField('field_ticket_holder')) {
         continue;
       }
       $holders = $item->get('field_ticket_holder')->referencedEntities();
-      foreach ($holders as $para) {
-        if (!$para instanceof Paragraph) {
+      foreach ($holders as $holder) {
+        if (!$holder instanceof ParagraphInterface) {
           continue;
         }
 
-        $render_array[] = [
+        $rows[] = [
           '#theme' => 'attendee_row',
           '#data' => [
-            'first' => $para->get('field_first_name')->value,
-            'last' => $para->get('field_last_name')->value,
-            'email' => $para->get('field_email')->value,
+            'first' => $holder->get('field_first_name')->value,
+            'last' => $holder->get('field_last_name')->value,
+            'email' => $holder->get('field_email')->value,
           ],
         ];
       }
     }
 
-    return $render_array;
+    return $rows;
   }
 
 }

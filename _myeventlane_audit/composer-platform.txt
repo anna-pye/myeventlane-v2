@@ -1,0 +1,2 @@
+./myeventlane-audit-collector.sh: line 18: composer: command not found
+./myeventlane-audit-collector.sh: line 18: composer: command not found

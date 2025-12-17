@@ -1,0 +1,3 @@
+services:
+  myeventlane_shared.color_service:
+    class: Drupal\myeventlane_shared\Service\ColorService

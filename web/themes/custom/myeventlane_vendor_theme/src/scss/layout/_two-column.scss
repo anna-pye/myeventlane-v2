@@ -1,0 +1,143 @@
+/**
+ * @file
+ * Two-column layout for MyEventLane Vendor Theme.
+ *
+ * mel-layout--two-column: Main content area with optional right-hand sidebar.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/breakpoints' as *;
+@use '../tokens/typography' as *;
+
+// ============================================================================
+// TWO-COLUMN LAYOUT (Main + Right Sidebar)
+// ============================================================================
+
+.mel-layout--two-column {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $layout-gutter;
+  max-width: $layout-container-max;
+  
+  @include respond-to(xl) {
+    grid-template-columns: 1fr $layout-sidebar-help-width;
+  }
+}
+
+// Main content area - max 1080px
+.mel-layout__main {
+  max-width: $layout-content-max-width;
+  width: 100%;
+}
+
+// Right-hand sidebar for help/blog content
+.mel-layout__sidebar-help {
+  display: none;
+  
+  @include respond-to(xl) {
+    display: block;
+  }
+}
+
+// ============================================================================
+// FULL-WIDTH LAYOUT VARIANT
+// ============================================================================
+
+.mel-layout--full {
+  max-width: $layout-content-max-width;
+  margin: 0 auto;
+}
+
+// ============================================================================
+// PAGE CONTAINER
+// ============================================================================
+
+.mel-page {
+  padding: $spacing-6;
+  
+  @include respond-to(md) {
+    padding: $spacing-8;
+  }
+}
+
+.mel-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+  margin-bottom: $spacing-8;
+  
+  @include respond-to(md) {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $spacing-6;
+  }
+}
+
+.mel-page__title {
+  @include page-title;
+  margin: 0;
+}
+
+.mel-page__subtitle {
+  color: $text-secondary;
+  font-size: $font-size-body;
+  margin: 0;
+}
+
+.mel-page__meta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  flex-wrap: wrap;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+.mel-page__actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  flex-wrap: wrap;
+}
+
+// ============================================================================
+// CONTENT SECTIONS
+// ============================================================================
+
+.mel-section {
+  margin-bottom: $section-gap;
+}
+
+.mel-section--lg {
+  margin-bottom: $section-gap-lg;
+}
+
+.mel-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-4;
+  gap: $spacing-4;
+}
+
+.mel-section__title {
+  @include section-title;
+  margin: 0;
+}
+
+// ============================================================================
+// CONTENT WRAPPER (constrains main content)
+// ============================================================================
+
+.mel-content-wrapper {
+  max-width: $layout-content-max-width;
+}
+
+
+
+
+
+
+

@@ -256,6 +256,41 @@ class EventAttendee extends ContentEntityBase implements EntityChangedInterface,
       ])
       ->setDisplayConfigurable('view', TRUE);
 
+    // Promotion timestamp (when promoted from waitlist).
+    $fields['promoted_at'] = BaseFieldDefinition::create('timestamp')
+      ->setLabel(new TranslatableMarkup('Promoted at'))
+      ->setDescription(new TranslatableMarkup('When this attendee was promoted from the waitlist.'))
+      ->setRequired(FALSE)
+      ->setDisplayOptions('view', [
+        'label' => 'inline',
+        'type' => 'timestamp',
+        'weight' => 32,
+      ])
+      ->setDisplayConfigurable('view', TRUE);
+
+    // Accessibility needs (optional).
+    $fields['accessibility_needs'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Accessibility needs'))
+      ->setDescription(new TranslatableMarkup('Accessibility requirements or needs for this attendee (optional).'))
+      ->setRequired(FALSE)
+      ->setSetting('target_type', 'taxonomy_term')
+      ->setSetting('handler_settings', [
+        'target_bundles' => ['accessibility' => 'accessibility'],
+      ])
+      ->setCardinality(-1)
+      ->setDisplayOptions('form', [
+        'type' => 'options_buttons',
+        'weight' => 40,
+        'settings' => [],
+      ])
+      ->setDisplayOptions('view', [
+        'label' => 'inline',
+        'type' => 'entity_reference_label',
+        'weight' => 40,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
     // Extra data (for custom questions).
     $fields['extra_data'] = BaseFieldDefinition::create('map')
       ->setLabel(new TranslatableMarkup('Extra data'))
@@ -421,6 +456,30 @@ class EventAttendee extends ContentEntityBase implements EntityChangedInterface,
    */
   public function isFromRsvp(): bool {
     return $this->getSource() === self::SOURCE_RSVP;
+  }
+
+  /**
+   * Gets the created timestamp.
+   *
+   * @return int
+   *   The created timestamp.
+   */
+  public function getCreatedTime(): int {
+    return (int) $this->get('created')->value;
+  }
+
+  /**
+   * Sets the created timestamp.
+   *
+   * @param int $timestamp
+   *   The created timestamp.
+   *
+   * @return static
+   *   The entity.
+   */
+  public function setCreatedTime(int $timestamp): static {
+    $this->set('created', $timestamp);
+    return $this;
   }
 
 }

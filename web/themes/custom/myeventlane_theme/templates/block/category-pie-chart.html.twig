@@ -1,0 +1,90 @@
+{#
+/**
+ * @file
+ * Theme template for category pie chart block.
+ *
+ * Available variables:
+ * - labels: Array of category names.
+ * - counts: Array of event counts per category.
+ * - colors: Array of hex colors for each category.
+ */
+#}
+{% set chart_id = 'categoryPieChart-' ~ random() %}
+<div class="category-pie-chart-wrapper">
+  <h3 class="category-pie-chart-title">{{ 'Events by Category'|t }}</h3>
+  <div class="category-pie-chart-container">
+    <canvas id="{{ chart_id }}" width="440" height="440"></canvas>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  function init() {
+    // Chart.js is loaded via a deferred library attachment; wait until window load.
+    if (typeof Chart === 'undefined') {
+      // Retry a few times in case load order varies.
+      window.setTimeout(init, 50);
+      return;
+    }
+
+    const ctx = document.getElementById('{{ chart_id }}');
+    if (!ctx) {
+      return;
+    }
+
+    const chartData = {
+      labels: {{ labels|json_encode|raw }},
+      datasets: [{
+        data: {{ counts|json_encode|raw }},
+        backgroundColor: {{ colors|json_encode|raw }},
+        borderWidth: 2,
+        borderColor: '#ffffff',
+      }]
+    };
+
+    const inHero = !!ctx.closest('.home-hero__chart');
+
+    new Chart(ctx, {
+      type: 'pie',
+      data: chartData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            display: !inHero,
+            position: 'bottom',
+            labels: {
+              padding: 15,
+              usePointStyle: true,
+              font: {
+                size: 12,
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.parsed || 0;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = ((value / total) * 100).toFixed(1);
+                return label + ': ' + value + ' (' + percentage + '%)';
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  if (document.readyState === 'complete') {
+    init();
+  }
+  else {
+    window.addEventListener('load', init, { once: true });
+  }
+})();
+</script>

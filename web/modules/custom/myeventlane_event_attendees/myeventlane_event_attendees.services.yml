@@ -8,3 +8,8 @@ services:
   myeventlane_event_attendees.waitlist:
     class: Drupal\myeventlane_event_attendees\Service\AttendanceWaitlistManager
     arguments: ['@entity_type.manager', '@myeventlane_event_attendees.manager']
+
+  # Waitlist notification service.
+  myeventlane_event_attendees.waitlist_notification:
+    class: Drupal\myeventlane_event_attendees\Service\WaitlistNotificationService
+    arguments: ['@plugin.manager.mail', '@renderer']

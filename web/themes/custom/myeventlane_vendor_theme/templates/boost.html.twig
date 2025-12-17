@@ -1,0 +1,22 @@
+{#
+  Boost campaigns view.
+  Variables: campaigns.
+#}
+<div class="mel-card">
+  <div class="mel-card__header">
+    <div class="mel-card__title">{{ 'Boost campaigns'|t }}</div>
+  </div>
+  <div class="mel-list">
+    {% for campaign in campaigns %}
+      <div class="mel-list__item">
+        <div>{{ campaign.label }}</div>
+        <div class="mel-badge">{{ campaign.status }}</div>
+        {% if campaign.ends %}
+          <div class="mel-list__meta">{{ 'Ends'|t }} {{ campaign.ends }}</div>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="mel-empty">{{ 'No campaigns running.'|t }}</div>
+    {% endfor %}
+  </div>
+</div>

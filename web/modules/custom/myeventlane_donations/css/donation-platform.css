@@ -1,0 +1,66 @@
+/**
+ * @file
+ * Platform donation page styles.
+ */
+
+.mel-donation-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.mel-donation-page__header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.mel-donation-page__header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+}
+
+.mel-donation-page__content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mel-donation-success,
+.mel-donation-cancel {
+  max-width: 600px;
+  margin: 3rem auto;
+  padding: 2rem;
+  text-align: center;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mel-donation-success h1 {
+  color: #28a745;
+  margin-bottom: 1rem;
+}
+
+.mel-donation-cancel h1 {
+  color: #ffc107;
+  margin-bottom: 1rem;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .mel-donation-page {
+    padding: 1rem 0.5rem;
+  }
+
+  .mel-donation-page__content {
+    padding: 1.5rem 1rem;
+  }
+
+  .mel-donation-page__header h1 {
+    font-size: 1.5rem;
+  }
+}
+

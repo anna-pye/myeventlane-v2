@@ -9,41 +9,354 @@
  * - user_count: Total number of active users.
  * - recent_events: Array of recent events with 'title', 'url', 'created'.
  * - quick_links: Array of quick links with 'title', 'url', 'description', 'icon'.
+ * - revenue_kpis: Array of revenue KPI cards.
+ * - recent_transactions: Array of recent transaction data.
+ * - top_events: Array of top performing events.
+ * - platform_metrics: Platform-wide metrics data.
+ * - sidebar_metrics: Sidebar metrics for quick reference.
+ * - detailed_analytics: Detailed analytics data.
+ * - vendor_activity: Vendor activity summary.
+ * - event_breakdown: Detailed event breakdown with analytics.
+ * - vendor_breakdown: Detailed vendor breakdown with analytics.
+ * - customer_activity: Customer activity and spending data.
+ * - escalation_summary: Escalation management summary.
  * - attributes: HTML attributes for the wrapper element.
  */
 #}
 {{ attach_library('myeventlane_admin_dashboard/admin_dashboard') }}
 
-<div{{ attributes.addClass('admin-dashboard-wrapper') }}>
+<div{{ attributes.addClass('admin-dashboard-wrapper', 'admin-dashboard-wrapper--with-sidebar') }}>
+  
+  {# Sidebar with Key Metrics #}
+  <aside class="admin-dashboard-sidebar" role="complementary" aria-label="{{ 'Platform metrics'|t }}">
+    <h2 class="admin-dashboard-sidebar__title">{{ 'Platform Overview'|t }}</h2>
+    
+    {% if sidebar_metrics %}
+      <div class="admin-dashboard-sidebar__metrics">
+        <div class="sidebar-metric">
+          <span class="sidebar-metric__label">{{ 'Total Revenue'|t }}</span>
+          <span class="sidebar-metric__value">${{ sidebar_metrics.total_revenue|number_format(2) }}</span>
+        </div>
+        <div class="sidebar-metric">
+          <span class="sidebar-metric__label">{{ 'Platform Fees'|t }}</span>
+          <span class="sidebar-metric__value">${{ sidebar_metrics.platform_fees|number_format(2) }}</span>
+        </div>
+        <div class="sidebar-metric">
+          <span class="sidebar-metric__label">{{ 'Total Orders'|t }}</span>
+          <span class="sidebar-metric__value">{{ sidebar_metrics.total_orders }}</span>
+        </div>
+        <div class="sidebar-metric">
+          <span class="sidebar-metric__label">{{ 'Tickets Sold'|t }}</span>
+          <span class="sidebar-metric__value">{{ sidebar_metrics.tickets_sold }}</span>
+        </div>
+        <div class="sidebar-metric">
+          <span class="sidebar-metric__label">{{ 'Total Attendees'|t }}</span>
+          <span class="sidebar-metric__value">{{ sidebar_metrics.total_attendees }}</span>
+        </div>
+        <div class="sidebar-metric">
+          <span class="sidebar-metric__label">{{ 'Total RSVPs'|t }}</span>
+          <span class="sidebar-metric__value">{{ sidebar_metrics.total_rsvps }}</span>
+        </div>
+        <div class="sidebar-metric">
+          <span class="sidebar-metric__label">{{ 'Confirmed RSVPs'|t }}</span>
+          <span class="sidebar-metric__value">{{ sidebar_metrics.confirmed_rsvps }}</span>
+        </div>
+        <div class="sidebar-metric">
+          <span class="sidebar-metric__label">{{ 'Upcoming Events'|t }}</span>
+          <span class="sidebar-metric__value">{{ sidebar_metrics.upcoming_events }}</span>
+        </div>
+        {% if sidebar_metrics.total_donations is defined and sidebar_metrics.total_donations > 0 %}
+          <div class="sidebar-metric">
+            <span class="sidebar-metric__label">{{ 'Total Donations'|t }}</span>
+            <span class="sidebar-metric__value">${{ sidebar_metrics.total_donations|number_format(2) }}</span>
+          </div>
+          <div class="sidebar-metric">
+            <span class="sidebar-metric__label">{{ 'Platform Donations'|t }}</span>
+            <span class="sidebar-metric__value">${{ sidebar_metrics.platform_donation_total|default(0)|number_format(2) }}</span>
+          </div>
+          <div class="sidebar-metric">
+            <span class="sidebar-metric__label">{{ 'RSVP Donations'|t }}</span>
+            <span class="sidebar-metric__value">${{ sidebar_metrics.rsvp_donation_total|default(0)|number_format(2) }}</span>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
 
-  {# Stats cards #}
-  <section class="admin-dashboard-stats" aria-label="{{ 'Platform statistics'|t }}">
-    <div class="admin-dashboard-stat-card">
-      <span class="stat-value">{{ event_count }}</span>
-      <span class="stat-label">{{ 'Events'|t }}</span>
-    </div>
-    <div class="admin-dashboard-stat-card">
-      <span class="stat-value">{{ vendor_count }}</span>
-      <span class="stat-label">{{ 'Vendors'|t }}</span>
-    </div>
-    <div class="admin-dashboard-stat-card">
-      <span class="stat-value">{{ user_count }}</span>
-      <span class="stat-label">{{ 'Users'|t }}</span>
-    </div>
-  </section>
+    {# Escalations Summary in Sidebar #}
+    {% if escalation_summary %}
+      <div class="admin-dashboard-sidebar__escalations">
+        <h3 class="admin-dashboard-sidebar__subtitle">{{ 'Escalations'|t }}</h3>
+        <div class="sidebar-escalation-summary">
+          <div class="sidebar-metric">
+            <span class="sidebar-metric__label">{{ 'Total'|t }}</span>
+            <span class="sidebar-metric__value">{{ escalation_summary.total }}</span>
+          </div>
+          {% if escalation_summary.by_status.new > 0 %}
+            <div class="sidebar-metric sidebar-metric--urgent">
+              <span class="sidebar-metric__label">{{ 'New'|t }}</span>
+              <span class="sidebar-metric__value">{{ escalation_summary.by_status.new }}</span>
+            </div>
+          {% endif %}
+          {% if escalation_summary.by_status.in_progress > 0 %}
+            <div class="sidebar-metric sidebar-metric--warning">
+              <span class="sidebar-metric__label">{{ 'In Progress'|t }}</span>
+              <span class="sidebar-metric__value">{{ escalation_summary.by_status.in_progress }}</span>
+            </div>
+          {% endif %}
+          {% if escalation_summary.by_priority.urgent > 0 %}
+            <div class="sidebar-metric sidebar-metric--urgent">
+              <span class="sidebar-metric__label">{{ 'Urgent'|t }}</span>
+              <span class="sidebar-metric__value">{{ escalation_summary.by_priority.urgent }}</span>
+            </div>
+          {% endif %}
+        </div>
+        <div class="sidebar-action">
+          <a href="/admin/myeventlane/escalations" class="sidebar-link sidebar-link--action">{{ 'Manage Escalations'|t }}</a>
+        </div>
+      </div>
+    {% endif %}
 
-  {# Quick links #}
-  {% if quick_links %}
-    <section class="admin-dashboard-section" aria-labelledby="quick-links-title">
-      <h2 id="quick-links-title" class="admin-dashboard-section-title">{{ 'Quick Actions'|t }}</h2>
-      <div class="admin-dashboard-links">
-        {% for link in quick_links %}
-          <a href="{{ link.url }}" class="admin-dashboard-link admin-dashboard-link--{{ link.icon }}">
-            <span class="link-title">{{ link.title }}</span>
-            {% if link.description %}
-              <span class="link-description">{{ link.description }}</span>
+    {# Quick Links in Sidebar #}
+    {% if quick_links %}
+      <div class="admin-dashboard-sidebar__links">
+        <h3 class="admin-dashboard-sidebar__subtitle">{{ 'Quick Actions'|t }}</h3>
+        <ul class="sidebar-links-list">
+          {% for link in quick_links %}
+            <li>
+              <a href="{{ link.url }}" class="sidebar-link">{{ link.title }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </aside>
+
+  {# Main Content Area #}
+  <main class="admin-dashboard-main" role="main">
+
+    {# Page Header #}
+    <div class="admin-dashboard-main__header">
+      <h1 class="admin-dashboard-main__title">{{ 'Platform Analytics & Reports'|t }}</h1>
+      <p class="admin-dashboard-main__subtitle">{{ 'Complete transparency of all platform activity'|t }}</p>
+    </div>
+
+    {# Platform Overview Stats #}
+    <section class="admin-dashboard-stats" aria-label="{{ 'Platform statistics'|t }}">
+      <div class="admin-dashboard-stat-card">
+        <span class="stat-value">{{ event_count }}</span>
+        <span class="stat-label">{{ 'Events'|t }}</span>
+      </div>
+      <div class="admin-dashboard-stat-card">
+        <span class="stat-value">{{ vendor_count }}</span>
+        <span class="stat-label">{{ 'Vendors'|t }}</span>
+      </div>
+      <div class="admin-dashboard-stat-card">
+        <span class="stat-value">{{ user_count }}</span>
+        <span class="stat-label">{{ 'Users'|t }}</span>
+      </div>
+    </section>
+
+  {# Revenue KPIs #}
+  {% if revenue_kpis %}
+    <section class="admin-dashboard-section" aria-labelledby="revenue-kpis-title">
+      <h2 id="revenue-kpis-title" class="admin-dashboard-section-title">{{ 'Platform Revenue'|t }}</h2>
+      <div class="admin-dashboard-kpi-grid">
+        {% for kpi in revenue_kpis %}
+          <div class="admin-dashboard-kpi-card admin-dashboard-kpi-card--{{ kpi.color|default('default') }}">
+            <div class="kpi-card__header">
+              <div class="kpi-card__icon">
+                {% if kpi.icon == 'revenue' %}
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                  </svg>
+                {% elseif kpi.icon == 'fees' %}
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                  </svg>
+                {% elseif kpi.icon == 'net' %}
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                {% elseif kpi.icon == 'orders' %}
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                  </svg>
+                {% endif %}
+              </div>
+            </div>
+            <div class="kpi-card__label">{{ kpi.label }}</div>
+            <div class="kpi-card__value">{{ kpi.value }}</div>
+            {% if kpi.delta %}
+              <div class="kpi-card__delta kpi-card__delta--{% if kpi.delta.positive %}positive{% else %}negative{% endif %}">
+                {{ kpi.delta.value }} {{ kpi.delta.label }}
+              </div>
             {% endif %}
-          </a>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+    {# Detailed Analytics Section #}
+    {% if detailed_analytics %}
+      <section class="admin-dashboard-section" aria-labelledby="detailed-analytics-title">
+        <h2 id="detailed-analytics-title" class="admin-dashboard-section-title">{{ 'Detailed Analytics'|t }}</h2>
+        
+        <div class="admin-dashboard-analytics-grid">
+          {# Events by Status #}
+          {% if detailed_analytics.events_by_status %}
+            <div class="admin-dashboard-analytics-card">
+              <h3 class="analytics-card__title">{{ 'Events by Status'|t }}</h3>
+              <div class="analytics-card__content">
+                <div class="analytics-stat">
+                  <span class="analytics-stat__label">{{ 'Published'|t }}</span>
+                  <span class="analytics-stat__value">{{ detailed_analytics.events_by_status.published }}</span>
+                </div>
+                <div class="analytics-stat">
+                  <span class="analytics-stat__label">{{ 'Unpublished'|t }}</span>
+                  <span class="analytics-stat__value">{{ detailed_analytics.events_by_status.unpublished }}</span>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          {# Orders by Status #}
+          {% if detailed_analytics.orders_by_status %}
+            <div class="admin-dashboard-analytics-card">
+              <h3 class="analytics-card__title">{{ 'Orders by Status'|t }}</h3>
+              <div class="analytics-card__content">
+                {% for status, count in detailed_analytics.orders_by_status %}
+                  <div class="analytics-stat">
+                    <span class="analytics-stat__label">{{ status|capitalize }}</span>
+                    <span class="analytics-stat__value">{{ count }}</span>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          {# Revenue by Month #}
+          {% if detailed_analytics.revenue_by_month %}
+            <div class="admin-dashboard-analytics-card admin-dashboard-analytics-card--full">
+              <h3 class="analytics-card__title">{{ 'Revenue Trends (Last 6 Months)'|t }}</h3>
+              <div class="analytics-card__content">
+                <div class="revenue-timeline">
+                  {% for month_data in detailed_analytics.revenue_by_month %}
+                    <div class="revenue-timeline__item">
+                      <span class="revenue-timeline__month">{{ month_data.month }}</span>
+                      <span class="revenue-timeline__amount">${{ month_data.revenue|number_format(2) }}</span>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+    {% endif %}
+
+    {# Top Vendors #}
+    {% if detailed_analytics.top_vendors %}
+      <section class="admin-dashboard-section" aria-labelledby="top-vendors-title">
+        <h2 id="top-vendors-title" class="admin-dashboard-section-title">{{ 'Top Vendors by Revenue'|t }}</h2>
+        <div class="admin-dashboard-table-wrapper">
+          <table class="admin-dashboard-table">
+            <thead>
+              <tr>
+                <th>{{ 'Vendor'|t }}</th>
+                <th>{{ 'Revenue'|t }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for vendor in detailed_analytics.top_vendors %}
+                <tr>
+                  <td>{{ vendor.name }}</td>
+                  <td class="transaction-amount">${{ vendor.revenue|number_format(2) }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% endif %}
+
+    {# Vendor Activity #}
+    {% if vendor_activity %}
+      <section class="admin-dashboard-section" aria-labelledby="vendor-activity-title">
+        <h2 id="vendor-activity-title" class="admin-dashboard-section-title">{{ 'Vendor Activity'|t }}</h2>
+        <div class="admin-dashboard-table-wrapper">
+          <table class="admin-dashboard-table">
+            <thead>
+              <tr>
+                <th>{{ 'Vendor'|t }}</th>
+                <th>{{ 'Events Created'|t }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for activity in vendor_activity %}
+                <tr>
+                  <td>{{ activity.vendor_name }}</td>
+                  <td>{{ activity.event_count }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% endif %}
+
+  {# Recent Transactions #}
+  {% if recent_transactions %}
+    <section class="admin-dashboard-section" aria-labelledby="recent-transactions-title">
+      <h2 id="recent-transactions-title" class="admin-dashboard-section-title">{{ 'Recent Transactions'|t }}</h2>
+      <div class="admin-dashboard-table-wrapper">
+        <table class="admin-dashboard-table">
+          <thead>
+            <tr>
+              <th>{{ 'Date'|t }}</th>
+              <th>{{ 'Event'|t }}</th>
+              <th>{{ 'Amount'|t }}</th>
+              <th>{{ 'Status'|t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for transaction in recent_transactions %}
+              <tr>
+                <td>
+                  <time datetime="{{ transaction.date|date('c') }}">
+                    {{ transaction.date|date('M j, Y') }}
+                  </time>
+                </td>
+                <td>
+                  {% if transaction.event_url %}
+                    <a href="{{ transaction.event_url }}">{{ transaction.event_title }}</a>
+                  {% else %}
+                    {{ transaction.event_title }}
+                  {% endif %}
+                </td>
+                <td class="transaction-amount">${{ transaction.amount|number_format(2) }}</td>
+                <td><span class="status-badge status-badge--completed">{{ transaction.status }}</span></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  {# Top Performing Events #}
+  {% if top_events %}
+    <section class="admin-dashboard-section" aria-labelledby="top-events-title">
+      <h2 id="top-events-title" class="admin-dashboard-section-title">{{ 'Top Performing Events'|t }}</h2>
+      <div class="admin-dashboard-events-grid">
+        {% for event in top_events %}
+          <div class="admin-dashboard-event-card">
+            <h3 class="event-card__title"><a href="{{ event.url }}">{{ event.title }}</a></h3>
+            <div class="event-card__revenue">${{ event.revenue|number_format(2) }}</div>
+            <div class="event-card__meta">
+              <time datetime="{{ event.created|date('c') }}">{{ event.created|date('M j, Y') }}</time>
+            </div>
+          </div>
         {% endfor %}
       </div>
     </section>
@@ -71,4 +384,252 @@
     </section>
   {% endif %}
 
+    {# Event Breakdown - Detailed Analytics #}
+    {% if event_breakdown %}
+      <section class="admin-dashboard-section" aria-labelledby="event-breakdown-title">
+        <h2 id="event-breakdown-title" class="admin-dashboard-section-title">{{ 'Event Breakdown'|t }} <span class="section-count">({{ event_breakdown|length }})</span></h2>
+        <div class="admin-dashboard-table-wrapper">
+          <table class="admin-dashboard-table admin-dashboard-table--detailed">
+            <thead>
+              <tr>
+                <th>{{ 'Event'|t }}</th>
+                <th>{{ 'Vendor'|t }}</th>
+                <th>{{ 'Date'|t }}</th>
+                <th>{{ 'Revenue'|t }}</th>
+                <th>{{ 'Donations'|t }}</th>
+                <th>{{ 'Tickets'|t }}</th>
+                <th>{{ 'RSVPs'|t }}</th>
+                <th>{{ 'Attendees'|t }}</th>
+                <th>{{ 'Total'|t }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for event in event_breakdown %}
+                <tr>
+                  <td>
+                    <a href="{{ event.event_url }}" class="event-link">{{ event.event_title }}</a>
+                  </td>
+                  <td>
+                    {% if event.vendor_id %}
+                      <a href="/admin/myeventlane/vendor/{{ event.vendor_id }}">{{ event.vendor_name }}</a>
+                    {% else %}
+                      {{ event.vendor_name }}
+                    {% endif %}
+                  </td>
+                  <td>{{ event.event_date }}</td>
+                  <td class="transaction-amount">${{ event.revenue|number_format(2) }}</td>
+                  <td>
+                    {% if event.donation_total is defined and event.donation_total > 0 %}
+                      <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <strong class="transaction-amount">${{ event.donation_total|number_format(2) }}</strong>
+                        {% if event.donation_count is defined and event.donation_count > 0 %}
+                          <span style="font-size: 0.875rem; color: #666;">{{ event.donation_count }} {{ 'donation'|t }}{% if event.donation_count != 1 %}s{% endif %}</span>
+                        {% endif %}
+                      </div>
+                    {% else %}
+                      <span style="color: #999;">$0.00</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ event.tickets_sold }}</td>
+                  <td>{{ event.rsvps }}</td>
+                  <td>{{ event.attendees }}</td>
+                  <td><strong>{{ event.total_participants }}</strong></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% endif %}
+
+    {# Vendor Breakdown - Detailed Analytics #}
+    {% if vendor_breakdown %}
+      <section class="admin-dashboard-section" aria-labelledby="vendor-breakdown-title">
+        <h2 id="vendor-breakdown-title" class="admin-dashboard-section-title">{{ 'Vendor Breakdown'|t }} <span class="section-count">({{ vendor_breakdown|length }})</span></h2>
+        <div class="admin-dashboard-table-wrapper">
+          <table class="admin-dashboard-table admin-dashboard-table--detailed">
+            <thead>
+              <tr>
+                <th>{{ 'Vendor'|t }}</th>
+                <th>{{ 'Events'|t }}</th>
+                <th>{{ 'Published'|t }}</th>
+                <th>{{ 'Total Revenue'|t }}</th>
+                <th>{{ 'Donations'|t }}</th>
+                <th>{{ 'Platform Fees'|t }}</th>
+                <th>{{ 'Net Revenue'|t }}</th>
+                <th>{{ 'Tickets Sold'|t }}</th>
+                <th>{{ 'Orders'|t }}</th>
+                <th>{{ 'Users'|t }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for vendor in vendor_breakdown %}
+                <tr>
+                  <td>
+                    <a href="/vendor/{{ vendor.vendor_id }}" class="vendor-link">{{ vendor.vendor_name }}</a>
+                  </td>
+                  <td>{{ vendor.event_count }}</td>
+                  <td>{{ vendor.published_events }}</td>
+                  <td class="transaction-amount">${{ vendor.total_revenue|number_format(2) }}</td>
+                  <td>
+                    {% if vendor.donation_total is defined and vendor.donation_total > 0 %}
+                      <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <strong class="transaction-amount">${{ vendor.donation_total|number_format(2) }}</strong>
+                        {% if vendor.donation_count is defined and vendor.donation_count > 0 %}
+                          <span style="font-size: 0.875rem; color: #666;">{{ vendor.donation_count }} {{ 'donation'|t }}{% if vendor.donation_count != 1 %}s{% endif %}</span>
+                        {% endif %}
+                      </div>
+                    {% else %}
+                      <span style="color: #999;">$0.00</span>
+                    {% endif %}
+                  </td>
+                  <td class="transaction-amount">${{ vendor.platform_fees|number_format(2) }}</td>
+                  <td class="transaction-amount"><strong>${{ vendor.net_revenue|number_format(2) }}</strong></td>
+                  <td>{{ vendor.tickets_sold }}</td>
+                  <td>{{ vendor.total_orders }}</td>
+                  <td>{{ vendor.user_count }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% endif %}
+
+    {# Customer Activity #}
+    {% if customer_activity and customer_activity.summary %}
+      <section class="admin-dashboard-section" aria-labelledby="customer-activity-title">
+        <h2 id="customer-activity-title" class="admin-dashboard-section-title">{{ 'Customer Activity'|t }}</h2>
+        
+        {# Customer Summary #}
+        <div class="admin-dashboard-analytics-grid" style="margin-bottom: var(--mel-admin-spacing);">
+          <div class="admin-dashboard-analytics-card">
+            <h3 class="analytics-card__title">{{ 'Total Customers'|t }}</h3>
+            <div class="analytics-card__content">
+              <div class="analytics-stat">
+                <span class="analytics-stat__value" style="font-size: 2rem;">{{ customer_activity.summary.total_customers }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="admin-dashboard-analytics-card">
+            <h3 class="analytics-card__title">{{ 'Total Customer Spend'|t }}</h3>
+            <div class="analytics-card__content">
+              <div class="analytics-stat">
+                <span class="analytics-stat__value" style="font-size: 2rem;">${{ customer_activity.summary.total_spent|number_format(2) }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="admin-dashboard-analytics-card">
+            <h3 class="analytics-card__title">{{ 'Average Customer Value'|t }}</h3>
+            <div class="analytics-card__content">
+              <div class="analytics-stat">
+                <span class="analytics-stat__value" style="font-size: 2rem;">${{ customer_activity.summary.average_customer_value|number_format(2) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {# Top Customers #}
+        {% if customer_activity|length > 1 %}
+          <h3 class="admin-dashboard-section-subtitle">{{ 'Top Customers'|t }}</h3>
+          <div class="admin-dashboard-table-wrapper">
+            <table class="admin-dashboard-table">
+              <thead>
+                <tr>
+                  <th>{{ 'Customer'|t }}</th>
+                  <th>{{ 'Email'|t }}</th>
+                  <th>{{ 'Total Spent'|t }}</th>
+                  <th>{{ 'Orders'|t }}</th>
+                  <th>{{ 'Average Order'|t }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for customer in customer_activity %}
+                  {% if customer.customer_id %}
+                    <tr>
+                      <td>{{ customer.customer_name }}</td>
+                      <td>{{ customer.customer_email }}</td>
+                      <td class="transaction-amount">${{ customer.total_spent|number_format(2) }}</td>
+                      <td>{{ customer.order_count }}</td>
+                      <td>${{ customer.average_order|number_format(2) }}</td>
+                    </tr>
+                  {% endif %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      </section>
+    {% endif %}
+
+    {# Escalations Section #}
+    {% if escalation_summary %}
+      <section class="admin-dashboard-section" aria-labelledby="escalations-title">
+        <h2 id="escalations-title" class="admin-dashboard-section-title">
+          {{ 'Escalations & Support'|t }}
+          <a href="/admin/myeventlane/escalations" class="section-action-link">{{ 'Manage All'|t }} →</a>
+        </h2>
+        
+        {# Escalation Summary Cards #}
+        <div class="admin-dashboard-analytics-grid" style="margin-bottom: var(--mel-admin-spacing);">
+          <div class="admin-dashboard-analytics-card">
+            <h3 class="analytics-card__title">{{ 'By Status'|t }}</h3>
+            <div class="analytics-card__content">
+              {% for status, count in escalation_summary.by_status %}
+                {% if count > 0 %}
+                  <div class="analytics-stat">
+                    <span class="analytics-stat__label">{{ status|replace({'_': ' '})|title }}</span>
+                    <span class="analytics-stat__value">{{ count }}</span>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          <div class="admin-dashboard-analytics-card">
+            <h3 class="analytics-card__title">{{ 'By Priority'|t }}</h3>
+            <div class="analytics-card__content">
+              {% for priority, count in escalation_summary.by_priority %}
+                {% if count > 0 %}
+                  <div class="analytics-stat">
+                    <span class="analytics-stat__label">{{ priority|title }}</span>
+                    <span class="analytics-stat__value">{{ count }}</span>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        {# Recent Escalations #}
+        {% if escalation_summary.recent %}
+          <h3 class="admin-dashboard-section-subtitle">{{ 'Recent Escalations'|t }}</h3>
+          <div class="admin-dashboard-table-wrapper">
+            <table class="admin-dashboard-table">
+              <thead>
+                <tr>
+                  <th>{{ 'Subject'|t }}</th>
+                  <th>{{ 'Customer'|t }}</th>
+                  <th>{{ 'Status'|t }}</th>
+                  <th>{{ 'Priority'|t }}</th>
+                  <th>{{ 'Created'|t }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for escalation in escalation_summary.recent %}
+                  <tr>
+                    <td><a href="{{ escalation.url }}">{{ escalation.subject }}</a></td>
+                    <td>{{ escalation.customer }}</td>
+                    <td><span class="status-badge status-badge--{{ escalation.status }}">{{ escalation.status|replace({'_': ' '})|title }}</span></td>
+                    <td><span class="priority-badge priority-badge--{{ escalation.priority }}">{{ escalation.priority|title }}</span></td>
+                    <td><time datetime="{{ escalation.created|date('c') }}">{{ escalation.created|date('M j, Y') }}</time></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      </section>
+    {% endif %}
+
+  </main>
 </div>

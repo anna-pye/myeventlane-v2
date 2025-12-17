@@ -1,0 +1,73 @@
+/**
+ * @file
+ * Base reset styles for vendor theme.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/spacing' as *;
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: $font-family-sans;
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+  color: $text-primary;
+  background-color: $bg-secondary;
+  margin: 0;
+  padding: 0;
+}
+
+// Headings
+h1, h2, h3, h4, h5, h6 {
+  font-family: $heading-font-family;
+  font-weight: $heading-font-weight;
+  line-height: $line-height-tight;
+  color: $text-primary;
+  margin-top: 0;
+  margin-bottom: $spacing-4;
+}
+
+h1 { font-size: $font-size-4xl; }
+h2 { font-size: $font-size-3xl; }
+h3 { font-size: $font-size-2xl; }
+h4 { font-size: $font-size-xl; }
+h5 { font-size: $font-size-lg; }
+h6 { font-size: $font-size-base; }
+
+// Links
+a {
+  color: $primary;
+  text-decoration: none;
+  transition: color 0.15s ease-in-out;
+
+  &:hover,
+  &:focus {
+    color: $primary-dark;
+    text-decoration: underline;
+  }
+}
+
+// Lists
+ul, ol {
+  margin: 0;
+  padding-left: $spacing-6;
+}
+
+// Images
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+

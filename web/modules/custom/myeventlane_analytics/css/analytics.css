@@ -1,0 +1,85 @@
+/**
+ * @file
+ * Styles for MyEventLane Analytics.
+ */
+
+.mel-analytics-dashboard,
+.mel-analytics-event {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.mel-analytics-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.mel-section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.mel-analytics-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mel-analytics-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.mel-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mel-table th {
+  font-weight: 600;
+  text-align: left;
+  padding: 1rem;
+  border-bottom: 2px solid #ddd;
+  background-color: #f5f5f5;
+}
+
+.mel-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.mel-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.mel-funnel-stage {
+  position: relative;
+}
+
+.mel-funnel-stage::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #f5f5f5;
+}
+
+.mel-funnel-stage:last-child::after {
+  display: none;
+}
+
+
+
+
+
+
+
+

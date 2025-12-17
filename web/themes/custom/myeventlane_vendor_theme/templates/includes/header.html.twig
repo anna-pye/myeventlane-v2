@@ -1,0 +1,36 @@
+{#
+/**
+ * @file
+ * Vendor header include.
+ */
+#}
+<div class="mel-header vendor-shell__topbar">
+  <div class="mel-header__left">
+    <button class="mel-header__menu-toggle" data-vendor-nav-toggle aria-label="{{ 'Toggle navigation'|t }}">
+      ☰
+    </button>
+    <div class="mel-header__brand">
+      <span class="mel-header__logo" aria-hidden="true">◆</span>
+      <div class="mel-header__titles">
+        <div class="mel-header__title">Vendor Console</div>
+        {% if page.workspace_name %}
+          <div class="mel-header__subtitle">{{ page.workspace_name }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="mel-header__actions">
+    {% if page.quick_actions is defined and page.quick_actions is not empty %}
+      <div class="mel-header__quick-actions">
+        {% for action in page.quick_actions %}
+          {{ action|render }}
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% if page.user_menu %}
+      <div class="mel-header__user">
+        {{ page.user_menu }}
+      </div>
+    {% endif %}
+  </div>
+</div>

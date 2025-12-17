@@ -1,0 +1,141 @@
+{#
+/**
+ * @file
+ * Right-hand help/blog sidebar for MyEventLane Vendor Console.
+ *
+ * Future feature placeholder - will contain:
+ * - Blog entries
+ * - Help guides
+ * - Release notes
+ * - Contextual tips
+ *
+ * Variables:
+ * - context: Current page context (e.g., 'event-create', 'dashboard')
+ * - help_items: Array of help links
+ * - tips: Array of contextual tips
+ * - release_notes: Latest release note
+ */
+#}
+{% set context = context|default('dashboard') %}
+
+<div class="mel-helper-sidebar__content">
+  <div class="mel-helper-sidebar__header">
+    <h2 class="mel-helper-sidebar__title">{{ 'Helpful Guides'|t }}</h2>
+  </div>
+  
+  {# Contextual tip card #}
+  {% if tips is not empty %}
+    {% for tip in tips %}
+      <div class="mel-tip-card">
+        <div class="mel-tip-card__icon">💡</div>
+        <div class="mel-tip-card__title">{{ tip.title }}</div>
+        <div class="mel-tip-card__text">{{ tip.text }}</div>
+      </div>
+    {% endfor %}
+  {% else %}
+    {# Default contextual tips based on page context #}
+    {% if context == 'event-create' %}
+      <div class="mel-tip-card">
+        <div class="mel-tip-card__icon">💡</div>
+        <div class="mel-tip-card__title">{{ 'Quick tip'|t }}</div>
+        <div class="mel-tip-card__text">{{ 'Events with compelling images get 3x more views. Use a high-quality photo that shows what attendees will experience.'|t }}</div>
+      </div>
+    {% elseif context == 'dashboard' %}
+      <div class="mel-tip-card">
+        <div class="mel-tip-card__icon">📈</div>
+        <div class="mel-tip-card__title">{{ 'Grow your audience'|t }}</div>
+        <div class="mel-tip-card__text">{{ 'Use Boost to get your event featured on the homepage and in email newsletters.'|t }}</div>
+      </div>
+    {% endif %}
+  {% endif %}
+  
+  {# Help links section #}
+  <div class="mel-helper-sidebar__section">
+    <h3 class="mel-helper-sidebar__section-title">{{ 'Resources'|t }}</h3>
+    
+    <ul class="mel-help-links">
+      {% if help_items is not empty %}
+        {% for item in help_items %}
+          <li class="mel-help-links__item">
+            <a href="{{ item.url }}" class="mel-help-links__link" target="_blank">
+              <span class="mel-help-links__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                </svg>
+              </span>
+              <span class="mel-help-links__content">
+                <span class="mel-help-links__label">{{ item.label }}</span>
+                {% if item.description %}
+                  <span class="mel-help-links__desc">{{ item.description }}</span>
+                {% endif %}
+              </span>
+            </a>
+          </li>
+        {% endfor %}
+      {% else %}
+        {# Default help links - linking to relevant console pages #}
+        <li class="mel-help-links__item">
+          <a href="/vendor/events" class="mel-help-links__link">
+            <span class="mel-help-links__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+              </svg>
+            </span>
+            <span class="mel-help-links__content">
+              <span class="mel-help-links__label">{{ 'Manage your events'|t }}</span>
+            </span>
+          </a>
+        </li>
+        <li class="mel-help-links__item">
+          <a href="/vendor/payouts" class="mel-help-links__link">
+            <span class="mel-help-links__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            </span>
+            <span class="mel-help-links__content">
+              <span class="mel-help-links__label">{{ 'View payouts & earnings'|t }}</span>
+            </span>
+          </a>
+        </li>
+        <li class="mel-help-links__item">
+          <a href="/vendor/boost" class="mel-help-links__link">
+            <span class="mel-help-links__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </span>
+            <span class="mel-help-links__content">
+              <span class="mel-help-links__label">{{ 'Boost your events'|t }}</span>
+            </span>
+          </a>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
+  
+  {# Release notes section #}
+  <div class="mel-helper-sidebar__section">
+    <h3 class="mel-helper-sidebar__section-title">{{ "What's New"|t }}</h3>
+    
+    {% if release_notes %}
+      <div class="mel-release-card">
+        <span class="mel-release-card__badge">{{ release_notes.version }}</span>
+        <div class="mel-release-card__title">{{ release_notes.title }}</div>
+        <div class="mel-release-card__text">{{ release_notes.summary }}</div>
+        <a href="{{ release_notes.url }}" class="mel-release-card__link" target="_blank">
+          {{ 'Read more'|t }} →
+        </a>
+      </div>
+    {% else %}
+      {# Default release note placeholder #}
+      <div class="mel-release-card">
+        <span class="mel-release-card__badge">v2.0</span>
+        <div class="mel-release-card__title">{{ 'New Vendor Console'|t }}</div>
+        <div class="mel-release-card__text">{{ 'Redesigned dashboard with improved analytics, faster event creation, and more.'|t }}</div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+

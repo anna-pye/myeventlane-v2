@@ -1,0 +1,33 @@
+donation-form:
+  js:
+    js/donation-form.js: {}
+  css:
+    theme:
+      css/donation-form.css: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+
+donation-platform:
+  js:
+    js/donation-platform.js: {}
+  css:
+    theme:
+      css/donation-platform.css: {}
+  dependencies:
+    - myeventlane_donations/donation-form
+
+donation-rsvp:
+  css:
+    theme:
+      css/donation-rsvp.css: {}
+  dependencies:
+    - myeventlane_donations/donation-form
+
+donation-report:
+  css:
+    theme:
+      css/donation-report.css: {}
+  dependencies:
+    - core/drupal
+

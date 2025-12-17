@@ -1,0 +1,221 @@
+/**
+ * @file
+ * Styles for BAS report pages.
+ */
+
+.bas-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.bas-page__header {
+  margin-bottom: 2rem;
+}
+
+.bas-page__title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: #1a1a1a;
+}
+
+.bas-page__subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+.bas-page__period-selector {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.bas-period-form__fields {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.bas-period-form__field {
+  display: flex;
+  flex-direction: column;
+}
+
+.bas-period-form__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.bas-period-form__input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  min-width: 150px;
+}
+
+.bas-period-form__submit {
+  padding: 0.5rem 1.5rem;
+  background: #0073aa;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.bas-period-form__submit:hover {
+  background: #005a87;
+}
+
+.bas-period-form__current {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.bas-page__export-buttons {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.bas-export-button {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  background: #0073aa;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.bas-export-button:hover {
+  background: #005a87;
+  color: white;
+  text-decoration: none;
+}
+
+.bas-export-button--csv {
+  background: #28a745;
+}
+
+.bas-export-button--csv:hover {
+  background: #218838;
+}
+
+.bas-export-button--pdf {
+  background: #dc3545;
+}
+
+.bas-export-button--pdf:hover {
+  background: #c82333;
+}
+
+.bas-page__summary {
+  margin-bottom: 2rem;
+}
+
+.bas-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.bas-summary-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.bas-summary-card--highlight {
+  border-color: #0073aa;
+  border-width: 2px;
+  background: #f0f7ff;
+}
+
+.bas-summary-card__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bas-summary-card__value {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.bas-summary-card--highlight .bas-summary-card__value {
+  color: #0073aa;
+}
+
+.bas-summary-card__description {
+  font-size: 0.75rem;
+  color: #999;
+  line-height: 1.4;
+}
+
+.bas-page__disclaimer {
+  background: #fff9e6;
+  border-left: 4px solid #ffc107;
+  padding: 1rem 1.5rem;
+  border-radius: 4px;
+  margin-top: 2rem;
+}
+
+.bas-disclaimer {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.bas-disclaimer strong {
+  color: #333;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .bas-page {
+    padding: 1rem;
+  }
+
+  .bas-summary-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .bas-period-form__fields {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bas-period-form__field {
+    width: 100%;
+  }
+}
+
+
+

@@ -13,6 +13,8 @@
 $mel-color-bg: #faf7fb;              // Page background - soft lavender tint
 $mel-color-surface: #ffffff;          // Cards, modals, elevated surfaces
 $mel-color-surface-alt: #f5f0f7;      // Alternate surface - slightly darker
+$mel-color-overlay: rgba(16, 12, 34, 0.38); // Overlay for drawers/modals (AA-friendly)
+$mel-color-on-primary: #ffffff;       // Text on primary surfaces
 
 // ---------------------------------------------------------------------------
 // Accent Colors
@@ -76,7 +78,7 @@ $mel-focus-ring: 0 0 0 $mel-focus-ring-offset $mel-color-surface,
                  0 0 0 ($mel-focus-ring-offset + $mel-focus-ring-width) $mel-focus-ring-color;
 
 // ---------------------------------------------------------------------------
-// Focus Mixin
+// Focus Mixins
 // ---------------------------------------------------------------------------
 
 @mixin mel-focus-ring {

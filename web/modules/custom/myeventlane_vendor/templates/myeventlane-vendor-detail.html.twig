@@ -8,21 +8,109 @@
  */
 #}
 <article class="mel-vendor-detail">
-  <header class="mel-vendor-header">
-    <h1 class="mel-vendor-title">{{ vendor.label }}</h1>
-  </header>
-
-  {% if vendor.description.value %}
-    <div class="mel-vendor-body">
-      {{ vendor.description.value|raw }}
+  {# Banner Image #}
+  {% if vendor.field_banner_image.entity %}
+    <div class="mel-vendor-banner">
+      {{ content.field_banner_image }}
     </div>
   {% endif %}
 
-  {% if vendor.website.uri %}
-    <p class="mel-vendor-website">
-      <a href="{{ vendor.website.uri }}" rel="noopener noreferrer" target="_blank">
-        {{ vendor.website.title ?: vendor.website.uri }}
-      </a>
-    </p>
-  {% endif %}
+  <div class="mel-vendor-content">
+    {# Header with Logo and Name #}
+    <header class="mel-vendor-header">
+      {% if vendor.field_vendor_logo.entity or vendor.field_logo_image.entity %}
+        <div class="mel-vendor-logo">
+          {% if vendor.field_vendor_logo.entity %}
+            {{ vendor.field_vendor_logo|view }}
+          {% elseif vendor.field_logo_image.entity %}
+            {{ vendor.field_logo_image|view }}
+          {% endif %}
+        </div>
+      {% endif %}
+      <div class="mel-vendor-header-text">
+        <h1 class="mel-vendor-title">{{ vendor.label }}</h1>
+        {% if vendor.field_summary.value %}
+          <p class="mel-vendor-summary">{{ vendor.field_summary.value }}</p>
+        {% endif %}
+      </div>
+    </header>
+
+    {# Main Content #}
+    <div class="mel-vendor-body">
+      {% if vendor.field_description.value %}
+        <div class="mel-vendor-description">
+          {{ vendor.field_description.value|raw }}
+        </div>
+      {% endif %}
+
+      {% if vendor.field_vendor_bio.value %}
+        <div class="mel-vendor-bio">
+          <h2>{{ 'About'|t }}</h2>
+          {{ vendor.field_vendor_bio.value|raw }}
+        </div>
+      {% endif %}
+    </div>
+
+    {# Contact Information #}
+    <div class="mel-vendor-contact">
+      <h2>{{ 'Contact Information'|t }}</h2>
+      <div class="mel-vendor-contact-grid">
+        {% if vendor.field_website.uri %}
+          <div class="mel-vendor-contact-item">
+            <span class="mel-vendor-contact-icon">🌐</span>
+            <div class="mel-vendor-contact-content">
+              <strong>{{ 'Website'|t }}</strong>
+              <a href="{{ vendor.field_website.uri }}" rel="noopener noreferrer" target="_blank">
+                {{ vendor.field_website.title ?: vendor.field_website.uri }}
+              </a>
+            </div>
+          </div>
+        {% endif %}
+
+        {% if vendor.field_public_show_email.value and vendor.field_email.value %}
+          <div class="mel-vendor-contact-item">
+            <span class="mel-vendor-contact-icon">✉️</span>
+            <div class="mel-vendor-contact-content">
+              <strong>{{ 'Email'|t }}</strong>
+              <a href="mailto:{{ vendor.field_email.value }}">{{ vendor.field_email.value }}</a>
+            </div>
+          </div>
+        {% endif %}
+
+        {% if vendor.field_public_show_phone.value and vendor.field_phone.value %}
+          <div class="mel-vendor-contact-item">
+            <span class="mel-vendor-contact-icon">📞</span>
+            <div class="mel-vendor-contact-content">
+              <strong>{{ 'Phone'|t }}</strong>
+              <a href="tel:{{ vendor.field_phone.value }}">{{ vendor.field_phone.value }}</a>
+            </div>
+          </div>
+        {% endif %}
+
+        {% if vendor.field_public_show_location.value and vendor.field_address.value %}
+          <div class="mel-vendor-contact-item">
+            <span class="mel-vendor-contact-icon">📍</span>
+            <div class="mel-vendor-contact-content">
+              <strong>{{ 'Location'|t }}</strong>
+              <span>{{ vendor.field_address.value }}</span>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      {# Social Links #}
+      {% if vendor.field_social_links %}
+        <div class="mel-vendor-social">
+          <h3>{{ 'Follow Us'|t }}</h3>
+          <div class="mel-vendor-social-links">
+            {% for item in vendor.field_social_links %}
+              <a href="{{ item.uri }}" rel="noopener noreferrer" target="_blank" class="mel-vendor-social-link">
+                {{ item.title ?: item.uri }}
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </article>

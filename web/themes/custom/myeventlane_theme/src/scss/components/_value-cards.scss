@@ -1,0 +1,29 @@
+// ==========================================================================
+// Value Cards (Front page only)
+// ==========================================================================
+
+@use '../tokens/colors';
+
+.mel-value-card {
+  border-radius: 18px;
+  padding: 1.4rem;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(255, 255, 255, 0.75)
+  );
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08);
+}
+
+.mel-value-card:nth-child(1) {
+  border-left: 6px solid colors.$mel-color-primary;
+}
+
+.mel-value-card:nth-child(2) {
+  border-left: 6px solid colors.$mel-color-accent;
+}
+
+.mel-value-card:nth-child(3) {
+  border-left: 6px solid colors.$mel-color-secondary;
+}
+

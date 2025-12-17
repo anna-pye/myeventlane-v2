@@ -1,20 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\myeventlane_checkout_paragraph\Service;
 
 use Drupal\commerce_order\Entity\OrderInterface;
-use Drupal\paragraphs\Entity\Paragraph;
-use Drupal\myeventlane_checkout_paragraph\Entity\TicketHolderData;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\myeventlane_checkout_paragraph\Entity\TicketHolderData;
+use Drupal\paragraphs\Entity\Paragraph;
 
 /**
  * Service to save ticket holder data during checkout.
  */
-class TicketHolderSaver {
+final class TicketHolderSaver {
 
+  /**
+   * Entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
   protected EntityTypeManagerInterface $entityTypeManager;
 
+  /**
+   * TicketHolderSaver constructor.
+   */
   public function __construct(EntityTypeManagerInterface $entityTypeManager) {
     $this->entityTypeManager = $entityTypeManager;
   }
@@ -35,14 +45,14 @@ class TicketHolderSaver {
       }
 
       foreach ($attendee_data[$line_item_id] as $index => $data) {
-        // Sanitize inputs
+        // Sanitize inputs.
         $sanitized = [
           'first_name' => Xss::filter($data['first_name'] ?? ''),
           'last_name' => Xss::filter($data['last_name'] ?? ''),
           'email' => Xss::filter($data['email'] ?? ''),
         ];
 
-        // Create Paragraph entity
+        // Create Paragraph entity.
         $paragraph = Paragraph::create([
           'type' => 'attendee_extra_field',
           'field_first_name' => $sanitized['first_name'],
@@ -51,7 +61,7 @@ class TicketHolderSaver {
         ]);
         $paragraph->save();
 
-        // Link to custom entity
+        // Link to custom entity.
         $ticket_holder = TicketHolderData::create([
           'type' => 'ticket_holder_data',
           'field_order' => $order->id(),
@@ -63,4 +73,5 @@ class TicketHolderSaver {
       }
     }
   }
+
 }

@@ -1,0 +1,12 @@
+<div class="mel-hero">
+  {% if logo_src is defined and logo_src %}
+    <div class="mel-hero-logo" aria-label="{{ 'MyEventLane'|t }}">
+      <img src="{{ logo_src }}" alt="{{ 'MyEventLane'|t }}" loading="eager" decoding="async" />
+    </div>
+  {% endif %}
+
+  <h1 class="mel-hero-title">Your lane to great events.</h1>
+  <p class="mel-hero-subtitle">
+    Create, share, and celebrate local stories.
+  </p>
+</div>

@@ -1,0 +1,284 @@
+/**
+ * @file
+ * Bulk actions styles for vendor events list.
+ */
+
+/* Bulk actions bar */
+.mel-bulk-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.mel-bulk-actions .form-item {
+  margin: 0;
+}
+
+/* Dropdown select styling */
+.mel-bulk-actions__select {
+  min-width: 180px;
+  padding: 8px 32px 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #495057;
+  background: white;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.mel-bulk-actions__select:hover {
+  border-color: #adb5bd;
+}
+
+.mel-bulk-actions__select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* Select all wrapper */
+.mel-bulk-actions__select-all {
+  margin-left: auto;
+}
+
+.mel-bulk-actions__select-all label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #495057;
+  cursor: pointer;
+}
+
+.mel-bulk-actions__select-all input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #6366f1;
+}
+
+/* Button styles */
+.mel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.mel-btn--sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.mel-btn--primary {
+  background: #6366f1;
+  color: white;
+}
+
+.mel-btn--primary:hover {
+  background: #4f46e5;
+}
+
+.mel-btn--secondary {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.mel-btn--secondary:hover {
+  background: #dee2e6;
+}
+
+.mel-btn--danger {
+  background: #dc3545;
+  color: white;
+}
+
+.mel-btn--danger:hover {
+  background: #c82333;
+}
+
+/* Table selectable styles */
+.mel-table--selectable {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.mel-table--selectable thead th {
+  background: #f8f9fa;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.mel-table--selectable tbody td {
+  padding: 16px;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 14px;
+  color: #212529;
+}
+
+.mel-table--selectable tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.mel-table--selectable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Checkbox column */
+.mel-table--selectable .select-all,
+.mel-table--selectable td:first-child {
+  width: 48px;
+  text-align: center;
+}
+
+.mel-table--selectable input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #6366f1;
+}
+
+/* Title cell */
+.mel-table__cell--title {
+  font-weight: 600;
+  color: #212529;
+}
+
+/* Badge styles */
+.mel-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.mel-badge--success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.mel-badge--neutral {
+  background: #e9ecef;
+  color: #495057;
+}
+
+/* Actions column */
+.mel-table__actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* Empty state */
+.mel-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed #dee2e6;
+}
+
+.mel-empty-state__icon {
+  margin-bottom: 16px;
+  color: #adb5bd;
+}
+
+.mel-empty-state__text {
+  margin: 0 0 24px;
+  font-size: 16px;
+  color: #6c757d;
+}
+
+/* Events table wrapper */
+.mel-events-table-wrapper {
+  overflow-x: auto;
+}
+
+/* Form error messages */
+.mel-bulk-actions + .form-item--error-message,
+.messages--error {
+  margin-bottom: 16px;
+}
+
+/* Selected count indicator */
+.mel-bulk-actions__count {
+  font-size: 13px;
+  color: #6c757d;
+  margin-left: 8px;
+}
+
+.mel-bulk-actions__count--active {
+  color: #6366f1;
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mel-bulk-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .mel-bulk-actions__select {
+    min-width: 140px;
+    flex: 1;
+  }
+
+  .mel-bulk-actions__select-all {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 8px;
+  }
+
+  .mel-table__actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mel-table--selectable thead th,
+  .mel-table--selectable tbody td {
+    padding: 12px 8px;
+  }
+}
+
+
+
+
+
+

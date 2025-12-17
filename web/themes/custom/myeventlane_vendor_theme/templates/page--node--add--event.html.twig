@@ -1,0 +1,125 @@
+{#
+/**
+ * @file
+ * Theme override for Event node add page (vendor theme).
+ *
+ * Create Event page with:
+ * - Stepper tabs navigation
+ * - Two-column layout (form + help sidebar)
+ * - Sticky action buttons
+ */
+#}
+{% extends "page.html.twig" %}
+
+{% block content %}
+<div class="mel-event-form-page">
+  {# Page Header #}
+  <div class="mel-event-form__header">
+    <h1 class="mel-event-form__title">{{ 'Create Event'|t }}</h1>
+    <div class="mel-event-form__header-actions">
+      <button type="button" class="mel-btn mel-btn--secondary" data-save-draft>
+        {{ 'Save Draft'|t }}
+      </button>
+    </div>
+  </div>
+  
+  {# Stepper Tabs #}
+  <div class="mel-event-form__stepper" role="tablist">
+    <button class="mel-event-form__step is-active" 
+            role="tab" 
+            aria-selected="true"
+            data-step="basics">
+      <span class="mel-event-form__step-number">1</span>
+      <span class="mel-event-form__step-label">{{ 'Basics'|t }}</span>
+    </button>
+    <button class="mel-event-form__step" 
+            role="tab" 
+            aria-selected="false"
+            data-step="location">
+      <span class="mel-event-form__step-number">2</span>
+      <span class="mel-event-form__step-label">{{ 'Location'|t }}</span>
+    </button>
+    <button class="mel-event-form__step" 
+            role="tab" 
+            aria-selected="false"
+            data-step="schedule">
+      <span class="mel-event-form__step-number">3</span>
+      <span class="mel-event-form__step-label">{{ 'Schedule'|t }}</span>
+    </button>
+    <button class="mel-event-form__step" 
+            role="tab" 
+            aria-selected="false"
+            data-step="tickets">
+      <span class="mel-event-form__step-number">4</span>
+      <span class="mel-event-form__step-label">{{ 'Tickets'|t }}</span>
+    </button>
+    <button class="mel-event-form__step" 
+            role="tab" 
+            aria-selected="false"
+            data-step="addons">
+      <span class="mel-event-form__step-number">5</span>
+      <span class="mel-event-form__step-label">{{ 'Add-ons'|t }}</span>
+    </button>
+    <button class="mel-event-form__step" 
+            role="tab" 
+            aria-selected="false"
+            data-step="design">
+      <span class="mel-event-form__step-number">6</span>
+      <span class="mel-event-form__step-label">{{ 'Design'|t }}</span>
+    </button>
+    <button class="mel-event-form__step" 
+            role="tab" 
+            aria-selected="false"
+            data-step="publish">
+      <span class="mel-event-form__step-number">7</span>
+      <span class="mel-event-form__step-label">{{ 'Publish'|t }}</span>
+    </button>
+  </div>
+  
+  {# Two-column Layout #}
+  <div class="mel-event-form__layout">
+    {# Main Form Content #}
+    <div class="mel-event-form__main">
+      {{ page.content }}
+    </div>
+    
+    {# Contextual Help Sidebar #}
+    <aside class="mel-event-form__sidebar">
+      <div class="mel-event-form__help">
+        {# Contextual tip #}
+        <div class="mel-tip-card">
+          <div class="mel-tip-card__icon">💡</div>
+          <div class="mel-tip-card__title">{{ 'Quick tip'|t }}</div>
+          <div class="mel-tip-card__text">{{ 'Events with compelling images get 3x more views. Use a high-quality photo that shows what attendees will experience.'|t }}</div>
+        </div>
+        
+        {# Quick tips #}
+        <div class="mel-event-form__help-section">
+          <h3 class="mel-event-form__help-title">{{ 'Best Practices'|t }}</h3>
+          <ul class="mel-event-form__help-list">
+            <li class="mel-event-form__help-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              </svg>
+              {{ 'Use a clear, descriptive event title'|t }}
+            </li>
+            <li class="mel-event-form__help-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              </svg>
+              {{ 'Use images at least 1200×630px'|t }}
+            </li>
+            <li class="mel-event-form__help-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              {{ 'Select relevant categories to help discovery'|t }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}
+

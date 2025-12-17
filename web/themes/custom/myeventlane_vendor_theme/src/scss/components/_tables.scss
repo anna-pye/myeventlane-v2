@@ -1,0 +1,389 @@
+/**
+ * @file
+ * Table component styles for MyEventLane Vendor Theme.
+ *
+ * mel-table: Data tables with sorting, actions, and responsive behavior.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/breakpoints' as *;
+
+// ============================================================================
+// TABLE WRAPPER
+// ============================================================================
+
+.mel-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: $radius-card;
+}
+
+// ============================================================================
+// TABLE (mel-table)
+// ============================================================================
+
+.mel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+}
+
+// ============================================================================
+// TABLE HEAD
+// ============================================================================
+
+.mel-table__head {
+  background: $bg-secondary;
+  border-bottom: 1px solid $border-color;
+}
+
+.mel-table__head-cell {
+  padding: $spacing-4 $spacing-4;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $text-secondary;
+  text-align: left;
+  white-space: nowrap;
+  
+  &:first-child {
+    padding-left: $spacing-5;
+  }
+  
+  &:last-child {
+    padding-right: $spacing-5;
+  }
+}
+
+// Sortable header
+.mel-table__head-cell--sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease-in-out;
+  
+  &:hover {
+    color: $text-primary;
+  }
+}
+
+.mel-table__sort-icon {
+  display: inline-flex;
+  margin-left: $spacing-1;
+  opacity: 0.5;
+  
+  .mel-table__head-cell--sorted & {
+    opacity: 1;
+  }
+}
+
+// ============================================================================
+// TABLE BODY
+// ============================================================================
+
+.mel-table__body {
+  background: $bg-primary;
+}
+
+.mel-table__row {
+  border-bottom: 1px solid $border-color-light;
+  transition: background-color 0.1s ease-in-out;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &:hover {
+    background: $bg-secondary;
+  }
+}
+
+// Clickable row
+a.mel-table__row,
+.mel-table__row--clickable {
+  display: table-row;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+// Selected row
+.mel-table__row--selected {
+  background: rgba($primary, 0.05);
+  
+  &:hover {
+    background: rgba($primary, 0.08);
+  }
+}
+
+// ============================================================================
+// TABLE CELLS
+// ============================================================================
+
+.mel-table__cell {
+  padding: $spacing-4;
+  vertical-align: middle;
+  
+  &:first-child {
+    padding-left: $spacing-5;
+  }
+  
+  &:last-child {
+    padding-right: $spacing-5;
+  }
+}
+
+// Cell with primary content
+.mel-table__cell--primary {
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+}
+
+// Numeric cell
+.mel-table__cell--numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+// Actions cell
+.mel-table__cell--actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+// ============================================================================
+// TABLE CELL CONTENT
+// ============================================================================
+
+.mel-table__title {
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+}
+
+.mel-table__subtitle {
+  font-size: $font-size-xs;
+  color: $text-muted;
+  margin-top: $spacing-1;
+}
+
+.mel-table__meta {
+  font-size: $font-size-xs;
+  color: $text-muted;
+}
+
+// ============================================================================
+// TABLE EMPTY STATE
+// ============================================================================
+
+.mel-table__empty {
+  padding: $spacing-12 $spacing-6;
+  text-align: center;
+  color: $text-secondary;
+}
+
+.mel-table__empty-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto $spacing-4;
+  color: $text-muted;
+}
+
+.mel-table__empty-text {
+  font-size: $font-size-sm;
+  margin-bottom: $spacing-4;
+}
+
+// ============================================================================
+// TABLE PAGINATION
+// ============================================================================
+
+.mel-table__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-4;
+  padding: $spacing-4 $spacing-5;
+  border-top: 1px solid $border-color-light;
+  background: $bg-secondary;
+}
+
+.mel-table__pagination-info {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+.mel-table__pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+}
+
+// ============================================================================
+// CSS TABLE (div-based)
+// ============================================================================
+
+.mel-table-css {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $border-color;
+  border-radius: $radius-card;
+  overflow: hidden;
+}
+
+.mel-table-css__head {
+  display: grid;
+  padding: $spacing-3 $spacing-4;
+  background: $bg-secondary;
+  border-bottom: 1px solid $border-color;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $text-secondary;
+  
+  // Default 5-column grid
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: $spacing-4;
+}
+
+.mel-table-css__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.mel-table-css__row {
+  display: grid;
+  padding: $spacing-4;
+  border-bottom: 1px solid $border-color-light;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: $spacing-4;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 0.1s ease-in-out;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &:hover {
+    background: $bg-secondary;
+  }
+}
+
+// ============================================================================
+// DIV-BASED TABLE LAYOUT (used by vendor templates)
+// ============================================================================
+
+// Apply grid layout to table elements using divs
+// Default: 4 columns for most tables (Date, Event, Amount, Status)
+.mel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+  
+  // Table head - grid layout
+  .mel-table__head {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 1fr;
+    gap: $spacing-4;
+    padding: $spacing-3 $spacing-5;
+    background: $bg-secondary;
+    border-bottom: 1px solid $border-color;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-secondary;
+    
+    > div {
+      white-space: nowrap;
+    }
+  }
+  
+  // Table body
+  .mel-table__body {
+    display: flex;
+    flex-direction: column;
+    background: $bg-primary;
+  }
+  
+  // Table row - grid layout matching head
+  .mel-table__row {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 1fr;
+    gap: $spacing-4;
+    padding: $spacing-4 $spacing-5;
+    border-bottom: 1px solid $border-color-light;
+    align-items: center;
+    transition: background-color 0.1s ease-in-out;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    &:hover {
+      background: $bg-secondary;
+    }
+    
+    > div {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+// Column count modifiers
+.mel-table--cols-3 {
+  .mel-table__head,
+  .mel-table__row {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.mel-table--cols-4 {
+  .mel-table__head,
+  .mel-table__row {
+    grid-template-columns: 1fr 2fr 1fr 1fr;
+  }
+}
+
+.mel-table--cols-5 {
+  .mel-table__head,
+  .mel-table__row {
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  }
+}
+
+.mel-table--cols-6 {
+  .mel-table__head,
+  .mel-table__row {
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+  }
+}
+
+// Responsive: stack on mobile
+@include respond-down(md) {
+  .mel-table {
+    .mel-table__head {
+      display: none; // Hide header on mobile
+    }
+    
+    .mel-table__row {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-2;
+      padding: $spacing-4;
+      
+      > div {
+        display: flex;
+        justify-content: space-between;
+        
+        &::before {
+          content: attr(data-label);
+          font-weight: $font-weight-semibold;
+          color: $text-secondary;
+          margin-right: $spacing-2;
+        }
+      }
+    }
+  }
+}
+

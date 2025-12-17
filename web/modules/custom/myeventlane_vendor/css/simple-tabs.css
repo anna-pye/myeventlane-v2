@@ -1,0 +1,55 @@
+/**
+ * @file
+ * Simple tab styles for vendor event form.
+ */
+
+/* Tab navigation buttons */
+.mel-simple-tabs {
+  margin-bottom: 1.5rem;
+}
+
+.mel-simple-tabs__buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.mel-simple-tab {
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #1a1a2e;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.625rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.mel-simple-tab:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.mel-simple-tab.is-active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.15);
+}
+
+.mel-simple-tab:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Tab panes */
+.mel-simple-tab-pane {
+  display: none !important;
+}
+
+.mel-simple-tab-pane.is-active {
+  display: block !important;
+}

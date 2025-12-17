@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+id: commerce_store.field_stripe_payouts_enabled
+field_name: field_stripe_payouts_enabled
+entity_type: commerce_store
+type: boolean
+settings:
+  on_label: 'Yes'
+  off_label: 'No'
+module: core
+locked: false
+cardinality: 1
+translatable: false
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
+
+
+
+
+
+
+
+
+
+

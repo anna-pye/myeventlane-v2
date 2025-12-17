@@ -1,0 +1,17 @@
+name: 'MyEventLane Donations'
+type: module
+description: 'Donation functionality for MyEventLane. Handles platform donations (vendor to MyEventLane) and RSVP attendee donations (attendee to vendor via Stripe Connect).'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_core:myeventlane_core
+  - myeventlane_commerce:myeventlane_commerce
+  - myeventlane_rsvp:myeventlane_rsvp
+  - drupal:commerce
+  - drupal:commerce_order
+  - drupal:commerce_payment
+  - drupal:node
+  - drupal:user
+

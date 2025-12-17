@@ -5,6 +5,12 @@
     "src": "js/account-dropdown.js",
     "isEntry": true
   },
+  "js/front-pie.js": {
+    "file": "js/front-pie.js",
+    "name": "front-pie",
+    "src": "js/front-pie.js",
+    "isEntry": true
+  },
   "js/main.js": {
     "file": "main.js",
     "name": "main",
@@ -13,5 +19,10 @@
     "css": [
       "main.css"
     ]
+  },
+  "scss/front.scss": {
+    "file": "css/front.css",
+    "src": "scss/front.scss",
+    "isEntry": true
   }
 }

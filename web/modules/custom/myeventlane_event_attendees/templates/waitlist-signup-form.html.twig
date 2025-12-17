@@ -1,0 +1,52 @@
+{#
+/**
+ * @file
+ * Template for waitlist signup form.
+ *
+ * Available variables:
+ * - form: The form render array.
+ * - event: The event node entity.
+ */
+#}
+<div class="mel-waitlist-signup-form">
+  <div class="mel-waitlist-signup-form__header">
+    <h2 class="mel-waitlist-signup-form__title">{{ 'Join the Waitlist'|t }}</h2>
+    <p class="mel-waitlist-signup-form__subtitle">
+      {{ 'This event is currently full. We will notify you if a spot becomes available.'|t }}
+    </p>
+  </div>
+
+  <div class="mel-waitlist-signup-form__body">
+    {{ form.description }}
+
+    {% if form.user_info %}
+      {{ form.user_info }}
+    {% endif %}
+
+    <div class="mel-waitlist-signup-form__fields">
+      {% if form.name %}
+        <div class="mel-form-item">
+          {{ form.name }}
+        </div>
+      {% endif %}
+
+      {% if form.email %}
+        <div class="mel-form-item">
+          {{ form.email }}
+        </div>
+      {% endif %}
+
+      {% if form.phone %}
+        <div class="mel-form-item">
+          {{ form.phone }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="mel-waitlist-signup-form__actions">
+      {{ form.actions }}
+    </div>
+
+    {{ form|without('description', 'user_info', 'name', 'email', 'phone', 'actions') }}
+  </div>
+</div>

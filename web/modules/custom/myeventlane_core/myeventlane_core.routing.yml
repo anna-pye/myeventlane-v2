@@ -20,4 +20,58 @@ myeventlane_core.settings:
   options:
     _admin_route: TRUE
 
+# My Categories page.
+myeventlane_core.my_categories:
+  path: '/my-categories'
+  defaults:
+    _controller: '\Drupal\myeventlane_core\Controller\MyCategoriesController::myCategories'
+    _title: 'My Categories'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+
+# Customer onboarding routes (step-by-step flow).
+myeventlane_core.onboard.account:
+  path: '/onboard/account'
+  defaults:
+    _controller: '\Drupal\myeventlane_core\Controller\CustomerOnboardAccountController::account'
+    _title: 'Create your account'
+  requirements:
+    _permission: 'access content'
+  options:
+    _maintenance_access: FALSE
+
+myeventlane_core.onboard.explore:
+  path: '/onboard/explore'
+  defaults:
+    _controller: '\Drupal\myeventlane_core\Controller\CustomerOnboardExploreController::explore'
+    _title: 'How MyEventLane works'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+  options:
+    _maintenance_access: FALSE
+
+myeventlane_core.onboard.first_action:
+  path: '/onboard/first-action'
+  defaults:
+    _controller: '\Drupal\myeventlane_core\Controller\CustomerOnboardFirstActionController::firstAction'
+    _title: 'Find your first event'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+  options:
+    _maintenance_access: FALSE
+
+myeventlane_core.onboard.my_tickets:
+  path: '/onboard/my-tickets'
+  defaults:
+    _controller: '\Drupal\myeventlane_core\Controller\CustomerOnboardMyTicketsController::myTickets'
+    _title: "You're all set!"
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+  options:
+    _maintenance_access: FALSE
+
 

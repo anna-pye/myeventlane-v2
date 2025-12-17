@@ -13,7 +13,7 @@
       {% for vendor in vendors %}
         <article class="mel-vendor-card">
           <h2 class="mel-vendor-name">
-            <a href="{{ path('entity.myeventlane_vendor.canonical', {'myeventlane_vendor': vendor.id}) }}">
+            <a href="{{ path('entity.myeventlane_vendor.canonical', {'myeventlane_vendor': vendor.id()}) }}">
               {{ vendor.label }}
             </a>
           </h2>

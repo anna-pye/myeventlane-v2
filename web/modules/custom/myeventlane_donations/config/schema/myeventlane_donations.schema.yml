@@ -1,0 +1,33 @@
+myeventlane_donations.settings:
+  type: config_object
+  label: 'Donation settings'
+  mapping:
+    enable_platform_donations:
+      type: boolean
+      label: 'Enable platform donations'
+    enable_rsvp_donations:
+      type: boolean
+      label: 'Enable RSVP attendee donations'
+    platform_presets:
+      type: sequence
+      label: 'Platform donation preset amounts'
+      sequence:
+        type: decimal
+    attendee_presets:
+      type: sequence
+      label: 'RSVP attendee donation preset amounts'
+      sequence:
+        type: decimal
+    min_amount:
+      type: decimal
+      label: 'Minimum donation amount'
+    platform_copy:
+      type: text
+      label: 'Platform donation help text'
+    attendee_copy:
+      type: text
+      label: 'RSVP attendee donation help text'
+    require_stripe_connected_for_attendee_donations:
+      type: boolean
+      label: 'Require Stripe Connect for attendee donations'
+

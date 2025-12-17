@@ -1,3 +1,17 @@
+# RSVP form page.
+myeventlane_rsvp.form:
+  path: '/event/{node}/rsvp/form'
+  defaults:
+    _controller: '\Drupal\myeventlane_rsvp\Controller\RsvpFormController::form'
+    _title: 'RSVP'
+  requirements:
+    _permission: 'access content'
+    node: '\d+'
+  options:
+    parameters:
+      node:
+        type: entity:node
+
 # Public RSVP form - redirects to unified Commerce booking route.
 myeventlane_rsvp.public_rsvp_form:
   path: '/event/{event}/rsvp'

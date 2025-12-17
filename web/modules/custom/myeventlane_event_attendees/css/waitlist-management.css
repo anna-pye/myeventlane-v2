@@ -1,0 +1,171 @@
+/**
+ * @file
+ * Styles for waitlist management interface.
+ */
+
+.mel-waitlist-management {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.mel-waitlist-management__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.mel-waitlist-management__title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #1a1a2e;
+}
+
+.mel-waitlist-management__subtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.mel-waitlist-management__subtitle a {
+  color: #6366f1;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.mel-waitlist-management__subtitle a:hover {
+  text-decoration: underline;
+}
+
+.mel-waitlist-management__actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Analytics Section */
+.mel-waitlist-analytics {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.mel-waitlist-analytics__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #1a1a2e;
+}
+
+.mel-waitlist-analytics__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.mel-waitlist-analytics__card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.mel-waitlist-analytics__label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.mel-waitlist-analytics__value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+/* Waitlist Table */
+.mel-waitlist-table-wrapper {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.mel-waitlist-table__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #1a1a2e;
+}
+
+.mel-waitlist-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+}
+
+.mel-waitlist-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mel-waitlist-table thead {
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.mel-waitlist-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mel-waitlist-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: #1a1a2e;
+}
+
+.mel-waitlist-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.mel-waitlist-table__position {
+  text-align: center;
+}
+
+.mel-waitlist-table__position-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: #6366f1;
+  color: white;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.mel-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mel-badge--waitlist {
+  background: #fef3c7;
+  color: #92400e;
+}

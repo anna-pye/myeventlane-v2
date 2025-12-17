@@ -1,0 +1,109 @@
+/**
+ * @file
+ * Account summary widget styles.
+ */
+
+.mel-account-summary {
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  &__avatar {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    border-radius: 12px;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--mel-color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__store {
+    font-size: 13px;
+    color: var(--mel-color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__details {
+    background: var(--mel-color-bg-subtle);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  &__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--mel-color-border);
+    }
+  }
+
+  &__label {
+    font-size: 13px;
+    color: var(--mel-color-text-secondary);
+  }
+
+  &__value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--mel-color-text);
+  }
+
+  &__links {
+    display: flex;
+    gap: 8px;
+  }
+
+  &__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--mel-color-bg-subtle);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--mel-color-text);
+    text-decoration: none;
+    transition: background-color 0.15s;
+
+    &:hover {
+      background: var(--mel-color-border);
+    }
+
+    svg {
+      color: var(--mel-color-text-secondary);
+    }
+  }
+}
+
+
+
+
+
+

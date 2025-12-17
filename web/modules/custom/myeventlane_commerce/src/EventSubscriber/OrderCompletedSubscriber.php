@@ -107,8 +107,30 @@ final class OrderCompletedSubscriber implements EventSubscriberInterface {
     $price = $orderItem->getTotalPrice();
     $isRsvp = $price && ((float) $price->getNumber() === 0.0);
 
+    // Get attendee data from order item (for accessibility needs from checkout pane).
+    $attendeeData = [];
+    if ($orderItem->hasField('field_attendee_data') && !$orderItem->get('field_attendee_data')->isEmpty()) {
+      $attendeeData = $orderItem->get('field_attendee_data')->value ?? [];
+      if (is_string($attendeeData)) {
+        $attendeeData = json_decode($attendeeData, TRUE) ?? [];
+      }
+    }
+
+    $ticketIndex = 1;
     foreach ($ticketHolders as $holder) {
-      $this->createAttendeeRecord($holder, $eventId, $order, $orderItem, $isRsvp, $variationTitle);
+      // Extract accessibility needs for this ticket from attendee data.
+      $accessibilityNeeds = [];
+      $ticketKey = 'ticket_' . $ticketIndex;
+      if (isset($attendeeData[$ticketKey]['accessibility_needs'])) {
+        $needs = $attendeeData[$ticketKey]['accessibility_needs'];
+        // Filter out unchecked values (checkboxes return 0 for unchecked).
+        $accessibilityNeeds = array_filter($needs, function ($value) {
+          return $value !== 0 && $value !== FALSE && $value !== '';
+        });
+      }
+
+      $this->createAttendeeRecord($holder, $eventId, $order, $orderItem, $isRsvp, $variationTitle, $accessibilityNeeds);
+      $ticketIndex++;
     }
   }
 
@@ -127,8 +149,10 @@ final class OrderCompletedSubscriber implements EventSubscriberInterface {
    *   TRUE if this is a free RSVP (price = $0).
    * @param string $variationTitle
    *   The ticket variation title.
+   * @param array $accessibilityNeeds
+   *   Array of accessibility term IDs.
    */
-  private function createAttendeeRecord(object $holder, int $eventId, object $order, object $orderItem, bool $isRsvp, string $variationTitle): void {
+  private function createAttendeeRecord(object $holder, int $eventId, object $order, object $orderItem, bool $isRsvp, string $variationTitle, array $accessibilityNeeds = []): void {
     $logger = $this->loggerFactory->get('myeventlane_commerce');
 
     // Extract ticket holder data from paragraph.
@@ -176,22 +200,29 @@ final class OrderCompletedSubscriber implements EventSubscriberInterface {
     // Create EventAttendee entity.
     try {
       /** @var \Drupal\myeventlane_event_attendees\Entity\EventAttendee $attendee */
+      $attendeeValues = [
+        'event' => $eventId,
+        // Link attendance to purchaser for dashboard lookups.
+        'uid' => $purchaserUid,
+        // Store purchaser email (or holder email as a fallback) so "My Events"
+        // can be resolved from the buyer account.
+        'email' => $storedEmail,
+        'phone' => $phone,
+        'status' => EventAttendee::STATUS_CONFIRMED,
+        'source' => $isRsvp ? EventAttendee::SOURCE_RSVP : EventAttendee::SOURCE_TICKET,
+        'order_item' => $orderItem->id(),
+        'ticket_code' => $ticketCode,
+        'extra_data' => $extraData,
+      ];
+
+      // Add accessibility needs if provided.
+      if (!empty($accessibilityNeeds)) {
+        $attendeeValues['accessibility_needs'] = array_values($accessibilityNeeds);
+      }
+
       $attendee = $this->entityTypeManager
         ->getStorage('event_attendee')
-        ->create([
-          'event' => $eventId,
-          // Link attendance to purchaser for dashboard lookups.
-          'uid' => $purchaserUid,
-          // Store purchaser email (or holder email as a fallback) so "My Events"
-          // can be resolved from the buyer account.
-          'email' => $storedEmail,
-          'phone' => $phone,
-          'status' => EventAttendee::STATUS_CONFIRMED,
-          'source' => $isRsvp ? EventAttendee::SOURCE_RSVP : EventAttendee::SOURCE_TICKET,
-          'order_item' => $orderItem->id(),
-          'ticket_code' => $ticketCode,
-          'extra_data' => $extraData,
-        ]);
+        ->create($attendeeValues);
 
       $attendee->save();
 

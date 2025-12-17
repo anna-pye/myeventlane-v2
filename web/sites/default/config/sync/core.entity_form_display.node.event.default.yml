@@ -5,6 +5,10 @@ dependencies:
   config:
     - field.field.node.event.body
     - field.field.node.event.field_accessibility
+    - field.field.node.event.field_accessibility_contact
+    - field.field.node.event.field_accessibility_directions
+    - field.field.node.event.field_accessibility_entry
+    - field.field.node.event.field_accessibility_parking
     - field.field.node.event.field_attendee_questions
     - field.field.node.event.field_capacity
     - field.field.node.event.field_category
@@ -13,7 +17,9 @@ dependencies:
     - field.field.node.event.field_event_image
     - field.field.node.event.field_event_location
     - field.field.node.event.field_event_start
+    - field.field.node.event.field_event_store
     - field.field.node.event.field_event_type
+    - field.field.node.event.field_event_vendor
     - field.field.node.event.field_external_url
     - field.field.node.event.field_featured
     - field.field.node.event.field_location
@@ -27,23 +33,17 @@ dependencies:
     - field.field.node.event.field_tags
     - field.field.node.event.field_ticket_types
     - field.field.node.event.field_venue_name
+    - field.field.node.event.field_waitlist_capacity
     - image.style.thumbnail
     - node.type.event
   module:
     - address
     - datetime
-    - field_layout
     - image
-    - layout_discovery
     - link
     - paragraphs
     - path
     - text
-third_party_settings:
-  field_layout:
-    id: layout_onecol
-    settings:
-      label: ''
 id: node.event.default
 targetEntityType: node
 bundle: event
@@ -57,6 +57,7 @@ content:
       rows: 9
       summary_rows: 3
       placeholder: ''
+      show_summary: false
     third_party_settings: {  }
   created:
     type: datetime_timestamp
@@ -65,13 +66,45 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_accessibility:
-    type: entity_reference_autocomplete
+    type: entity_reference_autocomplete_tags
     weight: 14
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
+      match_limit: 20
       size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_accessibility_contact:
+    type: text_textarea
+    weight: 15
+    region: content
+    settings:
+      rows: 3
+      placeholder: ''
+    third_party_settings: {  }
+  field_accessibility_directions:
+    type: text_textarea
+    weight: 16
+    region: content
+    settings:
+      rows: 3
+      placeholder: ''
+    third_party_settings: {  }
+  field_accessibility_entry:
+    type: text_textarea
+    weight: 17
+    region: content
+    settings:
+      rows: 3
+      placeholder: ''
+    third_party_settings: {  }
+  field_accessibility_parking:
+    type: text_textarea
+    weight: 18
+    region: content
+    settings:
+      rows: 3
       placeholder: ''
     third_party_settings: {  }
   field_attendee_questions:
@@ -101,12 +134,12 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_category:
-    type: entity_reference_autocomplete
+    type: entity_reference_autocomplete_tags
     weight: 13
     region: content
     settings:
       match_operator: CONTAINS
-      match_limit: 10
+      match_limit: 20
       size: 60
       placeholder: ''
     third_party_settings: {  }
@@ -162,7 +195,8 @@ content:
     type: address_default
     weight: 8
     region: content
-    settings: {  }
+    settings:
+      wrapper_type: fieldset
     third_party_settings: {  }
   field_organizer:
     type: entity_reference_autocomplete
@@ -211,6 +245,13 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_waitlist_capacity:
+    type: number
+    weight: 10
+    region: content
+    settings:
+      placeholder: 'Leave empty for unlimited'
+    third_party_settings: {  }
   path:
     type: path
     weight: 25
@@ -258,6 +299,8 @@ content:
     third_party_settings: {  }
 hidden:
   field_event_location: true
+  field_event_store: true
+  field_event_vendor: true
   field_location_latitude: true
   field_location_longitude: true
   field_promo_expires: true

@@ -37,7 +37,7 @@ final class TicketTypeManager {
    * For each ticket type paragraph on the event:
    * - Creates or updates the corresponding Product Variation
    * - Links the paragraph to the variation via UUID
-   * - Removes variations that no longer have corresponding paragraphs
+   * - Removes variations that no longer have corresponding paragraphs.
    *
    * @param \Drupal\node\NodeInterface $event
    *   The event node.
@@ -51,7 +51,7 @@ final class TicketTypeManager {
     }
 
     $eventType = $event->get('field_event_type')->value ?? '';
-    
+
     // Only sync for paid and both event types.
     if (!in_array($eventType, ['paid', 'both'], TRUE)) {
       return FALSE;
@@ -85,7 +85,7 @@ final class TicketTypeManager {
       $variation = $this->syncTicketTypeToVariation($paragraph, $product, $event);
       if ($variation) {
         $activeVariationUuids[] = $variation->uuid();
-        
+
         // Store the variation UUID in the paragraph for future lookups.
         if ($paragraph->hasField('field_ticket_variation_uuid')) {
           $paragraph->set('field_ticket_variation_uuid', $variation->uuid());
@@ -186,7 +186,8 @@ final class TicketTypeManager {
     $priceValue = $paragraph->get('field_ticket_price')->value ?? '0.00';
     // Get currency from the product's store, default to AUD if not available.
     $stores = $product->getStores();
-    $currency = 'AUD'; // Default to AUD for Australian site.
+    // Default to AUD for Australian site.
+    $currency = 'AUD';
     if (!empty($stores)) {
       $store = reset($stores);
       $currency = $store->getDefaultCurrencyCode();
@@ -216,12 +217,11 @@ final class TicketTypeManager {
       // Update existing variation.
       $variation->setTitle($variationTitle);
       $variation->setPrice($price);
-      
+
       // Update capacity if field exists (using stock or custom field).
       // For now, we'll store capacity in a note or custom field if needed.
-      
       $variation->save();
-      
+
       $this->loggerFactory->get('myeventlane_event')->notice(
         'Updated variation @vid for ticket type "@label"',
         ['@vid' => $variation->id(), '@label' => $label]
@@ -230,7 +230,7 @@ final class TicketTypeManager {
     else {
       // Create new variation.
       $sku = $this->generateSku($event, $label);
-      
+
       $variation = ProductVariation::create([
         'type' => 'ticket_variation',
         'sku' => $sku,
@@ -241,7 +241,7 @@ final class TicketTypeManager {
         'field_event' => ['target_id' => $event->id()],
       ]);
       $variation->save();
-      
+
       // Add variation to product's variations collection.
       // Get existing variations and add the new one.
       $existing_variations = $product->getVariations();
@@ -252,13 +252,13 @@ final class TicketTypeManager {
       $variation_ids[] = $variation->id();
       $product->set('variations', $variation_ids);
       $product->save();
-      
+
       // Store UUID in paragraph.
       if ($paragraph->hasField('field_ticket_variation_uuid')) {
         $paragraph->set('field_ticket_variation_uuid', $variation->uuid());
         $paragraph->save();
       }
-      
+
       $this->loggerFactory->get('myeventlane_event')->notice(
         'Created variation @vid for ticket type "@label"',
         ['@vid' => $variation->id(), '@label' => $label]
@@ -279,14 +279,14 @@ final class TicketTypeManager {
    */
   private function getTicketLabel(ParagraphInterface $paragraph): string {
     $labelMode = $paragraph->get('field_ticket_label_mode')->value ?? 'preset';
-    
+
     if ($labelMode === 'custom') {
       $customLabel = $paragraph->get('field_ticket_label_custom')->value ?? '';
       if (!empty($customLabel)) {
         return $customLabel;
       }
     }
-    
+
     // Use preset label.
     $presetValue = $paragraph->get('field_ticket_label_preset')->value ?? '';
     if (!empty($presetValue)) {
@@ -303,7 +303,7 @@ final class TicketTypeManager {
       ];
       return $presetLabels[$presetValue] ?? ucfirst(str_replace('_', ' ', $presetValue));
     }
-    
+
     return 'Ticket';
   }
 
@@ -341,7 +341,7 @@ final class TicketTypeManager {
         // For safety, we'll just unpublish it rather than delete.
         $variation->setPublished(FALSE);
         $variation->save();
-        
+
         $this->loggerFactory->get('myeventlane_event')->notice(
           'Unpublished orphaned variation @vid',
           ['@vid' => $variation->id()]
@@ -363,7 +363,7 @@ final class TicketTypeManager {
     if ($product->label() !== $eventTitle) {
       $product->setTitle($eventTitle);
       $product->save();
-      
+
       // Also update variation titles to include new event title.
       foreach ($product->getVariations() as $variation) {
         $oldTitle = $variation->label();
@@ -375,7 +375,7 @@ final class TicketTypeManager {
           $variation->save();
         }
       }
-      
+
       $this->loggerFactory->get('myeventlane_event')->notice(
         'Updated product and variation titles to match event title "@title"',
         ['@title' => $eventTitle]
@@ -384,4 +384,3 @@ final class TicketTypeManager {
   }
 
 }
-

@@ -16,18 +16,42 @@
     
     console.log('MyEventLane Location: Settings:', settings);
     console.log('MyEventLane Location: Provider:', provider);
+    console.log('MyEventLane Location: drupalSettings available:', typeof drupalSettings !== 'undefined');
+    console.log('MyEventLane Location: drupalSettings.myeventlaneLocation:', drupalSettings.myeventlaneLocation);
 
     // Check if API key is configured.
     if (provider === 'google_maps' && !settings.google_maps_api_key) {
       console.error('MyEventLane Location: Google Maps API key not configured.');
+      console.error('MyEventLane Location: Settings object:', settings);
       return;
     }
 
-    // Find the address search input.
-    const searchInput = document.querySelector('.myeventlane-location-address-search');
+    // Find the address search input - try multiple selectors
+    let searchInput = document.querySelector('.myeventlane-location-address-search');
     if (!searchInput) {
-      console.warn('MyEventLane Location: Address search input not found. Available inputs:', 
-        Array.from(document.querySelectorAll('input[type="text"]')).map(i => ({ class: i.className, name: i.name })));
+      // Try finding it in the location container
+      const locationContainer = document.querySelector('.location, .mel-form-card:has(.field--name-field-location)');
+      if (locationContainer) {
+        searchInput = locationContainer.querySelector('.myeventlane-location-address-search');
+      }
+    }
+    if (!searchInput) {
+      // Try finding by name attribute
+      searchInput = document.querySelector('input[name*="address_search"]');
+    }
+    
+    if (!searchInput) {
+      console.warn('MyEventLane Location: Address search input not found.');
+      console.warn('MyEventLane Location: Searching for inputs with class "myeventlane-location-address-search":', 
+        document.querySelectorAll('.myeventlane-location-address-search').length);
+      console.warn('MyEventLane Location: Available text inputs:', 
+        Array.from(document.querySelectorAll('input[type="text"]')).map(i => ({ 
+          class: i.className, 
+          name: i.name,
+          id: i.id,
+          placeholder: i.placeholder
+        })));
+      console.warn('MyEventLane Location: Form structure:', document.querySelector('form.node-event-form, form.node-event-edit-form'));
       return;
     }
     
@@ -44,7 +68,15 @@
     console.log('MyEventLane Location: Found form:', form);
     
     // Find the field_location widget container.
+    // After form restructuring, the widget might be inside .mel-form-content or .location container
     let widget = form.querySelector('.myeventlane-location-address-widget, .field--name-field-location, fieldset[data-drupal-selector*="field-location"]');
+    if (!widget) {
+      // Try finding within the location container (after form restructuring)
+      const locationContainer = form.querySelector('.location, .mel-form-card:has(.field--name-field-location)');
+      if (locationContainer) {
+        widget = locationContainer.querySelector('.myeventlane-location-address-widget, .field--name-field-location, fieldset[data-drupal-selector*="field-location"]');
+      }
+    }
     if (!widget) {
       // Fallback: find any fieldset containing address fields.
       widget = form.querySelector('fieldset:has(input[name*="address_line1"])');
@@ -337,34 +369,51 @@
     }
 
     // Direct selectors for the address widget of field_location.
+    // After form restructuring, fields are inside .location .mel-form-content
+    // Try multiple selectors to find fields regardless of container structure
     const addressLine1 =
       form.querySelector('[data-drupal-selector="edit-field-location-0-address-address-line1"]') ||
-      form.querySelector('input[name="field_location[0][address][address_line1]"]');
+      form.querySelector('input[name="field_location[0][address][address_line1]"]') ||
+      form.querySelector('.location input[name*="address_line1"]') ||
+      form.querySelector('.mel-form-content input[name*="address_line1"]');
 
     const addressLine2 =
       form.querySelector('[data-drupal-selector="edit-field-location-0-address-address-line2"]') ||
-      form.querySelector('input[name="field_location[0][address][address_line2]"]');
+      form.querySelector('input[name="field_location[0][address][address_line2]"]') ||
+      form.querySelector('.location input[name*="address_line2"]') ||
+      form.querySelector('.mel-form-content input[name*="address_line2"]');
 
     const locality =
       form.querySelector('[data-drupal-selector="edit-field-location-0-address-locality"]') ||
-      form.querySelector('input[name="field_location[0][address][locality]"]');
+      form.querySelector('input[name="field_location[0][address][locality]"]') ||
+      form.querySelector('.location input[name*="locality"]') ||
+      form.querySelector('.mel-form-content input[name*="locality"]');
 
     const administrativeArea =
       form.querySelector('[data-drupal-selector="edit-field-location-0-address-administrative-area"]') ||
-      form.querySelector('select[name="field_location[0][address][administrative_area]"]');
+      form.querySelector('select[name="field_location[0][address][administrative_area]"]') ||
+      form.querySelector('.location select[name*="administrative_area"]') ||
+      form.querySelector('.mel-form-content select[name*="administrative_area"]');
 
     const postalCode =
       form.querySelector('[data-drupal-selector="edit-field-location-0-address-postal-code"]') ||
-      form.querySelector('input[name="field_location[0][address][postal_code]"]');
+      form.querySelector('input[name="field_location[0][address][postal_code]"]') ||
+      form.querySelector('.location input[name*="postal_code"]') ||
+      form.querySelector('.mel-form-content input[name*="postal_code"]');
 
     const countryCode =
       form.querySelector('[data-drupal-selector="edit-field-location-0-address-country-code"]') ||
-      form.querySelector('select[name="field_location[0][address][country_code]"]');
+      form.querySelector('select[name="field_location[0][address][country_code]"]') ||
+      form.querySelector('.location select[name*="country_code"]') ||
+      form.querySelector('.mel-form-content select[name*="country_code"]');
 
     // Venue name field (simple text field).
+    // After restructuring, it's in .location .mel-form-content
     const venueNameField =
       form.querySelector('[data-drupal-selector="edit-field-venue-name-0-value"]') ||
-      form.querySelector('input[name="field_venue_name[0][value]"]');
+      form.querySelector('input[name="field_venue_name[0][value]"]') ||
+      form.querySelector('.location input[name*="field_venue_name"]') ||
+      form.querySelector('.mel-form-content input[name*="field_venue_name"]');
 
     // Log ALL inputs and selects in the form to debug.
     const allFields = Array.from(form.querySelectorAll('input, select'));
@@ -543,15 +592,19 @@
   function initialize() {
     // Only initialize if we're on an event form (check for the search input or form ID).
     const isEventForm = document.querySelector('.myeventlane-location-address-search') ||
-                        document.querySelector('form.node-event-form, form.node-event-edit-form, form[id*="node-event"]');
+                        document.querySelector('form.node-event-form, form.node-event-edit-form, form[id*="node-event"]') ||
+                        document.querySelector('form.mel-event-form-vendor');
     
     if (!isEventForm) {
       // Not on an event form, don't initialize or interfere.
       return;
     }
     
-    // Small delay to ensure form is fully rendered.
-    setTimeout(initAddressAutocomplete, 100);
+    // Longer delay to ensure form is fully rendered, especially after AJAX or form restructuring
+    // Try multiple times in case form loads asynchronously
+    setTimeout(initAddressAutocomplete, 300);
+    setTimeout(initAddressAutocomplete, 800);
+    setTimeout(initAddressAutocomplete, 1500);
   }
 
   if (document.readyState === 'loading') {
@@ -568,13 +621,33 @@
         // Only re-initialize if this is likely an event form AJAX update.
         // Check if the search input exists or if the form is an event form.
         const isEventForm = document.querySelector('.myeventlane-location-address-search') ||
-                            document.querySelector('form.node-event-form, form.node-event-edit-form, form[id*="node-event"]');
+                            document.querySelector('form.node-event-form, form.node-event-edit-form, form[id*="node-event"]') ||
+                            document.querySelector('form.mel-event-form-vendor');
         
         if (isEventForm) {
-          setTimeout(initAddressAutocomplete, 200);
+          setTimeout(initAddressAutocomplete, 300);
+          setTimeout(initAddressAutocomplete, 800);
         }
       });
     }
+  }
+  
+  // Also use Drupal behaviors for proper integration
+  if (typeof Drupal !== 'undefined' && Drupal.behaviors) {
+    Drupal.behaviors.myeventlaneLocationAutocomplete = {
+      attach: function (context, settings) {
+        // Only initialize on event forms
+        const isEventForm = context.querySelector('.myeventlane-location-address-search') ||
+                            context.querySelector('form.node-event-form, form.node-event-edit-form, form[id*="node-event"]') ||
+                            context.querySelector('form.mel-event-form-vendor');
+        
+        if (isEventForm) {
+          setTimeout(function() {
+            initAddressAutocomplete();
+          }, 200);
+        }
+      }
+    };
   }
 
 })(Drupal, drupalSettings);

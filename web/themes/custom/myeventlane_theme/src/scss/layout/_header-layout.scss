@@ -1,1 +1,36 @@
-/* Placeholder for src/scss/layout/_header-layout.scss */
+// ==========================================================================
+// Header Layout Helpers
+// ==========================================================================
+// Light helpers shared by header regions/blocks beyond the main component.
+
+@use '../tokens/spacing';
+@use '../tokens/breakpoints';
+
+// Utility to align header regions with consistent gutters.
+.mel-header-bar {
+  display: flex;
+  align-items: center;
+  gap: spacing.mel-space(3);
+  padding: spacing.mel-space(2) spacing.mel-space(3);
+
+  @include breakpoints.mel-break(md) {
+    padding: spacing.mel-space(2) spacing.mel-space(4);
+  }
+}
+
+// Utility for a left/right split layout (logo + actions).
+.mel-header-bar__left,
+.mel-header-bar__right {
+  display: flex;
+  align-items: center;
+  gap: spacing.mel-space(2);
+}
+
+.mel-header-bar__left {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mel-header-bar__right {
+  flex-shrink: 0;
+}

@@ -1,0 +1,387 @@
+/**
+ * @file
+ * Console-specific component styles for MyEventLane Vendor Theme.
+ *
+ * Additional utility classes and overrides for vendor console.
+ */
+
+@use '../tokens/colors' as *;
+@use '../tokens/shadows' as *;
+@use '../tokens/spacing' as *;
+@use '../tokens/shadows' as *;
+@use '../tokens/typography' as *;
+@use '../tokens/shadows' as *;
+@use '../tokens/radii' as *;
+@use '../tokens/shadows' as *;
+@use '../tokens/breakpoints' as *;
+@use '../tokens/shadows' as *;
+
+// ============================================================================
+// PAGE TITLE STYLES
+// ============================================================================
+
+.mel-page-title {
+  @include page-title;
+  margin: 0;
+}
+
+.mel-page-subtitle {
+  font-size: $font-size-body;
+  color: $text-secondary;
+  margin: $spacing-1 0 0 0;
+}
+
+// ============================================================================
+// BREADCRUMB
+// ============================================================================
+
+.mel-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  font-size: $font-size-sm;
+  color: $text-muted;
+  margin-bottom: $spacing-4;
+}
+
+.mel-breadcrumb__link {
+  color: $text-secondary;
+  text-decoration: none;
+  
+  &:hover {
+    color: $primary;
+  }
+}
+
+.mel-breadcrumb__separator {
+  color: $border-color;
+}
+
+.mel-breadcrumb__current {
+  color: $text-primary;
+  font-weight: $font-weight-medium;
+}
+
+// ============================================================================
+// ALERTS / NOTICES
+// ============================================================================
+
+.mel-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-3;
+  padding: $spacing-4;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-4;
+}
+
+.mel-alert--info {
+  background: $info-light;
+  border: 1px solid rgba($info, 0.2);
+  color: $info;
+}
+
+.mel-alert--success {
+  background: $success-light;
+  border: 1px solid rgba($success, 0.2);
+  color: $success;
+}
+
+.mel-alert--warning {
+  background: $warning-light;
+  border: 1px solid rgba($warning, 0.2);
+  color: $warning;
+}
+
+.mel-alert--danger {
+  background: $danger-light;
+  border: 1px solid rgba($danger, 0.2);
+  color: $danger;
+}
+
+.mel-alert__icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.mel-alert__content {
+  flex: 1;
+}
+
+.mel-alert__title {
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-1;
+}
+
+.mel-alert__text {
+  font-size: $font-size-sm;
+  opacity: 0.9;
+}
+
+.mel-alert__close {
+  flex-shrink: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+  
+  &:hover {
+    opacity: 1;
+  }
+}
+
+// ============================================================================
+// TOOLTIP
+// ============================================================================
+
+.mel-tooltip {
+  position: relative;
+}
+
+.mel-tooltip__content {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: $spacing-2 $spacing-3;
+  background: $ml-vendor-navy;
+  color: $text-inverse;
+  font-size: $font-size-sm;
+  border-radius: $radius-md;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s, visibility 0.15s;
+  z-index: 100;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: $ml-vendor-navy;
+  }
+}
+
+.mel-tooltip:hover .mel-tooltip__content {
+  opacity: 1;
+  visibility: visible;
+}
+
+// ============================================================================
+// MODAL
+// ============================================================================
+
+.mel-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-4;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+  
+  &.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.mel-modal {
+  background: $bg-primary;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-xl;
+  max-width: 560px;
+  width: 100%;
+  max-height: calc(100vh - 2rem);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.95);
+  transition: transform 0.2s;
+  
+  .is-open & {
+    transform: scale(1);
+  }
+}
+
+.mel-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-5 $spacing-6;
+  border-bottom: 1px solid $border-color-light;
+}
+
+.mel-modal__title {
+  @include section-title;
+  margin: 0;
+}
+
+.mel-modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: $text-muted;
+  cursor: pointer;
+  border-radius: $radius-md;
+  
+  &:hover {
+    background: $bg-secondary;
+    color: $text-primary;
+  }
+}
+
+.mel-modal__body {
+  padding: $spacing-6;
+  overflow-y: auto;
+}
+
+.mel-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $spacing-3;
+  padding: $spacing-4 $spacing-6;
+  border-top: 1px solid $border-color-light;
+  background: $bg-secondary;
+}
+
+// ============================================================================
+// AVATAR
+// ============================================================================
+
+.mel-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-full;
+  background: $primary;
+  color: $text-inverse;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+}
+
+.mel-avatar--sm {
+  width: 32px;
+  height: 32px;
+  font-size: $font-size-xs;
+}
+
+.mel-avatar--lg {
+  width: 56px;
+  height: 56px;
+  font-size: $font-size-lg;
+}
+
+.mel-avatar--coral {
+  background: $ml-accent-coral;
+}
+
+.mel-avatar--green {
+  background: $success;
+}
+
+// ============================================================================
+// PROGRESS BAR
+// ============================================================================
+
+.mel-progress {
+  height: 8px;
+  background: $bg-tertiary;
+  border-radius: $radius-full;
+  overflow: hidden;
+}
+
+.mel-progress__bar {
+  height: 100%;
+  background: $primary;
+  border-radius: $radius-full;
+  transition: width 0.3s ease-out;
+}
+
+.mel-progress__bar--coral {
+  background: $ml-accent-coral;
+}
+
+.mel-progress__bar--green {
+  background: $success;
+}
+
+// ============================================================================
+// COPY TO CLIPBOARD
+// ============================================================================
+
+.mel-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-2 $spacing-3;
+  background: $bg-secondary;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+}
+
+.mel-copy__text {
+  color: $text-primary;
+}
+
+.mel-copy__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-1;
+  background: transparent;
+  border: none;
+  color: $text-muted;
+  cursor: pointer;
+  border-radius: $radius-sm;
+  
+  &:hover {
+    color: $primary;
+    background: rgba($primary, 0.1);
+  }
+}
+
+// ============================================================================
+// DIVIDER
+// ============================================================================
+
+.mel-divider {
+  border: none;
+  border-top: 1px solid $border-color-light;
+  margin: $spacing-6 0;
+}
+
+.mel-divider--lg {
+  margin: $spacing-8 0;
+}
+
+.mel-divider--dark {
+  border-color: $border-color;
+}
+
+
+
+
+
+
+

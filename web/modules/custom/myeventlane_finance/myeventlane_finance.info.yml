@@ -1,0 +1,13 @@
+name: 'MyEventLane Finance'
+type: module
+description: 'Financial reporting and BAS (Business Activity Statement) data aggregation for MyEventLane platform.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_core:myeventlane_core
+  - myeventlane_vendor:myeventlane_vendor
+  - drupal:commerce_order
+  - drupal:commerce_product
+  - drupal:commerce_tax
