@@ -2,14 +2,29 @@
 
 declare(strict_types=1);
 
-use Drupal\node\NodeInterface;
-use Drupal\taxonomy\TermInterface;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_alter().
+ */
+function myeventlane_event_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  // Event node wizard.
+  if ($form_id === 'node_event_form' || str_starts_with($form_id, 'node_event_')) {
+    /** @var \Drupal\myeventlane_event\Form\EventFormAlter $alter */
+    $alter = \Drupal::service('myeventlane_event.event_form_alter');
+    $alter->alterForm($form, $form_state, $form_id);
+  }
+
+  // Ticket type paragraph conditional logic. Apply opportunistically because
+  // paragraph subform IDs vary across contexts (IEF, Paragraphs, etc).
+  \Drupal\myeventlane_event\Form\TicketTypeFormAlter::alterForm($form, $form_state);
+}
 
 /**
  * Implements hook_preprocess_node().
  */
 function myeventlane_event_preprocess_node(array &$variables): void {
-  if (empty($variables['node']) || !$variables['node'] instanceof NodeInterface) {
+  if (empty($variables['node']) || !$variables['node'] instanceof \Drupal\node\NodeInterface) {
     return;
   }
 
@@ -18,107 +33,36 @@ function myeventlane_event_preprocess_node(array &$variables): void {
     return;
   }
 
-  // Only target full page output.
-  $view_mode = $variables['view_mode'] ?? '';
-  if (!in_array($view_mode, ['full', 'default'], TRUE)) {
-    return;
-  }
-
-  // Always attach MEL event node styling.
-  $variables['#attached']['library'][] = 'myeventlane_event/event_node';
-
-  // Clean title string for data attributes and safe text usage.
-  $variables['mel_title'] = strip_tags($node->getTitle());
-
-  // Venue name.
-  $venue_name = '';
-  if ($node->hasField('field_venue_name') && !$node->get('field_venue_name')->isEmpty()) {
-    $venue_name = (string) $node->get('field_venue_name')->value;
-  }
-  elseif ($node->hasField('field_event_venue') && !$node->get('field_event_venue')->isEmpty()) {
-    $venue_name = (string) $node->get('field_event_venue')->value;
-  }
-  $variables['mel_venue_name'] = $venue_name;
-
-  // Address text. Prefer address field components.
-  $address_text = '';
-  if ($node->hasField('field_location') && !$node->get('field_location')->isEmpty()) {
-    $item = $node->get('field_location')->first();
-    if ($item) {
-      $v = $item->getValue();
-      $parts = [];
-      foreach (['address_line1', 'locality', 'administrative_area', 'postal_code', 'country_code'] as $k) {
-        if (!empty($v[$k])) {
-          $parts[] = (string) $v[$k];
-        }
-      }
-      $address_text = trim(implode(', ', $parts));
-    }
-  }
-  elseif ($node->hasField('field_event_address') && !$node->get('field_event_address')->isEmpty()) {
-    $address_text = (string) $node->get('field_event_address')->value;
-  }
-  $variables['mel_address_text'] = $address_text;
-
-  // Coordinates.
+  // Defaults.
   $lat = NULL;
   $lng = NULL;
 
-  if ($node->hasField('field_location_latitude') && !$node->get('field_location_latitude')->isEmpty()) {
-    $lat = (float) $node->get('field_location_latitude')->value;
-  }
-  elseif ($node->hasField('field_event_lat') && !$node->get('field_event_lat')->isEmpty()) {
+  // Pull coords if present.
+  if ($node->hasField('field_event_lat') && !$node->get('field_event_lat')->isEmpty()) {
     $lat = (float) $node->get('field_event_lat')->value;
   }
-
-  if ($node->hasField('field_location_longitude') && !$node->get('field_location_longitude')->isEmpty()) {
-    $lng = (float) $node->get('field_location_longitude')->value;
-  }
-  elseif ($node->hasField('field_event_lng') && !$node->get('field_event_lng')->isEmpty()) {
+  if ($node->hasField('field_event_lng') && !$node->get('field_event_lng')->isEmpty()) {
     $lng = (float) $node->get('field_event_lng')->value;
   }
 
-  $variables['mel_lat'] = $lat;
-  $variables['mel_lng'] = $lng;
+  // Expose coords to Twig if needed.
+  $variables['mel_event_lat'] = $lat;
+  $variables['mel_event_lng'] = $lng;
 
-  // Vendor label. Prefer a vendor/store/entity reference over author.
-  $vendor_label = '';
-  foreach (['field_vendor_target', 'field_vendor', 'field_store', 'field_organiser'] as $candidate) {
-    if ($node->hasField($candidate) && !$node->get($candidate)->isEmpty()) {
-      $ref = $node->get($candidate)->entity;
-      if ($ref) {
-        $vendor_label = $ref->label();
-        break;
-      }
-    }
-  }
-  if ($vendor_label === '') {
-    $vendor_label = $node->getOwner() ? $node->getOwner()->getDisplayName() : '';
-  }
-  $variables['mel_vendor_label'] = $vendor_label;
-
-  // Category pills. Optional term color via common field names.
+  // Categories metadata for theming (name + color).
   $categories = [];
-  foreach (['field_category', 'field_categories', 'field_event_category'] as $candidate) {
-    if ($node->hasField($candidate) && !$node->get($candidate)->isEmpty()) {
-      foreach ($node->get($candidate)->referencedEntities() as $term) {
-        if (!$term instanceof TermInterface) {
-          continue;
-        }
-        $color = '';
-        foreach (['field_color', 'field_colour', 'field_mel_color'] as $color_field) {
-          if ($term->hasField($color_field) && !$term->get($color_field)->isEmpty()) {
-            $color = (string) $term->get($color_field)->value;
-            break;
-          }
+  if ($node->hasField('field_event_categories') && !$node->get('field_event_categories')->isEmpty()) {
+    foreach ($node->get('field_event_categories')->referencedEntities() as $term) {
+      if ($term instanceof \Drupal\taxonomy\TermInterface) {
+        $color = NULL;
+        if ($term->hasField('field_term_color') && !$term->get('field_term_color')->isEmpty()) {
+          $color = $term->get('field_term_color')->value;
         }
         $categories[] = [
-          'tid' => (int) $term->id(),
           'name' => $term->label(),
           'color' => $color,
         ];
       }
-      break;
     }
   }
   $variables['mel_categories'] = $categories;

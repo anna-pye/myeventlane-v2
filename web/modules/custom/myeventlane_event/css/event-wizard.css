@@ -1,129 +1,67 @@
 .mel-event-wizard {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 1rem;
 }
 
-.mel-event-wizard__layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 20px;
-}
-
-@media (max-width: 900px) {
-  .mel-event-wizard__layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-.mel-event-wizard__left {
-  position: sticky;
-  top: 16px;
-  align-self: start;
-}
-
-.mel-stepper {
+.mel-wizard-stepper {
   background: #fff;
   border: 1px solid rgba(0,0,0,.08);
   border-radius: 16px;
-  padding: 14px;
+  padding: 1rem;
+  margin-bottom: 1rem;
 }
 
-.mel-stepper__item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 10px;
+.mel-wizard-stepper__title {
+  font-weight: 600;
+  margin-bottom: .75rem;
+}
+
+.mel-wizard-stepper__list {
+  margin: 0;
+  padding: 0;
+}
+
+.mel-wizard-stepper__link {
+  display: block;
+  padding: .6rem .75rem;
   border-radius: 12px;
+  text-decoration: none;
 }
 
-.mel-stepper__item.is-active {
-  background: rgba(110,126,242,.10);
-  border: 1px solid rgba(110,126,242,.25);
+.mel-wizard-stepper__link.is-active {
+  background: rgba(0,0,0,.05);
+  font-weight: 600;
 }
 
-.mel-stepper__num {
-  width: 26px;
-  height: 26px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: rgba(0,0,0,.06);
-  font-weight: 700;
-}
-
-.mel-stepper__label {
-  font-weight: 700;
-  font-size: 14px;
-}
-
-.mel-event-wizard__main {
+.mel-wizard-step {
   background: #fff;
   border: 1px solid rgba(0,0,0,.08);
-  border-radius: 18px;
-  padding: 18px;
+  border-radius: 16px;
+  padding: 1rem;
 }
 
-.mel-event-wizard__step-title {
-  margin: 0 0 6px 0;
-  font-size: 26px;
-  line-height: 1.15;
+.mel-wizard-step__title {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
 }
 
-.mel-event-wizard__step-intro {
-  margin: 0 0 16px 0;
-  color: rgba(0,0,0,.62);
-}
-
-.mel-event-wizard__main label {
-  font-weight: 700;
-}
-
-.mel-event-wizard__main input[type="text"],
-.mel-event-wizard__main input[type="email"],
-.mel-event-wizard__main input[type="url"],
-.mel-event-wizard__main input[type="number"],
-.mel-event-wizard__main input[type="datetime-local"],
-.mel-event-wizard__main textarea,
-.mel-event-wizard__main select {
-  width: 100%;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,.12);
-  padding: 12px 12px;
-  background: #fff;
-}
-
-.mel-event-wizard__actions {
+.mel-wizard-actions {
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(0,0,0,.08);
+  gap: .75rem;
+  align-items: center;
+  margin-top: 1rem;
 }
 
-.mel-btn {
+.mel-wizard-actions .button {
   border-radius: 999px;
-  padding: 12px 16px;
-  border: 1px solid rgba(0,0,0,.12);
-  background: #fff;
-  cursor: pointer;
-  font-weight: 700;
 }
 
-.mel-btn--primary {
-  background: #f26d5b;
-  border-color: #f26d5b;
-  color: #fff;
-}
-
-.mel-btn--ghost {
-  background: #fff;
-}
-
-.mel-btn--danger {
-  background: #fff;
-  border-color: rgba(242, 109, 91, .4);
-  color: #c0392b;
+/* Keep Drupal's helper compatible if theme lacks it. */
+.visually-hidden {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
 }

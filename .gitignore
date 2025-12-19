@@ -80,3 +80,6 @@ logs/
 # Drupal private files and config overrides
 web/sites/*/files/
 web/sites/*/private/
+
+# Local development scripts
+web/modules/custom/*/scripts/local/

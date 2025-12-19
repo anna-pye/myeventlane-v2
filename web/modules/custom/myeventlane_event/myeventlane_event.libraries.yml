@@ -6,3 +6,14 @@ event_node:
   dependencies:
     - core/drupal
     - core/once
+
+event_wizard:
+  css:
+    theme:
+      css/event-wizard.css: {}
+  js:
+    js/event-wizard.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/jquery

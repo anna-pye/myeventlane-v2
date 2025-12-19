@@ -1,6 +1,6 @@
 name: 'MyEventLane Event'
 type: module
-description: 'Canonical event orchestration module. Provides unified event mode detection, CTA building, and integration between RSVP and ticket flows.'
+description: 'Canonical event orchestration module. Provides unified event presentation, CTA building, and integration between RSVP and ticket flows.'
 package: MyEventLane
 core_version_requirement: ^11
 lifecycle: stable
@@ -11,3 +11,5 @@ dependencies:
   - myeventlane_schema:myeventlane_schema
   - myeventlane_event_attendees:myeventlane_event_attendees
   - drupal:node
+  - drupal:commerce_product
+  - drupal:commerce_price
