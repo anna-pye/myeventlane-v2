@@ -198,25 +198,6 @@ function myeventlane_rsvp_update_9004() {
 }
 
 /**
- * Update RSVP status and event_id field definitions.
- * 
- * Since these are base fields, we need to update them through the entity
- * definition update manager. However, due to issues with the update method,
- * we mark these as needing manual review through the entity updates page.
- */
-function myeventlane_rsvp_update_9006() {
-  // Clear the entity type cache so Drupal re-reads the definitions.
-  \Drupal::entityTypeManager()->clearCachedDefinitions();
-  
-  // Note: The actual field definition updates (status max_length and event_id handler)
-  // need to be applied through /admin/reports/status/entity-updates because
-  // updateFieldStorageDefinition requires batch processing for base fields.
-  // The entity definition update manager will detect the changes and apply them.
-  
-  return t('Prepared RSVP field definitions for update. Please visit /admin/reports/status/entity-updates to apply the changes.');
-}
-
-/**
  * Install missing base fields for rsvp_submission entity.
  */
 function myeventlane_rsvp_update_9005() {
@@ -258,4 +239,42 @@ function myeventlane_rsvp_update_9005() {
   }
   
   return t('Installed/updated missing base fields for rsvp_submission entity.');
+}
+
+/**
+ * Update RSVP status and event_id field definitions.
+ * 
+ * Since these are base fields, we need to update them through the entity
+ * definition update manager. However, due to issues with the update method,
+ * we mark these as needing manual review through the entity updates page.
+ */
+function myeventlane_rsvp_update_9006() {
+  // Clear the entity type cache so Drupal re-reads the definitions.
+  \Drupal::entityTypeManager()->clearCachedDefinitions();
+  
+  // Note: The actual field definition updates (status max_length and event_id handler)
+  // need to be applied through /admin/reports/status/entity-updates because
+  // updateFieldStorageDefinition requires batch processing for base fields.
+  // The entity definition update manager will detect the changes and apply them.
+  
+  return t('Prepared RSVP field definitions for update. Please visit /admin/reports/status/entity-updates to apply the changes.');
+}
+
+/**
+ * Update RSVP Submission status and event_id base field definitions.
+ * 
+ * Note: Base field definition updates for existing fields require batch processing
+ * and must be applied through /admin/reports/status/entity-updates. This update
+ * hook clears caches to ensure Drupal detects the definition changes.
+ */
+function myeventlane_rsvp_update_9007() {
+  // Clear entity type cache so Drupal re-reads the field definitions.
+  \Drupal::entityTypeManager()->clearCachedDefinitions();
+  
+  // The actual field definition updates (status max_length and event_id handler)
+  // must be applied through /admin/reports/status/entity-updates because
+  // updateFieldStorageDefinition() requires batch processing for base fields
+  // that already exist in the database.
+  
+  return t('Cleared entity definition cache. Please visit /admin/reports/status/entity-updates to apply RSVP field definition updates.');
 }

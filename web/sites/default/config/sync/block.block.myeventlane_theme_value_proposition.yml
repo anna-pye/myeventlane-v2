@@ -23,14 +23,3 @@ visibility:
     id: request_path
     negate: false
     pages: '<front>'
-
-
-
-
-
-
-
-
-
-
-

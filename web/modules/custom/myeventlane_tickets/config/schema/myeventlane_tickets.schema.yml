@@ -1,0 +1,20 @@
+# Schema for MyEventLane Tickets module configuration.
+myeventlane_tickets.settings:
+  type: config_object
+  label: 'MyEventLane Tickets settings'
+  mapping:
+    pdf_enabled:
+      type: boolean
+      label: 'PDF tickets enabled'
+    pdf_expiry_days:
+      type: string
+      label: 'PDF expiry days'
+    include_qr_code:
+      type: boolean
+      label: 'Include QR code in tickets'
+    show_ticket_code:
+      type: boolean
+      label: 'Show ticket code'
+    ticket_code_format:
+      type: string
+      label: 'Ticket code format'

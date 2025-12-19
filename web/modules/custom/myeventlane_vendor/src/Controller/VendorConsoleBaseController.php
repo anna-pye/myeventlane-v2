@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\myeventlane_vendor\Controller;
 
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\myeventlane_core\Service\DomainDetector;
+use Symfony\Component\HttpFoundation\TrustedRedirectResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
@@ -143,6 +146,125 @@ abstract class VendorConsoleBaseController {
     }
 
     return $render;
+  }
+
+  /**
+   * Gets the current vendor entity for the user.
+   *
+   * @return \Drupal\myeventlane_vendor\Entity\Vendor|null
+   *   The vendor entity, or NULL if not found.
+   */
+  protected function getCurrentVendorOrNull() {
+    $uid = (int) $this->currentUser->id();
+    if ($uid === 0) {
+      return NULL;
+    }
+
+    // Try to use entityTypeManager from child class if available.
+    $entityTypeManager = $this->entityTypeManager ?? \Drupal::entityTypeManager();
+
+    $storage = $entityTypeManager->getStorage('myeventlane_vendor');
+
+    // First, try to find vendor where user is the owner.
+    $owner_ids = $storage->getQuery()
+      ->accessCheck(TRUE)
+      ->condition('uid', $uid)
+      ->range(0, 1)
+      ->execute();
+
+    if (!empty($owner_ids)) {
+      $vendor = $storage->load(reset($owner_ids));
+      if ($vendor) {
+        return $vendor;
+      }
+    }
+
+    // If not found, check vendors where user is in field_vendor_users.
+    $user_ids = $storage->getQuery()
+      ->accessCheck(TRUE)
+      ->condition('field_vendor_users', $uid)
+      ->range(0, 1)
+      ->execute();
+
+    if (!empty($user_ids)) {
+      $vendor = $storage->load(reset($user_ids));
+      if ($vendor) {
+        return $vendor;
+      }
+    }
+
+    return NULL;
+  }
+
+  /**
+   * Asserts that the vendor has Stripe Connect configured.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
+   *   When Stripe is not connected.
+   * @throws \Symfony\Component\HttpFoundation\TrustedRedirectResponse
+   *   Redirects to Stripe onboarding if not connected.
+   */
+  protected function assertStripeConnected(): void {
+    // Administrators bypass this check.
+    if ($this->currentUser->hasPermission('administer site configuration') ||
+        $this->currentUser->id() === 1) {
+      return;
+    }
+
+    $vendor = $this->getCurrentVendorOrNull();
+    if (!$vendor || !$vendor->hasField('field_vendor_store') || $vendor->get('field_vendor_store')->isEmpty()) {
+      // No vendor or no store - redirect to onboarding.
+      $this->getMessenger()->addError($this->t('You must connect your Stripe account before setting up events.'));
+      $url = Url::fromRoute('myeventlane_vendor.onboard.stripe');
+      throw new TrustedRedirectResponse($url->toString());
+    }
+
+    $store = $vendor->get('field_vendor_store')->entity;
+    if (!$store) {
+      $this->getMessenger()->addError($this->t('You must connect your Stripe account before setting up events.'));
+      $url = Url::fromRoute('myeventlane_vendor.onboard.stripe');
+      throw new TrustedRedirectResponse($url->toString());
+    }
+
+    // Check if Stripe is connected.
+    $connected = FALSE;
+    if ($store->hasField('field_stripe_connected') && !$store->get('field_stripe_connected')->isEmpty()) {
+      $connected = (bool) $store->get('field_stripe_connected')->value;
+    }
+
+    // Also check charges_enabled as a stronger indicator.
+    if (!$connected && $store->hasField('field_stripe_charges_enabled') && !$store->get('field_stripe_charges_enabled')->isEmpty()) {
+      $connected = (bool) $store->get('field_stripe_charges_enabled')->value;
+    }
+
+    if (!$connected) {
+      $this->getMessenger()->addError($this->t('You must connect your Stripe account before setting up events.'));
+      $url = Url::fromRoute('myeventlane_vendor.onboard.stripe');
+      throw new TrustedRedirectResponse($url->toString());
+    }
+  }
+
+  /**
+   * Gets the messenger service.
+   *
+   * @return \Drupal\Core\Messenger\MessengerInterface
+   *   The messenger service.
+   */
+  protected function getMessenger(): MessengerInterface {
+    if (!isset($this->messenger)) {
+      $this->messenger = \Drupal::service('messenger');
+    }
+    return $this->messenger;
+  }
+
+  /**
+   * Gets the translation service.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslationInterface
+   *   The translation service.
+   */
+  protected function t($string, array $args = [], array $options = []) {
+    return \Drupal::translation()->translate($string, $args, $options);
   }
 
 }

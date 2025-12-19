@@ -48,6 +48,7 @@ final class VendorEventRsvpController extends VendorConsoleBaseController {
    */
   public function rsvps(NodeInterface $event): array {
     $this->assertEventOwnership($event);
+    $this->assertStripeConnected();
     $tabs = $this->eventTabs($event, 'rsvps');
     $summary = $this->rsvpStatsService->getRsvpSummary($event);
     $series = $this->rsvpStatsService->getDailyRsvpSeries($event);

@@ -12,9 +12,14 @@ function myeventlane_tickets_theme(array $existing, $type, $theme, $path): array
   return [
     'ticket_pdf' => [
       'variables' => [
-        'event' => NULL,
+        'order_item' => NULL,
+        'ticket' => NULL,
+        'event_title' => NULL,
+        'event_start' => NULL,
+        'location' => NULL,
         'holder' => NULL,
         'code' => NULL,
+        'legacy' => FALSE,
       ],
       'template' => 'ticket-pdf',
     ],

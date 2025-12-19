@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\myeventlane_dashboard\Controller;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Datetime\TimeInterface;
 use Drupal\Core\Url;
 use Drupal\myeventlane_event_attendees\Entity\EventAttendee;
 use Symfony\Component\DependencyInjection\ContainerInterface;

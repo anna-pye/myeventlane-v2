@@ -9,7 +9,7 @@ myeventlane_tickets.settings:
   options:
     _admin_route: TRUE
 
-# Ticket PDF download.
+# Ticket PDF download (legacy by order item ID).
 myeventlane_tickets.download_pdf:
   path: '/ticket/pdf/{order_item_id}'
   defaults:
@@ -18,3 +18,12 @@ myeventlane_tickets.download_pdf:
   requirements:
     _permission: 'access content'
     order_item_id: '\d+'
+
+# Canonical ticket PDF download by ticket code.
+myeventlane_tickets.download_pdf_by_code:
+  path: '/ticket/{ticket_code}/pdf'
+  defaults:
+    _controller: '\Drupal\myeventlane_tickets\Controller\TicketDownloadController::downloadByCode'
+    _title: 'Download Ticket PDF'
+  requirements:
+    _permission: 'access content'

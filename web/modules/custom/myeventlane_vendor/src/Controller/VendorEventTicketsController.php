@@ -28,6 +28,7 @@ final class VendorEventTicketsController extends VendorConsoleBaseController {
    */
   public function tickets(NodeInterface $event): array {
     $this->assertEventOwnership($event);
+    $this->assertStripeConnected();
     $tabs = $this->eventTabs($event, 'tickets');
     $sales = $this->ticketSalesService->getSalesSummary($event);
     $tickets = $this->ticketSalesService->getTicketBreakdown($event);

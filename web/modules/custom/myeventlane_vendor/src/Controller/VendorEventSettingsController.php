@@ -25,6 +25,7 @@ final class VendorEventSettingsController extends VendorConsoleBaseController {
    */
   public function settings(NodeInterface $event): array {
     $this->assertEventOwnership($event);
+    $this->assertStripeConnected();
     $tabs = $this->eventTabs($event, 'settings');
 
     return $this->buildVendorPage('myeventlane_vendor_console_page', [

@@ -61,6 +61,7 @@ final class VendorEventCreateController extends VendorConsoleBaseController impl
    */
   public function buildForm(): array {
     $this->assertVendorAccess();
+    $this->assertStripeConnected();
 
     // Get or create a draft event for this user.
     $event = $this->getOrCreateDraftEvent();

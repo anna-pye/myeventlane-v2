@@ -5,4 +5,14 @@ services:
 
   myeventlane_tickets.pdf:
     class: Drupal\myeventlane_tickets\Ticket\TicketPdfGenerator
-    arguments: ['@renderer', '@theme_handler']
+    arguments: ['@renderer']
+
+  myeventlane_tickets.issuer:
+    class: Drupal\myeventlane_tickets\Ticket\TicketIssuer
+    arguments: ['@entity_type.manager', '@myeventlane_tickets.code', '@logger.factory']
+
+  myeventlane_tickets.order_paid_subscriber:
+    class: Drupal\myeventlane_tickets\EventSubscriber\OrderPaidSubscriber
+    arguments: ['@myeventlane_tickets.issuer']
+    tags:
+      - { name: event_subscriber }

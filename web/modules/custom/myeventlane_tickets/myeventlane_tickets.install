@@ -1,0 +1,22 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * @file
+ * Install, update and uninstall functions for the myeventlane_tickets module.
+ */
+
+/**
+ * Implements hook_schema_alter().
+ */
+function myeventlane_tickets_schema_alter(array &$schema): void {
+  // Ensure ticket_code is unique and indexed.
+  if (isset($schema['myeventlane_ticket'])) {
+    $schema['myeventlane_ticket']['unique keys']['myeventlane_ticket__ticket_code'] = ['ticket_code'];
+    $schema['myeventlane_ticket']['indexes']['myeventlane_ticket__event'] = ['event_id'];
+    $schema['myeventlane_ticket']['indexes']['myeventlane_ticket__order'] = ['order_id'];
+    $schema['myeventlane_ticket']['indexes']['myeventlane_ticket__order_item'] = ['order_item_id'];
+    $schema['myeventlane_ticket']['indexes']['myeventlane_ticket__holder_email'] = ['holder_email'];
+  }
+}

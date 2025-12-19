@@ -63,4 +63,36 @@ class TicketCodeGenerator {
     return $entity;
   }
 
+  /**
+   * Generates a unique ticket code for the new Ticket entity.
+   *
+   * @return string
+   *   A unique ticket code.
+   */
+  public function generateUniqueTicketCode(): string {
+    $storage = $this->entityTypeManager->getStorage('myeventlane_ticket');
+    $max_attempts = 10;
+    $attempt = 0;
+
+    do {
+      // Generate a secure random code: MEL-{timestamp}-{random}
+      $code = 'MEL-' . time() . '-' . strtoupper(substr(bin2hex(random_bytes(8)), 0, 12));
+      $attempt++;
+
+      // Check if code already exists.
+      $existing = $storage->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('ticket_code', $code)
+        ->range(0, 1)
+        ->execute();
+
+      if (empty($existing)) {
+        return $code;
+      }
+    } while ($attempt < $max_attempts);
+
+    // Fallback: use UUID if we can't generate a unique code (very unlikely).
+    return 'MEL-' . str_replace('-', '', $this->uuidGenerator->generate());
+  }
+
 }
