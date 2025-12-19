@@ -10,15 +10,20 @@ use Drupal\taxonomy\TermInterface;
  * Implements hook_form_alter().
  */
 function myeventlane_event_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
-  // Apply only to Event node forms.
-  if ($form_id === 'node_event_form' || str_starts_with($form_id, 'node_event_')) {
-    /** @var \Drupal\myeventlane_event\Form\EventFormAlter $alter */
-    $alter = \Drupal::service('myeventlane_event.event_form_alter');
-    $alter->alterForm($form, $form_state, $form_id);
-  }
-
   // Ticket type paragraph conditional logic.
   \Drupal\myeventlane_event\Form\TicketTypeFormAlter::alterForm($form, $form_state);
+}
+
+/**
+ * Implements hook_form_node_event_form_alter().
+ *
+ * This specific hook runs AFTER hook_form_alter, ensuring we can remove
+ * conflicting elements added by other modules (like vendor module's tabs).
+ */
+function myeventlane_event_form_node_event_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  /** @var \Drupal\myeventlane_event\Form\EventFormAlter $alter */
+  $alter = \Drupal::service('myeventlane_event.event_form_alter');
+  $alter->alterForm($form, $form_state, $form_id);
 }
 
 /**

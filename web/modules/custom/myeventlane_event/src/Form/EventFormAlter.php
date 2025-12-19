@@ -158,11 +158,39 @@ final class EventFormAlter {
 
   /**
    * Hide conflicting navigation from vendor module and Drupal defaults.
+   *
+   * Completely removes conflicting elements to ensure clean wizard display.
    */
   private function hideConflictingNavigation(array &$form): void {
-    // Hide vendor module's horizontal tabs.
+    // Completely remove vendor module's horizontal tabs.
     if (isset($form['simple_tabs_nav'])) {
-      $form['simple_tabs_nav']['#access'] = FALSE;
+      unset($form['simple_tabs_nav']);
+    }
+
+    // Remove vendor module's tab pane classes from sections (they add mel-tab-pane, mel-simple-tab-pane).
+    $sections = ['event_basics', 'location', 'date_time', 'booking_config', 'visibility'];
+    foreach ($sections as $section_key) {
+      if (isset($form[$section_key]) && is_array($form[$section_key])) {
+        if (isset($form[$section_key]['#attributes']['class'])) {
+          $classes = $form[$section_key]['#attributes']['class'];
+          if (is_array($classes)) {
+            $classes = array_filter($classes, function($class) {
+              return !in_array($class, ['mel-tab-pane', 'mel-simple-tab-pane', 'is-active'], TRUE);
+            });
+            $form[$section_key]['#attributes']['class'] = array_values($classes);
+          }
+        }
+        // Remove tab pane data attributes.
+        if (isset($form[$section_key]['#attributes']['data-tab-pane'])) {
+          unset($form[$section_key]['#attributes']['data-tab-pane']);
+        }
+        if (isset($form[$section_key]['#attributes']['data-simple-tab-pane'])) {
+          unset($form[$section_key]['#attributes']['data-simple-tab-pane']);
+        }
+        if (isset($form[$section_key]['#attributes']['role']) && $form[$section_key]['#attributes']['role'] === 'tabpanel') {
+          unset($form[$section_key]['#attributes']['role']);
+        }
+      }
     }
 
     // Hide Drupal's default vertical tabs if present.
