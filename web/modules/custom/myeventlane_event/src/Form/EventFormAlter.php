@@ -74,63 +74,53 @@ final class EventFormAlter implements ContainerInjectionInterface {
       '#attributes' => ['class' => ['js-mel-wizard-target-step']],
     ];
 
-    // Stepper UI at top level for template compatibility.
-    $form['wizard_stepper'] = $this->buildStepper($steps, $current);
-
-    // Map step IDs to template-expected keys.
-    $step_key_map = [
-      'basics' => 'event_basics',
-      'schedule' => 'schedule',
-      'location' => 'location',
-      'tickets' => 'attendance_details',
-      'design' => 'extras',
-      'questions' => 'addons_tab',
-      'review' => 'review',
+    // Main wizard wrapper - this is what gets replaced by AJAX.
+    $form['mel_wizard'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'id' => 'mel-event-wizard-wrapper',
+        'class' => ['mel-event-wizard'],
+        'data-mel-current-step' => $current,
+      ],
+      '#weight' => -1000,
     ];
 
-    // Move top-level fields into step containers at top level.
+    // Stepper UI inside wrapper.
+    $form['mel_wizard']['stepper'] = $this->buildStepper($steps, $current);
+
+    // Move top-level fields into step containers.
     foreach ($steps as $step_id => $step) {
-      $container_key = $step_key_map[$step_id] ?? 'step_' . $step_id;
+      $container_key = 'step_' . $step_id;
       $is_active = ($step_id === $current);
 
-      $form[$container_key] = [
+      $form['mel_wizard'][$container_key] = [
         '#type' => 'container',
         '#attributes' => [
-          'class' => ['mel-wizard-step', 'mel-wizard-step--' . $step_id],
-          'data-wizard-step' => $step_id,
+          'class' => ['mel-wizard-step'],
+          'data-step' => $step_id,
         ],
         '#access' => $is_active,
       ];
 
-      $form[$container_key]['_heading'] = [
+      $form['mel_wizard'][$container_key]['_heading'] = [
         '#type' => 'html_tag',
         '#tag' => 'h2',
         '#value' => $step['label'],
         '#attributes' => ['class' => ['mel-wizard-step__title']],
       ];
 
-      // Create content wrapper for template compatibility.
-      $form[$container_key]['content'] = [
-        '#type' => 'container',
-        '#attributes' => ['class' => ['mel-wizard-step__content']],
-      ];
-
       foreach ($step['fields'] as $field_name) {
         if (isset($form[$field_name])) {
-          $form[$container_key]['content'][$field_name] = $form[$field_name];
+          $form['mel_wizard'][$container_key][$field_name] = $form[$field_name];
           unset($form[$field_name]);
         }
       }
 
       // Hide step if it ended up empty (except Review).
-      if ($step_id !== 'review' && count($form[$container_key]['content']) <= 0) {
-        $form[$container_key]['#access'] = FALSE;
+      if ($step_id !== 'review' && count($form['mel_wizard'][$container_key]) <= 2) {
+        $form['mel_wizard'][$container_key]['#access'] = FALSE;
       }
     }
-
-    // Create wrapper div for AJAX replacement (used by AJAX callback).
-    $form['#prefix'] = '<div id="mel-event-wizard-wrapper" class="mel-event-wizard" data-mel-current-step="' . htmlspecialchars($current) . '">';
-    $form['#suffix'] = '</div>';
 
     // Rewrite actions into wizard navigation.
     $this->rewriteActionsAsWizardNav($form, $form_state, $steps, $current);
@@ -323,8 +313,7 @@ final class EventFormAlter implements ContainerInjectionInterface {
    * AJAX callback for wizard wrapper.
    */
   public function ajaxCallback(array &$form, FormStateInterface $form_state): array {
-    // Return the entire form for AJAX replacement.
-    return $form;
+    return $form['mel_wizard'] ?? $form;
   }
 
   /**
@@ -390,20 +379,9 @@ final class EventFormAlter implements ContainerInjectionInterface {
     $limited = [];
     if (isset($steps[$step_id])) {
       foreach ($steps[$step_id]['fields'] as $field_name) {
-        // Fields may be nested in content containers, so include both paths.
         $limited[] = [$field_name];
-        // Also include nested path for template compatibility.
-        $step_key_map = [
-          'basics' => 'event_basics',
-          'schedule' => 'schedule',
-          'location' => 'location',
-          'tickets' => 'attendance_details',
-          'design' => 'extras',
-          'questions' => 'addons_tab',
-          'review' => 'review',
-        ];
-        $container_key = $step_key_map[$step_id] ?? 'step_' . $step_id;
-        $limited[] = [$container_key, 'content', $field_name];
+        // Also include nested path in case fields are nested.
+        $limited[] = ['mel_wizard', 'step_' . $step_id, $field_name];
       }
     }
     if (!in_array(['title'], $limited, TRUE)) {

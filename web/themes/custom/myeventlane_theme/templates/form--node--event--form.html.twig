@@ -1,10 +1,9 @@
 {#
 /**
  * @file
- * Theme override for Event node add/edit form (form theme hook).
+ * Theme override for Event node add/edit form.
  *
- * Renders the MEL-styled event wizard with left stepper and step panels.
- * Only renders the wizard wrapper - no duplicate fields, no legacy markup.
+ * Simple template that lets the wizard control the structure.
  */
 #}
 
@@ -15,16 +14,16 @@
   {{ form.form_id }}
 
   {# Wizard wrapper - contains stepper and all steps #}
-  {% if form.mel_event_wizard %}
-    {{ form.mel_event_wizard }}
+  {% if form.mel_wizard %}
+    {{ form.mel_wizard }}
   {% endif %}
 
   {# Hidden wizard state fields #}
   {% if form.wizard_current_step %}
     {{ form.wizard_current_step }}
   {% endif %}
-  {% if form.wizard_auto_save %}
-    {{ form.wizard_auto_save }}
+  {% if form.wizard_target_step %}
+    {{ form.wizard_target_step }}
   {% endif %}
 
   {# Hidden vendor/store fields (auto-populated) #}
@@ -35,7 +34,7 @@
     {{ form.field_event_store }}
   {% endif %}
 
-  {# Form actions (sticky footer) #}
+  {# Form actions (Next/Back/Submit) #}
   {% if form.actions %}
     {{ form.actions }}
   {% endif %}
@@ -43,8 +42,7 @@
   {# Render any remaining system fields that must be present #}
   {{ form|without(
     'form_build_id', 'form_token', 'form_id',
-    'mel_event_wizard', 'wizard_stepper', 'wizard_current_step', 'wizard_auto_save',
-    'event_basics', 'schedule', 'location', 'attendance_type', 'attendance_details', 'extras', 'review',
+    'mel_wizard', 'wizard_current_step', 'wizard_target_step',
     'field_event_vendor', 'field_event_store',
     'actions'
   ) }}

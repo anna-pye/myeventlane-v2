@@ -15,9 +15,16 @@
 .mel-wizard-stepper__title {
   font-weight: 600;
   margin-bottom: .75rem;
+  font-size: 1rem;
 }
 
 .mel-wizard-stepper__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mel-wizard-stepper__list li {
   margin: 0;
   padding: 0;
 }
@@ -27,6 +34,12 @@
   padding: .6rem .75rem;
   border-radius: 12px;
   text-decoration: none;
+  color: inherit;
+  transition: background-color 0.2s;
+}
+
+.mel-wizard-stepper__link:hover {
+  background: rgba(0,0,0,.03);
 }
 
 .mel-wizard-stepper__link.is-active {
@@ -38,23 +51,48 @@
   background: #fff;
   border: 1px solid rgba(0,0,0,.08);
   border-radius: 16px;
-  padding: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .mel-wizard-step__title {
-  margin: 0 0 1rem 0;
-  font-size: 1.25rem;
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .mel-wizard-actions {
   display: flex;
   gap: .75rem;
   align-items: center;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(0,0,0,.08);
 }
 
 .mel-wizard-actions .button {
   border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  transition: all 0.2s;
+}
+
+.mel-wizard-actions .button:hover {
+  background: rgba(0,0,0,.03);
+}
+
+.mel-wizard-actions .button--primary {
+  background: #0066cc;
+  color: #fff;
+  border-color: #0066cc;
+}
+
+.mel-wizard-actions .button--primary:hover {
+  background: #0052a3;
+  border-color: #0052a3;
 }
 
 /* Keep Drupal's helper compatible if theme lacks it. */

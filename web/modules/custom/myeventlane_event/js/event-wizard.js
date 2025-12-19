@@ -13,7 +13,7 @@
 
   Drupal.behaviors.melEventWizard = {
     attach: function (context) {
-      const $wrapper = $(once('mel-event-wizard', '.mel-event-wizard', context));
+      const $wrapper = $(once('mel-event-wizard', '#mel-event-wizard-wrapper', context));
       if (!$wrapper.length) {
         return;
       }
