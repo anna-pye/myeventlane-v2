@@ -225,12 +225,14 @@ final class EventFormAlter {
    */
   private function removeVendorTabsRecursive(array &$element): void {
     foreach ($element as $key => &$value) {
-      if (str_starts_with($key, '#')) {
+      // Skip form property keys (they start with #).
+      $key_str = (string) $key;
+      if (str_starts_with($key_str, '#')) {
         continue;
       }
 
       // Remove simple_tabs_nav anywhere in the structure.
-      if ($key === 'simple_tabs_nav') {
+      if ($key === 'simple_tabs_nav' || $key_str === 'simple_tabs_nav') {
         unset($element[$key]);
         continue;
       }
