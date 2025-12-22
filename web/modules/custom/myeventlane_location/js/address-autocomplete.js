@@ -3,11 +3,27 @@
  * Address autocomplete functionality for Google Maps and Apple Maps.
  */
 
+// CRITICAL: Log BEFORE IIFE to verify file is parsed
+console.log('========================================');
+console.log('MyEventLane Location: JavaScript file parsed');
+console.log('MyEventLane Location: File loaded at:', new Date().toISOString());
+console.log('MyEventLane Location: Drupal available?', typeof Drupal !== 'undefined');
+console.log('MyEventLane Location: drupalSettings available?', typeof drupalSettings !== 'undefined');
+console.log('========================================');
+
+// Get Drupal and drupalSettings from window if not passed
+var Drupal = typeof Drupal !== 'undefined' ? Drupal : (typeof window !== 'undefined' ? window.Drupal : null);
+var drupalSettings = typeof drupalSettings !== 'undefined' ? drupalSettings : (typeof window !== 'undefined' ? window.drupalSettings : null);
+
 (function (Drupal, drupalSettings) {
   'use strict';
 
   // Immediate console log to verify script is loading.
-  console.log('MyEventLane Location: Script file loaded and executing');
+  console.log('========================================');
+  console.log('MyEventLane Location: IIFE executing');
+  console.log('MyEventLane Location: Drupal:', Drupal ? 'available' : 'MISSING');
+  console.log('MyEventLane Location: drupalSettings:', drupalSettings ? 'available' : 'MISSING');
+  console.log('========================================');
 
   // Track initialization to prevent double initialization.
   const initializedForms = new WeakSet();
@@ -17,13 +33,24 @@
    */
   function initAddressAutocomplete() {
     console.log('MyEventLane Location: Initializing address autocomplete');
+    
+    // Check if drupalSettings is available
+    if (!drupalSettings) {
+      console.error('MyEventLane Location: drupalSettings is not available!');
+      console.error('MyEventLane Location: Cannot initialize without settings.');
+      return;
+    }
+    
     const settings = drupalSettings.myeventlaneLocation || {};
     const provider = settings.provider || 'google_maps';
     
     console.log('MyEventLane Location: Settings', settings);
+    console.log('MyEventLane Location: Provider:', provider);
+    console.log('MyEventLane Location: Google Maps API key present?', !!settings.google_maps_api_key);
     
     if (provider === 'google_maps' && !settings.google_maps_api_key) {
-      console.warn('MyEventLane Location: Google Maps API key not found');
+      console.error('MyEventLane Location: Google Maps API key not found in settings!');
+      console.error('MyEventLane Location: Full drupalSettings:', drupalSettings);
       return;
     }
 
@@ -1180,4 +1207,7 @@
     }
   }
 
-})(typeof Drupal !== 'undefined' ? Drupal : {}, typeof drupalSettings !== 'undefined' ? drupalSettings : {});
+})(Drupal || {}, drupalSettings || {});
+
+// Log AFTER IIFE to confirm it completed
+console.log('MyEventLane Location: IIFE completed execution');
