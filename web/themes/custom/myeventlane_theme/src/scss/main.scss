@@ -65,9 +65,12 @@
 @use 'components/tables';
 @use 'components/header';
 @use 'components/hero';
+@use 'components/event-grid';
 @use 'components/event-card';
 @use 'components/event-page';
 @use 'components/event-full';
+@use 'components/event-node';
+@use 'components/event' as event-component;
 @use 'components/mel-page-header';
 @use 'components/event-type-pill';
 @use 'components/rsvp';
@@ -77,6 +80,9 @@
 @use 'components/vendor-detail';
 @use 'components/feature-block';
 @use 'components/taxonomy-tags';
+@use 'components/event-wizard';
+@use 'components/ticket-types';
+@use 'components/diagnostics';
 
 // ---------------------------------------------------------------------------
 // 6. Pages

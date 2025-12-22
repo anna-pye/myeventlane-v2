@@ -7,6 +7,7 @@
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\node\NodeInterface;
@@ -667,10 +668,12 @@ function _myeventlane_theme_manifest_css(): ?string {
   return $cached = $css;
 }
 
+
 /**
  * Implements hook_node_view_alter().
  *
  * Attaches libraries and modifies build for event nodes.
+ * Prevents default field rendering so our custom template has full control.
  */
 function myeventlane_theme_node_view_alter(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display): void {
   // Only process event nodes in full/default view modes.
@@ -682,6 +685,9 @@ function myeventlane_theme_node_view_alter(array &$build, \Drupal\Core\Entity\En
   if (!in_array($view_mode, ['full', 'default'], TRUE)) {
     return;
   }
+
+  // Our custom field templates handle field rendering without default wrappers.
+  // Fields remain accessible in content array and will use our custom field templates.
 
   // Attach event-page library for styling.
   $build['#attached']['library'][] = 'myeventlane_theme/event-page';
@@ -721,10 +727,37 @@ function myeventlane_theme_preprocess_node(array &$variables): void {
     return;
   }
 
+  // Process teaser view mode for event cards in Views.
+  if ($view_mode === 'teaser') {
+    // Check if we're in a featured_events view context.
+    $view = NULL;
+    // Try to get view from various possible contexts.
+    if (isset($variables['view'])) {
+      $view = $variables['view'];
+    }
+    elseif (function_exists('views_get_current_view')) {
+      $view = views_get_current_view();
+    }
+    
+    if ($view instanceof ViewExecutable && $view->id() === 'featured_events') {
+      $variables['mel_card_variant'] = 'featured';
+    }
+    // Return early for teaser - let the template handle the rest.
+    return;
+  }
+
   // Only process full/default view modes for event display.
   if (!in_array($view_mode, ['full', 'default'], TRUE)) {
     return;
   }
+
+  // Add template suggestion to ensure our custom template is used.
+  if (!isset($variables['theme_hook_suggestions'])) {
+    $variables['theme_hook_suggestions'] = [];
+  }
+  // Add our custom template suggestion at the beginning (highest priority).
+  array_unshift($variables['theme_hook_suggestions'], 'node__event__' . $view_mode);
+  array_unshift($variables['theme_hook_suggestions'], 'node__event');
 
   // Ensure mel-event class is in attributes.
   if (!in_array('mel-event', $variables['attributes']['class'] ?? [], TRUE)) {
@@ -841,23 +874,106 @@ function myeventlane_theme_preprocess_node(array &$variables): void {
     if ($primary_cta) {
       $variables['content']['mel_ticket_cta'] = $primary_cta;
     }
+    
+    // Get all CTAs for templates that need them.
+    $all_ctas = $mode_manager->getAllCtas($node);
+    $variables['mel_all_ctas'] = $all_ctas;
+    $variables['mel_event_mode'] = $mode_manager->getEffectiveMode($node);
+    $variables['mel_is_bookable'] = $mode_manager->isBookable($node);
   }
   catch (\Exception $e) {
     // Service unavailable, continue without ticket CTA.
+    $variables['mel_all_ctas'] = [];
+    $variables['mel_event_mode'] = 'none';
+    $variables['mel_is_bookable'] = FALSE;
   }
 
-  // Vendor label. Only vendor entities, no author fallback.
-  $vendor = '';
-  foreach (['field_vendor', 'field_vendor_target', 'field_store'] as $f) {
-    if ($node->hasField($f) && !$node->get($f)->isEmpty()) {
-      $ref = $node->get($f)->entity;
-      if ($ref && $ref->getEntityTypeId() === 'myeventlane_vendor') {
-        $vendor = (string) $ref->label();
-        break;
+  // Get event state for state badge display.
+  try {
+    /** @var \Drupal\myeventlane_event_state\Service\EventStateResolverInterface $state_resolver */
+    $state_resolver = \Drupal::service('myeventlane_event_state.resolver');
+    $state = $state_resolver->resolveState($node);
+    $variables['mel_event_state'] = $state;
+    
+    // Get sales start/end for display.
+    $sales_start = $state_resolver->getSalesStart($node);
+    $sales_end = $state_resolver->getSalesEnd($node);
+    $variables['mel_sales_start'] = $sales_start;
+    $variables['mel_sales_end'] = $sales_end;
+    
+    // Format sales start date if scheduled.
+    if ($state === 'scheduled' && $sales_start) {
+      $variables['mel_sales_start_formatted'] = \Drupal::service('date.formatter')->format($sales_start, 'custom', 'l j F Y g:ia');
+    }
+  }
+  catch (\Exception $e) {
+    // Service unavailable, default to draft state.
+    $variables['mel_event_state'] = 'draft';
+    $variables['mel_sales_start'] = NULL;
+    $variables['mel_sales_end'] = NULL;
+    $variables['mel_sales_start_formatted'] = NULL;
+  }
+
+  // Get capacity information for sidebar display.
+  try {
+    /** @var \Drupal\myeventlane_metrics\Service\EventMetricsServiceInterface $metrics_service */
+    $metrics_service = \Drupal::service('myeventlane_metrics.service');
+    $capacity = $metrics_service->getCapacityTotal($node);
+    $attendee_count = $metrics_service->getAttendeeCount($node);
+    $remaining = $metrics_service->getRemainingCapacity($node);
+    
+    $variables['mel_capacity'] = [
+      'capacity' => $capacity,
+      'attendee_count' => $attendee_count,
+      'remaining' => $remaining,
+    ];
+  }
+  catch (\Exception $e) {
+    // Metrics service unavailable, skip capacity display.
+    $variables['mel_capacity'] = NULL;
+  }
+
+  // Vendor information (prefer field_event_vendor, fallback to other vendor fields).
+  $vendor_entity = NULL;
+  $vendor_name = '';
+  $vendor_logo = NULL;
+  
+  // Check field_event_vendor first (preferred).
+  if ($node->hasField('field_event_vendor') && !$node->get('field_event_vendor')->isEmpty()) {
+    $vendor_entity = $node->get('field_event_vendor')->entity;
+  }
+  // Fallback to other vendor fields.
+  else {
+    foreach (['field_vendor', 'field_vendor_target', 'field_store'] as $f) {
+      if ($node->hasField($f) && !$node->get($f)->isEmpty()) {
+        $ref = $node->get($f)->entity;
+        if ($ref && $ref->getEntityTypeId() === 'myeventlane_vendor') {
+          $vendor_entity = $ref;
+          break;
+        }
       }
     }
   }
-  $variables['mel_vendor'] = trim($vendor);
+  
+  if ($vendor_entity) {
+    $vendor_name = (string) $vendor_entity->label();
+    // Get vendor logo if available.
+    if ($vendor_entity->hasField('field_vendor_logo') && !$vendor_entity->get('field_vendor_logo')->isEmpty()) {
+      $logo_file = $vendor_entity->get('field_vendor_logo')->entity;
+      if ($logo_file) {
+        try {
+          $vendor_logo = \Drupal::service('file_url_generator')->generateString($logo_file->getFileUri());
+        }
+        catch (\Exception $e) {
+          // Logo unavailable, continue without it.
+        }
+      }
+    }
+  }
+  
+  $variables['mel_vendor'] = trim($vendor_name);
+  $variables['mel_vendor_entity'] = $vendor_entity;
+  $variables['mel_vendor_logo'] = $vendor_logo;
 
   // Category pills.
   $cats = [];
@@ -884,6 +1000,382 @@ function myeventlane_theme_preprocess_node(array &$variables): void {
     }
   }
   $variables['mel_categories'] = $cats;
+
+  // ============================================================================
+  // NEW EVENT PAGE VARIABLES (for expanded card layout)
+  // ============================================================================
+
+  // State variables (normalized from mel_event_state).
+  $state = $variables['mel_event_state'] ?? 'draft';
+  $variables['mel_state'] = $state;
+
+  // State label mapping.
+  $state_labels = [
+    'scheduled' => t('Scheduled'),
+    'live' => t('Live'),
+    'sold_out' => t('Sold Out'),
+    'cancelled' => t('Cancelled'),
+    'ended' => t('Ended'),
+    'draft' => t('Draft'),
+  ];
+  $variables['mel_state_label'] = $state_labels[$state] ?? t('Draft');
+
+  // Status message with MEL tone.
+  $status_message = NULL;
+  if ($state === 'cancelled') {
+    $status_message = t('This event won\'t be going ahead.');
+  }
+  elseif ($state === 'scheduled' && isset($variables['mel_sales_start_formatted'])) {
+    $status_message = t('Sales open on @date. Add it to your calendar so you don\'t miss out.', [
+      '@date' => $variables['mel_sales_start_formatted'],
+    ]);
+  }
+  elseif ($state === 'sold_out') {
+    $status_message = t('Sold out — join the waitlist and we\'ll notify you.');
+  }
+  $variables['mel_status_message'] = $status_message;
+
+  // Date and time labels.
+  $date_formatter = \Drupal::service('date.formatter');
+  $date_label = NULL;
+  $time_label = NULL;
+
+  if ($node->hasField('field_event_start') && !$node->get('field_event_start')->isEmpty()) {
+    $start_value = $node->get('field_event_start')->value;
+    $start_timestamp = strtotime($start_value);
+
+    $date_label = $date_formatter->format($start_timestamp, 'custom', 'l j F Y');
+    $time_label = $date_formatter->format($start_timestamp, 'custom', 'g:ia');
+
+    if ($node->hasField('field_event_end') && !$node->get('field_event_end')->isEmpty()) {
+      $end_value = $node->get('field_event_end')->value;
+      $end_timestamp = strtotime($end_value);
+      $time_label .= ' – ' . $date_formatter->format($end_timestamp, 'custom', 'g:ia');
+    }
+  }
+  $variables['mel_date_label'] = $date_label;
+  $variables['mel_time_label'] = $time_label;
+
+  // Venue label (prefer venue name, fallback to address locality).
+  $venue_label = NULL;
+  if (!empty($variables['mel_venue'])) {
+    $venue_label = $variables['mel_venue'];
+  }
+  elseif (!empty($variables['mel_address'])) {
+    $address_parts = explode(',', $variables['mel_address']);
+    $venue_label = trim($address_parts[0] ?? '');
+  }
+  $variables['mel_venue_label'] = $venue_label;
+
+  // Category label (first category only).
+  $category_label = NULL;
+  if (!empty($cats) && isset($cats[0]['name'])) {
+    $category_label = $cats[0]['name'];
+  }
+  $variables['mel_category_label'] = $category_label;
+
+  // ============================================================================
+  // CANONICAL EVENT CTA LOGIC (Phase 1)
+  // ============================================================================
+  // Resolves to ONE state: Buy tickets, RSVP, Sold out, or Event ended
+  // Considers: event date (past vs upcoming), capacity, ticket availability, RSVP enabled
+  
+  $event_cta = [
+    'label' => NULL,
+    'url' => NULL,
+    'disabled' => TRUE,
+    'state' => $state,
+    'helper' => NULL,
+  ];
+
+  // Event ended or cancelled - no CTA
+  if ($state === 'ended' || $state === 'cancelled') {
+    $event_cta['label'] = $state === 'ended' ? t('Event Ended') : t('Event Cancelled');
+    $event_cta['disabled'] = TRUE;
+  }
+  // Scheduled (sales not started yet)
+  elseif ($state === 'scheduled') {
+    $event_cta['label'] = isset($variables['mel_sales_start_formatted'])
+      ? t('Sales open on @date', ['@date' => $variables['mel_sales_start_formatted']])
+      : t('Sales opening soon');
+    $event_cta['disabled'] = TRUE;
+    $event_cta['helper'] = t('Add it to your calendar so you don\'t miss out.');
+  }
+  // Sold out
+  elseif ($state === 'sold_out') {
+    // Check if waitlist is available
+    if (!empty($variables['mel_all_ctas']['waitlist'])) {
+      try {
+        $event_cta['label'] = t('Join Waitlist');
+        $event_cta['url'] = Url::fromRoute('myeventlane_event_attendees.waitlist_signup', ['node' => $node->id()])->toString();
+        $event_cta['disabled'] = FALSE;
+        $event_cta['helper'] = t('We\'ll notify you if a spot opens.');
+      }
+      catch (\Exception $e) {
+        // Route not available, show sold out
+        $event_cta['label'] = t('Sold Out');
+        $event_cta['disabled'] = TRUE;
+      }
+    }
+    else {
+      $event_cta['label'] = t('Sold Out');
+      $event_cta['disabled'] = TRUE;
+    }
+  }
+  // Live event - determine primary action
+  elseif ($state === 'live' || ($state !== 'cancelled' && $state !== 'ended')) {
+    // Use EventModeManager to get primary CTA
+    try {
+      /** @var \Drupal\myeventlane_event\Service\EventModeManager $mode_manager */
+      $mode_manager = \Drupal::service('myeventlane_event.mode_manager');
+      $primary_cta = $mode_manager->getPrimaryCta($node);
+      
+      if (!empty($primary_cta) && isset($primary_cta['#url'])) {
+        $event_cta['label'] = $primary_cta['#title'] ?? t('Get Tickets');
+        $event_cta['url'] = $primary_cta['#url']->toString();
+        $event_cta['disabled'] = FALSE;
+      }
+      // Fallback to mel_all_ctas if primary CTA not available
+      elseif (!empty($variables['mel_all_ctas'])) {
+        if (isset($variables['mel_all_ctas']['tickets'])) {
+          $event_cta['label'] = t('Buy Tickets');
+          $event_cta['url'] = Url::fromRoute('myeventlane_commerce.event_book', ['node' => $node->id()])->toString();
+          $event_cta['disabled'] = FALSE;
+        }
+        elseif (isset($variables['mel_all_ctas']['rsvp'])) {
+          $event_cta['label'] = t('RSVP Now');
+          $event_cta['url'] = Url::fromRoute('myeventlane_commerce.event_book', ['node' => $node->id()])->toString();
+          $event_cta['disabled'] = FALSE;
+        }
+        elseif (isset($variables['mel_all_ctas']['external'])) {
+          $event_cta['label'] = t('Get Tickets');
+          $external_url = $variables['mel_all_ctas']['external']['#url'] ?? NULL;
+          if ($external_url instanceof \Drupal\Core\Url) {
+            $event_cta['url'] = $external_url->toString();
+            $event_cta['disabled'] = FALSE;
+          }
+        }
+      }
+      // Final fallback to content render array
+      elseif (isset($variables['content']['mel_ticket_cta'])) {
+        $cta_render = $variables['content']['mel_ticket_cta'];
+        if (isset($cta_render['#url'])) {
+          $event_cta['label'] = $cta_render['#title'] ?? t('Get Tickets');
+          $event_cta['url'] = $cta_render['#url']->toString();
+          $event_cta['disabled'] = FALSE;
+        }
+      }
+    }
+    catch (\Exception $e) {
+      // Service unavailable, default to disabled
+      $event_cta['label'] = t('Registration unavailable');
+      $event_cta['disabled'] = TRUE;
+    }
+  }
+
+  // Set canonical event_cta variable (primary)
+  $variables['event_cta'] = $event_cta;
+
+  // Backward compatibility: set individual variables and mel_event_cta
+  $variables['mel_cta_state'] = $event_cta['disabled'] ? 'disabled' : 'enabled';
+  $variables['mel_cta_label'] = $event_cta['label'];
+  $variables['mel_cta_url'] = $event_cta['url'];
+  $variables['mel_cta_helper'] = $event_cta['helper'];
+  $variables['mel_event_cta'] = $event_cta;
+
+  // Calendar URLs.
+  $ics_url = NULL;
+  $google_cal_url = NULL;
+
+  if ($node->hasField('field_event_start') && !$node->get('field_event_start')->isEmpty()) {
+    // ICS download URL.
+    try {
+      $ics_url = Url::fromRoute('myeventlane_rsvp.ics_download', ['node' => $node->id()])->toString();
+    }
+    catch (\Exception $e) {
+      // Route not available.
+    }
+
+    // Google Calendar URL.
+    $start_value = $node->get('field_event_start')->value;
+    $end_value = $node->hasField('field_event_end') && !$node->get('field_event_end')->isEmpty()
+      ? $node->get('field_event_end')->value
+      : NULL;
+
+    $start_iso = gmdate('Ymd\THis\Z', strtotime($start_value));
+    $end_iso = $end_value ? gmdate('Ymd\THis\Z', strtotime($end_value)) : gmdate('Ymd\THis\Z', strtotime($start_value . ' +2 hours'));
+
+    $title_encoded = rawurlencode($node->label());
+    $location_parts = array_filter([$variables['mel_venue'] ?? NULL, $variables['mel_address'] ?? NULL]);
+    $location_encoded = rawurlencode(implode(', ', $location_parts));
+    $details_encoded = rawurlencode(strip_tags($node->hasField('body') && !$node->get('body')->isEmpty() ? $node->get('body')->value : ''));
+    $url_encoded = rawurlencode($node->toUrl('canonical', ['absolute' => TRUE])->toString());
+
+    $google_cal_url = "https://calendar.google.com/calendar/render?action=TEMPLATE"
+      . "&text={$title_encoded}"
+      . "&dates={$start_iso}/{$end_iso}"
+      . "&details={$details_encoded}"
+      . "&location={$location_encoded}"
+      . "&ctz=" . date_default_timezone_get();
+  }
+
+  $variables['mel_ics_url'] = $ics_url;
+  $variables['mel_google_cal_url'] = $google_cal_url;
+
+  // Directions URL.
+  $directions_url = NULL;
+  if (!empty($variables['mel_address'])) {
+    $directions_url = 'https://maps.google.com/?q=' . rawurlencode($variables['mel_address']);
+  }
+  elseif (!empty($variables['mel_venue'])) {
+    $directions_url = 'https://maps.google.com/?q=' . rawurlencode($variables['mel_venue']);
+  }
+  $variables['mel_directions_url'] = $directions_url;
+
+  // Capacity variables.
+  $attending_count = 0;
+  $capacity_percent = 0;
+  $capacity_helper = NULL;
+
+  if (!empty($variables['mel_capacity'])) {
+    $attending_count = (int) ($variables['mel_capacity']['attendee_count'] ?? 0);
+    $capacity = $variables['mel_capacity']['capacity'] ?? NULL;
+    $remaining = $variables['mel_capacity']['remaining'] ?? NULL;
+
+    if ($capacity !== NULL && $capacity > 0) {
+      $capacity_percent = min(100, round(($attending_count / $capacity) * 100));
+      if ($remaining !== NULL) {
+        $capacity_helper = t('@count spots remaining', ['@count' => $remaining]);
+      }
+    }
+    else {
+      $capacity_percent = 0;
+      $capacity_helper = t('Unlimited capacity');
+    }
+  }
+
+  $variables['mel_attending_count'] = $attending_count;
+  $variables['mel_capacity_percent'] = $capacity_percent;
+  $variables['mel_capacity_helper'] = $capacity_helper;
+
+  // Price summary (Free RSVP or From $X for paid events).
+  $price_summary = NULL;
+  $event_type = $node->hasField('field_event_type') && !$node->get('field_event_type')->isEmpty()
+    ? (string) $node->get('field_event_type')->value
+    : 'rsvp';
+  
+  // Check if event has paid tickets.
+  if (in_array($event_type, ['paid', 'both'], TRUE)) {
+    // Get product and find lowest price variation.
+    if ($node->hasField('field_product_target') && !$node->get('field_product_target')->isEmpty()) {
+      $product = $node->get('field_product_target')->entity;
+      if ($product && $product->isPublished()) {
+        $variations = $product->getVariations();
+        $lowest_price = NULL;
+        
+        foreach ($variations as $variation) {
+          if (!$variation->isPublished()) {
+            continue;
+          }
+          
+          $price = $variation->getPrice();
+          if ($price) {
+            $price_number = $price->getNumber();
+            // Only consider non-zero prices for "From $X" display.
+            if ($price_number > 0) {
+              if ($lowest_price === NULL || $price_number < $lowest_price->getNumber()) {
+                $lowest_price = $price;
+              }
+            }
+          }
+        }
+        
+        if ($lowest_price) {
+          try {
+            $currency_formatter = \Drupal::service('commerce_price.currency_formatter');
+            $formatted_price = $currency_formatter->format($lowest_price->getNumber(), $lowest_price->getCurrencyCode());
+            $price_summary = t('From @price', ['@price' => $formatted_price]);
+          }
+          catch (\Exception $e) {
+            // Currency formatter unavailable, skip price summary.
+          }
+        }
+        // If all variations are $0, show "Free RSVP" for both mode.
+        elseif ($event_type === 'both') {
+          $price_summary = t('Free RSVP');
+        }
+      }
+    }
+  }
+  // RSVP-only events are free.
+  elseif ($event_type === 'rsvp') {
+    $price_summary = t('Free RSVP');
+  }
+  
+  $variables['mel_price_summary'] = $price_summary;
+
+  // Organiser block (prefer vendor, fallback to node owner).
+  $organiser_block = [];
+  $organiser_name = NULL;
+  $organiser_logo = NULL;
+  
+  // Use vendor if available.
+  if ($vendor_entity) {
+    $organiser_name = $vendor_name;
+    $organiser_logo = $vendor_logo;
+  }
+  // Fallback to node owner.
+  else {
+    $owner = $node->getOwner();
+    if ($owner) {
+      $organiser_name = $owner->getDisplayName();
+    }
+  }
+  
+  if ($organiser_name) {
+    $markup = '<div class="mel-organiser__name">' . htmlspecialchars($organiser_name, ENT_QUOTES, 'UTF-8') . '</div>';
+    if ($organiser_logo) {
+      $markup = '<div class="mel-organiser__logo"><img src="' . htmlspecialchars($organiser_logo, ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($organiser_name, ENT_QUOTES, 'UTF-8') . '" /></div>' . $markup;
+    }
+    $markup .= '<p class="mel-organiser__trust">Verified organiser</p>';
+    
+    $organiser_block = [
+      '#type' => 'markup',
+      '#markup' => $markup,
+    ];
+  }
+  $variables['mel_organiser_block'] = $organiser_block;
+  $variables['mel_organiser_name'] = $organiser_name;
+  $variables['mel_organiser_logo'] = $organiser_logo;
+
+  // ============================================================================
+  // NEW EVENT FULL TEMPLATE VARIABLES (Humanitix-style layout)
+  // ============================================================================
+  // These variables are used by the new node--event--full.html.twig template.
+
+  // Registration badge.
+  $variables['mel_registration_badge'] = _myeventlane_theme_event_registration_badge($node);
+
+  // Capacity text (simple string format).
+  $variables['mel_capacity_text'] = _myeventlane_theme_event_capacity_text($node);
+
+  // Calendar links (render array).
+  $variables['mel_calendar_links'] = _myeventlane_theme_event_calendar_links($node);
+
+  // Phase 1 CTA placeholder. Phase 2 will wire this to TicketMatrix / RSVP.
+  $variables['mel_ticket_cta'] = [
+    '#type' => 'link',
+    '#title' => t('Register'),
+    '#url' => $node->toUrl(),
+    '#attributes' => [
+      'class' => ['mel-button', 'mel-button--primary', 'mel-button--full'],
+    ],
+  ];
+
+  // Optional blocks (wire later).
+  $variables['mel_host_block'] = NULL;
+  $variables['mel_more_from_host_block'] = NULL;
+  $variables['mel_trending_block'] = NULL;
 }
 
 /**
@@ -1679,5 +2171,101 @@ function myeventlane_theme_preprocess_search_result(array &$variables): void {
     'ticket_type' => $ticket_type,
     'ticket_label' => $ticket_label,
     'accessibility' => $accessibility,
+  ];
+}
+
+/**
+ * Helper function to compute registration badge text for event nodes.
+ */
+function _myeventlane_theme_event_registration_badge(NodeInterface $node): string {
+  $state = '';
+  if ($node->hasField('field_event_state_override') && !$node->get('field_event_state_override')->isEmpty()) {
+    $state = (string) $node->get('field_event_state_override')->value;
+  }
+  elseif ($node->hasField('field_event_state') && !$node->get('field_event_state')->isEmpty()) {
+    $state = (string) $node->get('field_event_state')->value;
+  }
+
+  if ($state === 'cancelled') {
+    return (string) t('Cancelled');
+  }
+
+  $now = new \DateTimeImmutable('now', new \DateTimeZone(date_default_timezone_get()));
+
+  $sales_start = NULL;
+  if ($node->hasField('field_sales_start') && !$node->get('field_sales_start')->isEmpty()) {
+    $sales_start = new \DateTimeImmutable((string) $node->get('field_sales_start')->value);
+  }
+
+  $sales_end = NULL;
+  if ($node->hasField('field_sales_end') && !$node->get('field_sales_end')->isEmpty()) {
+    $sales_end = new \DateTimeImmutable((string) $node->get('field_sales_end')->value);
+  }
+
+  if ($sales_start && $now < $sales_start) {
+    return (string) t('Registration not open yet');
+  }
+  if ($sales_end && $now > $sales_end) {
+    return (string) t('Registration closed');
+  }
+
+  return (string) t('Tickets available');
+}
+
+/**
+ * Helper function to compute capacity text for event nodes.
+ */
+function _myeventlane_theme_event_capacity_text(NodeInterface $node): ?string {
+  // Choose a single authoritative capacity field for display.
+  // Recommend: field_event_capacity_total.
+  if (!$node->hasField('field_event_capacity_total') || $node->get('field_event_capacity_total')->isEmpty()) {
+    return NULL;
+  }
+
+  $total = (int) $node->get('field_event_capacity_total')->value;
+  if ($total <= 0) {
+    return NULL;
+  }
+
+  // Phase 1: show total only.
+  // Phase 2: subtract registrations/orders to show remaining.
+  return (string) t('@total total capacity', ['@total' => $total]);
+}
+
+/**
+ * Helper function to generate calendar links for event nodes.
+ */
+function _myeventlane_theme_event_calendar_links(NodeInterface $node): array {
+  // Phase 1: placeholders (safe, no broken routes).
+  // Phase 2: replace with real ICS + Google/Apple deep links.
+  $items = [
+    [
+      '#type' => 'link',
+      '#title' => t('Apple'),
+      '#url' => Url::fromUri('https://www.apple.com/'),
+      '#attributes' => ['rel' => 'nofollow noopener', 'target' => '_blank'],
+    ],
+    [
+      '#type' => 'link',
+      '#title' => t('Google Calendar'),
+      '#url' => Url::fromUri('https://calendar.google.com/'),
+      '#attributes' => ['rel' => 'nofollow noopener', 'target' => '_blank'],
+    ],
+    [
+      '#type' => 'link',
+      '#title' => t('Outlook (.ics)'),
+      '#url' => Url::fromUri('https://www.microsoft.com/'),
+      '#attributes' => ['rel' => 'nofollow noopener', 'target' => '_blank'],
+    ],
+  ];
+
+  return [
+    '#theme' => 'item_list',
+    '#items' => $items,
+    '#attributes' => ['class' => ['mel-links-inline__list']],
+    '#cache' => [
+      'tags' => $node->getCacheTags(),
+      'contexts' => ['url.path', 'languages:language_interface'],
+    ],
   ];
 }
