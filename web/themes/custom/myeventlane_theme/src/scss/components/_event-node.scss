@@ -1,0 +1,701 @@
+// ==========================================================================
+// Event Node Full Page - MEL Funky Design
+// ==========================================================================
+// Modern, fun, funky event product page styling.
+// Mobile-first with sticky sidebar and bottom CTA.
+
+@use '../tokens/colors' as *;
+@use '../tokens/typography' as type;
+@use '../tokens/spacing' as space;
+@use '../tokens/radii';
+@use '../tokens/shadows';
+@use '../tokens/breakpoints' as *;
+@use 'sass:map';
+
+// --------------------------------------------------------------------------
+// Event Wrapper
+// --------------------------------------------------------------------------
+
+.mel-event--full {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 100%;
+  padding: 0;
+  position: relative;
+  background: $mel-color-bg;
+
+  @include mel-break(lg) {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: space.mel-space(4);
+    gap: space.mel-space(4);
+  }
+}
+
+// --------------------------------------------------------------------------
+// Hero Section
+// --------------------------------------------------------------------------
+
+.mel-event-hero {
+  position: relative;
+  width: 100%;
+  margin-bottom: 0;
+  overflow: hidden;
+
+  &__image {
+    position: relative;
+    width: 100%;
+    height: 50vh;
+    min-height: 400px;
+    max-height: 600px;
+    overflow: hidden;
+
+    @include mel-break(md) {
+      height: 60vh;
+      min-height: 500px;
+      max-height: 700px;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  &__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      135deg,
+      rgba($mel-color-secondary, 0.5) 0%,
+      rgba($mel-color-primary, 0.4) 50%,
+      rgba($mel-color-accent, 0.3) 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &__content {
+    position: relative;
+    padding: space.mel-space(4) space.mel-space(3);
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.8) 0%,
+      rgba(0, 0, 0, 0.5) 50%,
+      transparent 100%
+    );
+    color: $mel-color-text-inverse;
+    z-index: 2;
+
+    @include mel-break(md) {
+      padding: space.mel-space(6) space.mel-space(4);
+    }
+
+    // If no image, use solid background
+    .mel-event-hero:not(:has(&__image)) & {
+      background: linear-gradient(
+        135deg,
+        $mel-color-secondary 0%,
+        $mel-color-primary 100%
+      );
+      padding: space.mel-space(6) space.mel-space(4);
+    }
+  }
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: space.mel-space(3);
+    margin-bottom: space.mel-space(4);
+  }
+
+  &__title {
+    @include type.mel-text(4xl, tight);
+    font-weight: type.$mel-font-bold;
+    margin: 0;
+    color: $mel-color-text-inverse;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    line-height: 1.1;
+
+    @include mel-break(md) {
+      @include type.mel-text(4xl, tight);
+      font-size: 3.5rem;
+    }
+  }
+
+  &__cta {
+    margin-top: space.mel-space(3);
+  }
+}
+
+// --------------------------------------------------------------------------
+// Status Badge
+// --------------------------------------------------------------------------
+
+.mel-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: space.mel-space(1) space.mel-space(3);
+  border-radius: radii.$mel-radius-full;
+  @include type.mel-text(sm);
+  font-weight: type.$mel-font-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  align-self: flex-start;
+  backdrop-filter: blur(10px);
+  box-shadow: shadows.$mel-shadow-sm;
+
+  &--scheduled {
+    background: rgba($mel-color-accent, 0.95);
+    color: #664d03;
+  }
+
+  &--live {
+    background: rgba($mel-color-success, 0.95);
+    color: #166534;
+  }
+
+  &--sold_out {
+    background: rgba($mel-color-error, 0.95);
+    color: #991b1b;
+  }
+
+  &--cancelled,
+  &--ended {
+    background: rgba($mel-color-text-muted, 0.95);
+    color: $mel-color-text-inverse;
+  }
+}
+
+// --------------------------------------------------------------------------
+// Event Meta Chips
+// --------------------------------------------------------------------------
+
+.mel-event-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: space.mel-space(2);
+  align-items: center;
+}
+
+.mel-event-meta__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: space.mel-space(1);
+  padding: space.mel-space(1) space.mel-space(3);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: radii.$mel-radius-full;
+  @include type.mel-text(sm);
+  font-weight: type.$mel-font-medium;
+  color: $mel-color-text;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &--category {
+    background: rgba($mel-color-secondary, 0.2);
+    color: $mel-color-text-inverse;
+  }
+}
+
+.mel-event-meta__icon {
+  font-size: 1em;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+// --------------------------------------------------------------------------
+// Cancelled Banner
+// --------------------------------------------------------------------------
+
+.mel-event-cancelled-banner {
+  padding: space.mel-space(4) space.mel-space(3);
+  background: $mel-color-error-bg;
+  border-left: 4px solid $mel-color-error;
+  margin: space.mel-space(4) space.mel-space(3);
+
+    @include mel-break(lg) {
+      margin: space.mel-space(4) 0;
+      border-radius: radii.$mel-radius-md;
+    }
+
+  &__text {
+    margin: 0;
+    @include type.mel-text(base);
+    color: $mel-color-error;
+  }
+}
+
+// --------------------------------------------------------------------------
+// Event Grid Layout
+// --------------------------------------------------------------------------
+
+// NOTE: .mel-event-grid layout is defined in:
+// - _event-card.scss: Grid layout for event listings (home page, search, etc.)
+// - _event-full.scss: Flexbox layout for event full pages (scoped to .mel-event--full)
+// 
+// This file does NOT define .mel-event-grid to avoid conflicts.
+
+// --------------------------------------------------------------------------
+// Event Cards (Event Detail Pages Only)
+// --------------------------------------------------------------------------
+// NOTE: These styles are scoped to event detail pages to avoid conflicts
+// with grid cards defined in _event-card.scss
+
+.mel-event--full .mel-event-card,
+.mel-event-page .mel-event-card {
+  padding: space.mel-space(4);
+  background: $mel-color-surface;
+  border-radius: radii.$mel-radius-lg;
+  box-shadow: shadows.$mel-shadow-sm;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid $mel-color-border;
+
+  @include mel-break(lg) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: shadows.$mel-shadow-md;
+    }
+  }
+
+  &__title {
+    @include type.mel-text(xl);
+    font-weight: type.$mel-font-semibold;
+    margin: 0 0 space.mel-space(3) 0;
+    color: $mel-color-text;
+  }
+
+  &__content {
+    @include type.mel-text(base, relaxed);
+    color: $mel-color-text;
+
+    p {
+      margin: 0 0 space.mel-space(3) 0;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  &--about,
+  &--accessibility,
+  &--organiser {
+    // Main content cards
+  }
+
+  &--date,
+  &--location,
+  &--capacity {
+    // Sidebar cards
+  }
+}
+
+// --------------------------------------------------------------------------
+// Sidebar
+// --------------------------------------------------------------------------
+
+.mel-event-sidebar {
+  width: 100%;
+
+  @include mel-break(lg) {
+    width: 360px;
+    flex-shrink: 0;
+    position: sticky;
+    top: space.mel-space(4);
+    align-self: flex-start;
+  }
+}
+
+.mel-event-sidebar__action-card {
+  background: $mel-color-surface;
+  border-radius: radii.$mel-radius-lg;
+  box-shadow: shadows.$mel-shadow-sm;
+  border: 1px solid $mel-color-border;
+  padding: space.mel-space(4);
+  display: flex;
+  flex-direction: column;
+  gap: space.mel-space(4);
+
+  @include mel-break(lg) {
+    position: sticky;
+    top: space.mel-space(4);
+  }
+}
+
+.mel-event-sidebar__section {
+  padding-bottom: space.mel-space(4);
+  border-bottom: 1px solid $mel-color-border;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &--badge {
+    padding-bottom: space.mel-space(3);
+  }
+
+  &--cta {
+    padding-bottom: space.mel-space(4);
+  }
+
+  &--price {
+    padding-bottom: space.mel-space(3);
+  }
+}
+
+.mel-event-sidebar__registration-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: space.mel-space(1) space.mel-space(3);
+  border-radius: radii.$mel-radius-full;
+  @include type.mel-text(sm);
+  font-weight: type.$mel-font-semibold;
+  background: rgba($mel-color-accent, 0.15);
+  color: $mel-color-text;
+  text-align: center;
+  width: 100%;
+  justify-content: center;
+}
+
+.mel-event-sidebar__title {
+  @include type.mel-text(lg);
+  font-weight: type.$mel-font-semibold;
+  margin: 0 0 space.mel-space(3) 0;
+  color: $mel-color-text;
+}
+
+.mel-event-sidebar__price {
+  @include type.mel-text(lg);
+  font-weight: type.$mel-font-semibold;
+  color: $mel-color-primary;
+  text-align: center;
+}
+
+.mel-event-sidebar__date {
+  display: block;
+  margin-bottom: space.mel-space(3);
+}
+
+.mel-event-sidebar__date-main {
+  @include type.mel-text(lg);
+  font-weight: type.$mel-font-semibold;
+  color: $mel-color-text;
+  margin-bottom: space.mel-space(1);
+}
+
+.mel-event-sidebar__date-time {
+  @include type.mel-text(base);
+  color: $mel-color-text-muted;
+}
+
+.mel-event-sidebar__venue {
+  @include type.mel-text(base);
+  font-weight: type.$mel-font-semibold;
+  color: $mel-color-text;
+  margin-bottom: space.mel-space(1);
+}
+
+.mel-event-sidebar__address {
+  @include type.mel-text(sm, relaxed);
+  color: $mel-color-text-muted;
+  font-style: normal;
+  margin-bottom: space.mel-space(3);
+}
+
+.mel-event-sidebar__map {
+  width: 100%;
+  height: 200px;
+  border-radius: radii.$mel-radius-md;
+  overflow: hidden;
+  margin: space.mel-space(3) 0;
+  background: $mel-color-surface-alt;
+  border: 1px solid $mel-color-border;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.mel-event-sidebar__directions {
+  margin-top: space.mel-space(2);
+  display: inline-flex;
+  align-items: center;
+  gap: space.mel-space(1);
+  @include type.mel-text(sm);
+  color: $mel-color-primary;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.mel-event-sidebar__capacity-info {
+  display: flex;
+  align-items: baseline;
+  gap: space.mel-space(1);
+  margin-bottom: space.mel-space(2);
+}
+
+.mel-event-sidebar__capacity-current {
+  @include type.mel-text(2xl);
+  font-weight: type.$mel-font-bold;
+  color: $mel-color-primary;
+}
+
+.mel-event-sidebar__capacity-separator {
+  @include type.mel-text(xl);
+  color: $mel-color-text-muted;
+}
+
+.mel-event-sidebar__capacity-total {
+  @include type.mel-text(xl);
+  font-weight: type.$mel-font-semibold;
+  color: $mel-color-text;
+}
+
+.mel-event-sidebar__capacity-label {
+  @include type.mel-text(sm);
+  color: $mel-color-text-muted;
+  margin-left: space.mel-space(1);
+}
+
+.mel-event-sidebar__capacity-remaining {
+  @include type.mel-text(sm);
+  color: $mel-color-text-muted;
+}
+
+.mel-event-sidebar__calendar-links {
+  display: flex;
+  flex-direction: column;
+  gap: space.mel-space(2);
+  margin-top: space.mel-space(3);
+
+  @include mel-break(sm) {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+.mel-event-sidebar__calendar-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: space.mel-space(2) space.mel-space(3);
+  background: $mel-color-bg;
+  border: 1px solid $mel-color-border;
+  border-radius: radii.$mel-radius-md;
+  @include type.mel-text(sm);
+  color: $mel-color-text;
+  text-decoration: none;
+  text-align: center;
+  min-height: 44px;
+  transition: background-color 0.14s ease, border-color 0.14s ease;
+
+  &:hover {
+    background: $mel-color-surface-alt;
+    border-color: $mel-color-border-strong;
+  }
+}
+
+// --------------------------------------------------------------------------
+// Calendar Buttons (Pill Group)
+// --------------------------------------------------------------------------
+
+.mel-calendar-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: space.mel-space(2);
+  margin-top: space.mel-space(3);
+
+  @include mel-break(sm) {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  &__ics,
+  &__google {
+    flex: 1;
+    min-width: 140px;
+    text-align: center;
+  }
+}
+
+// --------------------------------------------------------------------------
+// Organiser Section
+// --------------------------------------------------------------------------
+
+.event-organiser {
+  @extend .mel-event-card;
+
+  &__title {
+    @extend .mel-event-card__title;
+  }
+
+  &__name {
+    @include type.mel-text(lg);
+    font-weight: type.$mel-font-semibold;
+    margin: 0 0 space.mel-space(1) 0;
+    color: $mel-color-text;
+  }
+
+  &__trust {
+    @include type.mel-text(sm);
+    color: $mel-color-success;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: space.mel-space(1);
+
+    &::before {
+      content: '✓';
+      font-weight: type.$mel-font-bold;
+    }
+  }
+}
+
+// --------------------------------------------------------------------------
+// Mobile Sticky CTA Bar
+// --------------------------------------------------------------------------
+
+.mel-event-cta-mobile-sticky {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: space.mel-space(3);
+  background: $mel-color-surface;
+  border-top: 2px solid $mel-color-border;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  display: none;
+
+  @include mel-break(lg, max) {
+    display: block;
+  }
+
+  .mel-btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+}
+
+// --------------------------------------------------------------------------
+// Accessibility Icons in Cards
+// --------------------------------------------------------------------------
+
+.mel-event-card--accessibility {
+  .mel-accessibility-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: space.mel-space(2);
+    align-items: center;
+  }
+
+  .mel-accessibility-badge {
+    background-color: $mel-color-success-bg;
+    color: $mel-color-success;
+    padding: space.mel-space(1) space.mel-space(2);
+    @include type.mel-text(xs);
+    font-weight: type.$mel-font-medium;
+    border-radius: radii.$mel-radius-md;
+    border: 1px solid rgba($mel-color-success, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: space.mel-space(1);
+    white-space: nowrap;
+  }
+}
+
+// --------------------------------------------------------------------------
+// Extra Funky Enhancements (Optional)
+// --------------------------------------------------------------------------
+
+.mel-event--full {
+  // Subtle confetti dots background pattern (very light)
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(
+      circle,
+      rgba($mel-color-primary, 0.03) 1px,
+      transparent 1px
+    );
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// Gradient wave at bottom of hero
+.mel-event-hero__content {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.1) 0%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: -1;
+  }
+}
+
+// Animated chips on hover
+.mel-event-meta__chip {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+  }
+
+  &:hover::before {
+    width: 200px;
+    height: 200px;
+  }
+}
