@@ -134,6 +134,9 @@ final class EventWizardForm extends FormBase {
     // Attach wizard library.
     $form['#attached']['library'][] = 'myeventlane_event/event_wizard';
 
+    // Attach core autocomplete library for entity_autocomplete fields.
+    $form['#attached']['library'][] = 'core/drupal.autocomplete';
+
     // Attach address autocomplete library and settings.
     $form['#attached']['library'][] = 'myeventlane_location/address_autocomplete';
 
@@ -354,28 +357,34 @@ final class EventWizardForm extends FormBase {
 
     // Category (required).
     if ($event->hasField('field_category')) {
-      $default_categories = [];
+      $default_category = NULL;
       if (!$event->get('field_category')->isEmpty()) {
-        foreach ($event->get('field_category')->referencedEntities() as $term) {
-          if ($term instanceof TermInterface) {
-            $default_categories[] = $term->id();
-          }
+        $term = $event->get('field_category')->entity;
+        if ($term instanceof TermInterface) {
+          $default_category = $term;
         }
       }
 
       $form['wizard']['content']['step_content']['section']['field_category'] = [
         '#type' => 'entity_autocomplete',
         '#target_type' => 'taxonomy_term',
-        '#selection_handler' => 'default',
+        '#selection_handler' => 'default:taxonomy_term',
         '#selection_settings' => [
           'target_bundles' => ['categories'],
+          'sort' => [
+            'field' => 'name',
+            'direction' => 'ASC',
+          ],
+          'auto_create' => FALSE,
         ],
         '#title' => $this->t('Category'),
         '#description' => $this->t('Select the primary category for this event.'),
-        '#default_value' => !empty($default_categories) ? $this->entityTypeManager->getStorage('taxonomy_term')->loadMultiple($default_categories) : NULL,
+        '#default_value' => $default_category,
         '#required' => TRUE,
         '#tags' => FALSE,
-        '#attributes' => ['class' => ['mel-form-field']],
+        '#attributes' => [
+          'class' => ['mel-form-field', 'form-autocomplete'],
+        ],
       ];
     }
 
@@ -385,7 +394,7 @@ final class EventWizardForm extends FormBase {
       if (!$event->get('field_tags')->isEmpty()) {
         foreach ($event->get('field_tags')->referencedEntities() as $term) {
           if ($term instanceof TermInterface) {
-            $default_tags[] = $term->id();
+            $default_tags[] = $term;
           }
         }
       }
@@ -393,16 +402,23 @@ final class EventWizardForm extends FormBase {
       $form['wizard']['content']['step_content']['section']['field_tags'] = [
         '#type' => 'entity_autocomplete',
         '#target_type' => 'taxonomy_term',
-        '#selection_handler' => 'default',
+        '#selection_handler' => 'default:taxonomy_term',
         '#selection_settings' => [
           'target_bundles' => ['tags'],
+          'sort' => [
+            'field' => 'name',
+            'direction' => 'ASC',
+          ],
+          'auto_create' => FALSE,
         ],
         '#title' => $this->t('Tags'),
         '#description' => $this->t('Optional: Add tags to help people find your event.'),
-        '#default_value' => !empty($default_tags) ? $this->entityTypeManager->getStorage('taxonomy_term')->loadMultiple($default_tags) : NULL,
+        '#default_value' => $default_tags,
         '#required' => FALSE,
         '#tags' => TRUE,
-        '#attributes' => ['class' => ['mel-form-field']],
+        '#attributes' => [
+          'class' => ['mel-form-field', 'form-autocomplete'],
+        ],
       ];
     }
   }
@@ -785,16 +801,23 @@ final class EventWizardForm extends FormBase {
       $form['wizard']['content']['step_content']['section']['field_accessibility'] = [
         '#type' => 'entity_autocomplete',
         '#target_type' => 'taxonomy_term',
-        '#selection_handler' => 'default',
+        '#selection_handler' => 'default:taxonomy_term',
         '#selection_settings' => [
           'target_bundles' => ['accessibility'],
+          'sort' => [
+            'field' => 'name',
+            'direction' => 'ASC',
+          ],
+          'auto_create' => FALSE,
         ],
         '#title' => $this->t('Accessibility features'),
         '#description' => $this->t('Select accessibility features available at your event.'),
-        '#default_value' => !empty($default_accessibility) ? $this->entityTypeManager->getStorage('taxonomy_term')->loadMultiple($default_accessibility) : NULL,
+        '#default_value' => $default_accessibility,
         '#required' => FALSE,
         '#tags' => TRUE,
-        '#attributes' => ['class' => ['mel-form-field']],
+        '#attributes' => [
+          'class' => ['mel-form-field', 'form-autocomplete'],
+        ],
       ];
     }
   }
