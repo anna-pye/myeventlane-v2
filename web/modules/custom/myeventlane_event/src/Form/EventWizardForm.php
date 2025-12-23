@@ -304,7 +304,7 @@ final class EventWizardForm extends FormBase {
    */
   private function isStepCompleted(NodeInterface $event, string $step_id): bool {
     return match ($step_id) {
-      'basics' => !$event->getTitle()->isEmpty() && $event->hasField('field_event_type') && !$event->get('field_event_type')->isEmpty(),
+      'basics' => !empty(trim($event->getTitle())) && $event->hasField('field_event_type') && !$event->get('field_event_type')->isEmpty(),
       'when_where' => $event->hasField('field_event_start') && !$event->get('field_event_start')->isEmpty(),
       'branding' => $event->hasField('field_event_image') && !$event->get('field_event_image')->isEmpty(),
       // Always show as available.
