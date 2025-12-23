@@ -1,0 +1,12 @@
+name: 'MyEventLane Automation'
+type: module
+description: 'Automated notifications for events: sales opening, reminders, waitlist invites, cancellations, and exports.'
+core_version_requirement: ^11
+package: 'MyEventLane'
+
+dependencies:
+  - myeventlane_messaging
+  - myeventlane_event_state
+  - myeventlane_attendee
+  - myeventlane_event_attendees
+  - node

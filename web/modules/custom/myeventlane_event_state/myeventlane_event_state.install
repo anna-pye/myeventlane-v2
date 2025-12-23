@@ -1,0 +1,127 @@
+<?php
+
+/**
+ * @file
+ * Install hooks for MyEventLane Event State module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
+
+/**
+ * Installs event state fields.
+ */
+function myeventlane_event_state_install(): void {
+  // Sales timing fields.
+  _myeventlane_event_state_create_field('field_sales_start', 'datetime', 'Sales Start', [
+    'datetime_type' => 'datetime',
+  ]);
+
+  _myeventlane_event_state_create_field('field_sales_end', 'datetime', 'Sales End', [
+    'datetime_type' => 'datetime',
+  ]);
+
+  // State fields.
+  _myeventlane_event_state_create_field('field_event_state', 'list_string', 'Event State', [
+    'allowed_values' => [
+      'draft' => 'Draft',
+      'scheduled' => 'Scheduled',
+      'live' => 'Live',
+      'sold_out' => 'Sold out',
+      'ended' => 'Ended',
+      'cancelled' => 'Cancelled',
+      'archived' => 'Archived',
+    ],
+  ]);
+
+  _myeventlane_event_state_create_field('field_event_state_override', 'list_string', 'State Override', [
+    'allowed_values' => [
+      'draft' => 'Draft',
+      'scheduled' => 'Scheduled',
+      'live' => 'Live',
+      'sold_out' => 'Sold out',
+      'ended' => 'Ended',
+      'cancelled' => 'Cancelled',
+      'archived' => 'Archived',
+    ],
+  ]);
+
+  // Cancellation fields.
+  _myeventlane_event_state_create_field('field_cancel_reason', 'text_long', 'Cancellation Reason');
+
+  _myeventlane_event_state_create_field('field_cancelled_at', 'datetime', 'Cancelled At', [
+    'datetime_type' => 'datetime',
+  ]);
+
+  // Capacity field (if not exists).
+  if (!FieldStorageConfig::loadByName('node', 'field_event_capacity_total')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_event_capacity_total',
+      'entity_type' => 'node',
+      'type' => 'integer',
+      'settings' => [
+        'unsigned' => FALSE,
+        'size' => 'normal',
+      ],
+    ])->save();
+
+    FieldConfig::create([
+      'field_name' => 'field_event_capacity_total',
+      'entity_type' => 'node',
+      'bundle' => 'event',
+      'label' => 'Total Capacity',
+      'description' => 'Maximum number of attendees. Leave 0 or empty for unlimited.',
+      'settings' => [
+        'min' => 0,
+      ],
+    ])->save();
+  }
+}
+
+/**
+ * Helper to create a field.
+ */
+function _myeventlane_event_state_create_field(string $field_name, string $type, string $label, array $storage_settings = []): void {
+  // Create storage if needed.
+  $storage = FieldStorageConfig::loadByName('node', $field_name);
+  if (!$storage) {
+    $config = [
+      'field_name' => $field_name,
+      'entity_type' => 'node',
+      'type' => $type,
+    ];
+
+    if ($type === 'datetime') {
+      $config['module'] = 'datetime';
+      $config['settings'] = $storage_settings;
+    }
+    elseif ($type === 'list_string') {
+      $config['module'] = 'options';
+      $config['settings'] = $storage_settings;
+    }
+    elseif ($type === 'text_long') {
+      $config['module'] = 'text';
+    }
+
+    FieldStorageConfig::create($config)->save();
+  }
+
+  // Create field instance if needed.
+  $field = FieldConfig::loadByName('node', 'event', $field_name);
+  if (!$field) {
+    $field_config = [
+      'field_name' => $field_name,
+      'entity_type' => 'node',
+      'bundle' => 'event',
+      'label' => $label,
+    ];
+
+    if ($type === 'list_string') {
+      $field_config['settings'] = $storage_settings;
+    }
+
+    FieldConfig::create($field_config)->save();
+  }
+}

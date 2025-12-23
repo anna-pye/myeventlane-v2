@@ -1349,30 +1349,21 @@ function myeventlane_theme_preprocess_node(array &$variables): void {
   $variables['mel_organiser_logo'] = $organiser_logo;
 
   // ============================================================================
-  // NEW EVENT FULL TEMPLATE VARIABLES (Humanitix-style layout)
+  // ADDITIONAL EVENT FULL TEMPLATE VARIABLES
   // ============================================================================
-  // These variables are used by the new node--event--full.html.twig template.
+  // These variables complement the canonical event_cta variable above.
+  // They're used by node--event--full.html.twig template.
 
-  // Registration badge.
+  // Registration badge (for backward compatibility with existing templates).
   $variables['mel_registration_badge'] = _myeventlane_theme_event_registration_badge($node);
 
-  // Capacity text (simple string format).
+  // Capacity text (simple string format) - for backward compatibility.
   $variables['mel_capacity_text'] = _myeventlane_theme_event_capacity_text($node);
 
-  // Calendar links (render array).
-  $variables['mel_calendar_links'] = _myeventlane_theme_event_calendar_links($node);
+  // Calendar links are already set above (mel_ics_url, mel_google_cal_url).
+  // The helper function below is kept for backward compatibility but not used by full template.
 
-  // Phase 1 CTA placeholder. Phase 2 will wire this to TicketMatrix / RSVP.
-  $variables['mel_ticket_cta'] = [
-    '#type' => 'link',
-    '#title' => t('Register'),
-    '#url' => $node->toUrl(),
-    '#attributes' => [
-      'class' => ['mel-button', 'mel-button--primary', 'mel-button--full'],
-    ],
-  ];
-
-  // Optional blocks (wire later).
+  // Optional blocks (wire later if needed).
   $variables['mel_host_block'] = NULL;
   $variables['mel_more_from_host_block'] = NULL;
   $variables['mel_trending_block'] = NULL;
@@ -2234,30 +2225,90 @@ function _myeventlane_theme_event_capacity_text(NodeInterface $node): ?string {
 
 /**
  * Helper function to generate calendar links for event nodes.
+ *
+ * Note: This function is kept for backward compatibility.
+ * The node--event--full.html.twig template uses mel_ics_url and mel_google_cal_url
+ * directly, which are computed in the main preprocess function above.
  */
 function _myeventlane_theme_event_calendar_links(NodeInterface $node): array {
-  // Phase 1: placeholders (safe, no broken routes).
-  // Phase 2: replace with real ICS + Google/Apple deep links.
-  $items = [
-    [
+  $items = [];
+  
+  // ICS download URL.
+  try {
+    $ics_url = Url::fromRoute('myeventlane_rsvp.ics_download', ['node' => $node->id()]);
+    $items[] = [
       '#type' => 'link',
-      '#title' => t('Apple'),
-      '#url' => Url::fromUri('https://www.apple.com/'),
-      '#attributes' => ['rel' => 'nofollow noopener', 'target' => '_blank'],
-    ],
-    [
+      '#title' => t('Apple / Outlook (.ics)'),
+      '#url' => $ics_url,
+      '#attributes' => [
+        'download' => $node->label() . '.ics',
+        'rel' => 'nofollow',
+      ],
+    ];
+  }
+  catch (\Exception $e) {
+    // Route not available, skip.
+  }
+
+  // Google Calendar URL.
+  if ($node->hasField('field_event_start') && !$node->get('field_event_start')->isEmpty()) {
+    $start_value = $node->get('field_event_start')->value;
+    $end_value = $node->hasField('field_event_end') && !$node->get('field_event_end')->isEmpty()
+      ? $node->get('field_event_end')->value
+      : NULL;
+
+    $start_iso = gmdate('Ymd\THis\Z', strtotime($start_value));
+    $end_iso = $end_value ? gmdate('Ymd\THis\Z', strtotime($end_value)) : gmdate('Ymd\THis\Z', strtotime($start_value . ' +2 hours'));
+
+    $title_encoded = rawurlencode($node->label());
+    $venue = '';
+    if ($node->hasField('field_venue_name') && !$node->get('field_venue_name')->isEmpty()) {
+      $venue = $node->get('field_venue_name')->value;
+    }
+    $address = '';
+    if ($node->hasField('field_location') && !$node->get('field_location')->isEmpty()) {
+      $item = $node->get('field_location')->first();
+      if ($item) {
+        $v = $item->getValue();
+        $parts = [];
+        if (!empty($v['address_line1'])) {
+          $parts[] = $v['address_line1'];
+        }
+        if (!empty($v['locality'])) {
+          $parts[] = $v['locality'];
+        }
+        if (!empty($v['administrative_area'])) {
+          $parts[] = $v['administrative_area'];
+        }
+        if (!empty($v['postal_code'])) {
+          $parts[] = $v['postal_code'];
+        }
+        $address = implode(', ', array_filter($parts));
+      }
+    }
+    $location_parts = array_filter([$venue, $address]);
+    $location_encoded = rawurlencode(implode(', ', $location_parts));
+    $details_encoded = rawurlencode(strip_tags($node->hasField('body') && !$node->get('body')->isEmpty() ? $node->get('body')->value : ''));
+    $url_encoded = rawurlencode($node->toUrl('canonical', ['absolute' => TRUE])->toString());
+
+    $google_cal_url = "https://calendar.google.com/calendar/render?action=TEMPLATE"
+      . "&text={$title_encoded}"
+      . "&dates={$start_iso}/{$end_iso}"
+      . "&details={$details_encoded}"
+      . "&location={$location_encoded}"
+      . "&ctz=" . date_default_timezone_get();
+    
+    $items[] = [
       '#type' => 'link',
       '#title' => t('Google Calendar'),
-      '#url' => Url::fromUri('https://calendar.google.com/'),
+      '#url' => Url::fromUri($google_cal_url),
       '#attributes' => ['rel' => 'nofollow noopener', 'target' => '_blank'],
-    ],
-    [
-      '#type' => 'link',
-      '#title' => t('Outlook (.ics)'),
-      '#url' => Url::fromUri('https://www.microsoft.com/'),
-      '#attributes' => ['rel' => 'nofollow noopener', 'target' => '_blank'],
-    ],
-  ];
+    ];
+  }
+
+  if (empty($items)) {
+    return [];
+  }
 
   return [
     '#theme' => 'item_list',

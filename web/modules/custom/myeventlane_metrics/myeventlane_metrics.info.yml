@@ -1,0 +1,10 @@
+name: MyEventLane Metrics
+type: module
+description: 'Centralized event metrics service'
+core_version_requirement: ^11
+package: MyEventLane
+dependencies:
+  - drupal:node
+  - drupal:commerce_order
+  - myeventlane_attendee:myeventlane_attendee
+  - myeventlane_capacity:myeventlane_capacity

@@ -1,0 +1,7 @@
+access public api:
+  title: 'Access public API endpoints'
+  description: 'Allow access to public event API endpoints (read-only).'
+
+access vendor api:
+  title: 'Access vendor API endpoints'
+  description: 'Allow access to vendor-scoped API endpoints (requires API key).'

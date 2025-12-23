@@ -1,0 +1,38 @@
+/**
+ * @file
+ * Hides venue name field from vendors - it's auto-populated from address search.
+ */
+
+/* Hide venue name field visually but keep it in the form for JavaScript and submission */
+/* Target the field wrapper that Drupal generates - be very aggressive with selectors */
+.field--name-field-venue-name.hide-venue-name,
+.form-item--name-field-venue-name.hide-venue-name,
+.field--name-field-venue-name[class*="hide-venue-name"],
+.form-item--name-field-venue-name[class*="hide-venue-name"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+/* Fallback: Hide by field name class if class is added */
+.js-field-venue-name-hidden,
+.hide-venue-name-wrapper {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Also target the actual input field if needed */
+.field--name-field-venue-name.hide-venue-name input,
+.form-item--name-field-venue-name.hide-venue-name input {
+  display: none !important;
+  visibility: hidden !important;
+}

@@ -44,6 +44,11 @@ permissions:
   - 'manage own commerce_payment_method'
   - 'manage own event attendees'
   - 'manage own event rsvps'
+  - myeventlane_checkin.access
+  - myeventlane_checkin.scan
+  - myeventlane_checkin.toggle
+  - myeventlane_event_state.cancel_event
+  - myeventlane_event_state.request_refunds
   - 'purchase boost for events'
   - 'update own customer profile'
   - 'update own ticket commerce_product'

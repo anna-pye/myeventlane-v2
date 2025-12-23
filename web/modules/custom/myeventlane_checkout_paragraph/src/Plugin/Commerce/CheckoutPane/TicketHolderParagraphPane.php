@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\myeventlane_checkout_paragraph\Plugin\Commerce\CheckoutPane;
 
 use Drupal\commerce_checkout\Plugin\Commerce\CheckoutPane\CheckoutPaneBase;
+use Drupal\commerce_checkout\Plugin\Commerce\CheckoutFlow\CheckoutFlowInterface;
 use Drupal\commerce_order\Entity\OrderItemInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
@@ -45,9 +46,9 @@ final class TicketHolderParagraphPane extends CheckoutPaneBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?CheckoutFlowInterface $checkout_flow = NULL) {
     /** @var static $instance */
-    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition, $checkout_flow);
     $instance->logger = $container->get('logger.factory')->get('myeventlane_checkout');
     return $instance;
   }

@@ -1,0 +1,63 @@
+# Public Event API endpoints.
+myeventlane_api.public.events.list:
+  path: '/api/v1/events'
+  defaults:
+    _controller: '\Drupal\myeventlane_api\Controller\PublicEventApiController::listEvents'
+  methods: [GET]
+  requirements:
+    _permission: 'access public api'
+
+myeventlane_api.public.events.get:
+  path: '/api/v1/events/{node}'
+  defaults:
+    _controller: '\Drupal\myeventlane_api\Controller\PublicEventApiController::getEvent'
+  methods: [GET]
+  requirements:
+    _permission: 'access public api'
+    node: \d+
+
+# Vendor API endpoints (require authentication via API key).
+myeventlane_api.vendor.events.list:
+  path: '/api/v1/vendor/events'
+  defaults:
+    _controller: '\Drupal\myeventlane_api\Controller\VendorEventApiController::listEvents'
+  methods: [GET]
+  requirements:
+    _permission: 'access vendor api'
+
+myeventlane_api.vendor.events.get:
+  path: '/api/v1/vendor/events/{node}'
+  defaults:
+    _controller: '\Drupal\myeventlane_api\Controller\VendorEventApiController::getEvent'
+  methods: [GET]
+  requirements:
+    _permission: 'access vendor api'
+    node: \d+
+
+myeventlane_api.vendor.attendees.list:
+  path: '/api/v1/vendor/events/{node}/attendees'
+  defaults:
+    _controller: '\Drupal\myeventlane_api\Controller\VendorAttendeeApiController::listAttendees'
+  methods: [GET]
+  requirements:
+    _permission: 'access vendor api'
+    node: \d+
+
+myeventlane_api.vendor.attendees.checkin:
+  path: '/api/v1/vendor/events/{node}/attendees/{attendee_id}/checkin'
+  defaults:
+    _controller: '\Drupal\myeventlane_api\Controller\VendorAttendeeApiController::checkIn'
+  methods: [POST]
+  requirements:
+    _permission: 'access vendor api'
+    node: \d+
+    attendee_id: \d+
+
+myeventlane_api.vendor.exports.csv:
+  path: '/api/v1/vendor/events/{node}/exports/csv'
+  defaults:
+    _controller: '\Drupal\myeventlane_api\Controller\VendorExportApiController::requestCsvExport'
+  methods: [POST]
+  requirements:
+    _permission: 'access vendor api'
+    node: \d+

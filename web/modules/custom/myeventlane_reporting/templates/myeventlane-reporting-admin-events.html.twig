@@ -1,0 +1,40 @@
+{#
+/**
+ * @file
+ * Admin event reports template.
+ *
+ * Variables:
+ * - top_events: Array of top performing events
+ */
+#}
+<div class="mel-reporting-admin-events">
+  <h1>{{ 'Event Reports'|t }}</h1>
+
+  {% if top_events|length > 0 %}
+    <div class="mel-card">
+      <div class="mel-card__header">
+        <div class="mel-card__title">{{ 'Top Events'|t }}</div>
+      </div>
+      <div class="mel-card__body">
+        <div class="mel-table">
+          <div class="mel-table__head">
+            <div>{{ 'Event'|t }}</div>
+            <div>{{ 'Attendees'|t }}</div>
+            <div>{{ 'Revenue'|t }}</div>
+          </div>
+          <div class="mel-table__body">
+            {% for item in top_events %}
+              <div class="mel-table__row">
+                <div>
+                  <a href="{{ item.event.toUrl() }}">{{ item.event.label }}</a>
+                </div>
+                <div>{{ item.attendees }}</div>
+                <div>${{ item.revenue|number_format(2) }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>

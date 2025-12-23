@@ -1,0 +1,7 @@
+cancel_event:
+  title: 'Cancel events'
+  description: 'Cancel own events and set cancellation reason.'
+
+request_refunds:
+  title: 'Request refunds'
+  description: 'Request refunds for paid ticket events.'

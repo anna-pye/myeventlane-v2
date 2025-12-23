@@ -1,0 +1,68 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the MyEventLane Event module.
+ */
+
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
+
+/**
+ * Creates field_location_place_id field on Event content type.
+ */
+function myeventlane_event_update_11001(): void {
+  $field_name = 'field_location_place_id';
+  $entity_type = 'node';
+  $bundle = 'event';
+
+  // Check if field storage already exists.
+  $field_storage = FieldStorageConfig::loadByName($entity_type, $field_name);
+  if (!$field_storage) {
+    // Create field storage.
+    $field_storage = FieldStorageConfig::create([
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'type' => 'string',
+      'settings' => [
+        'max_length' => 255,
+      ],
+      'cardinality' => 1,
+    ]);
+    $field_storage->save();
+  }
+
+  // Check if field instance already exists.
+  $field_config = FieldConfig::loadByName($entity_type, $bundle, $field_name);
+  if (!$field_config) {
+    // Create field instance.
+    $field_config = FieldConfig::create([
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle,
+      'label' => 'Place ID',
+      'description' => 'Google Places API place_id for the location.',
+      'required' => FALSE,
+      'translatable' => FALSE,
+    ]);
+    $field_config->save();
+  }
+}
+
+/**
+ * Testing checklist (for reference):
+ *
+ * Commands:
+ * - ddev drush updb -y
+ * - ddev drush cr
+ *
+ * Manual tests:
+ * 1) Create event → Location step → choose address suggestion
+ *    Confirm:
+ *    - street + suburb + state + postcode populate
+ *    - venue name populates
+ *    - lat/lng populate
+ *    - place id saved (inspect submitted values or event fields)
+ * 2) Click Next → Back → confirm values persist
+ * 3) Save wizard → open Event node → confirm all fields saved
+ */

@@ -1,9 +1,12 @@
 {#
   Canonical MyEventLane Event Card
   Used everywhere: Home, Featured, Taxonomy, Search, Views
+  
+  Variables:
+  - variant: Optional variant class (e.g., 'featured')
 #}
 
-<article class="mel-event-card">
+<article class="mel-event-card{% if variant %} mel-event-card--{{ variant }}{% endif %}">
   <a href="{{ url }}" class="mel-card-link">
 
     <div class="mel-card-media">

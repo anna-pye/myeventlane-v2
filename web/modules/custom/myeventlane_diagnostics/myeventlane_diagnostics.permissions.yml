@@ -1,0 +1,4 @@
+view event diagnostics:
+  title: 'View event diagnostics'
+  description: 'Access to view diagnostic information for events'
+  restrict access: true

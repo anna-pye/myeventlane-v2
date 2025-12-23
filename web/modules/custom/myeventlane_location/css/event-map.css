@@ -5,10 +5,46 @@
 
 .myeventlane-event-map-container {
   width: 100%;
-  height: 400px;
+  height: 200px; /* Smaller, rectangular map */
   border-radius: 8px;
   overflow: hidden;
-  margin: 1em 0;
+  margin: spacing.mel-space(2) 0;
+  background: #f5f5f5;
+  position: relative;
+  min-height: 200px; /* Ensure container has height for map to render */
+}
+
+/* Ensure map container is visible and has proper dimensions */
+.myeventlane-event-map-container[data-latitude][data-longitude] {
+  display: block;
+  width: 100%;
+  height: 200px;
+}
+
+/* Hide excessive Google Maps branding */
+.myeventlane-event-map-container .gm-style-cc,
+.myeventlane-event-map-container .gm-style > div:first-child > div:last-child {
+  display: none !important;
+}
+
+/* Hide Google logo and copyright (minimal branding only) */
+.myeventlane-event-map-container a[href*="google.com/maps"],
+.myeventlane-event-map-container .gm-style-cc {
+  display: none !important;
+}
+
+/* Ensure map fills container and renders properly */
+.myeventlane-event-map-container > div {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 200px;
+}
+
+/* Fix for Google Maps iframe/div rendering */
+.myeventlane-event-map-container .gm-style,
+.myeventlane-event-map-container .gm-style > div {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .myeventlane-event-map-actions {

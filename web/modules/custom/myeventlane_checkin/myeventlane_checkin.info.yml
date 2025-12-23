@@ -1,0 +1,9 @@
+name: MyEventLane Check-in
+type: module
+description: 'Mobile-first check-in system for MyEventLane events.'
+core_version_requirement: ^11
+package: MyEventLane
+dependencies:
+  - drupal:node
+  - myeventlane_core:myeventlane_core
+  - myeventlane_attendee:myeventlane_attendee

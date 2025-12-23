@@ -1,0 +1,27 @@
+services:
+  myeventlane_api.authentication:
+    class: Drupal\myeventlane_api\Service\ApiAuthenticationService
+    arguments: ['@entity_type.manager']
+
+  myeventlane_api.rate_limiter:
+    class: Drupal\myeventlane_api\Service\RateLimiterService
+    arguments: ['@database']
+
+  myeventlane_api.response_formatter:
+    class: Drupal\myeventlane_api\Service\ApiResponseFormatter
+
+  myeventlane_api.event_serializer:
+    class: Drupal\myeventlane_api\Service\EventSerializer
+    arguments:
+      - '@myeventlane_event_state.resolver'
+      - '@myeventlane_metrics.service'
+
+  myeventlane_api.audit_logger:
+    class: Drupal\myeventlane_api\Service\ApiAuditLogger
+    arguments:
+      - '@database'
+      - '@logger.factory'
+
+  logger.channel.myeventlane_api:
+    parent: logger.channel_base
+    arguments: ['myeventlane_api']

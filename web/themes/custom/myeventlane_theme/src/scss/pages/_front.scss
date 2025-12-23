@@ -12,6 +12,28 @@
 @use '../tokens/breakpoints';
 
 // ---------------------------------------------------------------------------
+// Homepage Events Wrapper
+// ---------------------------------------------------------------------------
+// Homepage-only wrapper class for grid breathing room within .mel-container
+// Allows event grids to breathe without breaking event detail pages
+
+.mel-home-events {
+  // Additional spacing for homepage event sections
+  .mel-section {
+    margin-bottom: spacing.mel-space(8);
+
+    @include breakpoints.mel-break(md) {
+      margin-bottom: spacing.mel-space(10);
+    }
+  }
+
+  // Ensure event grids have proper spacing within container
+  .mel-event-grid {
+    margin-top: spacing.mel-space(4);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Page Sections
 // ---------------------------------------------------------------------------
 

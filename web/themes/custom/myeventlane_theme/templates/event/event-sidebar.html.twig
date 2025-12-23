@@ -1,0 +1,120 @@
+{#
+  Event sidebar
+  Sticky on desktop, collapsible on mobile
+  Includes date, calendar links, location, capacity info
+#}
+<aside class="event-sidebar">
+  <div class="event-sidebar__content">
+    
+    {# Date & Time #}
+    {% if node.field_event_start.value %}
+      <div class="event-sidebar__section event-sidebar__date">
+        <h3 class="event-sidebar__title">Date & Time</h3>
+        <time datetime="{{ node.field_event_start.value|date('c') }}">
+          <div class="event-sidebar__date-main">
+            {{ node.field_event_start.value|date('l j F Y') }}
+          </div>
+          <div class="event-sidebar__date-time">
+            {{ node.field_event_start.value|date('g:ia') }}
+            {% if node.field_event_end.value %}
+              – {{ node.field_event_end.value|date('g:ia') }}
+            {% endif %}
+          </div>
+        </time>
+        
+        {# Calendar links #}
+        <div class="event-sidebar__calendar-links">
+          {% set start_iso = node.field_event_start.value|date('Ymd\THis') %}
+          {% if node.field_event_end.value %}
+            {% set end_iso = node.field_event_end.value|date('Ymd\THis') %}
+          {% else %}
+            {% set end_iso = node.field_event_start.value|date_modify('+2 hours')|date('Ymd\THis') %}
+          {% endif %}
+          {% set title_encoded = node.label|url_encode %}
+          {% set location_encoded = (mel_venue ~ ', ' ~ mel_address)|url_encode %}
+          
+          <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ title_encoded }}&dates={{ start_iso }}/{{ end_iso }}&details={{ node.url('canonical', {'absolute': true})|url_encode }}&location={{ location_encoded }}" 
+             target="_blank" 
+             rel="noopener"
+             class="event-sidebar__calendar-link">
+            Add to Google Calendar
+          </a>
+          
+          <a href="https://outlook.live.com/calendar/0/deeplink/compose?subject={{ title_encoded }}&startdt={{ node.field_event_start.value|date('Y-m-d\TH:i:s') }}&enddt={{ node.field_event_end.value|default(node.field_event_start.value)|date('Y-m-d\TH:i:s') }}&body={{ node.url('canonical', {'absolute': true})|url_encode }}" 
+             target="_blank" 
+             rel="noopener"
+             class="event-sidebar__calendar-link">
+            Add to Outlook
+          </a>
+          
+          {% set ics_start = node.field_event_start.value|date('Ymd\THis\Z') %}
+          {% if node.field_event_end.value %}
+            {% set ics_end = node.field_event_end.value|date('Ymd\THis\Z') %}
+          {% else %}
+            {% set ics_end = node.field_event_start.value|date_modify('+2 hours')|date('Ymd\THis\Z') %}
+          {% endif %}
+          <a href="data:text/calendar;charset=utf8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ADTSTART:{{ ics_start }}%0ADTEND:{{ ics_end }}%0ASUMMARY:{{ title_encoded }}%0ADESCRIPTION:{{ node.url('canonical', {'absolute': true})|url_encode }}%0ALOCATION:{{ location_encoded }}%0AEND:VEVENT%0AEND:VCALENDAR" 
+             download="{{ node.label|replace({' ': '_'}) }}.ics"
+             class="event-sidebar__calendar-link">
+            Download .ics file
+          </a>
+        </div>
+      </div>
+    {% endif %}
+
+    {# Location #}
+    {% if mel_venue or mel_address %}
+      <div class="event-sidebar__section event-sidebar__location">
+        <h3 class="event-sidebar__title">Location</h3>
+        {% if mel_venue %}
+          <div class="event-sidebar__venue">{{ mel_venue }}</div>
+        {% endif %}
+        {% if mel_address %}
+          <address class="event-sidebar__address">{{ mel_address }}</address>
+        {% endif %}
+        
+        {% if mel_lat and mel_lng %}
+          <div class="event-sidebar__map" data-lat="{{ mel_lat }}" data-lng="{{ mel_lng }}" data-title="{{ node.label }}">
+            {# Map will be rendered by JavaScript #}
+          </div>
+        {% elseif mel_address %}
+          <a href="https://maps.google.com/?q={{ mel_address|url_encode }}" 
+             target="_blank" 
+             rel="noopener"
+             class="event-sidebar__directions">
+            Get directions
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {# Capacity / Attendance #}
+    {% if mel_capacity is defined and (mel_capacity.capacity is not null or mel_capacity.attendee_count > 0) %}
+      <div class="event-sidebar__section event-sidebar__capacity">
+        <h3 class="event-sidebar__title">Capacity</h3>
+        {% if mel_capacity.capacity is not null %}
+          <div class="event-sidebar__capacity-info">
+            <span class="event-sidebar__capacity-current">{{ mel_capacity.attendee_count }}</span>
+            <span class="event-sidebar__capacity-separator">/</span>
+            <span class="event-sidebar__capacity-total">{{ mel_capacity.capacity }}</span>
+            <span class="event-sidebar__capacity-label">attendees</span>
+          </div>
+          {% if mel_capacity.remaining is not null %}
+            <div class="event-sidebar__capacity-remaining">
+              {{ mel_capacity.remaining }} spots remaining
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="event-sidebar__capacity-info">
+            <span class="event-sidebar__capacity-current">{{ mel_capacity.attendee_count }}</span>
+            <span class="event-sidebar__capacity-label">attendees</span>
+          </div>
+          <div class="event-sidebar__capacity-remaining">
+            Unlimited capacity
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+    
+  </div>
+</aside>

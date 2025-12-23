@@ -1,0 +1,11 @@
+services:
+  myeventlane_diagnostics.service:
+    class: Drupal\myeventlane_diagnostics\Service\DiagnosticsService
+    arguments:
+      - '@myeventlane_event_state.resolver'
+      - '@myeventlane_event_attendees.manager'
+      - '@myeventlane_metrics.service'
+      - '@myeventlane_event.event_mode_manager'
+      - '@entity_type.manager'
+      - '@current_user'
+      - '@datetime.time'

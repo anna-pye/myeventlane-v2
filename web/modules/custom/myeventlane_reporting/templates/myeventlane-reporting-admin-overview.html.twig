@@ -1,0 +1,23 @@
+{#
+/**
+ * @file
+ * Admin reporting overview template.
+ *
+ * Variables:
+ * - kpis: Array of platform KPI cards
+ */
+#}
+<div class="mel-reporting-admin-overview">
+  <h1>{{ 'Platform Reports'|t }}</h1>
+
+  <div class="mel-grid mel-grid--4">
+    {% for kpi in kpis %}
+      {% include 'myeventlane-reporting-kpi-card.html.twig' with {
+        'label': kpi.label,
+        'value': kpi.value,
+        'subtitle': kpi.subtitle|default(''),
+        'icon': kpi.icon|default('chart'),
+      } %}
+    {% endfor %}
+  </div>
+</div>

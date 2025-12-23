@@ -1,0 +1,76 @@
+<?php
+
+/**
+ * @file
+ * MyEventLane Reporting module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function myeventlane_reporting_theme($existing, $type, $theme, $path) {
+  return [
+    'myeventlane_reporting_vendor_insights' => [
+      'variables' => [
+        'kpis' => [],
+        'attention_events' => [],
+        'top_event' => NULL,
+        'event_count' => 0,
+      ],
+      'template' => 'myeventlane-reporting-vendor-insights',
+    ],
+    'myeventlane_reporting_event_insights' => [
+      'variables' => [
+        'event' => NULL,
+        'kpis' => [],
+        'tabs' => [],
+        'active_tab' => 'overview',
+        'chart_data' => [],
+        'breakdown' => [],
+        'stub' => FALSE,
+        'stub_message' => '',
+      ],
+      'template' => 'myeventlane-reporting-event-insights',
+    ],
+    'myeventlane_reporting_kpi_card' => [
+      'variables' => [
+        'label' => '',
+        'value' => '',
+        'subtitle' => '',
+        'icon' => 'chart',
+      ],
+      'template' => 'myeventlane-reporting-kpi-card',
+    ],
+    'myeventlane_reporting_export_centre' => [
+      'variables' => [
+        'exports' => [],
+        'events' => [],
+      ],
+      'template' => 'myeventlane-reporting-export-centre',
+    ],
+    'myeventlane_reporting_admin_overview' => [
+      'variables' => [
+        'kpis' => [],
+      ],
+      'template' => 'myeventlane-reporting-admin-overview',
+    ],
+    'myeventlane_reporting_admin_vendors' => [
+      'variables' => [
+        'vendor_stats' => [],
+      ],
+      'template' => 'myeventlane-reporting-admin-vendors',
+    ],
+    'myeventlane_reporting_admin_events' => [
+      'variables' => [
+        'top_events' => [],
+      ],
+      'template' => 'myeventlane-reporting-admin-events',
+    ],
+    'myeventlane_reporting_admin_finance' => [
+      'variables' => [
+        'kpis' => [],
+      ],
+      'template' => 'myeventlane-reporting-admin-finance',
+    ],
+  ];
+}

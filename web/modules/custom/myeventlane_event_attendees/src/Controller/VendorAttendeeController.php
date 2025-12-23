@@ -333,7 +333,10 @@ final class VendorAttendeeController extends ControllerBase {
     $request = \Drupal::request();
     $obfuscateEmails = (bool) $request->query->get('obfuscate', FALSE);
     
-    $attendees = $this->attendanceManager->getAttendeesForEvent((int) $node->id());
+    // Use attendee repository for unified export.
+    $repositoryResolver = \Drupal::service('myeventlane_attendee.repository_resolver');
+    $repository = $repositoryResolver->getRepository($node);
+    $attendees = $repository->loadByEvent($node);
 
     $filename = sprintf('attendees-%s-%s.csv',
       preg_replace('/[^a-z0-9]+/', '-', strtolower($node->label())),
@@ -347,72 +350,48 @@ final class VendorAttendeeController extends ControllerBase {
       fputcsv($handle, [
         'Name',
         'Email',
-        'Phone',
-        'Status',
         'Source',
         'Ticket Type',
         'Ticket Code',
-        'Accessibility Needs',
         'Checked In',
-        'Registered',
+        'Checked In At',
       ]);
 
       // Data rows.
       foreach ($attendees as $attendee) {
-        // Get ticket type from order item if available.
-        $ticketType = '';
-        if ($attendee->hasField('order_item') && !$attendee->get('order_item')->isEmpty()) {
-          $orderItem = $attendee->get('order_item')->entity;
-          if ($orderItem) {
-            $purchasedEntity = $orderItem->getPurchasedEntity();
-            if ($purchasedEntity) {
-              $variationTitle = $purchasedEntity->label();
-              // Extract ticket type from variation title.
-              if (strpos($variationTitle, ' – ') !== FALSE) {
-                $parts = explode(' – ', $variationTitle, 2);
-                $ticketType = $parts[1] ?? $variationTitle;
-              }
-              else {
-                $ticketType = $variationTitle;
-              }
-            }
-          }
-        }
-
+        $row = $attendee->toExportRow();
+        
         // Obfuscate email if requested.
-        $email = $attendee->getEmail();
+        $email = $row['email'];
         if ($obfuscateEmails && $email) {
           $parts = explode('@', $email);
           if (count($parts) === 2) {
-            $local = $parts[0];
-            $domain = $parts[1];
-            // Show first 2 chars and last char of local part, hide domain.
-            $obfuscated = substr($local, 0, 2) . '***' . substr($local, -1) . '@***.' . substr($domain, strrpos($domain, '.') + 1);
-            $email = $obfuscated;
+            $email = substr($parts[0], 0, 2) . '***@' . $parts[1];
           }
         }
 
-        // Get accessibility needs.
-        $accessibilityNeeds = '';
-        if ($attendee->hasField('accessibility_needs') && !$attendee->get('accessibility_needs')->isEmpty()) {
-          $needs = [];
-          foreach ($attendee->get('accessibility_needs')->referencedEntities() as $term) {
-            $needs[] = $term->label();
+        $checkedInAt = $row['checked_in_at'] ?? '';
+        if ($checkedInAt && $row['checked_in']) {
+          try {
+            $dt = new \DateTime($checkedInAt);
+            $checkedInAt = $dt->format('Y-m-d H:i:s');
           }
-          $accessibilityNeeds = implode(', ', $needs);
+          catch (\Exception $e) {
+            $checkedInAt = '';
+          }
+        }
+        else {
+          $checkedInAt = '';
         }
 
         fputcsv($handle, [
-          $attendee->getName(),
+          $row['name'],
           $email,
-          $attendee->get('phone')->value ?? '',
-          $attendee->getStatus(),
-          ucfirst($attendee->getSource()),
-          $ticketType,
-          $attendee->getTicketCode() ?? '',
-          $accessibilityNeeds,
-          $attendee->isCheckedIn() ? 'Yes' : 'No',
-          date('Y-m-d H:i', $attendee->get('created')->value),
+          ucfirst($row['source']),
+          $row['ticket_type'] ?? '',
+          $row['ticket_code'] ?? '',
+          $row['checked_in'] ? 'Yes' : 'No',
+          $checkedInAt,
         ]);
       }
 

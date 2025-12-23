@@ -1,0 +1,152 @@
+<?php
+
+/**
+ * @file
+ * Event state machine module for MyEventLane.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_entity_presave().
+ */
+function myeventlane_event_state_entity_presave(EntityInterface $entity): void {
+  if (!$entity instanceof NodeInterface || $entity->bundle() !== 'event') {
+    return;
+  }
+
+  // Materialize state into field_event_state.
+  if (\Drupal::hasService('myeventlane_event_state.resolver')) {
+    $resolver = \Drupal::service('myeventlane_event_state.resolver');
+    $state = $resolver->resolveState($entity);
+
+    if ($entity->hasField('field_event_state')) {
+      $entity->set('field_event_state', $state);
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function myeventlane_event_state_entity_insert(\Drupal\Core\Entity\EntityInterface $entity): void {
+  _myeventlane_event_state_resync_event($entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function myeventlane_event_state_entity_update(\Drupal\Core\Entity\EntityInterface $entity): void {
+  _myeventlane_event_state_resync_event($entity);
+}
+
+/**
+ * Resyncs event state when related entities change.
+ */
+function _myeventlane_event_state_resync_event(\Drupal\Core\Entity\EntityInterface $entity): void {
+  if (!\Drupal::hasService('myeventlane_event_state.resolver')) {
+    return;
+  }
+
+  $eventId = NULL;
+
+  // RSVP submission.
+  if ($entity->getEntityTypeId() === 'rsvp_submission') {
+    if ($entity->hasField('event_id') && !$entity->get('event_id')->isEmpty()) {
+      $eventId = (int) $entity->get('event_id')->target_id;
+    }
+  }
+
+  // Commerce order item.
+  if ($entity->getEntityTypeId() === 'commerce_order_item') {
+    if ($entity->hasField('field_target_event') && !$entity->get('field_target_event')->isEmpty()) {
+      $eventId = (int) $entity->get('field_target_event')->target_id;
+    }
+  }
+
+  // Commerce order - check items.
+  if ($entity->getEntityTypeId() === 'commerce_order') {
+    try {
+      foreach ($entity->getItems() as $item) {
+        if ($item->hasField('field_target_event') && !$item->get('field_target_event')->isEmpty()) {
+          $eventId = (int) $item->get('field_target_event')->target_id;
+          if ($eventId) {
+            _myeventlane_event_state_resync_event_by_id($eventId);
+          }
+        }
+      }
+    }
+    catch (\Exception $e) {
+      // Ignore errors.
+    }
+    return;
+  }
+
+  if ($eventId) {
+    _myeventlane_event_state_resync_event_by_id($eventId);
+  }
+}
+
+/**
+ * Resyncs state for a specific event.
+ */
+function _myeventlane_event_state_resync_event_by_id(int $eventId): void {
+  if (!\Drupal::hasService('myeventlane_event_state.resolver')) {
+    return;
+  }
+
+  $nodeStorage = \Drupal::entityTypeManager()->getStorage('node');
+  $event = $nodeStorage->load($eventId);
+
+  if ($event instanceof NodeInterface && $event->bundle() === 'event') {
+    $resolver = \Drupal::service('myeventlane_event_state.resolver');
+    $state = $resolver->resolveState($event);
+
+    if ($event->hasField('field_event_state')) {
+      $currentState = $event->get('field_event_state')->value;
+      if ($currentState !== $state) {
+        $event->set('field_event_state', $state);
+        // Use save() with skip state sync to avoid recursion.
+        $event->save();
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function myeventlane_event_state_cron(): void {
+  // Resync states for all published events daily.
+  if (!\Drupal::hasService('myeventlane_event_state.resolver')) {
+    return;
+  }
+
+  $resolver = \Drupal::service('myeventlane_event_state.resolver');
+  $nodeStorage = \Drupal::entityTypeManager()->getStorage('node');
+
+  $query = $nodeStorage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('type', 'event')
+    ->condition('status', 1)
+    ->range(0, 100);
+
+  $nids = $query->execute();
+
+  foreach ($nids as $nid) {
+    $event = $nodeStorage->load($nid);
+    if ($event instanceof NodeInterface) {
+      $state = $resolver->resolveState($event);
+      if ($event->hasField('field_event_state')) {
+        $currentState = $event->get('field_event_state')->value;
+        if ($currentState !== $state) {
+          $event->set('field_event_state', $state);
+          $event->save();
+        }
+      }
+    }
+  }
+}

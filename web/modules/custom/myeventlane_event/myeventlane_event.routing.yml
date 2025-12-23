@@ -1,0 +1,122 @@
+# Event creation wizard routes.
+myeventlane_event.wizard.create:
+  path: '/vendor/events/create'
+  defaults:
+    _controller: '\Drupal\myeventlane_event\Controller\VendorEventWizardController::createDraft'
+    _title: 'Create event'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
+
+# New wizard form routes.
+myeventlane_event.wizard_form_new:
+  path: '/vendor/events/wizard'
+  defaults:
+    _form: '\Drupal\myeventlane_event\Form\EventWizardForm'
+    _title: 'Create event'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
+
+myeventlane_event.wizard_form_edit:
+  path: '/vendor/events/wizard/{node}'
+  defaults:
+    _form: '\Drupal\myeventlane_event\Form\EventWizardForm'
+    _title: 'Edit event'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
+    node: '\d+'
+  options:
+    parameters:
+      node:
+        type: entity:node
+        bundle:
+          - event
+
+myeventlane_event.wizard.basics:
+  path: '/vendor/events/{event}/build/basics'
+  defaults:
+    _controller: '\Drupal\myeventlane_event\Controller\VendorEventWizardController::basics'
+    _title: 'Event basics'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
+    event: '\d+'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+myeventlane_event.wizard.when_where:
+  path: '/vendor/events/{event}/build/when-where'
+  defaults:
+    _controller: '\Drupal\myeventlane_event\Controller\VendorEventWizardController::whenWhere'
+    _title: 'When & Where'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
+    event: '\d+'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+myeventlane_event.wizard.tickets:
+  path: '/vendor/events/{event}/build/tickets'
+  defaults:
+    _controller: '\Drupal\myeventlane_event\Controller\VendorEventWizardController::tickets'
+    _title: 'Tickets'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
+    event: '\d+'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+myeventlane_event.wizard.review:
+  path: '/vendor/events/{event}/build/review'
+  defaults:
+    _controller: '\Drupal\myeventlane_event\Controller\VendorEventWizardController::review'
+    _title: 'Review & Publish'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
+    event: '\d+'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+myeventlane_event.wizard.publish:
+  path: '/vendor/events/{event}/build/publish'
+  defaults:
+    _controller: '\Drupal\myeventlane_event\Controller\VendorEventWizardController::publish'
+    _title: 'Publish event'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
+    event: '\d+'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+myeventlane_event.wizard.success:
+  path: '/vendor/events/{event}/build/success'
+  defaults:
+    _controller: '\Drupal\myeventlane_event\Controller\VendorEventWizardController::success'
+    _title: 'Event published successfully'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
+    event: '\d+'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event

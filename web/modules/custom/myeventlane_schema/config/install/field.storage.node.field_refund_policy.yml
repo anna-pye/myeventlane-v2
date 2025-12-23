@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_refund_policy
+field_name: field_refund_policy
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    - { value: 'none_specified', label: 'No specified policy on refunds' }
+    - { value: '1_day', label: 'Refunds are available up to 1 day prior to the event' }
+    - { value: '7_days', label: 'Refunds are available up to 7 days prior to the event' }
+    - { value: '14_days', label: 'Refunds are available up to 14 days prior to the event' }
+    - { value: '30_days', label: 'Refunds are available up to 30 days prior to the event' }
+    - { value: 'no_refunds', label: 'No refunds' }
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

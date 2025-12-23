@@ -1,0 +1,84 @@
+<?php
+
+declare(strict_types=1);
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * @file
+ * Event diagnostics module.
+ */
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function myeventlane_diagnostics_form_node_event_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  // Get the event entity.
+  $event = $form_state->getFormObject()->getEntity();
+  if (!$event || $event->bundle() !== 'event') {
+    return;
+  }
+
+  // Only show for vendor context and users with permission.
+  $current_user = \Drupal::currentUser();
+  if (!$current_user->hasPermission('view event diagnostics')) {
+    return;
+  }
+
+  // Check if we're in vendor context (similar to EventFormAlter).
+  $route_match = \Drupal::routeMatch();
+  $route_name = (string) $route_match->getRouteName();
+  $is_vendor_context = str_contains($route_name, 'myeventlane_vendor') || str_contains($route_name, 'vendor');
+
+  if (!$is_vendor_context && !$current_user->hasPermission('administer nodes')) {
+    return;
+  }
+
+  $diagnostics_service = \Drupal::service('myeventlane_diagnostics.service');
+  $diagnostics = $diagnostics_service->analyzeEvent($event);
+
+  // Add diagnostics widget as a sidebar element.
+  $form['diagnostics_widget'] = [
+    '#type' => 'details',
+    '#title' => t('Event diagnostics'),
+    '#weight' => 100,
+    '#open' => $diagnostics['summary']['status'] !== 'ok',
+    '#attributes' => [
+      'id' => 'mel-diagnostics-widget',
+    ],
+  ];
+
+  $form['diagnostics_widget']['content'] = [
+    '#theme' => 'diagnostics_widget',
+    '#summary' => $diagnostics['summary'],
+    '#sections' => $diagnostics['sections'],
+    '#weight' => 0,
+  ];
+
+  // Attach library.
+  $form['#attached']['library'][] = 'myeventlane_diagnostics/diagnostics';
+}
+
+/**
+ * Implements hook_theme().
+ */
+function myeventlane_diagnostics_theme(array $existing, string $type, string $theme, string $path): array {
+  return [
+    'diagnostics_widget' => [
+      'variables' => [
+        'summary' => NULL,
+        'sections' => NULL,
+      ],
+      'template' => 'diagnostics-widget',
+      'path' => $path . '/templates',
+    ],
+    'diagnostics_widget_content' => [
+      'variables' => [
+        'summary' => NULL,
+        'sections' => NULL,
+      ],
+      'template' => 'diagnostics-widget-content',
+      'path' => $path . '/templates',
+    ],
+  ];
+}

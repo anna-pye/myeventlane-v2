@@ -14,8 +14,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Vendor-context Event form wizard.
  *
  * Principles:
- * - PHP owns structure and visibility (one step visible).
- * - Twig prints form.mel_wizard only. No manual field rendering.
+ * - PHP owns structure and visibility (one step visible via CSS).
+ * - All step panels remain in form for Form API value extraction.
  * - JS only triggers step changes + focus after AJAX.
  * - Stepper is LEFT and uses vendor theme-friendly classes.
  */
@@ -42,23 +42,34 @@ final class EventFormAlter {
       return;
     }
 
+    // CRITICAL: Always ensure buttons exist for event forms, regardless of context.
+    // This ensures edit forms always have save buttons.
+    $this->ensureActionButtons($form, $form_state);
+
     // Only apply wizard in vendor context.
     if (!$this->isVendorContext()) {
       return;
     }
 
     $form['#attached']['library'][] = 'myeventlane_event/event_wizard';
+    $form['#attached']['library'][] = 'myeventlane_event/hide_venue_name';
+    
+    // Attach address autocomplete library for location fields.
+    $form['#attached']['library'][] = 'myeventlane_location/address_autocomplete';
 
     // CRITICAL: Hide conflicting navigation from vendor module and Drupal.
     $this->hideConflictingNavigation($form);
 
     // Vendor UX: hide admin-only fields and help noise.
     $this->hideAdminFields($form);
+    $this->hideCoordinateFields($form);
     $this->suppressTextFormatHelp($form);
 
     // Build steps by recursively finding ALL fields in the form.
     $steps = $this->buildStepsFromForm($form);
     if (count($steps) < 2) {
+      // Wizard not applicable (not enough steps), but ensure buttons are present.
+      $this->ensureActionButtons($form, $form_state);
       return;
     }
 
@@ -100,7 +111,7 @@ final class EventFormAlter {
       '#attributes' => ['class' => ['mel-event-form__wizard-content']],
     ];
 
-    // Move ALL fields into step panels. PHP controls visibility.
+    // Move ALL fields into step panels. PHP controls visibility via CSS classes.
     foreach ($steps as $step_id => $step) {
       $panel_key = 'step_' . $step_id;
       $is_active = ($step_id === $current);
@@ -108,10 +119,13 @@ final class EventFormAlter {
       $form['mel_wizard']['layout']['content'][$panel_key] = [
         '#type' => 'container',
         '#attributes' => [
-          'class' => ['mel-event-form__panel', 'mel-wizard-step'],
+          'class' => array_filter([
+            'mel-event-form__panel',
+            'mel-wizard-step',
+            $is_active ? 'is-active' : 'is-hidden',
+          ]),
           'data-step' => $step_id,
         ],
-        '#access' => $is_active,
       ];
 
       $form['mel_wizard']['layout']['content'][$panel_key]['title'] = [
@@ -142,8 +156,18 @@ final class EventFormAlter {
     $this->rewriteActionsAsWizardNav($form, $form_state, $steps, $current);
 
     // CRITICAL: Remove vendor module's horizontal tabs AFTER all wizard setup.
-    // This must run at the very end to catch tabs added by other modules.
     $this->removeVendorTabs($form);
+    
+    // CRITICAL: Always ensure buttons exist and are visible after all processing.
+    $this->ensureActionButtons($form, $form_state);
+    
+    // Force buttons to be visible - override any #access = FALSE.
+    if (isset($form['actions']['submit'])) {
+      $form['actions']['submit']['#access'] = TRUE;
+    }
+    if (isset($form['actions']['save_draft'])) {
+      $form['actions']['save_draft']['#access'] = TRUE;
+    }
   }
 
   private function isEventForm(array &$form, FormStateInterface $form_state, string $form_id): bool {
@@ -155,23 +179,58 @@ final class EventFormAlter {
 
   private function isVendorContext(): bool {
     $route_name = (string) $this->routeMatch->getRouteName();
-    // Conservative: vendor console routes typically contain "/vendor/".
-    // If your canonical vendor routes differ, adjust this matcher.
-    return str_contains($route_name, 'myeventlane_vendor') || str_contains($route_name, 'vendor');
+    
+    // Check for vendor routes.
+    if (str_contains($route_name, 'myeventlane_vendor') || str_contains($route_name, 'vendor')) {
+      return TRUE;
+    }
+    
+    // Check for node add/edit forms for events (these are vendor routes when on vendor domain).
+    if (in_array($route_name, ['entity.node.add_form', 'entity.node.edit_form'], TRUE)) {
+      // Check if it's an event node.
+      try {
+        // For add forms, check node_type parameter.
+        $node_type = $this->routeMatch->getParameter('node_type');
+        if ($node_type) {
+          $bundle = is_string($node_type) ? $node_type : $node_type->id();
+          if ($bundle === 'event') {
+            return TRUE;
+          }
+        }
+        
+        // For edit forms, check node parameter.
+        $node = $this->routeMatch->getParameter('node');
+        if ($node && method_exists($node, 'bundle') && $node->bundle() === 'event') {
+          return TRUE;
+        }
+      }
+      catch (\Exception $e) {
+        // If parameter access fails, fall through to domain check.
+      }
+    }
+    
+    // Check if we're on vendor domain (fallback).
+    try {
+      $domain_detector = \Drupal::service('myeventlane_core.domain_detector');
+      if ($domain_detector && method_exists($domain_detector, 'isVendorDomain')) {
+        return $domain_detector->isVendorDomain();
+      }
+    }
+    catch (\Exception $e) {
+      // Service not available, continue.
+    }
+    
+    return FALSE;
   }
 
   /**
    * Hide conflicting navigation from vendor module and Drupal defaults.
-   *
-   * Completely removes conflicting elements to ensure clean wizard display.
    */
   private function hideConflictingNavigation(array &$form): void {
-    // Hide Drupal's default vertical tabs if present.
     if (isset($form['group_primary'])) {
       $form['group_primary']['#access'] = FALSE;
     }
 
-    // Hide any other tab navigation containers.
     foreach (['group_secondary', 'group_advanced', 'group_content'] as $key) {
       if (isset($form[$key]) && isset($form[$key]['#type']) && $form[$key]['#type'] === 'vertical_tabs') {
         $form[$key]['#access'] = FALSE;
@@ -181,16 +240,12 @@ final class EventFormAlter {
 
   /**
    * Remove vendor module's horizontal tabs and clean up tab pane attributes.
-   *
-   * This MUST run at the very end of alterForm() to catch tabs added by other modules.
    */
   private function removeVendorTabs(array &$form): void {
-    // Completely remove vendor module's horizontal tabs.
     if (isset($form['simple_tabs_nav'])) {
       unset($form['simple_tabs_nav']);
     }
 
-    // Remove vendor module's tab pane classes from sections (they add mel-tab-pane, mel-simple-tab-pane).
     $sections = ['event_basics', 'location', 'date_time', 'booking_config', 'visibility'];
     foreach ($sections as $section_key) {
       if (isset($form[$section_key]) && is_array($form[$section_key])) {
@@ -203,7 +258,6 @@ final class EventFormAlter {
             $form[$section_key]['#attributes']['class'] = array_values($classes);
           }
         }
-        // Remove tab pane data attributes.
         if (isset($form[$section_key]['#attributes']['data-tab-pane'])) {
           unset($form[$section_key]['#attributes']['data-tab-pane']);
         }
@@ -216,7 +270,6 @@ final class EventFormAlter {
       }
     }
 
-    // Also check recursively in case tabs are nested.
     $this->removeVendorTabsRecursive($form);
   }
 
@@ -225,19 +278,16 @@ final class EventFormAlter {
    */
   private function removeVendorTabsRecursive(array &$element): void {
     foreach ($element as $key => &$value) {
-      // Skip form property keys (they start with #).
       $key_str = (string) $key;
       if (str_starts_with($key_str, '#')) {
         continue;
       }
 
-      // Remove simple_tabs_nav anywhere in the structure.
       if ($key === 'simple_tabs_nav' || $key_str === 'simple_tabs_nav') {
         unset($element[$key]);
         continue;
       }
 
-      // Remove tab-related classes and attributes.
       if (is_array($value)) {
         if (isset($value['#attributes']['class'])) {
           $classes = $value['#attributes']['class'];
@@ -248,28 +298,114 @@ final class EventFormAlter {
             $value['#attributes']['class'] = array_values($classes);
           }
         }
-        // Remove tab data attributes.
         foreach (['data-simple-tab', 'data-tab-pane', 'data-simple-tab-pane'] as $attr) {
           if (isset($value['#attributes'][$attr])) {
             unset($value['#attributes'][$attr]);
           }
         }
-        // Recursively check children.
         $this->removeVendorTabsRecursive($value);
       }
     }
   }
 
   private function hideAdminFields(array &$form): void {
-    foreach (['field_event_vendor', 'field_event_store'] as $field_name) {
+    $admin_fields = ['field_event_vendor', 'field_event_store', 'field_venue_name'];
+    foreach ($admin_fields as $field_name) {
       if (isset($form[$field_name])) {
         $form[$field_name]['#access'] = FALSE;
+      }
+      
+      // Also hide in nested sections.
+      $sections = ['event_basics', 'location', 'date_time', 'booking_config', 'visibility'];
+      foreach ($sections as $section_key) {
+        if (isset($form[$section_key][$field_name])) {
+          $form[$section_key][$field_name]['#access'] = FALSE;
+        }
+      }
+      
+      // Also hide in wizard if fields were moved there.
+      if (isset($form['mel_wizard']['layout']['content'])) {
+        foreach ($form['mel_wizard']['layout']['content'] as $step_key => &$step_content) {
+          if (is_array($step_content) && isset($step_content['section'][$field_name])) {
+            $step_content['section'][$field_name]['#access'] = FALSE;
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Hide coordinate fields - they're auto-populated by JavaScript.
+   */
+  private function hideCoordinateFields(array &$form): void {
+    $coordinate_fields = [
+      'field_location_latitude',
+      'field_location_longitude',
+      'field_event_lat',
+      'field_event_lng',
+    ];
+    
+    foreach ($coordinate_fields as $field_name) {
+      if (isset($form[$field_name])) {
+        $form[$field_name]['#access'] = FALSE;
+        $form[$field_name]['#required'] = FALSE;
+        $form[$field_name]['#validated'] = TRUE;
+        if (!isset($form[$field_name]['#element_validate'])) {
+          $form[$field_name]['#element_validate'] = [];
+        }
+        $form[$field_name]['#element_validate'][] = [get_class($this), 'validateCoordinateField'];
+        
+        if (isset($form[$field_name]['widget']) && is_array($form[$field_name]['widget'])) {
+          foreach ($form[$field_name]['widget'] as $delta => &$widget_element) {
+            if (is_numeric($delta) && is_array($widget_element)) {
+              $widget_element['#access'] = FALSE;
+              $widget_element['#required'] = FALSE;
+              $widget_element['#validated'] = TRUE;
+              
+              if (isset($widget_element['value'])) {
+                $widget_element['value']['#access'] = FALSE;
+                $widget_element['value']['#required'] = FALSE;
+                $widget_element['value']['#validated'] = TRUE;
+                if (!isset($widget_element['value']['#element_validate'])) {
+                  $widget_element['value']['#element_validate'] = [];
+                }
+                $widget_element['value']['#element_validate'][] = [get_class($this), 'validateCoordinateField'];
+              }
+            }
+          }
+        }
+      }
+      
+      $sections = ['event_basics', 'location', 'date_time', 'booking_config', 'visibility'];
+      foreach ($sections as $section_key) {
+        if (isset($form[$section_key][$field_name])) {
+          $form[$section_key][$field_name]['#access'] = FALSE;
+          $form[$section_key][$field_name]['#required'] = FALSE;
+          $form[$section_key][$field_name]['#validated'] = TRUE;
+          if (!isset($form[$section_key][$field_name]['#element_validate'])) {
+            $form[$section_key][$field_name]['#element_validate'] = [];
+          }
+          $form[$section_key][$field_name]['#element_validate'][] = [get_class($this), 'validateCoordinateField'];
+        }
+      }
+      
+      if (isset($form['mel_wizard']['layout']['content'])) {
+        foreach ($form['mel_wizard']['layout']['content'] as $step_key => &$step_content) {
+          if (is_array($step_content) && isset($step_content['section'][$field_name])) {
+            $step_content['section'][$field_name]['#access'] = FALSE;
+            $step_content['section'][$field_name]['#required'] = FALSE;
+            $step_content['section'][$field_name]['#validated'] = TRUE;
+            if (!isset($step_content['section'][$field_name]['#element_validate'])) {
+              $step_content['section'][$field_name]['#element_validate'] = [];
+            }
+            $step_content['section'][$field_name]['#element_validate'][] = [get_class($this), 'validateCoordinateField'];
+          }
+        }
       }
     }
   }
 
   private function suppressTextFormatHelp(array &$form): void {
-    // Remove format help if present to reduce clutter in vendor UI.
     foreach ($form as $key => &$element) {
       if (is_array($element) && isset($element['#type']) && $element['#type'] === 'text_format') {
         if (isset($element['format']['help'])) {
@@ -315,11 +451,7 @@ final class EventFormAlter {
           'field_event_location_mode',
           'field_event_location',
           'field_location',
-          'field_venue_name',
-          'field_event_lat',
-          'field_location_latitude',
-          'field_event_lng',
-          'field_location_longitude',
+          // Note: field_venue_name is hidden for vendors via hideAdminFields()
           'field_event_online_url',
         ],
       ],
@@ -387,7 +519,6 @@ final class EventFormAlter {
       return TRUE;
     }
 
-    // Check nested sections (event_basics, location, date_time, booking_config, visibility).
     $sections = ['event_basics', 'location', 'date_time', 'booking_config', 'visibility'];
     foreach ($sections as $section) {
       if (isset($form[$section]) && is_array($form[$section])) {
@@ -404,19 +535,16 @@ final class EventFormAlter {
    * Move a field from form to wizard section (handles nested locations).
    */
   private function moveFieldToWizard(array &$form, array &$target_section, string $field_name): void {
-    // Check top level first.
     if (isset($form[$field_name])) {
       $target_section[$field_name] = $form[$field_name];
       unset($form[$field_name]);
       return;
     }
 
-    // Check nested sections.
     $sections = ['event_basics', 'location', 'date_time', 'booking_config', 'visibility'];
     foreach ($sections as $section_key) {
       if (isset($form[$section_key]) && is_array($form[$section_key])) {
         if ($this->extractFieldFromSection($form[$section_key], $target_section, $field_name)) {
-          // If section is now empty (only has # keys), hide it.
           $this->cleanupEmptySection($form, $section_key);
           return;
         }
@@ -434,12 +562,10 @@ final class EventFormAlter {
       return TRUE;
     }
 
-    // Check nested content arrays.
     if (isset($section['content']) && is_array($section['content'])) {
       return $this->extractFieldFromSection($section['content'], $target, $field_name);
     }
 
-    // Recursively check all array children.
     foreach ($section as $key => &$value) {
       if (is_array($value) && !str_starts_with($key, '#')) {
         if ($this->extractFieldFromSection($value, $target, $field_name)) {
@@ -486,6 +612,10 @@ final class EventFormAlter {
       'actions',
       'field_event_vendor',
       'field_event_store',
+      'field_location_latitude',
+      'field_location_longitude',
+      'field_event_lat',
+      'field_event_lng',
     ];
 
     foreach ($form as $key => &$element) {
@@ -497,12 +627,10 @@ final class EventFormAlter {
         continue;
       }
 
-      // Hide sections that were emptied.
       if (in_array($key, ['event_basics', 'location', 'date_time', 'booking_config', 'visibility'], TRUE)) {
         if (isset($element['#access']) && $element['#access'] === FALSE) {
           continue;
         }
-        // Check if section is effectively empty.
         $has_visible_content = FALSE;
         if (is_array($element)) {
           foreach ($element as $subkey => $subvalue) {
@@ -518,7 +646,6 @@ final class EventFormAlter {
         continue;
       }
 
-      // Hide any other top-level elements that aren't system fields.
       if (is_array($element)) {
         $element['#access'] = FALSE;
       }
@@ -539,6 +666,8 @@ final class EventFormAlter {
       $current = array_key_first($steps);
     }
 
+    // CRITICAL: Clear wizard_target_step after consuming it.
+    $form_state->setValue('wizard_target_step', '');
     $form_state->set(self::STATE_KEY, $current);
     return $current;
   }
@@ -624,15 +753,33 @@ final class EventFormAlter {
     $original_submit = $form['actions']['submit'] ?? NULL;
     $original_save_draft = $form['actions']['save_draft'] ?? NULL;
 
-    // Keep original actions but only show on last step.
+    // Preserve other action buttons (like preview, delete, etc.).
     $other_actions = $form['actions'];
     unset($other_actions['submit']);
     unset($other_actions['save_draft']);
+    // Remove form property keys.
+    foreach (array_keys($other_actions) as $key) {
+      if (str_starts_with($key, '#')) {
+        unset($other_actions[$key]);
+      }
+    }
 
-    $form['actions'] = [
-      '#type' => 'actions',
-      '#attributes' => ['class' => ['mel-event-form__actions', 'mel-event-form__actions--sticky']],
-    ];
+    // Ensure actions container exists.
+    if (!isset($form['actions'])) {
+      $form['actions'] = [
+        '#type' => 'actions',
+      ];
+    }
+    
+    // Set attributes for actions container.
+    if (!isset($form['actions']['#attributes'])) {
+      $form['actions']['#attributes'] = [];
+    }
+    if (!isset($form['actions']['#attributes']['class'])) {
+      $form['actions']['#attributes']['class'] = [];
+    }
+    $form['actions']['#attributes']['class'][] = 'mel-event-form__actions';
+    $form['actions']['#attributes']['class'][] = 'mel-event-form__actions--sticky';
 
     $form['actions']['wizard_back'] = [
       '#type' => 'submit',
@@ -672,21 +819,147 @@ final class EventFormAlter {
       '#attributes' => ['class' => ['js-mel-wizard-goto', 'visually-hidden']],
     ];
 
-    // Only show original submit/save_draft on last step.
+    // Show submit/save_draft on ALL steps - ALWAYS ensure they exist and are visible.
     if ($original_submit) {
-      $original_submit['#access'] = $is_last;
+      $original_submit['#access'] = TRUE;
+      unset($original_submit['#ajax']);
+      unset($original_submit['#limit_validation_errors']);
+      if (empty($original_submit['#submit'])) {
+        $original_submit['#submit'] = [];
+      }
+      $form_object = $form_state->getFormObject();
+      if ($form_object instanceof \Drupal\Core\Entity\EntityFormInterface) {
+        $has_save_handler = FALSE;
+        foreach ($original_submit['#submit'] as $handler) {
+          if (is_array($handler) && isset($handler[1]) && $handler[1] === 'save') {
+            $has_save_handler = TRUE;
+            break;
+          }
+        }
+        if (!$has_save_handler) {
+          // Add our publish handler FIRST (weight -10) to set published status before save.
+          array_unshift($original_submit['#submit'], [get_class($this), 'submitPublish']);
+          // Then add the entity form's save handler (weight 0, default).
+          $original_submit['#submit'][] = [$form_object, 'save'];
+          // Finally, add post-save handler (weight 10) to sync products.
+          $original_submit['#submit'][] = [get_class($this), 'submitPublishPostSave'];
+        } else {
+          // Save handler exists, add our handlers around it.
+          array_unshift($original_submit['#submit'], [get_class($this), 'submitPublish']);
+          $original_submit['#submit'][] = [get_class($this), 'submitPublishPostSave'];
+        }
+      }
+      if (!isset($original_submit['#attributes'])) {
+        $original_submit['#attributes'] = [];
+      }
+      if (!isset($original_submit['#attributes']['class'])) {
+        $original_submit['#attributes']['class'] = [];
+      }
+      $original_submit['#attributes']['class'][] = 'button';
+      $original_submit['#attributes']['class'][] = 'button--primary';
       $original_submit['#attributes']['class'][] = 'mel-event-form__actions-publish';
+      $original_submit['#access'] = TRUE;
+      $original_submit['#weight'] = 10;
       $form['actions']['submit'] = $original_submit;
+    } else {
+      // No submit button exists - create one.
+      $form_object = $form_state->getFormObject();
+      $submit_handlers = [];
+      // Set published status first.
+      $submit_handlers[] = [get_class($this), 'submitPublish'];
+      // Then save.
+      if ($form_object instanceof \Drupal\Core\Entity\EntityFormInterface) {
+        $submit_handlers[] = [$form_object, 'save'];
+      }
+      // Then sync products.
+      $submit_handlers[] = [get_class($this), 'submitPublishPostSave'];
+      $form['actions']['submit'] = [
+        '#type' => 'submit',
+        '#value' => 'Publish event',
+        '#submit' => $submit_handlers,
+        '#access' => TRUE,
+        '#weight' => 10,
+        '#attributes' => ['class' => ['button', 'button--primary', 'mel-event-form__actions-publish']],
+      ];
     }
 
+    // Save draft button - always visible.
     if ($original_save_draft) {
-      $original_save_draft['#access'] = $is_last;
+      $original_save_draft['#access'] = TRUE;
+      if (empty($original_save_draft['#submit'])) {
+        $original_save_draft['#submit'] = [];
+      }
+      $form_object = $form_state->getFormObject();
+      // Add our handler first to set unpublished status.
+      array_unshift($original_save_draft['#submit'], [get_class($this), 'submitSaveDraft']);
+      // Then add entity form's save handler.
+      if ($form_object instanceof \Drupal\Core\Entity\EntityFormInterface) {
+        $has_save_handler = FALSE;
+        foreach ($original_save_draft['#submit'] as $handler) {
+          if (is_array($handler) && isset($handler[1]) && $handler[1] === 'save') {
+            $has_save_handler = TRUE;
+            break;
+          }
+        }
+        if (!$has_save_handler) {
+          $original_save_draft['#submit'][] = [$form_object, 'save'];
+        }
+      }
+      if (!isset($original_save_draft['#attributes'])) {
+        $original_save_draft['#attributes'] = [];
+      }
+      if (!isset($original_save_draft['#attributes']['class'])) {
+        $original_save_draft['#attributes']['class'] = [];
+      }
+      $original_save_draft['#attributes']['class'][] = 'button';
+      $original_save_draft['#attributes']['class'][] = 'mel-event-form__actions-draft';
+      $original_save_draft['#access'] = TRUE;
+      $original_save_draft['#weight'] = 5;
       $form['actions']['save_draft'] = $original_save_draft;
+    } else {
+      // No save_draft button exists - create one.
+      $form_object = $form_state->getFormObject();
+      $submit_handlers = [];
+      // Set unpublished status first.
+      $submit_handlers[] = [get_class($this), 'submitSaveDraft'];
+      // Then save.
+      if ($form_object instanceof \Drupal\Core\Entity\EntityFormInterface) {
+        $submit_handlers[] = [$form_object, 'save'];
+      }
+      $form['actions']['save_draft'] = [
+        '#type' => 'submit',
+        '#value' => 'Save draft',
+        '#submit' => $submit_handlers,
+        '#access' => TRUE,
+        '#weight' => 5,
+        '#attributes' => ['class' => ['button', 'mel-event-form__actions-draft']],
+      ];
+    }
+    
+    // Delete button - only show for existing events.
+    $entity = $form_state->getFormObject()->getEntity();
+    if (!$entity->isNew() && isset($form['actions']['delete'])) {
+      $form['actions']['delete']['#access'] = TRUE;
+      $form['actions']['delete']['#attributes']['class'][] = 'button';
+      $form['actions']['delete']['#attributes']['class'][] = 'mel-event-form__actions-delete';
+    } elseif (!$entity->isNew()) {
+      $form['actions']['delete'] = [
+        '#type' => 'link',
+        '#title' => 'Delete',
+        '#url' => $entity->toUrl('delete-form'),
+        '#attributes' => ['class' => ['button', 'mel-event-form__actions-delete']],
+      ];
     }
 
+    // Add back other action buttons (preview, delete, etc.) - always visible.
     foreach ($other_actions as $key => $action) {
-      if (is_array($action)) {
-        $action['#access'] = $is_last;
+      if (is_array($action) && isset($action['#type'])) {
+        // Ensure preview and other buttons are visible.
+        if (isset($action['#access']) && $action['#access'] === FALSE) {
+          // Only hide if it was explicitly hidden, otherwise show it.
+          continue;
+        }
+        $action['#access'] = TRUE;
       }
       $form['actions'][$key] = $action;
     }
@@ -705,7 +978,6 @@ final class EventFormAlter {
     if (isset($steps[$step_id])) {
       foreach ($steps[$step_id]['fields'] as $field_name) {
         $limited[] = [$field_name];
-        // Also check nested paths.
         $limited[] = ['mel_wizard', 'layout', 'content', 'step_' . $step_id, 'section', $field_name];
       }
     }
@@ -765,9 +1037,6 @@ final class EventFormAlter {
    * @return array<string, array{label: string, fields: string[]}>
    */
   private static function rebuildStepsFromForm(array $form): array {
-    // Minimal rebuild: rely on hidden structure created in alter stage.
-    // If mel_wizard exists, the original steps are implicit. Fallback is safe.
-    // This keeps submit handlers stable even if the alter runs again.
     $steps = [
       'basics' => ['label' => 'Basics', 'fields' => []],
       'schedule' => ['label' => 'Schedule', 'fields' => []],
@@ -794,6 +1063,216 @@ final class EventFormAlter {
       return $current;
     }
     return array_key_first($steps);
+  }
+
+  /**
+   * Submit handler for saving draft.
+   *
+   * Sets entity as unpublished. The entity form's save handler (which runs after)
+   * will extract form values and save the entity.
+   */
+  public static function submitSaveDraft(array &$form, FormStateInterface $form_state): void {
+    $entity = $form_state->getFormObject()->getEntity();
+    if (!$entity instanceof \Drupal\node\NodeInterface) {
+      return;
+    }
+    
+    // Mark as unpublished. The save handler will save with this status.
+    $entity->setUnpublished();
+    
+    // Prevent redirect - rebuild form instead.
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Submit handler for publishing event (runs BEFORE save).
+   *
+   * Sets entity as published. The entity form's save handler (which runs after)
+   * will extract form values and save the entity with published status.
+   */
+  public static function submitPublish(array &$form, FormStateInterface $form_state): void {
+    $entity = $form_state->getFormObject()->getEntity();
+    if (!$entity instanceof \Drupal\node\NodeInterface) {
+      return;
+    }
+    
+    // Mark as published. The save handler will save with this status.
+    $entity->setPublished();
+  }
+  
+  /**
+   * Submit handler for publishing event (runs AFTER save).
+   *
+   * Syncs products after the entity has been saved.
+   */
+  public static function submitPublishPostSave(array &$form, FormStateInterface $form_state): void {
+    $entity = $form_state->getFormObject()->getEntity();
+    if (!$entity instanceof \Drupal\node\NodeInterface) {
+      return;
+    }
+    
+    // Sync products ONLY if event is published and saved.
+    if ($entity->isPublished() && !$entity->isNew()) {
+      try {
+        $product_manager = \Drupal::service('myeventlane_event.event_product_manager');
+        if ($product_manager instanceof \Drupal\myeventlane_event\Service\EventProductManager) {
+          $product_manager->syncProducts($entity, 'publish');
+        }
+        \Drupal::messenger()->addStatus(t('Event published successfully.'));
+      } catch (\Exception $e) {
+        \Drupal::messenger()->addError(t('Error syncing products: @message', ['@message' => $e->getMessage()]));
+      }
+    }
+  }
+
+  /**
+   * Validation handler for coordinate fields - always passes.
+   */
+  public static function validateCoordinateField(array &$element, FormStateInterface $form_state): void {
+    // Always pass validation for coordinate fields - they're auto-populated.
+  }
+
+  /**
+   * Ensures Save Draft and Publish buttons are present (fallback when wizard doesn't apply).
+   *
+   * Public so it can be called from hook implementations.
+   */
+  public function ensureActionButtons(array &$form, FormStateInterface $form_state): void {
+    // CRITICAL: Always ensure actions container exists.
+    if (!isset($form['actions'])) {
+      $form['actions'] = [
+        '#type' => 'actions',
+        '#weight' => 1000,
+      ];
+    }
+    
+    // Ensure actions container is accessible.
+    if (!isset($form['actions']['#access'])) {
+      $form['actions']['#access'] = TRUE;
+    }
+
+    // Ensure submit button exists and is configured for publish.
+    if (!isset($form['actions']['submit'])) {
+      $form_object = $form_state->getFormObject();
+      $submit_handlers = [];
+      $submit_handlers[] = [get_class($this), 'submitPublish'];
+      if ($form_object instanceof \Drupal\Core\Entity\EntityFormInterface) {
+        $submit_handlers[] = [$form_object, 'save'];
+      }
+      $submit_handlers[] = [get_class($this), 'submitPublishPostSave'];
+      $form['actions']['submit'] = [
+        '#type' => 'submit',
+        '#value' => 'Publish event',
+        '#submit' => $submit_handlers,
+        '#access' => TRUE,
+        '#weight' => 10,
+        '#attributes' => ['class' => ['button', 'button--primary']],
+      ];
+    } else {
+      // Ensure submit button has our handlers and is visible.
+      $form['actions']['submit']['#access'] = TRUE;
+      
+      $form_object = $form_state->getFormObject();
+      if ($form_object instanceof \Drupal\Core\Entity\EntityFormInterface) {
+        if (empty($form['actions']['submit']['#submit'])) {
+          $form['actions']['submit']['#submit'] = [];
+        }
+        $has_publish_handler = FALSE;
+        $has_save_handler = FALSE;
+        foreach ($form['actions']['submit']['#submit'] as $handler) {
+          if (is_array($handler) && isset($handler[1])) {
+            if ($handler[1] === 'submitPublish') {
+              $has_publish_handler = TRUE;
+            }
+            if ($handler[1] === 'save') {
+              $has_save_handler = TRUE;
+            }
+          }
+        }
+        if (!$has_publish_handler) {
+          array_unshift($form['actions']['submit']['#submit'], [get_class($this), 'submitPublish']);
+        }
+        if (!$has_save_handler) {
+          $form['actions']['submit']['#submit'][] = [$form_object, 'save'];
+        }
+        if (!in_array([get_class($this), 'submitPublishPostSave'], $form['actions']['submit']['#submit'], TRUE)) {
+          $form['actions']['submit']['#submit'][] = [get_class($this), 'submitPublishPostSave'];
+        }
+      }
+      
+      // Ensure button has proper attributes.
+      if (!isset($form['actions']['submit']['#attributes'])) {
+        $form['actions']['submit']['#attributes'] = [];
+      }
+      if (!isset($form['actions']['submit']['#attributes']['class'])) {
+        $form['actions']['submit']['#attributes']['class'] = [];
+      }
+      if (!in_array('button', $form['actions']['submit']['#attributes']['class'])) {
+        $form['actions']['submit']['#attributes']['class'][] = 'button';
+      }
+      if (!in_array('button--primary', $form['actions']['submit']['#attributes']['class'])) {
+        $form['actions']['submit']['#attributes']['class'][] = 'button--primary';
+      }
+    }
+
+    // Ensure save_draft button exists.
+    if (!isset($form['actions']['save_draft'])) {
+      $form_object = $form_state->getFormObject();
+      $submit_handlers = [];
+      $submit_handlers[] = [get_class($this), 'submitSaveDraft'];
+      if ($form_object instanceof \Drupal\Core\Entity\EntityFormInterface) {
+        $submit_handlers[] = [$form_object, 'save'];
+      }
+      $form['actions']['save_draft'] = [
+        '#type' => 'submit',
+        '#value' => 'Save draft',
+        '#submit' => $submit_handlers,
+        '#access' => TRUE,
+        '#weight' => 5,
+        '#attributes' => ['class' => ['button']],
+      ];
+    } else {
+      // Ensure save_draft button has our handler and is visible.
+      $form['actions']['save_draft']['#access'] = TRUE;
+      
+      if (empty($form['actions']['save_draft']['#submit'])) {
+        $form['actions']['save_draft']['#submit'] = [];
+      }
+      $has_draft_handler = FALSE;
+      foreach ($form['actions']['save_draft']['#submit'] as $handler) {
+        if (is_array($handler) && isset($handler[1]) && $handler[1] === 'submitSaveDraft') {
+          $has_draft_handler = TRUE;
+          break;
+        }
+      }
+      if (!$has_draft_handler) {
+        array_unshift($form['actions']['save_draft']['#submit'], [get_class($this), 'submitSaveDraft']);
+        $form_object = $form_state->getFormObject();
+        if ($form_object instanceof \Drupal\Core\Entity\EntityFormInterface) {
+          $has_save_handler = FALSE;
+          foreach ($form['actions']['save_draft']['#submit'] as $handler) {
+            if (is_array($handler) && isset($handler[1]) && $handler[1] === 'save') {
+              $has_save_handler = TRUE;
+              break;
+            }
+          }
+          if (!$has_save_handler) {
+            $form['actions']['save_draft']['#submit'][] = [$form_object, 'save'];
+          }
+        }
+      }
+      
+      // Ensure button has proper attributes.
+      if (!isset($form['actions']['save_draft']['#attributes'])) {
+        $form['actions']['save_draft']['#attributes'] = [];
+      }
+      if (!isset($form['actions']['save_draft']['#attributes']['class'])) {
+        $form['actions']['save_draft']['#attributes']['class'] = [];
+      }
+      if (!in_array('button', $form['actions']['save_draft']['#attributes']['class'])) {
+        $form['actions']['save_draft']['#attributes']['class'][] = 'button';
+      }
+    }
   }
 
 }

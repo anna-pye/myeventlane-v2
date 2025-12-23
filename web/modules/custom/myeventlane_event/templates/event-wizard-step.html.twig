@@ -1,0 +1,106 @@
+{#
+/**
+ * @file
+ * Template for wizard step pages (Basics, When & Where, Tickets).
+ *
+ * MEL Funky Design: friendly, pastel, clear, outcome-first.
+ *
+ * Variables:
+ * - title: Page title
+ * - step: Step definition array (id, label)
+ * - form: Form render array
+ * - steps: Step navigation array
+ */
+#}
+<div class="mel-event-wizard">
+  <div class="mel-event-wizard__layout">
+    {# ==========================================================================
+       LEFT: STEPPER NAVIGATION
+       ========================================================================== #}
+    <nav class="mel-event-wizard__nav" aria-label="{{ 'Event creation steps'|t }}">
+      <ol class="mel-wizard-steps">
+        {% for nav_step in steps %}
+          <li class="mel-wizard-steps__item{% if nav_step.is_current %} is-current{% endif %}{% if nav_step.is_complete %} is-complete{% endif %}{% if not nav_step.is_accessible %} is-disabled{% endif %}">
+            {% if nav_step.url and (nav_step.is_accessible or nav_step.is_current) %}
+              <a href="{{ nav_step.url }}" 
+                 class="mel-wizard-steps__link js-mel-stepper-button" 
+                 data-step-target="{{ nav_step.id }}"
+                 {% if nav_step.is_current %}aria-current="step"{% endif %}>
+                <span class="mel-wizard-steps__number">{{ nav_step.step_number }}</span>
+                <span class="mel-wizard-steps__label">{{ nav_step.label }}</span>
+              </a>
+            {% else %}
+              <span class="mel-wizard-steps__link" aria-disabled="true">
+                <span class="mel-wizard-steps__number">{{ nav_step.step_number }}</span>
+                <span class="mel-wizard-steps__label">{{ nav_step.label }}</span>
+              </span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    </nav>
+
+    {# ==========================================================================
+       CENTER: STEP CONTENT CARD
+       ========================================================================== #}
+    <div class="mel-event-wizard__main">
+      <div class="mel-wizard-step-card">
+        <div class="mel-wizard-step-card__header">
+          <h1 class="mel-wizard-step-card__title">
+            {% if step.id == 'basics' %}
+              {{ 'Tell us about your event'|t }}
+            {% elseif step.id == 'when-where' %}
+              {{ 'When and where'|t }}
+            {% elseif step.id == 'tickets' %}
+              {{ 'How people attend'|t }}
+            {% else %}
+              {{ title }}
+            {% endif %}
+          </h1>
+          
+          <p class="mel-wizard-step-card__description">
+            {% if step.id == 'basics' %}
+              {{ 'What\'s happening? Give your event a clear name and description so people know what to expect. You can always edit these later.'|t }}
+            {% elseif step.id == 'when-where' %}
+              {{ 'When does it start and where will it be? Use the address search to find your venue quickly. If it\'s online, you can skip the location.'|t }}
+            {% elseif step.id == 'tickets' %}
+              {{ 'How do people attend? Choose RSVP (free), paid tickets, both, or an external booking link. Each option is explained in plain language.'|t }}
+            {% else %}
+              {{ 'Complete this step to continue.'|t }}
+            {% endif %}
+          </p>
+        </div>
+
+        <div class="mel-wizard-step-card__content">
+          {# Form fields are rendered here via form.mel_wizard structure #}
+          {{ form.mel_wizard|without('wizard_current_step', 'wizard_target_step', 'layout.nav', 'layout.diagnostics') }}
+          
+          {# Form actions (submit/continue button) #}
+          {% if form.actions %}
+            <div class="mel-wizard-step-card__actions">
+              {{ form.actions }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {# ==========================================================================
+       RIGHT: DIAGNOSTICS WIDGET (if available)
+       ========================================================================== #}
+    {% if form.mel_wizard.layout.diagnostics %}
+      <aside class="mel-event-wizard__diag" aria-label="{{ 'Event checklist'|t }}">
+        {{ form.mel_wizard.layout.diagnostics }}
+      </aside>
+    {% endif %}
+  </div>
+</div>
+
+{#
+  Form structure after EventFormAlter processes:
+  - form.mel_wizard.layout.content.step_[step_id] - Contains the actual step form fields
+  - form.mel_wizard.layout.nav - Stepper navigation (handled above via steps variable)
+  - form.mel_wizard.layout.diagnostics - Diagnostics widget (shown in aside above)
+  
+  The form.mel_wizard render above will include all the step panels, but only the current one is visible.
+#}

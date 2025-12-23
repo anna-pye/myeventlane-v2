@@ -1,0 +1,33 @@
+{#
+/**
+ * @file
+ * Event CTA (Call to Action) button.
+ *
+ * Renders the appropriate CTA based on event_cta variable:
+ * - Uses canonical event_cta variable (preferred)
+ * - Falls back to mel_cta_* variables for backward compatibility
+ */
+#}
+{% set cta = event_cta|default({
+  label: mel_cta_label|default(''),
+  url: mel_cta_url|default(null),
+  disabled: (mel_cta_state|default('disabled') == 'disabled'),
+  helper: mel_cta_helper|default(null)
+}) %}
+
+{% if cta.label %}
+  {% if cta.disabled %}
+    <button class="mel-btn mel-btn-primary" disabled aria-disabled="true">
+      {{ cta.label }}
+    </button>
+  {% elseif cta.url %}
+    <a class="mel-btn mel-btn-primary" href="{{ cta.url }}">{{ cta.label }}</a>
+  {% else %}
+    <button class="mel-btn mel-btn-primary" disabled aria-disabled="true">
+      {{ cta.label }}
+    </button>
+  {% endif %}
+  {% if cta.helper %}
+    <p class="mel-helper">{{ cta.helper }}</p>
+  {% endif %}
+{% endif %}

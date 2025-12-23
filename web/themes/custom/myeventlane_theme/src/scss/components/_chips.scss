@@ -138,6 +138,18 @@
   color: colors.$mel-color-info;
 }
 
+// Purple (Secondary color variant)
+.mel-chip--purple {
+  background: rgba(colors.$mel-color-secondary, 0.1);
+  border-color: colors.$mel-color-secondary;
+  color: colors.$mel-color-secondary;
+
+  &:hover {
+    background: rgba(colors.$mel-color-secondary, 0.2);
+    border-color: colors.$mel-color-secondary-hover;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Chip with Icon
 // ---------------------------------------------------------------------------

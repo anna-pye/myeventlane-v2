@@ -1,0 +1,22 @@
+{#
+/**
+ * @file
+ * Event meta chips (date, time, location, category).
+ *
+ * Renders meta information as chips for display in the event hero.
+ */
+#}
+<div class="mel-event-meta">
+  {% if mel_date_label %}
+    <span class="mel-chip"><span class="mel-chip__icon">📅</span>{{ mel_date_label }}</span>
+  {% endif %}
+  {% if mel_time_label %}
+    <span class="mel-chip"><span class="mel-chip__icon">⏰</span>{{ mel_time_label }}</span>
+  {% endif %}
+  {% if mel_venue_label %}
+    <span class="mel-chip"><span class="mel-chip__icon">📍</span>{{ mel_venue_label }}</span>
+  {% endif %}
+  {% if mel_category_label %}
+    <span class="mel-chip mel-chip--purple"><span class="mel-chip__icon">🏷</span>{{ mel_category_label }}</span>
+  {% endif %}
+</div>

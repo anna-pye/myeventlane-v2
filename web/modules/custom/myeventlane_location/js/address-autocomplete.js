@@ -75,9 +75,19 @@ var drupalSettings = typeof drupalSettings !== 'undefined' ? drupalSettings : (t
       }
     }
     if (!searchInput) {
-      // Check by name attribute.
+      // Check by name attribute - try exact match first (wizard uses nested names).
+      searchInput = document.querySelector('input[name="location_fields[field_location_address_search]"]');
+      console.log('MyEventLane Location: Search input (exact name match)', searchInput);
+    }
+    if (!searchInput) {
+      // Check by data attribute.
+      searchInput = document.querySelector('input[data-address-search="true"]');
+      console.log('MyEventLane Location: Search input (data attribute)', searchInput);
+    }
+    if (!searchInput) {
+      // Check by name pattern.
       searchInput = document.querySelector('input[name*="address_search"], input[name*="field_location"][name*="address_search"], input[name*="field_location_address_search"]');
-      console.log('MyEventLane Location: Search input (by name)', searchInput);
+      console.log('MyEventLane Location: Search input (by name pattern)', searchInput);
     }
     if (!searchInput) {
       // Check in any form (including wizard).
@@ -97,13 +107,63 @@ var drupalSettings = typeof drupalSettings !== 'undefined' ? drupalSettings : (t
           visible: el.offsetParent !== null
         }))
       );
-      // For wizard forms, the field might be hidden initially. Try again after a delay.
+      // For wizard forms, the field might be hidden initially or on a different step.
+      // Set up observers and listeners to initialize when the location step becomes visible.
       const isWizard = document.querySelector('.mel-event-wizard, form#event-wizard-form, form[id*="event_wizard"]');
       if (isWizard) {
-        console.log('MyEventLane Location: Wizard form detected, will retry initialization after delay');
-        setTimeout(function() {
-          initAddressAutocomplete();
-        }, 1000);
+        console.log('MyEventLane Location: Wizard form detected, setting up step change listeners');
+        
+        // Listen for AJAX completion (when wizard steps change).
+        if (typeof Drupal !== 'undefined' && Drupal.ajax) {
+          document.addEventListener('ajaxSuccess', function(event) {
+            // Check if location step is now visible.
+            setTimeout(function() {
+              const locationStep = document.querySelector('.mel-wizard-step, .location-fields-container');
+              const searchField = document.querySelector('.myeventlane-location-address-search, input[name*="field_location_address_search"]');
+              if (locationStep && searchField && searchField.offsetParent !== null) {
+                console.log('MyEventLane Location: Location step visible after AJAX, initializing');
+                initAddressAutocomplete();
+              }
+            }, 100);
+          });
+        }
+        
+        // Also set up a MutationObserver to watch for the field appearing.
+        const observer = new MutationObserver(function(mutations) {
+          const searchField = document.querySelector('.myeventlane-location-address-search, input[name*="field_location_address_search"]');
+          if (searchField && searchField.offsetParent !== null) {
+            console.log('MyEventLane Location: Search field appeared, initializing');
+            observer.disconnect();
+            initAddressAutocomplete();
+          }
+        });
+        
+        // Observe the wizard container for changes.
+        const wizardContainer = document.querySelector('.mel-event-wizard, form#event-wizard-form, #event-wizard-wrapper');
+        if (wizardContainer) {
+          observer.observe(wizardContainer, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['style', 'class']
+          });
+        }
+        
+        // Also try periodically (fallback).
+        let retryCount = 0;
+        const maxRetries = 10;
+        const retryInterval = setInterval(function() {
+          retryCount++;
+          const searchField = document.querySelector('.myeventlane-location-address-search, input[name*="field_location_address_search"]');
+          if (searchField && searchField.offsetParent !== null) {
+            console.log('MyEventLane Location: Search field found on retry', retryCount);
+            clearInterval(retryInterval);
+            initAddressAutocomplete();
+          } else if (retryCount >= maxRetries) {
+            console.warn('MyEventLane Location: Max retries reached, stopping');
+            clearInterval(retryInterval);
+          }
+        }, 500);
       }
       return;
     }
@@ -318,13 +378,33 @@ var drupalSettings = typeof drupalSettings !== 'undefined' ? drupalSettings : (t
       const addressComponents = extractGoogleAddressComponents(place);
       console.log('MyEventLane Location: Extracted address components', addressComponents);
       
-      // Populate address fields FIRST - this is the critical functionality.
-      populateAddressFields(widget, addressComponents, searchInput);
-
-      // Then set coordinates and show map preview (non-critical).
+      // Get coordinates.
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
-      setCoordinates(widget, lat, lng, searchInput);
+      
+      // Populate address fields directly (standard Drupal address field).
+      populateAddressFields(widget, addressComponents, searchInput);
+      
+      // Also populate venue name if field exists.
+      const form = searchInput.closest('form');
+      if (form) {
+        populateVenueName(form, addressComponents.name);
+        
+        // Set coordinates in separate fields.
+        setCoordinates(widget, lat, lng, searchInput);
+        
+        // Set Place ID if available (Google Maps only).
+        const placeId = place.place_id || '';
+        if (placeId) {
+          setPlaceId(widget, placeId, searchInput);
+        }
+        
+        // Trigger formUpdated to ensure Drupal recognizes changes.
+        if (typeof jQuery !== 'undefined') {
+          jQuery(form).trigger('formUpdated');
+          console.log('MyEventLane Location: Triggered formUpdated after address selection');
+        }
+      }
 
       // Map preview is optional - don't let it block address population.
       try {
@@ -425,12 +505,31 @@ var drupalSettings = typeof drupalSettings !== 'undefined' ? drupalSettings : (t
     suggestionsContainer.style.display = 'none';
 
     const addressComponents = extractAppleAddressComponents(place);
-    // Populate address fields FIRST - this is the critical functionality.
-    populateAddressFields(widget, addressComponents, searchInput);
     
+    // Get coordinates.
     const lat = place.coordinate.latitude;
     const lng = place.coordinate.longitude;
-    setCoordinates(widget, lat, lng, searchInput);
+    
+    // Populate address fields directly (standard Drupal address field).
+    populateAddressFields(widget, addressComponents, searchInput);
+    
+    // Also populate venue name if field exists.
+    const form = searchInput.closest('form');
+    if (form) {
+      populateVenueName(form, addressComponents.name);
+      
+      // Set coordinates in separate fields.
+      setCoordinates(widget, lat, lng, searchInput);
+      
+      // Note: Apple Maps does not provide Google place_id.
+      // If a stable identifier becomes available in the future, it can be stored here.
+      // For now, leave place_id blank for Apple Maps selections.
+      
+      // Trigger formUpdated.
+      if (typeof jQuery !== 'undefined') {
+        jQuery(form).trigger('formUpdated');
+      }
+    }
 
     // Map preview is optional - don't let it block address population.
     try {
@@ -506,7 +605,30 @@ var drupalSettings = typeof drupalSettings !== 'undefined' ? drupalSettings : (t
   }
 
   /**
+   * Populates venue name field if it exists.
+   */
+  function populateVenueName(form, venueName) {
+    if (!venueName) return;
+    
+    // Find venue name field.
+    const venueNameField = form.querySelector('input[name*="field_venue_name"]');
+    if (venueNameField) {
+      // Clean up venue name (remove long addresses).
+      let cleanName = venueName;
+      if (cleanName.includes(',') && cleanName.length > 50) {
+        const parts = cleanName.split(',');
+        cleanName = parts[0].trim();
+      }
+      venueNameField.value = cleanName;
+      venueNameField.dispatchEvent(new Event('input', { bubbles: true }));
+      venueNameField.dispatchEvent(new Event('change', { bubbles: true }));
+      console.log('MyEventLane Location: Set venue name =', cleanName);
+    }
+  }
+
+  /**
    * Populates address fields in the widget.
+   * Works with standard Drupal address field type.
    */
   function populateAddressFields(widget, components, searchInput) {
     const form = (searchInput && searchInput.closest('form')) ||
@@ -521,51 +643,23 @@ var drupalSettings = typeof drupalSettings !== 'undefined' ? drupalSettings : (t
     // Debug: Log that we're trying to populate fields.
     console.log('MyEventLane Location: Populating address fields', components);
     
-    // Find the location container to scope our search.
-    const locationContainer = form.querySelector('[data-mel-address="field_location"], .location-fields-container, .myeventlane-location-address-widget, .field--name-field-location, [class*="location"]') || form;
-    console.log('MyEventLane Location: Location container found', locationContainer);
-    
-    // Check for widget container with data-mel-address attribute.
+    // Find the location container to scope our search - prioritize data-mel-address attribute.
     const widgetContainer = form.querySelector('[data-mel-address="field_location"]');
-    if (widgetContainer) {
-      console.log('MyEventLane Location: Widget container with data-mel-address found', widgetContainer);
-    } else {
-      console.warn('MyEventLane Location: Widget container with data-mel-address="field_location" not found');
-    }
+    const locationContainer = widgetContainer || 
+                              form.querySelector('.location-fields-container, .myeventlane-location-address-widget, .field--name-field-location') || 
+                              form;
     
-    // Debug: List all address-related fields in the form.
-    const allAddressInputs = locationContainer.querySelectorAll('input[name*="address"], input[name*="locality"], input[name*="postal"], select[name*="administrative"], select[name*="country"]');
-    console.log('MyEventLane Location: Found address inputs:', Array.from(allAddressInputs).map(el => ({
-      name: el.name,
-      id: el.id,
-      type: el.type,
-      value: el.value,
-      visible: el.offsetParent !== null
-    })));
-    
-    // Alternative: Try to find fields by walking the DOM from the search input.
-    // Sometimes fields are siblings or in nearby containers.
-    if (searchInput) {
-      const searchParent = searchInput.closest('fieldset, .form-item, .form-wrapper, [data-mel-address]') || searchInput.parentElement;
-      console.log('MyEventLane Location: Search input parent:', searchParent);
-      
-      // Look for address fields near the search input.
-      const nearbyFields = searchParent.querySelectorAll('input, select');
-      console.log('MyEventLane Location: Fields near search input:', Array.from(nearbyFields).map(el => ({
-        name: el.name,
-        id: el.id,
-        type: el.type
-      })));
-    }
+    console.log('MyEventLane Location: Widget container found:', !!widgetContainer);
+    console.log('MyEventLane Location: Location container:', locationContainer);
     
     const findField = function(selectors, labelText) {
       // PRIORITY 1: Search within the widget container with data-mel-address attribute first.
-      const widgetContainer = form.querySelector('[data-mel-address="field_location"]');
+      // This is the most reliable way to find wizard address fields.
       if (widgetContainer) {
         for (const selector of selectors) {
           try {
             const field = widgetContainer.querySelector(selector);
-            if (field && (field.offsetParent !== null || field.type === 'hidden')) {
+            if (field && (field.offsetParent !== null || field.type === 'hidden' || field.style.display === 'none')) {
               console.log('MyEventLane Location: Found field via widget container', selector, field.name);
               return field;
             }
@@ -697,117 +791,63 @@ var drupalSettings = typeof drupalSettings !== 'undefined' ? drupalSettings : (t
       return null;
     };
     
+    // Find address fields - prioritize wizard structure with data-mel-address attribute.
+    // Standard Drupal address field structure: location_fields[field_location][0][address][component]
     const countryCode = findField([
-      // Wizard-specific selectors first (highest priority).
       '[data-mel-address="field_location"] select[name*="country_code"]',
-      'select[name="location_fields[field_location][country_code]"]',
+      'select[name="location_fields[field_location][0][address][country_code]"]',
+      'select[name*="location_fields"][name*="field_location"][name*="country_code"]',
       '.location-fields-container select[name*="country_code"]',
       '.mel-wizard-step select[name*="country_code"]',
-      '.mel-event-wizard__content select[name*="country_code"]',
-      // Standard form selectors.
-      '[data-drupal-selector="edit-field-location-0-address-country-code"]',
-      'select[name="field_location[0][address][country_code]"]',
-      'select[name*="field_location"][name*="country_code"]',
-      '.field--name-field-location select[name*="country_code"]',
       '.myeventlane-location-address-widget select[name*="country_code"]',
-      '.mel-event-form__wizard-content select[name*="country_code"]'
     ], 'country');
 
     const administrativeArea = findField([
-      // Wizard-specific selectors first (highest priority).
       '[data-mel-address="field_location"] select[name*="administrative_area"]',
-      'select[name="location_fields[field_location][administrative_area]"]',
       'select[name="location_fields[field_location][0][address][administrative_area]"]',
       'select[name*="location_fields"][name*="field_location"][name*="administrative_area"]',
       '.location-fields-container select[name*="administrative_area"]',
       '.mel-wizard-step select[name*="administrative_area"]',
-      '.mel-event-wizard__content select[name*="administrative_area"]',
-      // Standard form selectors.
-      '[data-drupal-selector="edit-field-location-0-address-administrative-area"]',
-      'select[name="field_location[0][address][administrative_area]"]',
-      'select[name*="field_location"][name*="administrative_area"]',
-      '.field--name-field-location select[name*="administrative_area"]',
       '.myeventlane-location-address-widget select[name*="administrative_area"]',
-      '.mel-event-form__wizard-content select[name*="administrative_area"]',
-      'select[aria-label*="state" i]',
-      'select[aria-label*="administrative" i]'
     ], 'state');
 
     const locality = findField([
-      // Wizard-specific selectors first (highest priority).
       '[data-mel-address="field_location"] input[name*="locality"]',
-      'input[name="location_fields[field_location][locality]"]',
       'input[name="location_fields[field_location][0][address][locality]"]',
       'input[name*="location_fields"][name*="field_location"][name*="locality"]',
       '.location-fields-container input[name*="locality"]',
       '.mel-wizard-step input[name*="locality"]',
-      '.mel-event-wizard__content input[name*="locality"]',
-      // Standard form selectors.
-      '[data-drupal-selector="edit-field-location-0-address-locality"]',
-      'input[name="field_location[0][address][locality]"]',
-      'input[name*="field_location"][name*="locality"]',
-      '.field--name-field-location input[name*="locality"]',
       '.myeventlane-location-address-widget input[name*="locality"]',
-      '.mel-event-form__wizard-content input[name*="locality"]',
-      'input[aria-label*="suburb" i]',
-      'input[aria-label*="locality" i]'
     ], 'suburb');
 
     const postalCode = findField([
-      // Wizard-specific selectors first (highest priority).
       '[data-mel-address="field_location"] input[name*="postal_code"]',
-      'input[name="location_fields[field_location][postal_code]"]',
       'input[name="location_fields[field_location][0][address][postal_code]"]',
       'input[name*="location_fields"][name*="field_location"][name*="postal_code"]',
       '.location-fields-container input[name*="postal_code"]',
       '.mel-wizard-step input[name*="postal_code"]',
-      '.mel-event-wizard__content input[name*="postal_code"]',
-      // Standard form selectors.
-      '[data-drupal-selector="edit-field-location-0-address-postal-code"]',
-      'input[name="field_location[0][address][postal_code]"]',
-      'input[name*="field_location"][name*="postal_code"]',
-      '.field--name-field-location input[name*="postal_code"]',
       '.myeventlane-location-address-widget input[name*="postal_code"]',
-      '.mel-event-form__wizard-content input[name*="postal_code"]',
-      'input[aria-label*="postal" i]',
-      'input[aria-label*="postcode" i]'
     ], 'postal code');
 
     const addressLine1 = findField([
-      // Wizard-specific selectors first (highest priority).
       '[data-mel-address="field_location"] input[name*="address_line1"]',
-      'input[name="location_fields[field_location][address_line1]"]',
       'input[name="location_fields[field_location][0][address][address_line1]"]',
       'input[name*="location_fields"][name*="field_location"][name*="address_line1"]',
       '.location-fields-container input[name*="address_line1"]',
       '.mel-wizard-step input[name*="address_line1"]',
-      '.mel-event-wizard__content input[name*="address_line1"]',
-      // Standard form selectors.
-      '[data-drupal-selector="edit-field-location-0-address-address-line1"]',
-      'input[name="field_location[0][address][address_line1]"]',
-      'input[name*="field_location"][name*="address_line1"]',
-      '.field--name-field-location input[name*="address_line1"]',
       '.myeventlane-location-address-widget input[name*="address_line1"]',
-      '.mel-event-form__wizard-content input[name*="address_line1"]',
-      'input[aria-label*="street" i]',
-      'input[aria-label*="address" i]'
     ], 'street address');
 
     const addressLine2 = findField([
-      '[data-drupal-selector="edit-field-location-0-address-address-line2"]',
-      'input[name="field_location[0][address][address_line2]"]',
-      'input[name*="field_location"][name*="address_line2"]',
-      '.field--name-field-location input[name*="address_line2"]',
-      '.mel-event-form__wizard-content input[name*="address_line2"]',
-      '.mel-wizard-step input[name*="address_line2"]'
+      '[data-mel-address="field_location"] input[name*="address_line2"]',
+      'input[name="location_fields[field_location][0][address][address_line2]"]',
+      'input[name*="location_fields"][name*="field_location"][name*="address_line2"]',
+      '.location-fields-container input[name*="address_line2"]',
     ], 'address line 2');
 
     const venueNameField = findField([
-      '[data-drupal-selector="edit-field-venue-name-0-value"]',
-      'input[name="field_venue_name[0][value]"]',
+      'input[name="location_fields[field_venue_name]"]',
       'input[name*="field_venue_name"]',
-      '.field--name-field-venue-name input',
-      '.mel-event-form__wizard-content input[name*="field_venue_name"]',
       '.mel-wizard-step input[name*="field_venue_name"]'
     ], 'venue name');
 
@@ -817,6 +857,9 @@ var drupalSettings = typeof drupalSettings !== 'undefined' ? drupalSettings : (t
       countryCode.dispatchEvent(new Event('input', { bubbles: true }));
       countryCode.dispatchEvent(new Event('change', { bubbles: true }));
       countryCode.dispatchEvent(new Event('blur', { bubbles: true }));
+      console.log('MyEventLane Location: Set country_code =', countryCode.value, 'in field', countryCode.name);
+    } else {
+      console.warn('MyEventLane Location: Country code field not found');
     }
 
     // Wait briefly for state options to populate.
@@ -850,52 +893,95 @@ var drupalSettings = typeof drupalSettings !== 'undefined' ? drupalSettings : (t
           administrativeArea.dispatchEvent(new Event('input', { bubbles: true }));
           administrativeArea.dispatchEvent(new Event('change', { bubbles: true }));
           administrativeArea.dispatchEvent(new Event('blur', { bubbles: true }));
+          console.log('MyEventLane Location: Set administrative_area =', administrativeArea.value, 'in field', administrativeArea.name);
         };
         setAdministrativeArea();
+      } else {
+        console.warn('MyEventLane Location: Administrative area field not found');
       }
 
-      // Populate other fields with a small delay to ensure DOM is ready.
+      // Populate other fields immediately.
+      if (locality) {
+        locality.value = components.locality || '';
+        locality.dispatchEvent(new Event('input', { bubbles: true }));
+        locality.dispatchEvent(new Event('change', { bubbles: true }));
+        locality.dispatchEvent(new Event('blur', { bubbles: true }));
+        console.log('MyEventLane Location: Set locality =', locality.value, 'in field', locality.name);
+      } else {
+        console.error('MyEventLane Location: CRITICAL - Locality field not found!');
+      }
+
+      if (postalCode) {
+        postalCode.value = components.postal_code || '';
+        postalCode.dispatchEvent(new Event('input', { bubbles: true }));
+        postalCode.dispatchEvent(new Event('change', { bubbles: true }));
+        postalCode.dispatchEvent(new Event('blur', { bubbles: true }));
+        console.log('MyEventLane Location: Set postal_code =', postalCode.value, 'in field', postalCode.name);
+      } else {
+        console.error('MyEventLane Location: CRITICAL - Postal code field not found!');
+      }
+
+      if (addressLine1) {
+        addressLine1.value = components.address_line1 || '';
+        addressLine1.dispatchEvent(new Event('input', { bubbles: true }));
+        addressLine1.dispatchEvent(new Event('change', { bubbles: true }));
+        addressLine1.dispatchEvent(new Event('blur', { bubbles: true }));
+        console.log('MyEventLane Location: Set address_line1 =', addressLine1.value, 'in field', addressLine1.name);
+      } else {
+        console.error('MyEventLane Location: CRITICAL - Address line 1 field not found!');
+      }
+      
+      if (addressLine2 && components.address_line2) {
+        addressLine2.value = components.address_line2 || '';
+        addressLine2.dispatchEvent(new Event('input', { bubbles: true }));
+        addressLine2.dispatchEvent(new Event('change', { bubbles: true }));
+        addressLine2.dispatchEvent(new Event('blur', { bubbles: true }));
+        console.log('MyEventLane Location: Set address_line2 =', addressLine2.value, 'in field', addressLine2.name);
+      }
+      
+      // Final verification - check all critical fields have values and trigger form state update.
       setTimeout(() => {
-        if (locality) {
-          locality.value = components.locality || '';
-          locality.dispatchEvent(new Event('input', { bubbles: true }));
-          locality.dispatchEvent(new Event('change', { bubbles: true }));
-          locality.dispatchEvent(new Event('blur', { bubbles: true }));
-          console.log('MyEventLane Location: Populated locality', components.locality, 'in field', locality.name);
-        } else {
-          console.warn('MyEventLane Location: Locality field not found. Available fields:', 
-            Array.from(locationContainer.querySelectorAll('input, select')).map(el => ({name: el.name, id: el.id, type: el.type})));
-        }
-
-        if (postalCode) {
-          postalCode.value = components.postal_code || '';
-          postalCode.dispatchEvent(new Event('input', { bubbles: true }));
-          postalCode.dispatchEvent(new Event('change', { bubbles: true }));
-          postalCode.dispatchEvent(new Event('blur', { bubbles: true }));
-          console.log('MyEventLane Location: Populated postal code', components.postal_code, 'in field', postalCode.name);
-        } else {
-          console.warn('MyEventLane Location: Postal code field not found. Available fields:', 
-            Array.from(locationContainer.querySelectorAll('input, select')).map(el => ({name: el.name, id: el.id, type: el.type})));
-        }
-
-        if (addressLine1) {
-          addressLine1.value = components.address_line1 || '';
-          addressLine1.dispatchEvent(new Event('input', { bubbles: true }));
-          addressLine1.dispatchEvent(new Event('change', { bubbles: true }));
-          addressLine1.dispatchEvent(new Event('blur', { bubbles: true }));
-          console.log('MyEventLane Location: Populated address_line1', components.address_line1, 'in field', addressLine1.name);
-        } else {
-          console.warn('MyEventLane Location: Address line 1 field not found. Available fields:', 
-            Array.from(locationContainer.querySelectorAll('input, select')).map(el => ({name: el.name, id: el.id, type: el.type})));
+        const criticalFields = {
+          'address_line1': addressLine1,
+          'locality': locality,
+          'administrative_area': administrativeArea,
+          'postal_code': postalCode
+        };
+        
+        const missing = [];
+        const empty = [];
+        
+        for (const [name, field] of Object.entries(criticalFields)) {
+          if (!field) {
+            missing.push(name);
+          } else if (!field.value || field.value.trim() === '') {
+            empty.push(name);
+          }
         }
         
-        if (administrativeArea) {
-          console.log('MyEventLane Location: Populated administrative_area', administrativeArea.value, 'in field', administrativeArea.name);
-        } else {
-          console.warn('MyEventLane Location: Administrative area field not found. Available fields:', 
-            Array.from(locationContainer.querySelectorAll('input, select')).map(el => ({name: el.name, id: el.id, type: el.type})));
+        if (missing.length > 0) {
+          console.error('MyEventLane Location: CRITICAL FIELDS MISSING:', missing.join(', '));
         }
-      }, 50);
+        if (empty.length > 0) {
+          console.error('MyEventLane Location: CRITICAL FIELDS EMPTY:', empty.join(', '));
+          console.error('MyEventLane Location: This will cause validation to fail!');
+        }
+        if (missing.length === 0 && empty.length === 0) {
+          console.log('MyEventLane Location: SUCCESS - All critical fields populated!');
+          
+          // CRITICAL: Trigger form state update to ensure Drupal recognizes the values.
+          if (typeof jQuery !== 'undefined' && form) {
+            jQuery(form).trigger('formUpdated');
+            // Also trigger on each field individually.
+            Object.values(criticalFields).forEach(field => {
+              if (field) {
+                jQuery(field).trigger('formUpdated');
+              }
+            });
+            console.log('MyEventLane Location: Triggered formUpdated events to update Drupal form state');
+          }
+        }
+      }, 100);
 
       if (addressLine2 && components.address_line2) {
         addressLine2.value = components.address_line2;
@@ -1003,6 +1089,48 @@ var drupalSettings = typeof drupalSettings !== 'undefined' ? drupalSettings : (t
   }
 
   /**
+   * Sets Place ID in hidden field.
+   */
+  function setPlaceId(widget, placeId, searchInput) {
+    const form = searchInput ? searchInput.closest('form') : (widget.closest('form') || document.querySelector('form'));
+    if (!form || !placeId) {
+      return;
+    }
+
+    // Find Place ID field - try multiple selectors.
+    let placeIdField = form.querySelector('input.mel-place-id[type="hidden"]');
+    
+    if (!placeIdField) {
+      placeIdField = form.querySelector('input[type="hidden"][name*="field_location_place_id"]');
+    }
+    
+    if (!placeIdField) {
+      // Try scoped to location fields container.
+      const locationContainer = form.querySelector('[data-mel-address="field_location"], .location-fields-container, .mel-wizard-step');
+      if (locationContainer) {
+        placeIdField = locationContainer.querySelector('input[type="hidden"][name*="field_location_place_id"]');
+      }
+    }
+    
+    if (!placeIdField) {
+      // Try wizard content areas.
+      const wizardContent = form.querySelector('.mel-event-form__wizard-content, .mel-wizard-step, .mel-event-form__section, .location-fields-container');
+      if (wizardContent) {
+        placeIdField = wizardContent.querySelector('input[type="hidden"][name*="field_location_place_id"], input.mel-place-id[type="hidden"]');
+      }
+    }
+    
+    if (placeIdField) {
+      placeIdField.value = placeId;
+      placeIdField.dispatchEvent(new Event('input', { bubbles: true }));
+      placeIdField.dispatchEvent(new Event('change', { bubbles: true }));
+      console.log('MyEventLane Location: Set place_id =', placeId, 'in field', placeIdField.name);
+    } else {
+      console.warn('MyEventLane Location: Place ID field not found');
+    }
+  }
+
+  /**
    * Shows a map preview with a marker.
    */
   /**
@@ -1099,8 +1227,50 @@ var drupalSettings = typeof drupalSettings !== 'undefined' ? drupalSettings : (t
       return;
     }
     
-    console.log('MyEventLane Location: Calling initAddressAutocomplete in 300ms');
-    setTimeout(initAddressAutocomplete, 300);
+    // Check if this is a wizard form - if so, wait for location step.
+    const isWizard = document.querySelector('.mel-event-wizard, form#event-wizard-form, form[id*="event_wizard"]');
+    
+    if (isWizard) {
+      console.log('MyEventLane Location: Wizard form detected, will initialize when location step is visible');
+      
+      // Set up a MutationObserver to watch for the field appearing.
+      const wizardObserver = new MutationObserver(function(mutations) {
+        const searchField = document.querySelector('.myeventlane-location-address-search, input[name*="field_location_address_search"]');
+        if (searchField && searchField.offsetParent !== null) {
+          const form = searchField.closest('form');
+          if (form && !initializedForms.has(form)) {
+            console.log('MyEventLane Location: Location step visible in wizard, initializing');
+            wizardObserver.disconnect();
+            initAddressAutocomplete();
+          }
+        }
+      });
+      
+      // Observe the entire document for wizard step changes.
+      wizardObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+      });
+      
+      // Also try immediately in case we're already on the location step.
+      setTimeout(function() {
+        const searchField = document.querySelector('.myeventlane-location-address-search, input[name*="field_location_address_search"]');
+        if (searchField && searchField.offsetParent !== null) {
+          const form = searchField.closest('form');
+          if (form && !initializedForms.has(form)) {
+            console.log('MyEventLane Location: Location step already visible, initializing');
+            wizardObserver.disconnect();
+            initAddressAutocomplete();
+          }
+        }
+      }, 100);
+    } else {
+      // For non-wizard forms, initialize immediately.
+      console.log('MyEventLane Location: Non-wizard form, calling initAddressAutocomplete in 300ms');
+      setTimeout(initAddressAutocomplete, 300);
+    }
   }
 
   console.log('MyEventLane Location: Script loaded, document readyState:', document.readyState);
@@ -1173,7 +1343,97 @@ var drupalSettings = typeof drupalSettings !== 'undefined' ? drupalSettings : (t
     }, 1000);
   }
   
-  // Also re-initialize after AJAX (for wizard step changes).
+  // CRITICAL: Before form submit, ensure all hidden address fields have values.
+  // This ensures validation passes even if form state hasn't updated yet.
+  document.addEventListener('submit', function(e) {
+    const form = e.target;
+    if (!form || form.tagName !== 'FORM') return;
+    
+    // Check if this is an event wizard form.
+    const isWizardForm = form.id === 'event-wizard-form' || 
+                       form.classList.contains('mel-event-wizard') ||
+                       form.querySelector('.myeventlane-location-address-search');
+    
+    if (!isWizardForm) return;
+    
+    // Find all hidden address fields and verify they have values.
+    const widgetContainer = form.querySelector('[data-mel-address="field_location"]');
+    if (!widgetContainer) return;
+    
+    const addressFields = {
+      address_line1: widgetContainer.querySelector('input[data-address-component="address_line1"]'),
+      locality: widgetContainer.querySelector('input[data-address-component="locality"]'),
+      administrative_area: widgetContainer.querySelector('input[data-address-component="administrative_area"], select[data-address-component="administrative_area"]'),
+      postal_code: widgetContainer.querySelector('input[data-address-component="postal_code"]'),
+    };
+    
+    // Check if any critical fields are empty.
+    const emptyFields = [];
+    for (const [name, field] of Object.entries(addressFields)) {
+      if (field && (!field.value || field.value.trim() === '')) {
+        emptyFields.push(name);
+      }
+    }
+    
+    if (emptyFields.length > 0) {
+      console.warn('MyEventLane Location: Form submit detected with empty address fields:', emptyFields);
+      console.warn('MyEventLane Location: This may cause validation to fail.');
+      // Don't prevent submit - let validation handle it, but log for debugging.
+    } else {
+      console.log('MyEventLane Location: Form submit - all address fields have values');
+    }
+  }, true); // Use capture phase to run before form validation.
+
+  // Re-initialize after AJAX (for wizard step changes).
+  if (typeof Drupal !== 'undefined' && Drupal.ajax) {
+    // Listen for AJAX completion to re-initialize when steps change.
+    document.addEventListener('ajaxSuccess', function(event) {
+      // Small delay to ensure DOM is updated.
+      setTimeout(function() {
+        // Check if location step is now visible.
+        const locationStep = document.querySelector('.mel-wizard-step, .location-fields-container, [data-mel-address="field_location"]');
+        const searchField = document.querySelector('.myeventlane-location-address-search, input[name*="field_location_address_search"]');
+        if (locationStep && searchField && searchField.offsetParent !== null) {
+          console.log('MyEventLane Location: Location step visible after AJAX, re-initializing');
+          // Only initialize if not already initialized for this form.
+          const form = searchField.closest('form');
+          if (form && !initializedForms.has(form)) {
+            initAddressAutocomplete();
+          }
+        }
+      }, 200);
+    });
+    
+    // Also listen for AJAX commands (more reliable for Drupal).
+    if (Drupal.ajax && Drupal.ajax.prototype) {
+      const originalBeforeSend = Drupal.ajax.prototype.beforeSend;
+      Drupal.ajax.prototype.beforeSend = function(xmlhttprequest, options) {
+        if (originalBeforeSend) {
+          originalBeforeSend.call(this, xmlhttprequest, options);
+        }
+      };
+      
+      const originalSuccess = Drupal.ajax.prototype.success;
+      Drupal.ajax.prototype.success = function(response, status) {
+        if (originalSuccess) {
+          originalSuccess.call(this, response, status);
+        }
+        // Re-initialize after AJAX success.
+        setTimeout(function() {
+          const searchField = document.querySelector('.myeventlane-location-address-search, input[name*="field_location_address_search"]');
+          if (searchField && searchField.offsetParent !== null) {
+            const form = searchField.closest('form');
+            if (form && !initializedForms.has(form)) {
+              console.log('MyEventLane Location: Re-initializing after AJAX success');
+              initAddressAutocomplete();
+            }
+          }
+        }, 300);
+      };
+    }
+  }
+  
+  // Also re-initialize after AJAX (for wizard step changes) - legacy approach.
   if (typeof Drupal !== 'undefined' && Drupal.ajax) {
     // Use once() to avoid multiple wrappers if script loads multiple times.
     if (!Drupal.ajax.prototype._myeventlaneLocationWrapped) {

@@ -1,0 +1,50 @@
+{#
+/**
+ * @file
+ * Template for post-publish success screen.
+ *
+ * MEL Funky Design: celebratory, clear next steps.
+ *
+ * Variables:
+ * - title: Page title
+ * - event: Event node (published)
+ * - event_url: URL to view the event
+ * - tickets_url: URL to manage tickets
+ * - create_url: URL to create another event
+ */
+#}
+<div class="mel-event-wizard-success">
+  <div class="mel-event-wizard-success__content">
+    <div class="mel-event-wizard-success__icon">🎉</div>
+    
+    <h1 class="mel-event-wizard-success__title">{{ 'Your event is live!'|t }}</h1>
+    
+    <p class="mel-event-wizard-success__description">
+      {{ 'Great work! "@title" has been published and is now visible to attendees. Share it far and wide!'|t({'@title': event.label()}) }}
+    </p>
+
+    <div class="mel-event-wizard-success__actions">
+      <a href="{{ event_url }}" class="mel-btn mel-btn--primary mel-btn--large" target="_blank">
+        👀 {{ 'View event'|t }}
+      </a>
+      
+      <a href="{{ tickets_url }}" class="mel-btn mel-btn--secondary">
+        🎟️ {{ 'Manage tickets'|t }}
+      </a>
+      
+      <a href="{{ create_url }}" class="mel-btn mel-btn--secondary">
+        ➕ {{ 'Create another event'|t }}
+      </a>
+    </div>
+
+    <div class="mel-event-wizard-success__tips">
+      <h2 class="mel-event-wizard-success__tips-title">{{ 'What\'s next?'|t }}</h2>
+      <ul class="mel-event-wizard-success__tips-list">
+        <li>{{ 'Share your event link on social media and with your community'|t }}</li>
+        <li>{{ 'Set up ticket types and pricing if you haven\'t already'|t }}</li>
+        <li>{{ 'Monitor RSVPs and ticket sales from your dashboard'|t }}</li>
+        <li>{{ 'Send reminders to attendees closer to the event date'|t }}</li>
+      </ul>
+    </div>
+  </div>
+</div>

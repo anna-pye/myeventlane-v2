@@ -1,0 +1,9 @@
+services:
+  myeventlane_metrics.service:
+    class: Drupal\myeventlane_metrics\Service\EventMetricsService
+    arguments:
+      - '@entity_type.manager'
+      - '@myeventlane_capacity.service'
+      - '@myeventlane_attendee.repository_resolver'
+      - '@cache.default'
+      - '@datetime.time'

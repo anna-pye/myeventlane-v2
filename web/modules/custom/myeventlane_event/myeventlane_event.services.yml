@@ -18,6 +18,7 @@ services:
       - '@entity_type.manager'
       - '@logger.factory'
       - '@messenger'
+      - '@lock'
 
   myeventlane_event.event_mode_manager:
     class: Drupal\myeventlane_event\Service\EventModeManager

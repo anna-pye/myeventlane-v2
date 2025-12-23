@@ -1,0 +1,563 @@
+// ============================================================================
+// Generic Wizard Component System
+// ============================================================================
+// Reusable wizard layout component for:
+// - Event creation wizard
+// - Commerce checkout steps
+// - User onboarding flows
+//
+// Design principles:
+// - Soft, pastel MyEventLane brand
+// - Mobile-first responsive layout
+// - WCAG AA compliant
+// - BEM naming convention
+//
+// Usage:
+//   <div class="mel-wizard">
+//     <div class="mel-wizard__layout">
+//       <nav class="mel-wizard__nav">...</nav>
+//       <main class="mel-wizard__content">...</main>
+//     </div>
+//   </div>
+
+@use '../tokens/colors';
+@use '../tokens/spacing';
+@use '../tokens/radii';
+@use '../tokens/shadows';
+@use '../tokens/typography';
+@use '../tokens/breakpoints';
+
+// ============================================================================
+// WIZARD ROOT CONTAINER
+// ============================================================================
+
+.mel-wizard {
+  width: 100%;
+  padding: spacing.mel-space(4);
+  background: colors.$mel-color-bg;
+
+  @include breakpoints.mel-break(lg) {
+    padding: spacing.mel-space(6);
+  }
+}
+
+// ============================================================================
+// WIZARD LAYOUT GRID
+// ============================================================================
+// Two-column layout: sidebar (nav) + content
+// Mobile: stacked layout with hidden sidebar (can be toggled)
+
+.mel-wizard__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: spacing.mel-space(4);
+  max-width: 1600px;
+  margin: 0 auto;
+
+  @include breakpoints.mel-break(lg) {
+    grid-template-columns: 280px 1fr;
+    gap: spacing.mel-space(6);
+    align-items: start;
+  }
+}
+
+// ============================================================================
+// LEFT: STEP NAVIGATION SIDEBAR
+// ============================================================================
+
+.mel-wizard__nav {
+  // Mobile: hidden by default, can be toggled via JS
+  @include breakpoints.mel-break(lg, max) {
+    display: none;
+    order: 1;
+    
+    &.is-visible {
+      display: block;
+      margin-bottom: spacing.mel-space(4);
+    }
+  }
+
+  @include breakpoints.mel-break(lg) {
+    position: sticky;
+    top: spacing.mel-space(4);
+    align-self: start;
+  }
+}
+
+// Navigation card container
+.mel-wizard__nav-card {
+  background: colors.$mel-color-surface;
+  border: 1px solid rgba(colors.$mel-color-text-light, 0.1);
+  border-radius: radii.$mel-radius-xl;
+  padding: spacing.mel-space(4);
+  box-shadow: shadows.$mel-shadow-sm;
+
+  @include breakpoints.mel-break(sm, max) {
+    padding: spacing.mel-space(3);
+    border-radius: radii.$mel-radius-lg;
+  }
+}
+
+// Navigation title/heading
+.mel-wizard__nav-title {
+  font-size: typography.mel-font-size(sm);
+  font-weight: typography.$mel-font-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: colors.$mel-color-text-muted;
+  margin: 0 0 spacing.mel-space(3) 0;
+}
+
+// Step list container
+.mel-wizard__nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+// Individual step item
+.mel-wizard__step {
+  position: relative;
+  display: flex;
+  
+  // Vertical connector line (desktop only)
+  @include breakpoints.mel-break(lg) {
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 16px;
+      top: 40px;
+      bottom: calc(-1 * #{spacing.mel-space(2)});
+      width: 2px;
+      background: rgba(colors.$mel-color-text-light, 0.2);
+      z-index: 0;
+      transition: background-color 0.2s ease;
+    }
+
+    &.is-complete:not(:last-child)::after {
+      background: colors.$mel-color-success;
+    }
+  }
+}
+
+// Step button/link
+.mel-wizard__step-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: spacing.mel-space(2);
+  padding: spacing.mel-space(2) spacing.mel-space(3);
+  text-align: left;
+  background: rgba(colors.$mel-color-text-light, 0.04);
+  border: 1px solid rgba(colors.$mel-color-text-light, 0.1);
+  border-radius: radii.$mel-radius-md;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text-muted;
+  text-decoration: none;
+  font-family: inherit;
+  position: relative;
+  z-index: 1;
+
+  // Focus state for accessibility
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px colors.$mel-color-surface,
+                0 0 0 4px colors.$mel-focus-ring-color;
+  }
+
+  &:hover:not([aria-disabled="true"]) {
+    background: rgba(colors.$mel-color-primary, 0.08);
+    border-color: colors.$mel-color-primary;
+    color: colors.$mel-color-text;
+  }
+
+  // Active state
+  .mel-wizard__step.is-active & {
+    background: rgba(colors.$mel-color-primary, 0.12);
+    border-color: colors.$mel-color-primary;
+    color: colors.$mel-color-primary;
+    font-weight: typography.$mel-font-semibold;
+  }
+
+  // Completed state
+  .mel-wizard__step.is-complete & {
+    color: colors.$mel-color-success;
+    
+    &:hover {
+      color: colors.$mel-color-success;
+    }
+  }
+
+  // Disabled state
+  &[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+// Step number badge
+.mel-wizard__step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: typography.mel-font-size(sm);
+  font-weight: typography.$mel-font-semibold;
+  background: rgba(colors.$mel-color-text-light, 0.15);
+  color: colors.$mel-color-text-muted;
+  border-radius: radii.$mel-radius-full;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+
+  // Active state
+  .mel-wizard__step.is-active & {
+    background: colors.$mel-color-primary;
+    color: colors.$mel-color-on-primary;
+    box-shadow: 0 2px 8px rgba(colors.$mel-color-primary, 0.3);
+  }
+
+  // Completed state
+  .mel-wizard__step.is-complete & {
+    background: colors.$mel-color-success;
+    color: colors.$mel-color-on-primary;
+    
+    &::before {
+      content: '✓';
+      font-size: typography.mel-font-size(base);
+    }
+  }
+}
+
+// Step label text
+.mel-wizard__step-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ============================================================================
+// RIGHT: STEP CONTENT PANEL
+// ============================================================================
+
+.mel-wizard__content {
+  min-width: 0; // Prevent flex overflow
+  order: 2;
+}
+
+// Step panel card
+.mel-wizard__step-panel {
+  background: colors.$mel-color-surface;
+  border-radius: radii.$mel-radius-xl;
+  padding: spacing.mel-space(6);
+  box-shadow: shadows.$mel-shadow-md;
+  border: 1px solid rgba(colors.$mel-color-text-light, 0.1);
+
+  @include breakpoints.mel-break(sm, max) {
+    padding: spacing.mel-space(4);
+    border-radius: radii.$mel-radius-lg;
+  }
+
+  // Hidden step panels
+  &.is-hidden {
+    display: none;
+  }
+
+  // Active step panel
+  &.is-active {
+    display: block;
+  }
+}
+
+// Step panel header
+.mel-wizard__step-header {
+  margin-bottom: spacing.mel-space(6);
+
+  @include breakpoints.mel-break(sm, max) {
+    margin-bottom: spacing.mel-space(4);
+  }
+}
+
+// Step title
+.mel-wizard__step-title {
+  font-size: typography.mel-font-size(2xl);
+  font-weight: typography.$mel-font-bold;
+  color: colors.$mel-color-text;
+  margin: 0 0 spacing.mel-space(2) 0;
+  line-height: typography.$mel-leading-tight;
+
+  @include breakpoints.mel-break(sm, max) {
+    font-size: typography.mel-font-size(xl);
+  }
+}
+
+// Step description
+.mel-wizard__step-description {
+  font-size: typography.mel-font-size(base);
+  color: colors.$mel-color-text-muted;
+  margin: 0;
+  line-height: typography.$mel-leading-relaxed;
+}
+
+// Step content area
+.mel-wizard__step-body {
+  // Form fields spacing
+  .form-item {
+    margin-bottom: spacing.mel-space(5);
+  }
+
+  // Field labels
+  label {
+    font-weight: typography.$mel-font-medium;
+    color: colors.$mel-color-text;
+    margin-bottom: spacing.mel-space(1);
+    display: block;
+  }
+
+  // Input fields
+  input[type="text"],
+  input[type="email"],
+  input[type="url"],
+  input[type="date"],
+  input[type="time"],
+  input[type="number"],
+  input[type="tel"],
+  textarea,
+  select {
+    width: 100%;
+    border: 2px solid rgba(colors.$mel-color-text-light, 0.2);
+    border-radius: radii.$mel-radius-md;
+    padding: spacing.mel-space(3);
+    font-size: typography.mel-font-size(base);
+    transition: all 0.2s ease;
+    font-family: inherit;
+    background: colors.$mel-color-surface;
+    color: colors.$mel-color-text;
+
+    &:focus {
+      outline: none;
+      border-color: colors.$mel-color-primary;
+      box-shadow: 0 0 0 3px rgba(colors.$mel-color-primary, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  // Error states
+  .form-item--error-message {
+    color: colors.$mel-color-error;
+    font-size: typography.mel-font-size(sm);
+    margin-top: spacing.mel-space(1);
+    display: block;
+  }
+
+  input.error,
+  textarea.error,
+  select.error {
+    border-color: colors.$mel-color-error;
+    
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(colors.$mel-color-error, 0.1);
+    }
+  }
+}
+
+// ============================================================================
+// WIZARD ACTIONS (Back/Next/Submit buttons)
+// ============================================================================
+
+.mel-wizard__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: spacing.mel-space(3);
+  margin-top: spacing.mel-space(8);
+  padding-top: spacing.mel-space(6);
+  border-top: 1px solid rgba(colors.$mel-color-text-light, 0.1);
+
+  @include breakpoints.mel-break(sm, max) {
+    flex-direction: column-reverse;
+    gap: spacing.mel-space(2);
+    margin-top: spacing.mel-space(6);
+    padding-top: spacing.mel-space(4);
+  }
+
+  // Sticky actions on mobile
+  &--sticky {
+    @include breakpoints.mel-break(sm, max) {
+      position: sticky;
+      bottom: 0;
+      background: colors.$mel-color-surface;
+      padding: spacing.mel-space(3);
+      margin-left: calc(-1 * #{spacing.mel-space(4)});
+      margin-right: calc(-1 * #{spacing.mel-space(4)});
+      margin-bottom: calc(-1 * #{spacing.mel-space(4)});
+      border-radius: 0 0 radii.$mel-radius-lg radii.$mel-radius-lg;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+      border-top: 1px solid rgba(colors.$mel-color-text-light, 0.1);
+      z-index: 10;
+    }
+  }
+}
+
+// Action button groups
+.mel-wizard__actions-primary {
+  display: flex;
+  gap: spacing.mel-space(2);
+  flex: 1;
+  justify-content: flex-end;
+
+  @include breakpoints.mel-break(sm, max) {
+    width: 100%;
+    justify-content: stretch;
+    
+    .button,
+    .mel-btn {
+      flex: 1;
+    }
+  }
+}
+
+.mel-wizard__actions-secondary {
+  display: flex;
+  gap: spacing.mel-space(2);
+}
+
+// ============================================================================
+// PROGRESS INDICATOR (optional)
+// ============================================================================
+
+.mel-wizard__progress {
+  margin-bottom: spacing.mel-space(4);
+  padding-bottom: spacing.mel-space(4);
+  border-bottom: 1px solid rgba(colors.$mel-color-text-light, 0.1);
+}
+
+.mel-wizard__progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(colors.$mel-color-text-light, 0.1);
+  border-radius: radii.$mel-radius-full;
+  overflow: hidden;
+}
+
+.mel-wizard__progress-fill {
+  height: 100%;
+  background: colors.$mel-color-primary;
+  border-radius: radii.$mel-radius-full;
+  transition: width 0.3s ease;
+}
+
+.mel-wizard__progress-text {
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text-muted;
+  margin-top: spacing.mel-space(2);
+  text-align: center;
+}
+
+// ============================================================================
+// MOBILE NAVIGATION TOGGLE (optional)
+// ============================================================================
+
+.mel-wizard__nav-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: spacing.mel-space(3);
+  background: colors.$mel-color-surface;
+  border: 1px solid rgba(colors.$mel-color-text-light, 0.1);
+  border-radius: radii.$mel-radius-md;
+  font-size: typography.mel-font-size(sm);
+  font-weight: typography.$mel-font-medium;
+  color: colors.$mel-color-text;
+  cursor: pointer;
+  margin-bottom: spacing.mel-space(4);
+  transition: all 0.2s ease;
+
+  @include breakpoints.mel-break(lg) {
+    display: none;
+  }
+
+  &:hover {
+    background: rgba(colors.$mel-color-primary, 0.05);
+    border-color: colors.$mel-color-primary;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px colors.$mel-color-surface,
+                0 0 0 4px colors.$mel-focus-ring-color;
+  }
+
+  &::after {
+    content: '▼';
+    font-size: typography.mel-font-size(xs);
+    transition: transform 0.2s ease;
+  }
+
+  &[aria-expanded="true"]::after {
+    transform: rotate(180deg);
+  }
+}
+
+// ============================================================================
+// ACCESSIBILITY ENHANCEMENTS
+// ============================================================================
+
+// Ensure sufficient color contrast
+.mel-wizard__step-button {
+  // Active state has sufficient contrast (primary on light background)
+  // Completed state uses success color (green) which meets AA standards
+}
+
+// Screen reader only text
+.mel-wizard__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+// Focus management for keyboard navigation
+.mel-wizard__step-panel.is-active {
+  // Ensure active panel is focusable
+  &:focus {
+    outline: none;
+  }
+}
+
+// ============================================================================
+// UTILITY CLASSES
+// ============================================================================
+
+// Hide on mobile
+.mel-wizard__hide-mobile {
+  @include breakpoints.mel-break(lg, max) {
+    display: none !important;
+  }
+}
+
+// Show only on mobile
+.mel-wizard__show-mobile {
+  display: none !important;
+
+  @include breakpoints.mel-break(lg, max) {
+    display: block !important;
+  }
+}

@@ -29,7 +29,7 @@ settings:
     familyName:
       override: hidden
     organization:
-      override: optional
+      override: hidden
     addressLine1:
       override: required
     addressLine2:

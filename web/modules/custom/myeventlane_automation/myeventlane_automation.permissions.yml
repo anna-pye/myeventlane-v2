@@ -1,0 +1,4 @@
+view automation dispatch log:
+  title: 'View automation dispatch log'
+  description: 'View the log of automated notification dispatches.'
+  restrict access: true

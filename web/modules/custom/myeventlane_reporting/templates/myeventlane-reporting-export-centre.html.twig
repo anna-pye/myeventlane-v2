@@ -1,0 +1,91 @@
+{#
+/**
+ * @file
+ * Export centre template.
+ *
+ * Variables:
+ * - exports: Array of export records
+ * - events: Array of event nodes for request buttons
+ */
+#}
+<div class="mel-reporting-export-centre">
+  <div class="mel-console__header">
+    <h1 class="mel-console__title">{{ 'Export Centre'|t }}</h1>
+  </div>
+
+  {# Request New Exports #}
+  {% if events|length > 0 %}
+    <div class="mel-card">
+      <div class="mel-card__header">
+        <div class="mel-card__title">{{ 'Request New Export'|t }}</div>
+      </div>
+      <div class="mel-card__body">
+        <div class="mel-list">
+          {% for event in events %}
+            <div class="mel-list__item">
+              <div>
+                <strong>{{ event.label }}</strong>
+                <div class="mel-text--sm mel-text--muted">{{ 'Event ID: '|t }}{{ event.id }}</div>
+              </div>
+              <div class="mel-inline-actions">
+                <a href="/vendor/exports/request-csv/{{ event.id }}" class="mel-btn mel-btn--sm mel-btn--primary">
+                  {{ 'Request Attendee CSV'|t }}
+                </a>
+                <a href="/vendor/exports/request-sales/{{ event.id }}" class="mel-btn mel-btn--sm mel-btn--secondary">
+                  {{ 'Request Sales CSV'|t }}
+                </a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  {# Export List #}
+  <div class="mel-card">
+    <div class="mel-card__header">
+      <div class="mel-card__title">{{ 'Recent Exports'|t }}</div>
+    </div>
+    <div class="mel-card__body">
+      {% if exports|length > 0 %}
+        <div class="mel-table">
+          <div class="mel-table__head">
+            <div>{{ 'Event'|t }}</div>
+            <div>{{ 'Type'|t }}</div>
+            <div>{{ 'Status'|t }}</div>
+            <div>{{ 'Requested'|t }}</div>
+            <div>{{ 'Actions'|t }}</div>
+          </div>
+          <div class="mel-table__body">
+            {% for export in exports %}
+              <div class="mel-table__row">
+                <div>{{ export.event_name }}</div>
+                <div>{{ export.type }}</div>
+                <div>
+                  <span class="mel-badge mel-badge--{{ export.status == 'sent' ? 'success' : (export.status == 'failed' ? 'error' : 'warning') }}">
+                    {{ export.status|capitalize }}
+                  </span>
+                </div>
+                <div>{{ export.requested_at|date('Y-m-d H:i') }}</div>
+                <div>
+                  {% if export.download_url and export.status == 'sent' %}
+                    <a href="{{ export.download_url }}" class="mel-btn mel-btn--sm mel-btn--primary">
+                      {{ 'Download'|t }}
+                    </a>
+                  {% else %}
+                    <span class="mel-text--muted">{{ 'Processing...'|t }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% else %}
+        <div class="mel-empty-state">
+          <p>{{ 'No exports requested yet.'|t }}</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

@@ -148,6 +148,30 @@ class Vendor extends ContentEntityBase implements EntityChangedInterface, Entity
       ->setDescription(new TranslatableMarkup('The time that the vendor was last updated.'))
       ->setDisplayConfigurable('view', TRUE);
 
+    // API key (hashed value for vendor API authentication).
+    $fields['api_key_hash'] = BaseFieldDefinition::create('string')
+      ->setLabel(new TranslatableMarkup('API Key Hash'))
+      ->setDescription(new TranslatableMarkup('Hashed API key for vendor API authentication. Generated automatically.'))
+      ->setRequired(FALSE)
+      ->setSettings([
+        'max_length' => 255,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'string_textfield',
+        'weight' => 20,
+        'settings' => [
+          'size' => 60,
+        ],
+      ])
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'string',
+        'weight' => 20,
+      ])
+      ->setDisplayConfigurable('form', FALSE)
+      ->setDisplayConfigurable('view', FALSE)
+      ->setReadOnly(TRUE);
+
     return $fields;
   }
 
@@ -194,6 +218,30 @@ class Vendor extends ContentEntityBase implements EntityChangedInterface, Entity
    */
   public function setCreatedTime(int $timestamp): static {
     $this->set('created', $timestamp);
+    return $this;
+  }
+
+  /**
+   * Gets the API key hash.
+   *
+   * @return string|null
+   *   The hashed API key, or NULL if not set.
+   */
+  public function getApiKeyHash(): ?string {
+    $value = $this->get('api_key_hash')->value;
+    return $value ? (string) $value : NULL;
+  }
+
+  /**
+   * Sets the API key hash.
+   *
+   * @param string $hash
+   *   The hashed API key.
+   *
+   * @return $this
+   */
+  public function setApiKeyHash(string $hash): static {
+    $this->set('api_key_hash', $hash);
     return $this;
   }
 

@@ -1,0 +1,4 @@
+access attendee repository:
+  title: 'Access attendee repository'
+  description: 'Access to query attendees via repository interface'
+  restrict access: true

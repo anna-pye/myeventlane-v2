@@ -35,6 +35,9 @@
   {% endfor %}
 {% endif %}
 
+{# Check if we're in featured_events view context #}
+{% set variant = mel_card_variant|default(null) %}
+
 {% include '@myeventlane_theme/event/event-card.html.twig' with {
   title: label|default(node.label),
   url: url,
@@ -47,5 +50,6 @@
   category_slug: category_slug,
   ticket_type: ticket_type,
   ticket_label: ticket_label,
-  accessibility: accessibility
+  accessibility: accessibility,
+  variant: variant
 } %}

@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\myeventlane_vendor\Service;
 
+use Drupal\myeventlane_metrics\Service\EventMetricsServiceInterface;
 use Drupal\node\NodeInterface;
 
 /**
  * Aggregates metrics across ticket sales, RSVPs, audience, and boost.
  *
- * All data is now sourced from real database queries.
+ * All data is now sourced from EventMetricsService and other services.
  */
 final class MetricsAggregator {
 
@@ -21,12 +22,13 @@ final class MetricsAggregator {
     private readonly RsvpStatsService $rsvpStatsService,
     private readonly CategoryAudienceService $categoryAudienceService,
     private readonly BoostStatusService $boostStatusService,
+    private readonly EventMetricsServiceInterface $eventMetricsService,
   ) {}
 
   /**
    * Returns KPI cards for the vendor dashboard.
    *
-   * Data is queried from real Commerce orders and RSVP submissions.
+   * Data is queried from EventMetricsService.
    *
    * @param int $userId
    *   The vendor user ID.
@@ -64,7 +66,7 @@ final class MetricsAggregator {
   }
 
   /**
-   * Returns an event overview block.
+   * Returns an event overview block using EventMetricsService.
    *
    * @param \Drupal\node\NodeInterface $event
    *   The event node.
@@ -73,12 +75,39 @@ final class MetricsAggregator {
    *   Overview data including sales, RSVPs, audience, boost, tickets.
    */
   public function getEventOverview(NodeInterface $event): array {
+    // Use EventMetricsService for core metrics.
+    $attendeeCount = $this->eventMetricsService->getAttendeeCount($event);
+    $checkedInCount = $this->eventMetricsService->getCheckedInCount($event);
+    $remainingCapacity = $this->eventMetricsService->getRemainingCapacity($event);
+    $isSoldOut = $this->eventMetricsService->isSoldOut($event);
+    $revenue = $this->eventMetricsService->getRevenue($event);
+    $checkInRate = $this->eventMetricsService->getCheckInRate($event);
+    $ticketBreakdown = $this->eventMetricsService->getTicketBreakdown($event);
+
+    // Get additional data from other services.
+    $salesSummary = $this->ticketSalesService->getSalesSummary($event);
+    $rsvpSummary = $this->rsvpStatsService->getRsvpSummary($event);
+
     return [
-      'sales' => $this->ticketSalesService->getSalesSummary($event),
-      'rsvps' => $this->rsvpStatsService->getRsvpSummary($event),
+      'attendees' => [
+        'total' => $attendeeCount,
+        'checked_in' => $checkedInCount,
+        'check_in_rate' => $checkInRate,
+      ],
+      'capacity' => [
+        'total' => $this->eventMetricsService->getCapacityTotal($event),
+        'remaining' => $remainingCapacity,
+        'sold_out' => $isSoldOut,
+      ],
+      'revenue' => $revenue ? [
+        'amount' => $revenue->getNumber(),
+        'currency' => $revenue->getCurrencyCode(),
+      ] : NULL,
+      'sales' => $salesSummary,
+      'rsvps' => $rsvpSummary,
       'audience' => $this->categoryAudienceService->getGeoBreakdown($event),
       'boost' => $this->boostStatusService->getBoostStatuses($event),
-      'tickets' => $this->ticketSalesService->getTicketBreakdown($event),
+      'tickets' => $ticketBreakdown,
     ];
   }
 

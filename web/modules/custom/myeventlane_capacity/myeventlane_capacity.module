@@ -1,0 +1,85 @@
+<?php
+
+/**
+ * @file
+ * Capacity engine module for MyEventLane.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_entity_insert().
+ */
+function myeventlane_capacity_entity_insert(EntityInterface $entity): void {
+  myeventlane_capacity_invalidate_event_cache($entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function myeventlane_capacity_entity_update(EntityInterface $entity): void {
+  myeventlane_capacity_invalidate_event_cache($entity);
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function myeventlane_capacity_entity_delete(EntityInterface $entity): void {
+  myeventlane_capacity_invalidate_event_cache($entity);
+}
+
+/**
+ * Invalidates capacity cache for related events.
+ */
+function myeventlane_capacity_invalidate_event_cache(EntityInterface $entity): void {
+  if (!\Drupal::hasService('myeventlane_capacity.service')) {
+    return;
+  }
+
+  $capacityService = \Drupal::service('myeventlane_capacity.service');
+  $eventId = NULL;
+
+  // RSVP submission.
+  if ($entity->getEntityTypeId() === 'rsvp_submission') {
+    if ($entity->hasField('event_id') && !$entity->get('event_id')->isEmpty()) {
+      $eventId = (int) $entity->get('event_id')->target_id;
+    }
+  }
+
+  // Commerce order item.
+  if ($entity->getEntityTypeId() === 'commerce_order_item') {
+    if ($entity->hasField('field_target_event') && !$entity->get('field_target_event')->isEmpty()) {
+      $eventId = (int) $entity->get('field_target_event')->target_id;
+    }
+  }
+
+  // Commerce order - check items.
+  if ($entity->getEntityTypeId() === 'commerce_order') {
+    try {
+      foreach ($entity->getItems() as $item) {
+        if ($item->hasField('field_target_event') && !$item->get('field_target_event')->isEmpty()) {
+          $eventId = (int) $item->get('field_target_event')->target_id;
+          if ($eventId) {
+            $capacityService->invalidateCache($eventId);
+          }
+        }
+      }
+    }
+    catch (\Exception $e) {
+      // Ignore errors.
+    }
+    return;
+  }
+
+  // Event node.
+  if ($entity instanceof NodeInterface && $entity->bundle() === 'event') {
+    $eventId = (int) $entity->id();
+  }
+
+  if ($eventId) {
+    $capacityService->invalidateCache($eventId);
+  }
+}

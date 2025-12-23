@@ -1,0 +1,23 @@
+{#
+/**
+ * @file
+ * Admin finance reports template.
+ *
+ * Variables:
+ * - kpis: Array of finance KPI cards
+ */
+#}
+<div class="mel-reporting-admin-finance">
+  <h1>{{ 'Finance Reports'|t }}</h1>
+
+  <div class="mel-grid mel-grid--4">
+    {% for kpi in kpis %}
+      {% include 'myeventlane-reporting-kpi-card.html.twig' with {
+        'label': kpi.label,
+        'value': kpi.value,
+        'subtitle': kpi.subtitle|default(''),
+        'icon': kpi.icon|default('chart'),
+      } %}
+    {% endfor %}
+  </div>
+</div>

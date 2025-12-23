@@ -1,0 +1,17 @@
+{#
+/**
+ * @file
+ * Page template override for Event node full page.
+ * 
+ * Removes container constraints so event-shell can use full width.
+ */
+#}
+{% extends "page.html.twig" %}
+
+{% block content %}
+  <main id="main-content" class="mel-main" role="main">
+    <div class="mel-content">
+      {{ page.content }}
+    </div>
+  </main>
+{% endblock %}

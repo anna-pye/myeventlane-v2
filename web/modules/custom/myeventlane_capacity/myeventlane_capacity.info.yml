@@ -1,0 +1,8 @@
+name: MyEventLane Capacity Engine
+type: module
+description: 'Capacity tracking and enforcement for MyEventLane events.'
+core_version_requirement: ^11
+package: MyEventLane
+dependencies:
+  - drupal:node
+  - myeventlane_core:myeventlane_core

@@ -8,6 +8,7 @@ use Drupal\commerce_price\Price;
 use Drupal\commerce_product\Entity\Product;
 use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Lock\LockBackendInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -16,9 +17,10 @@ use Drupal\node\NodeInterface;
 /**
  * Manages Commerce product creation and sync for MyEventLane events.
  *
- * This service automatically creates and manages ticket products for
- * RSVP events, ensuring every event that needs Commerce integration
- * has a linked product.
+ * This service provides intent-driven product synchronization:
+ * - syncProducts() MUST be called with explicit intent ('publish' or 'sync').
+ * - Product sync MUST NOT run during AJAX, wizard navigation, or draft saves.
+ * - All operations are guarded against concurrent execution and invalid states.
  */
 final class EventProductManager {
 
@@ -31,60 +33,176 @@ final class EventProductManager {
     private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly LoggerChannelFactoryInterface $loggerFactory,
     private readonly MessengerInterface $messenger,
+    private readonly LockBackendInterface $lock,
   ) {}
 
   /**
-   * Ensures an event has a linked RSVP product, creating if necessary.
+   * Syncs products for an event based on explicit intent.
    *
-   * For RSVP events (field_event_type = 'rsvp'), this creates a hidden
-   * Commerce product with a single $0 variation if one doesn't exist.
+   * Allowed intents:
+   * - 'publish': Event is being published (full sync).
+   * - 'sync': Explicit manual sync request.
+   *
+   * This method MUST NOT be called:
+   * - During AJAX requests.
+   * - During wizard navigation.
+   * - During draft saves.
+   * - For unpublished events (unless intent is 'sync').
+   * - For new (unsaved) nodes.
+   *
+   * @param \Drupal\node\NodeInterface $event
+   *   The event node.
+   * @param string $intent
+   *   The sync intent: 'publish' or 'sync'.
+   *
+   * @return bool
+   *   TRUE if sync completed successfully, FALSE otherwise.
+   */
+  public function syncProducts(NodeInterface $event, string $intent): bool {
+    // Guard: Only allow 'publish' or 'sync' intents.
+    if (!in_array($intent, ['publish', 'sync'], TRUE)) {
+      $this->loggerFactory->get('myeventlane_event')->warning(
+        'Invalid sync intent "@intent" for event @eid. Allowed: publish, sync.',
+        ['@intent' => $intent, '@eid' => $event->id() ?? 'new']
+      );
+      return FALSE;
+    }
+
+    // Guard: Must not be a new (unsaved) node.
+    if ($event->isNew()) {
+      $this->loggerFactory->get('myeventlane_event')->warning(
+        'Cannot sync products for new (unsaved) event. Event must be saved first.'
+      );
+      return FALSE;
+    }
+
+    // Guard: For 'publish' intent, event must be published.
+    if ($intent === 'publish' && !$event->isPublished()) {
+      $this->loggerFactory->get('myeventlane_event')->warning(
+        'Cannot sync products with "publish" intent for unpublished event @eid.',
+        ['@eid' => $event->id()]
+      );
+      return FALSE;
+    }
+
+    // Guard: Prevent concurrent syncs using lock service.
+    $lock_name = 'myeventlane_event:sync_products:' . $event->id();
+    if (!$this->lock->acquire($lock_name, 30)) {
+      $this->loggerFactory->get('myeventlane_event')->warning(
+        'Product sync already in progress for event @eid. Skipping duplicate request.',
+        ['@eid' => $event->id()]
+      );
+      return FALSE;
+    }
+
+    try {
+      $result = $this->doSyncProducts($event, $intent);
+      return $result;
+    }
+    finally {
+      $this->lock->release($lock_name);
+    }
+  }
+
+  /**
+   * Performs the actual product sync operation.
+   *
+   * @param \Drupal\node\NodeInterface $event
+   *   The event node.
+   * @param string $intent
+   *   The sync intent.
+   *
+   * @return bool
+   *   TRUE if sync completed successfully.
+   */
+  private function doSyncProducts(NodeInterface $event, string $intent): bool {
+    if ($event->bundle() !== 'event') {
+      return FALSE;
+    }
+
+    $eventType = $event->get('field_event_type')->value ?? '';
+
+    // RSVP events: ensure product exists and is linked.
+    if ($eventType === 'rsvp') {
+      return $this->syncRsvpProduct($event);
+    }
+
+    // Paid and Both events: validate product link exists.
+    if (in_array($eventType, ['paid', 'both'], TRUE)) {
+      $hasTicketTypes = $event->hasField('field_ticket_types')
+        && !$event->get('field_ticket_types')->isEmpty();
+
+      if ($event->get('field_product_target')->isEmpty() && !$hasTicketTypes) {
+        $this->messenger->addWarning(
+          $this->t('Please link a ticket product for this @type event, or define ticket types below.', [
+            '@type' => $eventType === 'paid' ? 'paid' : 'hybrid',
+          ])
+        );
+      }
+    }
+
+    return TRUE;
+  }
+
+  /**
+   * Syncs RSVP product for an event.
+   *
+   * @param \Drupal\node\NodeInterface $event
+   *   The event node.
+   *
+   * @return bool
+   *   TRUE if sync completed successfully.
+   */
+  private function syncRsvpProduct(NodeInterface $event): bool {
+    // Check if product already exists and is linked.
+    if (!$event->get('field_product_target')->isEmpty()) {
+      $product = $event->get('field_product_target')->entity;
+      if ($product && $product->isPublished()) {
+        // Ensure bidirectional link.
+        if ($product->hasField('field_event')) {
+          $productEventId = $product->get('field_event')->target_id;
+          if ($productEventId != $event->id()) {
+            $product->set('field_event', ['target_id' => $event->id()]);
+            $product->save();
+
+            $this->loggerFactory->get('myeventlane_event')->notice(
+              'Linked RSVP product @pid to event @eid',
+              ['@pid' => $product->id(), '@eid' => $event->id()]
+            );
+          }
+        }
+        return TRUE;
+      }
+    }
+
+    // Create new RSVP product if it doesn't exist.
+    $product = $this->createRsvpProduct($event);
+    if (!$product) {
+      return FALSE;
+    }
+
+    // Link event to product.
+    $event->set('field_product_target', ['target_id' => $product->id()]);
+    $event->save();
+
+    $this->loggerFactory->get('myeventlane_event')->notice(
+      'Created and linked RSVP product @pid for event @eid',
+      ['@pid' => $product->id(), '@eid' => $event->id()]
+    );
+
+    return TRUE;
+  }
+
+  /**
+   * Creates a new RSVP product for an event.
    *
    * @param \Drupal\node\NodeInterface $event
    *   The event node.
    *
    * @return \Drupal\commerce_product\Entity\ProductInterface|null
-   *   The product entity, or NULL if event doesn't need auto-creation.
+   *   The created product, or NULL on failure.
    */
-  public function ensureRsvpProduct(NodeInterface $event): ?object {
-    if ($event->bundle() !== 'event') {
-      return NULL;
-    }
-
-    $eventType = $event->get('field_event_type')->value ?? '';
-
-    // Only auto-create for pure RSVP events (not paid, not both, not external).
-    if ($eventType !== 'rsvp') {
-      return NULL;
-    }
-
-    // Check if product already exists.
-    if (!$event->get('field_product_target')->isEmpty()) {
-      $product = $event->get('field_product_target')->entity;
-      if ($product && $product->isPublished()) {
-        return $product;
-      }
-    }
-
-    // Create new RSVP product.
-    return $this->createRsvpProduct($event);
-  }
-
-  /**
-   * Creates an RSVP product for a new event (before event is saved).
-   *
-   * This is called during form submission to avoid field validation errors.
-   *
-   * @param string|null $eventTitle
-   *   The event title. If empty, uses "Untitled Event".
-   *
-   * @return \Drupal\commerce_product\Entity\ProductInterface|null
-   *   The created product or NULL on failure.
-   */
-  public function createRsvpProductForNewEvent(?string $eventTitle): ?object {
-    // Handle empty titles.
-    if (empty($eventTitle)) {
-      $eventTitle = 'Untitled Event';
-    }
+  private function createRsvpProduct(NodeInterface $event): ?object {
     $storeStorage = $this->entityTypeManager->getStorage('commerce_store');
     $stores = $storeStorage->loadByProperties(['is_default' => TRUE]);
     $store = reset($stores);
@@ -95,35 +213,43 @@ final class EventProductManager {
     }
 
     if (!$store) {
-      $this->loggerFactory->get('myeventlane_event')->error('No Commerce store available for RSVP product creation.');
+      $this->loggerFactory->get('myeventlane_event')->error(
+        'No Commerce store available for RSVP product creation.'
+      );
       return NULL;
     }
 
     try {
-      // Create variation first.
+      // Create variation first (required for product).
       $variation = ProductVariation::create([
         'type' => 'ticket_variation',
-        'sku' => 'rsvp-new-' . time() . '-' . rand(1000, 9999),
+        'sku' => 'rsvp-' . $event->id() . '-' . time(),
         'title' => 'Free RSVP',
         'price' => new Price('0', 'USD'),
         'status' => 1,
+        'field_event' => ['target_id' => $event->id()],
       ]);
       $variation->save();
 
       // Create product.
       $product = Product::create([
         'type' => 'ticket',
-        'title' => $eventTitle . ' - RSVP',
+        'title' => $event->label() . ' - RSVP',
         'stores' => [$store->id()],
         'variations' => [$variation],
         'status' => 1,
-        'uid' => \Drupal::currentUser()->id(),
+        'field_event' => ['target_id' => $event->id()],
+        'uid' => $event->getOwnerId(),
       ]);
       $product->save();
 
       $this->loggerFactory->get('myeventlane_event')->notice(
-        'Created RSVP product @pid for new event "@title"',
-        ['@pid' => $product->id(), '@title' => $eventTitle]
+        'Created RSVP product @pid for event @eid (@title)',
+        [
+          '@pid' => $product->id(),
+          '@eid' => $event->id(),
+          '@title' => $event->label(),
+        ]
       );
 
       return $product;
@@ -138,114 +264,36 @@ final class EventProductManager {
   }
 
   /**
-   * Creates a new RSVP product for an event.
+   * Calculates product definitions for an event (pure function, no side effects).
+   *
+   * This method can be called safely to determine what products should exist
+   * without actually creating them.
    *
    * @param \Drupal\node\NodeInterface $event
    *   The event node.
    *
-   * @return \Drupal\commerce_product\Entity\ProductInterface
-   *   The created product.
+   * @return array<string, mixed>
+   *   Array of product definitions, keyed by product type.
    */
-  private function createRsvpProduct(NodeInterface $event): object {
-    $storeStorage = $this->entityTypeManager->getStorage('commerce_store');
-    $stores = $storeStorage->loadByProperties(['is_default' => TRUE]);
-    $store = reset($stores);
+  public function calculateProductDefinitions(NodeInterface $event): array {
+    $definitions = [];
 
-    if (!$store) {
-      // Fallback: load any store.
-      $stores = $storeStorage->loadMultiple();
-      $store = reset($stores);
-    }
-
-    // Create variation first (required for product).
-    $variation = ProductVariation::create([
-      'type' => 'ticket_variation',
-      'sku' => 'rsvp-' . $event->id() . '-' . time(),
-      'title' => 'Free RSVP',
-      'price' => new Price('0', 'USD'),
-      'status' => 1,
-      'field_event' => ['target_id' => $event->id()],
-    ]);
-    $variation->save();
-
-    // Create product.
-    $product = Product::create([
-      'type' => 'ticket',
-      'title' => $event->label() . ' - RSVP',
-      'stores' => [$store->id()],
-      'variations' => [$variation],
-      'status' => 1,
-      'field_event' => ['target_id' => $event->id()],
-      // Mark as auto-generated so we can hide it from vendor UI later.
-      'uid' => $event->getOwnerId(),
-    ]);
-    $product->save();
-
-    $this->loggerFactory->get('myeventlane_event')->notice(
-      'Auto-created RSVP product @pid for event @eid (@title)',
-      [
-        '@pid' => $product->id(),
-        '@eid' => $event->id(),
-        '@title' => $event->label(),
-      ]
-    );
-
-    return $product;
-  }
-
-  /**
-   * Syncs product ↔ event relationship on event save.
-   *
-   * For RSVP events: ensures product exists and is linked.
-   * For paid/both events: validates product link exists.
-   *
-   * @param \Drupal\node\NodeInterface $event
-   *   The event node being saved.
-   */
-  public function syncProductToEvent(NodeInterface $event): void {
     if ($event->bundle() !== 'event') {
-      return;
+      return $definitions;
     }
 
     $eventType = $event->get('field_event_type')->value ?? '';
 
-    // RSVP events: link event to product if product exists.
     if ($eventType === 'rsvp') {
-      if (!$event->get('field_product_target')->isEmpty()) {
-        $product = $event->get('field_product_target')->entity;
-        if ($product && $event->id()) {
-          // Link product back to event if needed.
-          if ($product->hasField('field_event')) {
-            $productEventId = $product->get('field_event')->target_id;
-            if ($productEventId != $event->id()) {
-              $product->set('field_event', ['target_id' => $event->id()]);
-              $product->save();
-
-              $this->loggerFactory->get('myeventlane_event')->notice(
-                'Linked RSVP product @pid to event @eid',
-                ['@pid' => $product->id(), '@eid' => $event->id()]
-              );
-            }
-          }
-        }
-      }
+      $definitions['rsvp'] = [
+        'type' => 'ticket',
+        'variation_type' => 'ticket_variation',
+        'price' => new Price('0', 'USD'),
+        'title' => $event->label() . ' - RSVP',
+      ];
     }
 
-    // Paid and Both events: ensure product link exists.
-    // For events with ticket types, the product will be auto-created by
-    // TicketTypeManager, so we don't show a warning if ticket types exist.
-    if (in_array($eventType, ['paid', 'both'], TRUE)) {
-      $hasTicketTypes = $event->hasField('field_ticket_types')
-        && !$event->get('field_ticket_types')->isEmpty();
-
-      if ($event->get('field_product_target')->isEmpty() && !$hasTicketTypes) {
-        $this->messenger->addWarning(
-          $this->t('Please link a ticket product for this @type event, or define ticket types below.', [
-            '@type' => $eventType === 'paid' ? 'paid' : 'hybrid',
-          ])
-        );
-      }
-    }
+    return $definitions;
   }
 
   /**
@@ -258,7 +306,6 @@ final class EventProductManager {
    *   TRUE if this is an auto-generated RSVP product.
    */
   public function isAutoGeneratedRsvpProduct(object $product): bool {
-    // Check if product has only one variation with $0 price.
     if ($product->bundle() !== 'ticket') {
       return FALSE;
     }

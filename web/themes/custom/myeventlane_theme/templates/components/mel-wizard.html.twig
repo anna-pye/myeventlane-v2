@@ -1,0 +1,58 @@
+{#
+/**
+ * @file
+ * Generic Wizard Component Template
+ *
+ * Reusable wizard layout wrapper for:
+ * - Event creation wizard
+ * - Commerce checkout steps
+ * - User onboarding flows
+ *
+ * Variables:
+ * - wizard_nav: (optional) Navigation markup to inject
+ * - wizard_content: (required) Main content area (form fields, etc.)
+ * - wizard_actions: (optional) Action buttons (Back/Next/Submit)
+ * - wizard_progress: (optional) Progress indicator markup
+ * - wizard_title: (optional) Wizard title/heading
+ * - wizard_class: (optional) Additional CSS classes for root element
+ * - wizard_nav_title: (optional) Title for the navigation sidebar
+ */
+#}
+
+<div class="mel-wizard{{ wizard_class ? ' ' ~ wizard_class }}">
+  {% if wizard_title %}
+    <h1 class="mel-wizard__title visually-hidden">{{ wizard_title }}</h1>
+  {% endif %}
+
+  {% if wizard_progress %}
+    <div class="mel-wizard__progress">
+      {{ wizard_progress }}
+    </div>
+  {% endif %}
+
+  <div class="mel-wizard__layout">
+    {# Left: Step Navigation Sidebar #}
+    {% if wizard_nav %}
+      <nav class="mel-wizard__nav" aria-label="{{ 'Wizard steps'|t }}">
+        <div class="mel-wizard__nav-card">
+          {% if wizard_nav_title %}
+            <div class="mel-wizard__nav-title">{{ wizard_nav_title }}</div>
+          {% endif %}
+          {{ wizard_nav }}
+        </div>
+      </nav>
+    {% endif %}
+
+    {# Right: Step Content Panel #}
+    <main class="mel-wizard__content" role="main">
+      {{ wizard_content }}
+    </main>
+  </div>
+
+  {# Actions (Back/Next/Submit buttons) #}
+  {% if wizard_actions %}
+    <div class="mel-wizard__actions{{ wizard_actions_sticky ? ' mel-wizard__actions--sticky' : '' }}">
+      {{ wizard_actions }}
+    </div>
+  {% endif %}
+</div>

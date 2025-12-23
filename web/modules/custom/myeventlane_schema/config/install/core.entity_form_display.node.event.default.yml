@@ -17,6 +17,7 @@ dependencies:
     - field.field.node.event.field_event_start
     - field.field.node.event.field_event_type
     - field.field.node.event.field_external_url
+    - field.field.node.event.field_event_setup_complete
     - field.field.node.event.field_featured
     - field.field.node.event.field_location
     - field.field.node.event.field_product_target
@@ -248,5 +249,6 @@ content:
       size: 60
       placeholder: ''
 hidden:
+  field_event_setup_complete: true
   field_promo_expires: true
   field_promoted: true

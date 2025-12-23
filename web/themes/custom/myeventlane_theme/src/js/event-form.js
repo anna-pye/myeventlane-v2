@@ -12,6 +12,13 @@
 
   Drupal.behaviors.eventFormConditionalFields = {
     attach: function (context, settings) {
+      // Only run on event forms - check if we're in a form context
+      const form = context.querySelector('form.node-event-form, form[id*="node-event-form"], .mel-event-form-wrapper form');
+      if (!form) {
+        // Not on an event form page - silently return
+        return;
+      }
+      
       // Find the event type select - try multiple selectors
       // Priority: exact name match, then data attribute, then pattern match
       const selectors = [
@@ -33,7 +40,10 @@
       }
       
       if (!select) {
-        console.warn('Event form: Could not find field_event_type select element');
+        // Only warn if we're actually on a form page
+        if (form) {
+          console.warn('Event form: Could not find field_event_type select element');
+        }
         return;
       }
       

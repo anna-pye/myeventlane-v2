@@ -1,0 +1,9 @@
+name: MyEventLane Event State
+type: module
+description: 'Event state machine and state resolution for MyEventLane events.'
+core_version_requirement: ^11
+package: MyEventLane
+dependencies:
+  - drupal:node
+  - drupal:datetime
+  - myeventlane_core:myeventlane_core

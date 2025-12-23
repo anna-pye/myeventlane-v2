@@ -1,0 +1,35 @@
+<div class="mel-diagnostics__summary mel-diagnostics__summary--{{ summary.status }}">
+  {% if summary.status == 'ok' %}
+    <strong>✓ This event is ready</strong>
+  {% elseif summary.status == 'warn' %}
+    <strong>⚠ This event has warnings</strong>
+  {% else %}
+    <strong>✕ This event has blocking issues</strong>
+  {% endif %}
+  <span>{{ summary.issue_count }} issue(s)</span>
+</div>
+
+{% for section, items in sections %}
+  <div class="mel-diagnostics__section">
+    <h4>{{ section|replace({'_': ' '})|title }}</h4>
+
+    {% for item in items %}
+      <div class="mel-diagnostics__item mel-diagnostics__item--{{ item.status }}">
+        <span class="mel-diagnostics__icon">
+          {% if item.status == 'ok' %}✓{% elseif item.status == 'warn' %}⚠{% else %}✕{% endif %}
+        </span>
+
+        <div class="mel-diagnostics__content">
+          <strong>{{ item.label }}</strong>
+          <div class="mel-diagnostics__message">{{ item.message }}</div>
+
+          {% if item.fix_route %}
+            <a href="{{ path(item.fix_route, item.fix_params) }}{% if item.fix_fragment %}#{{ item.fix_fragment }}{% endif %}" class="mel-diagnostics__fix-link">
+              Fix this
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endfor %}

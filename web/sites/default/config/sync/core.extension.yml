@@ -70,9 +70,13 @@ module:
   metatag_google_cse: 0
   myeventlane_admin_dashboard: 0
   myeventlane_analytics: 0
+  myeventlane_attendee: 0
+  myeventlane_automation: 0
   myeventlane_blocks: 0
   myeventlane_boost: 0
+  myeventlane_capacity: 0
   myeventlane_cart: 0
+  myeventlane_checkin: 0
   myeventlane_checkout_paragraph: 0
   myeventlane_commerce: 0
   myeventlane_core: 0
@@ -82,9 +86,11 @@ module:
   myeventlane_escalations: 0
   myeventlane_event: 0
   myeventlane_event_attendees: 0
+  myeventlane_event_state: 0
   myeventlane_finance: 0
   myeventlane_location: 0
   myeventlane_messaging: 0
+  myeventlane_metrics: 0
   myeventlane_rsvp: 0
   myeventlane_schema: 0
   myeventlane_shared: 0

@@ -1,0 +1,19 @@
+view vendor insights:
+  title: 'View vendor insights'
+  description: 'Access vendor-level reporting and insights dashboard.'
+  restrict access: true
+
+view event insights:
+  title: 'View event insights'
+  description: 'Access per-event reporting and insights pages.'
+  restrict access: true
+
+request exports:
+  title: 'Request CSV and ICS exports'
+  description: 'Request and download CSV/ICS exports for events.'
+  restrict access: true
+
+view admin reports:
+  title: 'View admin reports'
+  description: 'Access platform-wide admin reporting console.'
+  restrict access: true

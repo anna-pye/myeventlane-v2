@@ -1,0 +1,31 @@
+services:
+  logger.channel.myeventlane_automation:
+    parent: logger.channel_base
+    arguments: ['myeventlane_automation']
+
+  myeventlane_automation.dispatch:
+    class: Drupal\myeventlane_automation\Service\AutomationDispatchService
+    arguments: ['@database', '@datetime.time']
+
+  myeventlane_automation.scheduler:
+    class: Drupal\myeventlane_automation\Service\AutomationScheduler
+    arguments:
+      - '@myeventlane_automation.dispatch'
+      - '@myeventlane_event_state.resolver'
+      - '@myeventlane_attendee.repository_resolver'
+      - '@entity_type.manager'
+      - '@queue'
+      - '@datetime.time'
+      - '@logger.channel.myeventlane_automation'
+
+  myeventlane_automation.audit_logger:
+    class: Drupal\myeventlane_automation\Service\AutomationAuditLogger
+    arguments: ['@database', '@datetime.time']
+
+  myeventlane_automation.export_notification:
+    class: Drupal\myeventlane_automation\Service\ExportNotificationHelper
+    arguments:
+      - '@myeventlane_automation.dispatch'
+      - '@queue'
+      - '@entity_type.manager'
+      - '@datetime.time'

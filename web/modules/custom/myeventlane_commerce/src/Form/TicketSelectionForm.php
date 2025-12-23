@@ -196,6 +196,7 @@ final class TicketSelectionForm extends FormBase {
   public function validateForm(array &$form, FormStateInterface $form_state): void {
     $tickets = $form_state->getValue('tickets', []);
     $has_quantity = FALSE;
+    $total_quantity = 0;
 
     // Check each variation's quantity field.
     foreach ($tickets as $key => $value) {
@@ -209,18 +210,31 @@ final class TicketSelectionForm extends FormBase {
         $quantity = (int) $value['quantity'];
         if ($quantity > 0) {
           $has_quantity = TRUE;
-          break;
+          $total_quantity += $quantity;
         }
       }
       // Fallback: if quantity is directly in the value (shouldn't happen with proper structure).
       elseif (is_numeric($value) && (int) $value > 0) {
         $has_quantity = TRUE;
-        break;
+        $total_quantity += (int) $value;
       }
     }
 
     if (!$has_quantity) {
       $form_state->setError($form['actions']['submit'], $this->t('Please select at least one ticket.'));
+      return;
+    }
+
+    // Check capacity.
+    $node = $form['#node'];
+    if ($node && \Drupal::hasService('myeventlane_capacity.service')) {
+      try {
+        $capacityService = \Drupal::service('myeventlane_capacity.service');
+        $capacityService->assertCanBook($node, $total_quantity);
+      }
+      catch (\Drupal\myeventlane_capacity\Exception\CapacityExceededException $e) {
+        $form_state->setError($form['actions']['submit'], $e->getMessage());
+      }
     }
   }
 

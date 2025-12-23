@@ -1,0 +1,87 @@
+{#
+/**
+ * @file
+ * Template for tickets step when event type is paid/both.
+ *
+ * Variables:
+ * - title: Page title
+ * - event: Event node
+ * - event_type: Event type (paid/both)
+ * - steps: Step navigation array
+ * - tickets_url: URL to ticket management page
+ */
+#}
+<div class="mel-event-wizard">
+  <div class="mel-event-wizard__layout">
+    {# Left: Stepper #}
+    <nav class="mel-event-wizard__nav" aria-label="{{ 'Event creation steps'|t }}">
+      <ol class="mel-wizard-steps">
+        {% for nav_step in steps %}
+          <li class="mel-wizard-steps__item{% if nav_step.is_current %} is-current{% endif %}{% if nav_step.is_complete %} is-complete{% endif %}{% if not nav_step.is_accessible %} is-disabled{% endif %}">
+            {% if nav_step.url and (nav_step.is_accessible or nav_step.is_current) %}
+              <a href="{{ nav_step.url }}" 
+                 class="mel-wizard-steps__link js-mel-stepper-button" 
+                 data-step-target="{{ nav_step.id }}"
+                 {% if nav_step.is_current %}aria-current="step"{% endif %}>
+                <span class="mel-wizard-steps__number">{{ nav_step.step_number }}</span>
+                <span class="mel-wizard-steps__label">{{ nav_step.label }}</span>
+              </a>
+            {% else %}
+              <span class="mel-wizard-steps__link" aria-disabled="true">
+                <span class="mel-wizard-steps__number">{{ nav_step.step_number }}</span>
+                <span class="mel-wizard-steps__label">{{ nav_step.label }}</span>
+              </span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    </nav>
+
+    {# Center: Content #}
+    <div class="mel-event-wizard__main">
+      <div class="mel-wizard-step-card">
+        <div class="mel-wizard-step-card__header">
+          <h1 class="mel-wizard-step-card__title">🎟️ {{ 'Set up tickets'|t }}</h1>
+          <p class="mel-wizard-step-card__description">
+            {{ 'Create ticket types, set prices, and manage availability on the next screen. Don\'t worry—you can always come back and change these later.'|t }}
+          </p>
+        </div>
+
+        <div class="mel-wizard-step-card__content">
+          <div class="mel-info-card mel-info-card--primary">
+            <div class="mel-info-card__content">
+              <h3 class="mel-info-card__title">{{ 'Ready to set up tickets?'|t }}</h3>
+              <p class="mel-info-card__description">
+                {{ 'You\'ll be able to:'|t }}
+              </p>
+              <ul class="mel-info-card__list">
+                <li>{{ 'Create different ticket types (e.g., Early Bird, General Admission)'|t }}</li>
+                <li>{{ 'Set prices and availability windows'|t }}</li>
+                <li>{{ 'Add ticket descriptions and limits'|t }}</li>
+                <li>{{ 'Enable or disable ticket sales'|t }}</li>
+              </ul>
+            </div>
+            <div class="mel-info-card__actions">
+              <a href="{{ tickets_url }}" class="mel-btn mel-btn--primary mel-btn--large">
+                {{ 'Set up tickets →'|t }}
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="mel-wizard-step-card__actions">
+          <div class="mel-wizard-step-card__actions-primary">
+            <a href="{{ url('myeventlane_event.wizard.review', {'event': event.id()}) }}" class="mel-btn mel-btn--primary">
+              {{ 'Continue to Review →'|t }}
+            </a>
+          </div>
+          <div class="mel-wizard-step-card__actions-secondary">
+            <a href="{{ url('myeventlane_event.wizard.when_where', {'event': event.id()}) }}" class="mel-btn mel-btn--secondary">
+              {{ '← Back'|t }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

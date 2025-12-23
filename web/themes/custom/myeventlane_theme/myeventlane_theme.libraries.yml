@@ -72,7 +72,7 @@ event-wizard:
     - core/drupal.states
 
 # Event full node page styling.
-# Styles are compiled via Vite into dist/main.css from src/scss/components/_event-full.scss.
+# Styles are compiled via Vite into dist/main.css from src/scss/pages/_event.scss.
 myeventlane_event_full:
   css:
     theme:
@@ -80,3 +80,4 @@ myeventlane_event_full:
   dependencies:
     - core/drupal
     - core/once
+    - myeventlane_location/event_map

@@ -20,6 +20,10 @@ final class TicketTypeFormAlter {
    *   The form state.
    */
   public static function alterForm(array &$form, FormStateInterface $form_state): void {
+    // Fix datetime fields that have array values instead of strings.
+    // This can happen when paragraphs are created or loaded with corrupted data.
+    self::fixDatetimeFieldValues($form, $form_state);
+
     // For inline entity forms, the field names might be nested.
     // Try multiple selector patterns to handle different form contexts.
     $labelModeSelectors = [
@@ -50,6 +54,62 @@ final class TicketTypeFormAlter {
           $labelModeSelectors[0] => ['value' => 'custom'],
         ],
       ];
+    }
+  }
+
+  /**
+   * Fixes datetime fields that have array values instead of strings.
+   *
+   * This prevents the error: "DateTime::createFromFormat(): Argument #2 ($datetime)
+   * must be of type string, array given".
+   *
+   * Note: Entity-level fixes are handled by hook_entity_load() and
+   * hook_field_widget_form_alter(). This method handles form-level fixes.
+   *
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  private static function fixDatetimeFieldValues(array &$form, FormStateInterface $form_state): void {
+    // Fix datetime fields in nested paragraph forms (inline entity forms).
+    // Recursively search for datetime field widgets and fix their default values.
+    self::fixDatetimeFieldsRecursive($form);
+  }
+
+  /**
+   * Recursively fixes datetime field widgets in the form structure.
+   *
+   * @param array &$form
+   *   The form array to process recursively.
+   */
+  private static function fixDatetimeFieldsRecursive(array &$form): void {
+    foreach ($form as $key => &$element) {
+      if (!is_array($element)) {
+        continue;
+      }
+
+      // Check if this is a datetime field widget.
+      if (isset($element['#field_name']) && in_array($element['#field_name'], ['field_ticket_sales_start', 'field_ticket_sales_end'], TRUE)) {
+        // Fix widget default values if they're arrays.
+        if (isset($element['widget']) && is_array($element['widget'])) {
+          foreach ($element['widget'] as $delta => &$widget_item) {
+            if (is_numeric($delta) && is_array($widget_item)) {
+              // Fix value field if it's an array.
+              if (isset($widget_item['value']) && is_array($widget_item['value'])) {
+                $widget_item['value'] = ['#default_value' => NULL];
+              }
+              // Fix date field if it's an array.
+              if (isset($widget_item['value']['date']) && is_array($widget_item['value']['date'])) {
+                $widget_item['value']['date'] = ['#default_value' => NULL];
+              }
+            }
+          }
+        }
+      }
+
+      // Recursively process child elements.
+      self::fixDatetimeFieldsRecursive($element);
     }
   }
 

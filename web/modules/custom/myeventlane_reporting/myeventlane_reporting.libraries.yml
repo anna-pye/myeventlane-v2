@@ -1,0 +1,10 @@
+reporting:
+  css:
+    theme:
+      css/reporting.css: {}
+  js:
+    js/reporting.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - myeventlane_vendor_theme/global-styling

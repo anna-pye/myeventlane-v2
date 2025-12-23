@@ -107,7 +107,8 @@ function _myeventlane_commerce_sync_event_variations(EntityInterface $entity): v
       ->loadByProperties(['field_event' => $event_id]);
 
     if (empty($products)) {
-      \Drupal::logger('myeventlane_commerce')->notice('No products found for Event @id', ['@id' => $event_id]);
+      // Expected for new/draft events that haven't created products yet.
+      \Drupal::logger('myeventlane_commerce')->debug('No products found for Event @id (expected for new/draft events)', ['@id' => $event_id]);
       return;
     }
 

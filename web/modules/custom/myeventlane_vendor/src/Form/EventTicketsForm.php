@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\myeventlane_vendor\Form;
 
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\paragraphs\ParagraphInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -19,6 +23,7 @@ final class EventTicketsForm extends FormBase {
 
   protected EntityTypeManagerInterface $entityTypeManager;
   protected AccountProxyInterface $currentUserProxy;
+  protected FormBuilderInterface $formBuilder;
 
   /**
    * {@inheritdoc}
@@ -27,6 +32,7 @@ final class EventTicketsForm extends FormBase {
     $instance = new static();
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->currentUserProxy = $container->get('current_user');
+    $instance->formBuilder = $container->get('form_builder');
     return $instance;
   }
 
@@ -119,17 +125,15 @@ final class EventTicketsForm extends FormBase {
     $form['actions'] = [
       '#type' => 'container',
       '#attributes' => ['class' => ['mel-ticket-actions']],
-      'add_paid' => [
-        '#type' => 'submit',
-        '#value' => $this->t('Add Paid Ticket'),
-        '#submit' => ['::addPaidTicket'],
-        '#attributes' => ['class' => ['button', 'button--primary']],
-      ],
-      'add_free' => [
-        '#type' => 'submit',
-        '#value' => $this->t('Add Free Ticket'),
-        '#submit' => ['::addFreeTicket'],
-        '#attributes' => ['class' => ['button']],
+      'add_ticket' => [
+        '#type' => 'link',
+        '#title' => '+ ' . $this->t('Add ticket type'),
+        '#url' => Url::fromRoute('mel_tickets.add_ticket_modal', ['event' => $event->id()]),
+        '#attributes' => [
+          'class' => ['button', 'button--primary', 'use-ajax'],
+          'data-dialog-type' => 'modal',
+          'data-dialog-options' => json_encode(['width' => 'medium']),
+        ],
       ],
       'save' => [
         '#type' => 'submit',
@@ -137,6 +141,10 @@ final class EventTicketsForm extends FormBase {
         '#attributes' => ['class' => ['button', 'button--primary']],
       ],
     ];
+    
+    // Attach AJAX library for modal.
+    $form['#attached']['library'][] = 'core/drupal.ajax';
+    $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
 
     // Calculate total capacity.
     $total_capacity = 0;

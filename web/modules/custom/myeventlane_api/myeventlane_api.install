@@ -1,0 +1,102 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for myeventlane_api module.
+ */
+
+use Drupal\Core\Database\Database;
+
+/**
+ * Implements hook_schema().
+ */
+function myeventlane_api_schema(): array {
+  $schema = [];
+
+  // Rate limiting table.
+  $schema['myeventlane_api_rate_limit'] = [
+    'description' => 'Tracks API rate limit requests for rate limiting.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique rate limit record ID.',
+      ],
+      'identifier' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'Rate limit identifier (IP address or vendor/token ID).',
+      ],
+      'timestamp' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'Unix timestamp of the request.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'identifier_timestamp' => ['identifier', 'timestamp'],
+    ],
+  ];
+
+  // API audit log table.
+  $schema['myeventlane_api_audit_log'] = [
+    'description' => 'Audit log of API requests for security and monitoring.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique audit log record ID.',
+      ],
+      'endpoint' => [
+        'type' => 'varchar',
+        'length' => 500,
+        'not null' => TRUE,
+        'description' => 'The API endpoint path.',
+      ],
+      'method' => [
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => TRUE,
+        'description' => 'HTTP method (GET, POST, etc.).',
+      ],
+      'vendor_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'The vendor ID (if authenticated).',
+      ],
+      'ip_address' => [
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'description' => 'Client IP address (normalized).',
+      ],
+      'user_agent' => [
+        'type' => 'varchar',
+        'length' => 512,
+        'not null' => FALSE,
+        'description' => 'User agent string.',
+      ],
+      'response_code' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'HTTP response code.',
+      ],
+      'timestamp' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'Unix timestamp of the request.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'vendor_id' => ['vendor_id'],
+      'timestamp' => ['timestamp'],
+      'endpoint_timestamp' => ['endpoint', 'timestamp'],
+    ],
+  ];
+
+  return $schema;
+}

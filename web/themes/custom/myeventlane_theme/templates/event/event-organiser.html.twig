@@ -1,0 +1,17 @@
+{#
+  Event organiser section
+  Displays organiser information and trust indicators
+  Uses mel_organiser_name and mel_organiser_logo from preprocess
+#}
+<section class="mel-event-card mel-event-card--organiser">
+  <h2 class="mel-event-card__title">{{ 'Hosted by'|t }}</h2>
+  <div class="mel-event-card__content">
+    {% if mel_organiser_logo %}
+      <div class="mel-organiser__logo">
+        <img src="{{ mel_organiser_logo }}" alt="{{ mel_organiser_name }}" />
+      </div>
+    {% endif %}
+    <div class="mel-organiser__name">{{ mel_organiser_name }}</div>
+    <p class="mel-organiser__trust">{{ 'Verified organiser'|t }}</p>
+  </div>
+</section>

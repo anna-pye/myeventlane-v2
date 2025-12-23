@@ -1,0 +1,40 @@
+{#
+  Event tickets section
+  Displays available ticket products as cards
+#}
+<section class="event-tickets">
+  <h2 class="event-tickets__title">Tickets</h2>
+
+  <div class="event-tickets__list">
+    {% for item in node.field_product_target %}
+      {% set product = item.entity %}
+      {% if product %}
+        {% set default_variation = product.getDefaultVariation() %}
+        <div class="ticket-card">
+          <h3 class="ticket-card__title">{{ product.label }}</h3>
+
+          {% if default_variation and default_variation.hasField('price') %}
+            <div class="ticket-card__price">
+              {{ default_variation.getPrice()|commerce_price_format }}
+            </div>
+          {% endif %}
+
+          {% if product.hasField('body') and not product.body.isEmpty %}
+            <div class="ticket-card__description">
+              {{ product.body.value|striptags|trim }}
+            </div>
+          {% endif %}
+
+          {% if content.mel_ticket_cta is defined and content.mel_ticket_cta %}
+            {{ content.mel_ticket_cta }}
+          {% else %}
+            <button class="button button--secondary ticket-card__button">
+              Select ticket
+            </button>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+</section>

@@ -1,0 +1,141 @@
+{#
+/**
+ * @file
+ * Event insights template with tabs.
+ *
+ * Variables:
+ * - event: Event node
+ * - kpis: Array of KPI cards
+ * - tabs: Tab navigation array
+ * - active_tab: Active tab ID
+ * - chart_data: Chart data URLs (optional)
+ * - breakdown: Breakdown data (optional)
+ * - stub: Boolean if stub page
+ * - stub_message: Stub message text
+ */
+#}
+<div class="mel-reporting-event-insights">
+  <div class="mel-console__header">
+    <h1 class="mel-console__title">{{ 'Insights: '|t }}{{ event.label }}</h1>
+  </div>
+
+  {# Tab Navigation #}
+  {% if tabs %}
+    <div class="mel-console__tabs" role="tablist">
+      {% for tab in tabs %}
+        <a class="mel-console__tab{% if tab.id == active_tab %} is-active{% endif %}"
+           href="{{ tab.url }}"
+           role="tab">
+          {{ tab.label }}
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {# KPI Cards #}
+  {% if kpis|length > 0 %}
+    <div class="mel-grid mel-grid--4">
+      {% for kpi in kpis %}
+        {% include 'myeventlane-reporting-kpi-card.html.twig' with {
+          'label': kpi.label,
+          'value': kpi.value,
+          'subtitle': kpi.subtitle|default(''),
+          'icon': kpi.icon|default('chart'),
+        } %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {# Stub Message #}
+  {% if stub %}
+    <div class="mel-card">
+      <div class="mel-card__body">
+        <div class="mel-empty-state">
+          <p>{{ stub_message|default('This feature is not yet implemented.') }}</p>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  {# Charts #}
+  {% if chart_data %}
+    {% if active_tab == 'sales' %}
+      <div class="mel-grid mel-grid--2">
+        {% if chart_data.sales %}
+          <div class="mel-card">
+            <div class="mel-card__header">
+              <div class="mel-card__title">{{ 'Sales Over Time'|t }}</div>
+            </div>
+            <div class="mel-card__body">
+              <div class="mel-chart-container" data-chart-id="sales" data-chart-type="line" data-chart-url="{{ chart_data.sales }}">
+                <canvas></canvas>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+        {% if chart_data.ticket_breakdown %}
+          <div class="mel-card">
+            <div class="mel-card__header">
+              <div class="mel-card__title">{{ 'Ticket Breakdown'|t }}</div>
+            </div>
+            <div class="mel-card__body">
+              <div class="mel-chart-container" data-chart-id="ticket-breakdown" data-chart-type="doughnut" data-chart-url="{{ chart_data.ticket_breakdown }}">
+                <canvas></canvas>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      {% if chart_data.revenue %}
+        <div class="mel-card">
+          <div class="mel-card__header">
+            <div class="mel-card__title">{{ 'Revenue Over Time'|t }}</div>
+          </div>
+          <div class="mel-card__body">
+            <div class="mel-chart-container" data-chart-id="revenue" data-chart-type="line" data-chart-url="{{ chart_data.revenue }}">
+              <canvas></canvas>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endif %}
+
+    {% if active_tab == 'checkins' and chart_data.checkins %}
+      <div class="mel-card">
+        <div class="mel-card__header">
+          <div class="mel-card__title">{{ 'Check-ins Over Time'|t }}</div>
+        </div>
+        <div class="mel-card__body">
+          <div class="mel-chart-container" data-chart-id="checkins" data-chart-type="line" data-chart-url="{{ chart_data.checkins }}">
+            <canvas></canvas>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  {# Breakdown Data #}
+  {% if breakdown and active_tab == 'attendees' %}
+    <div class="mel-card">
+      <div class="mel-card__header">
+        <div class="mel-card__title">{{ 'Attendee Breakdown'|t }}</div>
+      </div>
+      <div class="mel-card__body">
+        <div class="mel-list">
+          {% if breakdown.by_source %}
+            <div class="mel-list__item">
+              <div>{{ 'RSVPs'|t }}</div>
+              <div class="mel-badge">{{ breakdown.by_source.rsvp|default(0) }}</div>
+            </div>
+            <div class="mel-list__item">
+              <div>{{ 'Paid Tickets'|t }}</div>
+              <div class="mel-badge">{{ breakdown.by_source.ticket|default(0) }}</div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>

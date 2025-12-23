@@ -1,0 +1,151 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall hooks.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Database\Database;
+
+/**
+ * Implements hook_schema().
+ */
+function myeventlane_automation_schema(): array {
+  $schema = [];
+
+  // Dispatch table for idempotency and audit.
+  $schema['myeventlane_automation_dispatch'] = [
+    'description' => 'Tracks automated notification dispatch attempts for idempotency and audit.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique dispatch ID.',
+      ],
+      'event_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'The event node ID (nullable for global notifications).',
+      ],
+      'notification_type' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'description' => 'Notification type: sales_open, reminder_24h, reminder_2h, waitlist_invite, event_cancelled, export_ready_csv, export_ready_ics, weekly_category_digest.',
+      ],
+      'recipient_hash' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'description' => 'Hash of recipient identifier (email/user ID) for privacy.',
+      ],
+      'scheduled_for' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Unix timestamp when notification was scheduled.',
+      ],
+      'sent_at' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'Unix timestamp when notification was sent (NULL if not sent).',
+      ],
+      'status' => [
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => 'scheduled',
+        'description' => 'Status: scheduled, sent, failed, skipped.',
+      ],
+      'attempts' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Number of send attempts.',
+      ],
+      'last_error' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'Last error message if failed.',
+      ],
+      'metadata' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'JSON metadata (export file path, cancellation reason, etc).',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'event_type' => ['event_id', 'notification_type'],
+      'recipient_type' => ['recipient_hash', 'notification_type'],
+      'scheduled_for' => ['scheduled_for'],
+      'status' => ['status'],
+      'event_status' => ['event_id', 'status'],
+    ],
+  ];
+
+  // Audit log table for tracking notification actions.
+  $schema['myeventlane_automation_audit'] = [
+    'description' => 'Audit log for automation actions.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique audit log ID.',
+      ],
+      'event_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'The event node ID (nullable for global actions).',
+      ],
+      'action' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'description' => 'Action type: notification_sent, notification_failed, etc.',
+      ],
+      'notification_type' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => FALSE,
+        'description' => 'Notification type if applicable.',
+      ],
+      'recipient_hash' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => FALSE,
+        'description' => 'Hash of recipient identifier.',
+      ],
+      'created' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Unix timestamp when action occurred.',
+      ],
+      'metadata' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'JSON metadata.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'event_action' => ['event_id', 'action'],
+      'created' => ['created'],
+      'action' => ['action'],
+    ],
+  ];
+
+  return $schema;
+}

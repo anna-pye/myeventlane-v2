@@ -1,0 +1,37 @@
+{#
+  Event location section
+  Displays venue name, address, and map link
+#}
+<section class="event-location">
+  <h2 class="event-location__title">Location</h2>
+
+  {% if mel_venue %}
+    <p class="event-location__venue">
+      {{ mel_venue }}
+    </p>
+  {% endif %}
+
+  {% if mel_address %}
+    <address class="event-location__address">
+      {{ mel_address }}
+    </address>
+  {% endif %}
+
+  {% if mel_address %}
+    <a
+      href="https://maps.google.com/?q={{ mel_address|url_encode }}"
+      class="button button--link event-location__directions"
+      target="_blank"
+      rel="noopener">
+      Get directions
+    </a>
+  {% elseif mel_venue %}
+    <a
+      href="https://maps.google.com/?q={{ mel_venue|url_encode }}"
+      class="button button--link event-location__directions"
+      target="_blank"
+      rel="noopener">
+      Get directions
+    </a>
+  {% endif %}
+</section>

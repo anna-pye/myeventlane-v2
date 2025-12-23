@@ -1,0 +1,4 @@
+services:
+  myeventlane_capacity.service:
+    class: Drupal\myeventlane_capacity\Service\EventCapacityService
+    arguments: ['@entity_type.manager', '@cache.default']

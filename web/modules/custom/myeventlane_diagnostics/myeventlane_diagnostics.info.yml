@@ -1,0 +1,11 @@
+name: MyEventLane Diagnostics
+type: module
+description: 'Event diagnostics system providing real-time feedback on event configuration and readiness.'
+core_version_requirement: ^11
+package: MyEventLane
+dependencies:
+  - myeventlane_core
+  - myeventlane_event
+  - myeventlane_event_state
+  - myeventlane_event_attendees
+  - myeventlane_vendor

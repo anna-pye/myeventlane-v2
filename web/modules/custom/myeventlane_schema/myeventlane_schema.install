@@ -302,3 +302,61 @@ function myeventlane_schema_update_9002(): string {
 
   return 'Created ticket type paragraph type and all related fields for event-driven ticket management.';
 }
+
+/**
+ * Add field_event_setup_complete to Event bundle.
+ */
+function myeventlane_schema_update_9003(): string {
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $field_storage_storage = $entity_type_manager->getStorage('field_storage_config');
+  $field_config_storage = $entity_type_manager->getStorage('field_config');
+
+  // Create field storage if it doesn't exist.
+  $storage_id = 'node.field_event_setup_complete';
+  if (!$field_storage_storage->load($storage_id)) {
+    $storage = $field_storage_storage->create([
+      'field_name' => 'field_event_setup_complete',
+      'entity_type' => 'node',
+      'type' => 'boolean',
+      'module' => 'core',
+      'settings' => [],
+    ]);
+    $storage->save();
+  }
+
+  // Create field instance if it doesn't exist.
+  $field_id = 'node.event.field_event_setup_complete';
+  if (!$field_config_storage->load($field_id)) {
+    $field = $field_config_storage->create([
+      'field_name' => 'field_event_setup_complete',
+      'entity_type' => 'node',
+      'bundle' => 'event',
+      'label' => 'Setup Complete',
+      'description' => 'Flag indicating the event was successfully published through the wizard. Used to distinguish wizard drafts from intentionally unpublished events.',
+      'required' => FALSE,
+      'translatable' => FALSE,
+      'default_value' => [
+        ['value' => 0],
+      ],
+      'settings' => [
+        'on_label' => 'Setup complete',
+        'off_label' => 'Setup incomplete',
+      ],
+    ]);
+    $field->save();
+  }
+
+  // Hide field from form displays.
+  $form_display_storage = $entity_type_manager->getStorage('entity_form_display');
+  $form_display = $form_display_storage->load('node.event.default');
+  if ($form_display) {
+    $hidden = $form_display->get('hidden');
+    $hidden['field_event_setup_complete'] = TRUE;
+    $form_display->set('hidden', $hidden);
+    $form_display->save();
+  }
+
+  drupal_flush_all_caches();
+
+  return 'Created field_event_setup_complete field on Event bundle.';
+}

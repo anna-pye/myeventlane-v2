@@ -16,13 +16,15 @@ form .mel-simple-tabs {
 .mel-event-form--wizard .mel-event-form__wizard-layout {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 @media (min-width: 1200px) {
   .mel-event-form--wizard .mel-event-form__wizard-layout {
-    grid-template-columns: 280px 1fr;
+    /* Three columns: stepper | content | diagnostics */
+    grid-template-columns: 280px 1fr 320px;
     align-items: start;
+    gap: 2rem;
   }
 }
 
@@ -82,9 +84,23 @@ form .mel-simple-tabs {
   background: rgba(0,0,0,.08);
 }
 
-/* Right content */
+/* Center content */
 .mel-event-form--wizard .mel-event-form__wizard-content {
   min-width: 0;
+}
+
+/* Right diagnostics sidebar */
+.mel-event-form--wizard .mel-event-form__wizard-diagnostics {
+  min-width: 0;
+  position: sticky;
+  top: 1rem;
+  align-self: start;
+}
+
+@media (max-width: 1199px) {
+  .mel-event-form--wizard .mel-event-form__wizard-diagnostics {
+    display: none;
+  }
 }
 
 /* Actions */
@@ -97,6 +113,15 @@ form .mel-simple-tabs {
   margin-top: 1rem;
   border-radius: 16px;
   backdrop-filter: blur(6px);
+}
+
+/* CRITICAL: Hide wizard steps via CSS class, never via #access. */
+.mel-wizard-step.is-hidden {
+  display: none !important;
+}
+
+.mel-wizard-step.is-active {
+  display: block;
 }
 
 /* Visually hidden helper (in case theme doesn't provide it) */

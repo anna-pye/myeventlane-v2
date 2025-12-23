@@ -1,0 +1,11 @@
+name: MyEventLane Attendee
+type: module
+description: 'Attendee abstraction layer for unified RSVP and ticket attendee handling'
+core_version_requirement: ^11
+package: MyEventLane
+dependencies:
+  - drupal:node
+  - drupal:user
+  - myeventlane_event_state:myeventlane_event_state
+  - myeventlane_rsvp:myeventlane_rsvp
+  - myeventlane_event_attendees:myeventlane_event_attendees

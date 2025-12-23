@@ -1,0 +1,3 @@
+# Schema for MyEventLane Automation module configuration.
+# This module uses the messaging module's config system for email templates.
+# No custom config objects are defined at this time.

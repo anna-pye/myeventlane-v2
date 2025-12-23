@@ -1,0 +1,11 @@
+name: MyEventLane Reporting
+type: module
+description: 'Vendor and admin reporting & insights UI with KPIs, charts, and exports.'
+core_version_requirement: ^11
+package: MyEventLane
+dependencies:
+  - myeventlane_core
+  - myeventlane_metrics
+  - myeventlane_vendor
+  - myeventlane_event_attendees
+  - myeventlane_automation

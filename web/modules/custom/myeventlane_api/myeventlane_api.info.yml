@@ -1,0 +1,15 @@
+name: MyEventLane API
+type: module
+description: 'Public and vendor-scoped REST API endpoints for MyEventLane'
+core_version_requirement: ^11
+package: MyEventLane
+dependencies:
+  - drupal:node
+  - drupal:serialization
+  - drupal:system
+  - myeventlane_core:myeventlane_core
+  - myeventlane_vendor:myeventlane_vendor
+  - myeventlane_event:myeventlane_event
+  - myeventlane_event_attendees:myeventlane_event_attendees
+  - myeventlane_metrics:myeventlane_metrics
+  - myeventlane_event_state:myeventlane_event_state

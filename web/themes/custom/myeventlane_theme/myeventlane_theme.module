@@ -9,10 +9,25 @@
  * Implements hook_page_attachments().
  *
  * Ensures Stripe.js loads on checkout pages and exports category colors to JS.
+ * Also ensures event page CSS loads on event node pages.
  */
 function myeventlane_theme_page_attachments(array &$page) {
-  // Only on checkout pages.
   $route = \Drupal::routeMatch()->getRouteName();
+  
+  // Attach event full page CSS on event node canonical pages.
+  if ($route === 'entity.node.canonical') {
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if ($node && $node->bundle() === 'event') {
+      if (!isset($page['#attached']['library'])) {
+        $page['#attached']['library'] = [];
+      }
+      if (!in_array('myeventlane_theme/myeventlane_event_full', $page['#attached']['library'], TRUE)) {
+        $page['#attached']['library'][] = 'myeventlane_theme/myeventlane_event_full';
+      }
+    }
+  }
+  
+  // Only on checkout pages.
   $is_checkout_route = strpos($route, 'commerce_checkout') === 0;
 
   if ($is_checkout_route && \Drupal::moduleHandler()->moduleExists('commerce_stripe')) {

@@ -8,6 +8,109 @@ declare(strict_types=1);
  */
 
 /**
+ * Implements hook_install().
+ */
+function myeventlane_tickets_install(): void {
+  // Entity schema is created automatically by Drupal based on the Ticket
+  // content entity definition. This hook ensures the entity type is properly
+  // registered and tables are created.
+  \Drupal::logger('myeventlane_tickets')->notice('MyEventLane Tickets module installed. Entity schema created automatically.');
+}
+
+/**
+ * Ensures the myeventlane_ticket entity tables are created.
+ */
+function myeventlane_tickets_update_8001(): string {
+  $entity_type_manager = \Drupal::entityTypeManager();
+  
+  // Get the entity type definition.
+  $entity_type = $entity_type_manager->getDefinition('myeventlane_ticket');
+  if (!$entity_type) {
+    return 'Ticket entity type not found.';
+  }
+  
+  // Get the storage handler.
+  $storage = $entity_type_manager->getStorage('myeventlane_ticket');
+  
+  // Check if tables exist by trying to query them.
+  $database = \Drupal::database();
+  $table_name = $entity_type->getBaseTable();
+  $data_table_name = $entity_type->getDataTable();
+  
+  $tables_exist = TRUE;
+  try {
+    $database->query("SELECT 1 FROM {{$table_name}} LIMIT 1")->fetchField();
+    if ($data_table_name) {
+      $database->query("SELECT 1 FROM {{$data_table_name}} LIMIT 1")->fetchField();
+    }
+  }
+  catch (\Exception $e) {
+    $tables_exist = FALSE;
+  }
+  
+  if (!$tables_exist && $storage instanceof \Drupal\Core\Entity\Sql\SqlContentEntityStorage) {
+    // Force table creation by getting the schema.
+    $schema_handler = $storage->getTableMapping();
+    // Accessing the storage will trigger table creation on first use.
+    // Create a dummy entity to force table creation.
+    try {
+      $test_entity = $storage->create([]);
+      // Don't save it, just creating it should trigger schema creation.
+    }
+    catch (\Exception $e) {
+      // If creation fails, try to manually create tables using the schema.
+      $schema = $storage->getSchema();
+      $schema->onEntityTypeCreate($entity_type);
+    }
+  }
+  
+  return 'Ticket entity tables created.';
+}
+
+/**
+ * Properly installs the myeventlane_ticket entity type and tables.
+ */
+function myeventlane_tickets_update_8002(): string {
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  
+  // Get the entity type definition.
+  $entity_type = $entity_type_manager->getDefinition('myeventlane_ticket', FALSE);
+  if (!$entity_type) {
+    return 'Ticket entity type not found.';
+  }
+  
+  // Check if tables exist.
+  $database = \Drupal::database();
+  $table_name = $entity_type->getBaseTable();
+  
+  try {
+    $database->query("SELECT 1 FROM {{$table_name}} LIMIT 1")->fetchField();
+    return 'Ticket entity tables already exist.';
+  }
+  catch (\Exception $e) {
+    // Tables don't exist, install the entity type.
+    try {
+      $update_manager->installEntityType($entity_type);
+      return 'Ticket entity type and tables installed.';
+    }
+    catch (\Exception $install_exception) {
+      // If installEntityType fails, try installing field storage definitions.
+      $field_definitions = \Drupal\myeventlane_tickets\Entity\Ticket::baseFieldDefinitions($entity_type);
+      foreach ($field_definitions as $field_name => $field_definition) {
+        try {
+          $update_manager->installFieldStorageDefinition($field_name, 'myeventlane_ticket', 'myeventlane_tickets', $field_definition);
+        }
+        catch (\Exception $field_exception) {
+          // Field might already exist, skip.
+        }
+      }
+      return 'Ticket entity field storage definitions installed.';
+    }
+  }
+}
+
+/**
  * Implements hook_schema_alter().
  */
 function myeventlane_tickets_schema_alter(array &$schema): void {

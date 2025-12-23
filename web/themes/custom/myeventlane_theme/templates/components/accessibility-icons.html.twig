@@ -49,31 +49,32 @@
 {% if accessibility_terms is not empty %}
   {% set terms_to_display = [] %}
   
-  {# Process terms #}
-  {% for term in accessibility_terms %}
-    {% if term.entity %}
-      {% set term_entity = term.entity %}
-    {% elseif term.target_id %}
-      {% set term_entity = term %}
-    {% else %}
-      {% set term_entity = term %}
-    {% endif %}
-    
+  {# Process terms - handle term entities directly #}
+  {% for term_entity in accessibility_terms %}
     {% if term_entity %}
-      {% set term_id = term_entity.id.value|default(term_entity.id) %}
-      {% set term_name = term_entity.name.value|default(term_entity.label) %}
-      {% set term_machine_name = term_id|replace({'accessibility_': ''}) %}
+      {# Extract term ID #}
+      {% set term_id = term_entity.id.value|default(term_entity.id())|default(term_entity.id) %}
       
+      {# Extract term name/label #}
+      {% set term_name = term_entity.name.value|default(term_entity.getName())|default(term_entity.label.value|default(term_entity.label)) %}
+      
+      {# Get machine name from term name (normalize for mapping lookup) #}
+      {% set term_machine_name = term_name|lower|replace({' ': '_', '-': '_', '&': 'and', '(': '', ')': ''})|trim %}
+      
+      {# Try to match icon and label from mapping #}
       {% set icon = accessibility_icons[term_machine_name]|default('♿') %}
       {% set label = accessibility_labels[term_machine_name]|default(term_name) %}
       
-      {% set terms_to_display = terms_to_display|merge([{
-        'id': term_id,
-        'name': term_name,
-        'machine_name': term_machine_name,
-        'icon': icon,
-        'label': label,
-      }]) %}
+      {# Only add if we have a valid name #}
+      {% if term_name %}
+        {% set terms_to_display = terms_to_display|merge([{
+          'id': term_id,
+          'name': term_name,
+          'machine_name': term_machine_name,
+          'icon': icon,
+          'label': label,
+        }]) %}
+      {% endif %}
     {% endif %}
   {% endfor %}
   

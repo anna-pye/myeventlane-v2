@@ -1,0 +1,5 @@
+diagnostics:
+  dependencies:
+    - myeventlane_theme/global-styling
+  js:
+    js/diagnostics.js: {}

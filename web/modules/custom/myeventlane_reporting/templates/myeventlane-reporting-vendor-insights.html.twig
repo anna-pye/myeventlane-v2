@@ -1,0 +1,84 @@
+{#
+/**
+ * @file
+ * Vendor insights dashboard template.
+ *
+ * Variables:
+ * - kpis: Array of KPI card data
+ * - attention_events: Events needing attention
+ * - top_event: Top performing event
+ * - event_count: Total event count
+ */
+#}
+<div class="mel-reporting-vendor-insights">
+  <div class="mel-console__header">
+    <h1 class="mel-console__title">{{ 'Vendor Insights'|t }}</h1>
+  </div>
+
+  {# KPI Cards #}
+  <div class="mel-grid mel-grid--4">
+    {% for kpi in kpis %}
+      {% include 'myeventlane-reporting-kpi-card.html.twig' with {
+        'label': kpi.label,
+        'value': kpi.value,
+        'subtitle': kpi.subtitle|default(''),
+        'icon': kpi.icon|default('chart'),
+      } %}
+    {% endfor %}
+  </div>
+
+  {# Top Performing Event #}
+  {% if top_event %}
+    <div class="mel-card">
+      <div class="mel-card__header">
+        <div class="mel-card__title">{{ 'Top Performing Event'|t }}</div>
+      </div>
+      <div class="mel-card__body">
+        <div class="mel-stat-group">
+          <div class="mel-stat">
+            <div class="mel-stat__label">{{ 'Event'|t }}</div>
+            <div class="mel-stat__value">
+              <a href="{{ top_event.url }}">{{ top_event.event.label }}</a>
+            </div>
+          </div>
+          <div class="mel-stat">
+            <div class="mel-stat__label">{{ 'Attendees'|t }}</div>
+            <div class="mel-stat__value">{{ top_event.attendees }}</div>
+          </div>
+          <div class="mel-stat">
+            <div class="mel-stat__label">{{ 'Revenue'|t }}</div>
+            <div class="mel-stat__value">${{ top_event.revenue|number_format(2) }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  {# Events Needing Attention #}
+  {% if attention_events|length > 0 %}
+    <div class="mel-card">
+      <div class="mel-card__header">
+        <div class="mel-card__title">{{ 'Events Needing Attention'|t }}</div>
+      </div>
+      <div class="mel-card__body">
+        <div class="mel-list">
+          {% for item in attention_events %}
+            <div class="mel-list__item">
+              <div>
+                <a href="{{ item.url }}">{{ item.event.label }}</a>
+                <div class="mel-text--sm mel-text--muted">{{ item.reason }}</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if event_count == 0 %}
+    <div class="mel-empty-state">
+      <p>{{ 'You haven\'t created any events yet.'|t }}</p>
+      <a href="/vendor/events/add" class="mel-btn mel-btn--primary">{{ 'Create your first event'|t }}</a>
+    </div>
+  {% endif %}
+</div>

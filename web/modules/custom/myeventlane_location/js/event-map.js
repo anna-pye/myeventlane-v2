@@ -10,16 +10,12 @@
    * Initializes map rendering on Event view pages.
    */
   function initEventMap() {
-    console.log('MyEventLane Location: Initializing event map...');
     const settings = drupalSettings.myeventlaneLocation || {};
     const eventData = drupalSettings.myeventlaneLocationEvent || {};
     const provider = settings.provider || 'google_maps';
 
-    console.log('MyEventLane Location: Settings:', settings);
-    console.log('MyEventLane Location: Event data:', eventData);
-
     if (!eventData.latitude || !eventData.longitude) {
-      console.warn('MyEventLane Location: Event coordinates not found. Event data:', eventData);
+      console.warn('MyEventLane Location: Event coordinates not found.');
       return;
     }
 
@@ -34,21 +30,32 @@
       return;
     }
 
-    const lat = parseFloat(eventData.latitude);
-    const lng = parseFloat(eventData.longitude);
-    const title = eventData.title || 'Event Location';
+    // Get coordinates from data attributes as fallback
+    const lat = parseFloat(eventData.latitude) || parseFloat(mapContainer.dataset.latitude);
+    const lng = parseFloat(eventData.longitude) || parseFloat(mapContainer.dataset.longitude);
+    const title = eventData.title || mapContainer.dataset.title || 'Event Location';
+    
+    // Get address from nearby elements if available
+    const addressElement = mapContainer.closest('.event-sidebar__section')?.querySelector('.event-sidebar__address, address');
+    const address = addressElement ? addressElement.textContent.trim() : null;
+
+    // Validate coordinates
+    if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      console.error('MyEventLane Location: Invalid coordinates:', lat, lng);
+      return;
+    }
 
     if (provider === 'google_maps') {
-      initGoogleMapsMap(mapContainer, lat, lng, title, settings);
+      initGoogleMapsMap(mapContainer, lat, lng, title, address, settings);
     } else if (provider === 'apple_maps') {
-      initAppleMapsMap(mapContainer, lat, lng, title, settings);
+      initAppleMapsMap(mapContainer, lat, lng, title, address, settings);
     }
   }
 
   /**
    * Initializes Google Maps embedded map.
    */
-  function initGoogleMapsMap(container, lat, lng, title, settings) {
+  function initGoogleMapsMap(container, lat, lng, title, address, settings) {
     // Check if Google Maps API is loaded.
     if (typeof google === 'undefined' || !google.maps) {
       // Load Google Maps API.
@@ -57,36 +64,80 @@
       script.async = true;
       script.defer = true;
       window.myeventlaneLocationGoogleMapsMapReady = function () {
-        setupGoogleMapsMap(container, lat, lng, title);
+        setupGoogleMapsMap(container, lat, lng, title, address);
       };
       document.head.appendChild(script);
     } else {
-      setupGoogleMapsMap(container, lat, lng, title);
+      setupGoogleMapsMap(container, lat, lng, title, address);
     }
   }
 
   /**
    * Sets up Google Maps after API is loaded.
+   * Minimal controls and styling for clean, calm appearance.
    */
-  function setupGoogleMapsMap(container, lat, lng, title) {
+  function setupGoogleMapsMap(container, lat, lng, title, address) {
+    // Ensure container has proper dimensions
+    if (container.offsetHeight === 0) {
+      container.style.height = '200px';
+      container.style.minHeight = '200px';
+    }
+
+    // Minimal map styling - reduce visual clutter
+    const mapStyles = [
+      {
+        featureType: 'poi',
+        elementType: 'labels',
+        stylers: [{ visibility: 'off' }]
+      },
+      {
+        featureType: 'transit',
+        elementType: 'labels',
+        stylers: [{ visibility: 'off' }]
+      },
+      {
+        featureType: 'poi.business',
+        stylers: [{ visibility: 'off' }]
+      }
+    ];
+
     const map = new google.maps.Map(container, {
       center: { lat: lat, lng: lng },
-      zoom: 15,
-      mapTypeControl: true,
-      streetViewControl: true,
-      fullscreenControl: true,
+      zoom: 16,
+      // Disable most controls to reduce Google branding
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+      zoomControl: true,
+      zoomControlOptions: {
+        position: google.maps.ControlPosition.RIGHT_CENTER
+      },
+      // Minimal styling
+      styles: mapStyles,
+      // Disable default UI features
+      disableDefaultUI: false,
+      gestureHandling: 'cooperative',
+      // Ensure map renders
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
     });
 
+    // Simple marker
     const marker = new google.maps.Marker({
       position: { lat: lat, lng: lng },
       map: map,
       title: title,
+      animation: google.maps.Animation.DROP,
     });
 
-    // Add info window.
+    // Info window with title and address
+    const infoContent = address 
+      ? `<div style="padding: 8px; line-height: 1.5;"><strong>${title}</strong><br><span style="color: #666; font-size: 0.9em;">${address}</span></div>`
+      : `<div style="padding: 8px;"><strong>${title}</strong></div>`;
+    
     const infoWindow = new google.maps.InfoWindow({
-      content: `<strong>${title}</strong><br>${lat}, ${lng}`,
+      content: infoContent,
     });
+    
     marker.addListener('click', function () {
       infoWindow.open(map, marker);
     });
@@ -95,7 +146,7 @@
   /**
    * Initializes Apple Maps embedded map.
    */
-  function initAppleMapsMap(container, lat, lng, title, settings) {
+  function initAppleMapsMap(container, lat, lng, title, address, settings) {
     // Check if MapKit JS is loaded.
     if (typeof mapkit === 'undefined') {
       // Load MapKit JS.
@@ -122,7 +173,7 @@
   /**
    * Sets up Apple Maps after API is loaded.
    */
-  function setupAppleMapsMap(container, lat, lng, title) {
+  function setupAppleMapsMap(container, lat, lng, title, address) {
     const map = new mapkit.Map(container);
     const coordinate = new mapkit.Coordinate(lat, lng);
     map.region = new mapkit.CoordinateRegion(coordinate, new mapkit.CoordinateSpan(0.01, 0.01));

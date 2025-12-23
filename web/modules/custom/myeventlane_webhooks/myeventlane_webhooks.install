@@ -1,0 +1,161 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for myeventlane_webhooks module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function myeventlane_webhooks_schema(): array {
+  $schema = [];
+
+  // Webhook subscriptions table.
+  $schema['myeventlane_webhook_subscriptions'] = [
+    'description' => 'Stores webhook subscription configurations per vendor.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique subscription ID.',
+      ],
+      'vendor_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The vendor ID this subscription belongs to.',
+      ],
+      'endpoint_url' => [
+        'type' => 'varchar',
+        'length' => 2048,
+        'not null' => TRUE,
+        'description' => 'The webhook endpoint URL.',
+      ],
+      'secret' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'HMAC secret for signing webhook payloads.',
+      ],
+      'event_types' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'Serialized array of enabled event types.',
+      ],
+      'enabled' => [
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 1,
+        'description' => 'Whether this subscription is enabled.',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'Unix timestamp when subscription was created.',
+      ],
+      'updated' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'Unix timestamp when subscription was last updated.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'vendor_id' => ['vendor_id'],
+      'enabled' => ['enabled'],
+    ],
+  ];
+
+  // Webhook delivery attempts table (for logging and retry).
+  $schema['myeventlane_webhook_deliveries'] = [
+    'description' => 'Logs webhook delivery attempts and status.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique delivery attempt ID.',
+      ],
+      'subscription_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The webhook subscription ID.',
+      ],
+      'event_type' => [
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'description' => 'The event type (e.g., event.updated, ticket.purchased).',
+      ],
+      'event_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'description' => 'The event node ID (if applicable).',
+      ],
+      'vendor_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The vendor ID.',
+      ],
+      'payload' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'Serialized payload that was sent.',
+      ],
+      'status' => [
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => 'pending',
+        'description' => 'Delivery status: pending, success, failed, retrying.',
+      ],
+      'response_code' => [
+        'type' => 'int',
+        'not null' => FALSE,
+        'description' => 'HTTP response code from endpoint.',
+      ],
+      'response_body' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'Response body from endpoint.',
+      ],
+      'attempt_count' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Number of delivery attempts.',
+      ],
+      'next_retry_at' => [
+        'type' => 'int',
+        'not null' => FALSE,
+        'description' => 'Unix timestamp for next retry (if status is retrying).',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'Unix timestamp when delivery was queued.',
+      ],
+      'delivered_at' => [
+        'type' => 'int',
+        'not null' => FALSE,
+        'description' => 'Unix timestamp when delivery succeeded.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'subscription_id' => ['subscription_id'],
+      'status' => ['status'],
+      'next_retry_at' => ['next_retry_at'],
+      'event_id_vendor' => ['event_id', 'vendor_id'],
+    ],
+  ];
+
+  return $schema;
+}

@@ -1,0 +1,116 @@
+{#
+/**
+ * @file
+ * Template for wizard review & publish page.
+ *
+ * Variables:
+ * - title: Page title
+ * - event: Event node
+ * - steps: Step navigation array
+ * - summary: Event summary data
+ * - publish_url: URL to publish the event
+ */
+#}
+<div class="mel-event-wizard">
+  <div class="mel-event-wizard__layout">
+    {# Left: Stepper #}
+    <nav class="mel-event-wizard__nav" aria-label="{{ 'Event creation steps'|t }}">
+      <ol class="mel-wizard-steps">
+        {% for nav_step in steps %}
+          <li class="mel-wizard-steps__item{% if nav_step.is_current %} is-current{% endif %}{% if nav_step.is_complete %} is-complete{% endif %}">
+            <span class="mel-wizard-steps__link">
+              <span class="mel-wizard-steps__number">{{ nav_step.step_number }}</span>
+              <span class="mel-wizard-steps__label">{{ nav_step.label }}</span>
+            </span>
+          </li>
+        {% endfor %}
+      </ol>
+    </nav>
+
+    {# Center: Review Content #}
+    <div class="mel-event-wizard__main">
+      <div class="mel-wizard-step-card">
+        <div class="mel-wizard-step-card__header">
+          <h1 class="mel-wizard-step-card__title">{{ 'Almost there! Review your event'|t }}</h1>
+          <p class="mel-wizard-step-card__description">
+            {{ 'Take a moment to review your event details below. Once published, your event will be live and visible to attendees. You can always edit it later.'|t }}
+          </p>
+        </div>
+
+        <div class="mel-wizard-step-card__content">
+          <div class="mel-review-summary">
+            {% for section_key, section in summary %}
+              <div class="mel-review-section">
+                <div class="mel-review-section__header">
+                  <h3 class="mel-review-section__title">{{ section.title }}</h3>
+                  {% if section_key == 'basics' %}
+                    <a href="{{ url('myeventlane_event.wizard.basics', {'event': event.id()}) }}" class="mel-review-section__edit">
+                      {{ 'Edit'|t }}
+                    </a>
+                  {% elseif section_key == 'when_where' %}
+                    <a href="{{ url('myeventlane_event.wizard.when_where', {'event': event.id()}) }}" class="mel-review-section__edit">
+                      {{ 'Edit'|t }}
+                    </a>
+                  {% elseif section_key == 'tickets' %}
+                    {% if event.hasField('field_event_type') and not event.get('field_event_type').isEmpty %}
+                      {% set event_type = event.get('field_event_type').value %}
+                      {% if event_type in ['paid', 'both'] %}
+                        <a href="{{ url('myeventlane_vendor.console.event_tickets', {'event': event.id()}) }}" class="mel-review-section__edit">
+                          {{ 'Edit'|t }}
+                        </a>
+                      {% else %}
+                        <a href="{{ url('myeventlane_event.wizard.tickets', {'event': event.id()}) }}" class="mel-review-section__edit">
+                          {{ 'Edit'|t }}
+                        </a>
+                      {% endif %}
+                    {% endif %}
+                  {% endif %}
+                </div>
+                <dl class="mel-review-section__list">
+                  {% for item in section.items %}
+                    <div class="mel-review-section__item">
+                      <dt class="mel-review-section__label">{{ item.label }}</dt>
+                      <dd class="mel-review-section__value">{{ item.value }}</dd>
+                    </div>
+                  {% endfor %}
+                  {% if section.items is empty %}
+                    <div class="mel-review-section__item mel-review-section__item--empty">
+                      <dd class="mel-review-section__value">{{ 'No details entered yet.'|t }}</dd>
+                    </div>
+                  {% endif %}
+                </dl>
+              </div>
+            {% endfor %}
+          </div>
+
+          {# Publish Actions #}
+          <div class="mel-wizard-step-card__actions mel-wizard-step-card__actions--publish">
+            <div class="mel-wizard-step-card__actions-primary">
+              {% if publish_url %}
+                <a href="{{ publish_url }}" class="mel-btn mel-btn--primary mel-btn--large">
+                  ✨ {{ 'Publish Event'|t }}
+                </a>
+              {% endif %}
+            </div>
+            <div class="mel-wizard-step-card__actions-secondary">
+              {% set prev_step = null %}
+              {% for nav_step in steps %}
+                {% if nav_step.is_current and not loop.first %}
+                  {% set prev_step = steps[loop.index0 - 1] %}
+                {% endif %}
+              {% endfor %}
+              {% if prev_step and prev_step.url %}
+                <a href="{{ prev_step.url }}" class="mel-btn mel-btn--secondary">
+                  {{ '← Back'|t }}
+                </a>
+              {% endif %}
+              <a href="{{ url('myeventlane_event.wizard.basics', {'event': event.id()}) }}" class="mel-btn mel-btn--secondary">
+                {{ 'Edit Details'|t }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

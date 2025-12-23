@@ -1,0 +1,88 @@
+<?php
+
+/**
+ * @file
+ * Module file for MyEventLane Metrics.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ */
+function myeventlane_metrics_node_update(EntityInterface $entity): void {
+  if (!$entity instanceof NodeInterface || $entity->bundle() !== 'event') {
+    return;
+  }
+
+  // Invalidate metrics cache when event is updated.
+  \Drupal::service('myeventlane_metrics.service')->invalidateCache((int) $entity->id());
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function myeventlane_metrics_node_insert(EntityInterface $entity): void {
+  if (!$entity instanceof NodeInterface || $entity->bundle() !== 'event') {
+    return;
+  }
+
+  // Invalidate metrics cache when event is created.
+  \Drupal::service('myeventlane_metrics.service')->invalidateCache((int) $entity->id());
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function myeventlane_metrics_entity_update(EntityInterface $entity): void {
+  $entityType = $entity->getEntityTypeId();
+
+  // Invalidate metrics when RSVP submissions change.
+  if ($entityType === 'rsvp_submission') {
+    $eventId = $entity->get('event_id')->target_id;
+    if ($eventId) {
+      \Drupal::service('myeventlane_metrics.service')->invalidateCache((int) $eventId);
+    }
+  }
+
+  // Invalidate metrics when event attendees change.
+  if ($entityType === 'event_attendee') {
+    $eventId = $entity->get('event')->target_id;
+    if ($eventId) {
+      \Drupal::service('myeventlane_metrics.service')->invalidateCache((int) $eventId);
+    }
+  }
+
+  // Invalidate metrics when commerce orders change.
+  if ($entityType === 'commerce_order') {
+    // Find events associated with order items.
+    if ($entity->hasField('order_items') && !$entity->get('order_items')->isEmpty()) {
+      $orderItems = $entity->get('order_items')->referencedEntities();
+      $eventIds = [];
+      foreach ($orderItems as $orderItem) {
+        if ($orderItem->hasField('field_target_event') && !$orderItem->get('field_target_event')->isEmpty()) {
+          $eventIds[] = (int) $orderItem->get('field_target_event')->target_id;
+        }
+      }
+      $metricsService = \Drupal::service('myeventlane_metrics.service');
+      foreach (array_unique($eventIds) as $eventId) {
+        $metricsService->invalidateCache($eventId);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function myeventlane_metrics_entity_insert(EntityInterface $entity): void {
+  myeventlane_metrics_entity_update($entity);
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function myeventlane_metrics_entity_delete(EntityInterface $entity): void {
+  myeventlane_metrics_entity_update($entity);
+}

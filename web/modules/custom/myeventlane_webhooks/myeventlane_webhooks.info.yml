@@ -1,0 +1,8 @@
+name: MyEventLane Webhooks
+type: module
+description: 'Webhook delivery system for event-driven integrations'
+core_version_requirement: ^11
+package: MyEventLane
+dependencies:
+  - drupal:node
+  - myeventlane_vendor:myeventlane_vendor

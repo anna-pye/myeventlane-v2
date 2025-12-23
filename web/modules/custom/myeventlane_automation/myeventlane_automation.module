@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Module hooks for MyEventLane Automation.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_cron().
+ */
+function myeventlane_automation_cron(): void {
+  if (\Drupal::hasService('myeventlane_automation.scheduler')) {
+    \Drupal::service('myeventlane_automation.scheduler')->scan();
+  }
+}

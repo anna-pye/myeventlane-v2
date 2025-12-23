@@ -289,6 +289,13 @@ function myeventlane_vendor_form_node_event_form_alter(array &$form, \Drupal\Cor
     return;
   }
   
+  // CRITICAL: If EventFormAlter has already created the wizard structure,
+  // do NOT add vendor tabs. The wizard provides its own navigation.
+  if (isset($form['mel_wizard'])) {
+    // Wizard is present, skip vendor tab system.
+    return;
+  }
+  
   // Debug: Log form structure before wrapping.
   $logger = \Drupal::logger('myeventlane_vendor');
   $top_level_keys = array_filter(array_keys($form), function($key) {

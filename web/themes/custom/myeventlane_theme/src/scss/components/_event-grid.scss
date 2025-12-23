@@ -1,0 +1,63 @@
+// ==========================================================================
+// Event Grid Component
+// ==========================================================================
+// Canonical grid layout for all Event listing Views (front page, taxonomy, search).
+// Single source of truth for event card grid layout.
+
+@use '../tokens/spacing' as space-tokens;
+@use '../tokens/breakpoints';
+
+.mel-event-grid {
+  display: grid !important;
+  // Humanitix-density: 4-column grid at desktop for optimal density
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: space-tokens.mel-space(4);
+  width: 100% !important;
+  box-sizing: border-box;
+
+  // Ensure grid items are equal width and don't overflow
+  > * {
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 1023px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Force grid in all container contexts
+// ---------------------------------------------------------------------------
+
+.mel-section .mel-event-grid,
+.mel-container .mel-event-grid,
+.view-content .mel-event-grid,
+.view .mel-event-grid {
+  display: grid !important;
+  // Humanitix-density: 4-column grid at desktop for optimal density
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: space-tokens.mel-space(4) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+
+  > * {
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  @media (max-width: 1023px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr !important;
+  }
+}

@@ -1,0 +1,70 @@
+{#
+  Event hero section
+  Displays image, title, date/time, location, state badge, and primary CTA
+#}
+<section class="event-hero">
+  {% if content.field_event_image %}
+    <div class="event-hero__image">
+      {{ content.field_event_image }}
+      <div class="event-hero__overlay"></div>
+    </div>
+  {% endif %}
+
+  <div class="event-hero__content">
+    <div class="event-hero__header">
+      {% if mel_event_state %}
+        <div class="event-hero__state-badge event-hero__state-badge--{{ mel_event_state }}">
+          {% if mel_event_state == 'scheduled' %}
+            Scheduled
+          {% elseif mel_event_state == 'live' %}
+            Live
+          {% elseif mel_event_state == 'sold_out' %}
+            Sold Out
+          {% elseif mel_event_state == 'cancelled' %}
+            Cancelled
+          {% elseif mel_event_state == 'ended' %}
+            Ended
+          {% else %}
+            Draft
+          {% endif %}
+        </div>
+      {% endif %}
+      
+      <h1 class="event-hero__title">{{ node.label }}</h1>
+    </div>
+
+    <div class="event-hero__meta">
+      {% if node.field_event_start.value %}
+        {% set start_date = node.field_event_start.value|date('U') %}
+        <time datetime="{{ node.field_event_start.value|date('c') }}" class="event-hero__date">
+          {{ node.field_event_start.value|date('l j F Y') }}
+          <span class="event-hero__time">
+            {{ node.field_event_start.value|date('g:ia') }}
+            {% if node.field_event_end.value %}
+              – {{ node.field_event_end.value|date('g:ia') }}
+            {% endif %}
+          </span>
+        </time>
+      {% endif %}
+
+      {% if mel_venue or mel_address %}
+        <div class="event-hero__location">
+          {% if mel_venue %}
+            <span class="event-hero__venue">{{ mel_venue }}</span>
+          {% endif %}
+          {% if mel_address %}
+            <span class="event-hero__address">{{ mel_address|split(',')|slice(0, 2)|join(', ') }}</span>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+    {% if node.hasField('field_event_summary') and not node.field_event_summary.isEmpty %}
+      <p class="event-hero__summary">
+        {{ node.field_event_summary.value }}
+      </p>
+    {% endif %}
+
+    {# CTA is now handled by event-cta template #}
+  </div>
+</section>

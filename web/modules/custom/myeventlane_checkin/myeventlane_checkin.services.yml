@@ -1,0 +1,4 @@
+services:
+  myeventlane_checkin.storage:
+    class: Drupal\myeventlane_checkin\Service\CheckInStorage
+    arguments: ['@myeventlane_attendee.repository_resolver']

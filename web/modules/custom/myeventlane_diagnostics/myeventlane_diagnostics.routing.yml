@@ -1,0 +1,29 @@
+myeventlane_diagnostics.ajax:
+  path: '/vendor/events/{event}/diagnostics'
+  defaults:
+    _controller: '\Drupal\myeventlane_diagnostics\Controller\DiagnosticsController::ajax'
+    _title: 'Event diagnostics'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_diagnostics\Access\DiagnosticsAccess::access'
+    event: '\d+'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+myeventlane_diagnostics.widget:
+  path: '/vendor/events/{event}/diagnostics/widget'
+  defaults:
+    _controller: '\Drupal\myeventlane_diagnostics\Controller\DiagnosticsController::ajax'
+    _title: 'Event diagnostics widget'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_diagnostics\Access\DiagnosticsAccess::access'
+    event: '\d+'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event

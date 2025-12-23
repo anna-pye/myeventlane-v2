@@ -1,0 +1,223 @@
+# Vendor Insights Dashboard
+myeventlane_reporting.vendor_insights:
+  path: '/vendor/insights'
+  defaults:
+    _controller: 'myeventlane_reporting.vendor_insights:dashboard'
+    _title: 'Insights'
+  requirements:
+    _permission: 'view vendor insights'
+    _custom_access: '\Drupal\myeventlane_reporting\Access\VendorReportingAccess::access'
+
+# Event Insights Overview
+myeventlane_reporting.event_insights.overview:
+  path: '/vendor/events/{event}/insights'
+  defaults:
+    _controller: 'myeventlane_reporting.event_insights:overview'
+    _title: 'Event Insights'
+  requirements:
+    _permission: 'view event insights'
+    _custom_access: '\Drupal\myeventlane_reporting\Controller\EventInsightsController::access'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+# Event Insights - Sales Tab
+myeventlane_reporting.event_insights.sales:
+  path: '/vendor/events/{event}/insights/sales'
+  defaults:
+    _controller: 'myeventlane_reporting.event_insights:sales'
+    _title: 'Sales Insights'
+  requirements:
+    _permission: 'view event insights'
+    _custom_access: '\Drupal\myeventlane_reporting\Controller\EventInsightsController::access'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+# Event Insights - Attendees Tab
+myeventlane_reporting.event_insights.attendees:
+  path: '/vendor/events/{event}/insights/attendees'
+  defaults:
+    _controller: 'myeventlane_reporting.event_insights:attendees'
+    _title: 'Attendee Insights'
+  requirements:
+    _permission: 'view event insights'
+    _custom_access: '\Drupal\myeventlane_reporting\Controller\EventInsightsController::access'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+# Event Insights - Check-ins Tab
+myeventlane_reporting.event_insights.checkins:
+  path: '/vendor/events/{event}/insights/checkins'
+  defaults:
+    _controller: 'myeventlane_reporting.event_insights:checkins'
+    _title: 'Check-in Insights'
+  requirements:
+    _permission: 'view event insights'
+    _custom_access: '\Drupal\myeventlane_reporting\Controller\EventInsightsController::access'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+# Event Insights - Traffic Tab (stub if pageview tracking not available)
+myeventlane_reporting.event_insights.traffic:
+  path: '/vendor/events/{event}/insights/traffic'
+  defaults:
+    _controller: 'myeventlane_reporting.event_insights:traffic'
+    _title: 'Traffic Insights'
+  requirements:
+    _permission: 'view event insights'
+    _custom_access: '\Drupal\myeventlane_reporting\Controller\EventInsightsController::access'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+# Chart Data Endpoints (JSON)
+myeventlane_reporting.chart.sales:
+  path: '/vendor/charts/sales/{event}'
+  defaults:
+    _controller: 'myeventlane_reporting.chart_data:sales'
+    _format: json
+  requirements:
+    _permission: 'view event insights'
+    _custom_access: '\Drupal\myeventlane_reporting\Controller\ChartDataController::access'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+myeventlane_reporting.chart.ticket_breakdown:
+  path: '/vendor/charts/ticket-breakdown/{event}'
+  defaults:
+    _controller: 'myeventlane_reporting.chart_data:ticketBreakdown'
+    _format: json
+  requirements:
+    _permission: 'view event insights'
+    _custom_access: '\Drupal\myeventlane_reporting\Controller\ChartDataController::access'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+myeventlane_reporting.chart.checkins:
+  path: '/vendor/charts/checkins/{event}'
+  defaults:
+    _controller: 'myeventlane_reporting.chart_data:checkins'
+    _format: json
+  requirements:
+    _permission: 'view event insights'
+    _custom_access: '\Drupal\myeventlane_reporting\Controller\ChartDataController::access'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+myeventlane_reporting.chart.revenue:
+  path: '/vendor/charts/revenue/{event}'
+  defaults:
+    _controller: 'myeventlane_reporting.chart_data:revenue'
+    _format: json
+  requirements:
+    _permission: 'view event insights'
+    _custom_access: '\Drupal\myeventlane_reporting\Controller\ChartDataController::access'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+# Export Centre
+myeventlane_reporting.export_centre:
+  path: '/vendor/exports'
+  defaults:
+    _controller: 'myeventlane_reporting.export_centre:list'
+    _title: 'Export Centre'
+  requirements:
+    _permission: 'request exports'
+    _custom_access: '\Drupal\myeventlane_reporting\Access\VendorReportingAccess::access'
+
+myeventlane_reporting.export.request_csv:
+  path: '/vendor/exports/request-csv/{event}'
+  defaults:
+    _controller: 'myeventlane_reporting.export_centre:requestCsv'
+    _title: 'Request CSV Export'
+  requirements:
+    _permission: 'request exports'
+    _custom_access: '\Drupal\myeventlane_reporting\Controller\ExportCentreController::access'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+myeventlane_reporting.export.request_sales:
+  path: '/vendor/exports/request-sales/{event}'
+  defaults:
+    _controller: 'myeventlane_reporting.export_centre:requestSales'
+    _title: 'Request Sales Export'
+  requirements:
+    _permission: 'request exports'
+    _custom_access: '\Drupal\myeventlane_reporting\Controller\ExportCentreController::access'
+  options:
+    parameters:
+      event:
+        type: entity:node
+        bundle:
+          - event
+
+# Admin Reporting Routes
+myeventlane_reporting.admin.overview:
+  path: '/admin/myeventlane/reports'
+  defaults:
+    _controller: 'myeventlane_reporting.admin_reports:overview'
+    _title: 'Platform Reports'
+  requirements:
+    _permission: 'view admin reports'
+
+myeventlane_reporting.admin.vendors:
+  path: '/admin/myeventlane/reports/vendors'
+  defaults:
+    _controller: 'myeventlane_reporting.admin_reports:vendors'
+    _title: 'Vendor Reports'
+  requirements:
+    _permission: 'view admin reports'
+
+myeventlane_reporting.admin.events:
+  path: '/admin/myeventlane/reports/events'
+  defaults:
+    _controller: 'myeventlane_reporting.admin_reports:events'
+    _title: 'Event Reports'
+  requirements:
+    _permission: 'view admin reports'
+
+myeventlane_reporting.admin.finance:
+  path: '/admin/myeventlane/reports/finance'
+  defaults:
+    _controller: 'myeventlane_reporting.admin_reports:finance'
+    _title: 'Finance Reports'
+  requirements:
+    _permission: 'view admin reports'

@@ -31,6 +31,7 @@ services:
       - '@myeventlane_vendor.service.rsvp_stats'
       - '@myeventlane_vendor.service.category_audience'
       - '@myeventlane_vendor.service.boost_status'
+      - '@myeventlane_metrics.service'
 
   # Vendor console controllers as services for DI.
   myeventlane_vendor.controller.vendor_dashboard:

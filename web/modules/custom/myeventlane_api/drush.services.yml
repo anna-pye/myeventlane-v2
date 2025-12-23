@@ -1,0 +1,8 @@
+services:
+  myeventlane_api.commands:
+    class: Drupal\myeventlane_api\Commands\ApiCommands
+    arguments:
+      - '@entity_type.manager'
+      - '@myeventlane_api.authentication'
+    tags:
+      - { name: drush.command }

@@ -370,6 +370,18 @@ class RsvpPublicForm extends FormBase {
       $form_state->setErrorByName('email', $this->t('Please enter a valid email address.'));
     }
 
+    // Check capacity.
+    $event = $this->getEventFromRoute();
+    if ($event && \Drupal::hasService('myeventlane_capacity.service')) {
+      try {
+        $capacityService = \Drupal::service('myeventlane_capacity.service');
+        $capacityService->assertCanBook($event, $guests);
+      }
+      catch (\Drupal\myeventlane_capacity\Exception\CapacityExceededException $e) {
+        $form_state->setErrorByName('', $e->getMessage());
+      }
+    }
+
     // Validate donation amount if donation toggle is enabled.
     $donationToggle = $form_state->getValue('donation_toggle');
     if ($donationToggle) {

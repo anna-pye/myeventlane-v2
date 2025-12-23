@@ -1,13 +1,10 @@
 {#
-/**
- * @file
- * Vendor console override for Event node add/edit form.
- *
- * Important:
- * - Do NOT manually render individual fields here.
- * - The wizard structure is built in PHP (myeventlane_event).
- * - Twig only prints the wizard container + actions + required hidden tokens.
- */
+  Vendor Event form wrapper.
+  PHP builds the wizard structure.
+  Twig only prints it.
+  
+  If form.mel_wizard exists, it contains the full wizard layout (stepper, content, diagnostics).
+  Otherwise, render the form normally (fallback for non-wizard contexts).
 #}
 
 <form{{ attributes.addClass('mel-event-form-page') }}>
@@ -15,20 +12,23 @@
   {{ form.form_token }}
   {{ form.form_id }}
 
-  {# Wizard wrapper created by PHP alter. #}
+  {# Wizard structure takes precedence - render it if present #}
   {% if form.mel_wizard %}
+    {# Render the wizard structure built by EventFormAlter #}
     {{ form.mel_wizard }}
+  {% else %}
+    {# No wizard - render form fields normally (shouldn't happen in vendor context, but fallback) #}
+    {{ form|without(
+      'form_build_id',
+      'form_token',
+      'form_id',
+      'actions'
+    ) }}
   {% endif %}
 
   {% if form.actions %}
-    {{ form.actions }}
+    <div class="mel-event-form__actions-wrapper">
+      {{ form.actions }}
+    </div>
   {% endif %}
-
-  {# Render any remaining system fields that must be present. #}
-  {{ form|without(
-    'form_build_id', 'form_token', 'form_id',
-    'mel_wizard',
-    'wizard_current_step', 'wizard_target_step',
-    'actions'
-  ) }}
 </form>

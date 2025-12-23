@@ -164,6 +164,9 @@ final class EventWizardForm extends FormBase {
         'id' => 'event-wizard-wrapper',
       ],
     ];
+    
+    // Set form ID attribute for JavaScript targeting.
+    $form['#attributes']['id'] = 'event-wizard-form';
 
     // Step navigation/stepper.
     $form['wizard']['navigation'] = [

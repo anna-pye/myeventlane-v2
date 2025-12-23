@@ -102,37 +102,119 @@ function _myeventlane_location_alter_event_form(array &$form, FormStateInterface
     $settings
   );
 
-  // Only alter field_location if it exists.
-  if (!isset($form['field_location'])) {
+  // Find field_location wherever it exists in the form (might be at root or moved to wizard).
+  // Check root first (normal form).
+  $field_location_ref = NULL;
+  if (isset($form['field_location'])) {
+    $field_location_ref = &$form['field_location'];
+  }
+  // Check new wizard structure (EventWizardForm).
+  elseif (isset($form['wizard']['content']['step_content']['location_fields']['field_location'])) {
+    $field_location_ref = &$form['wizard']['content']['step_content']['location_fields']['field_location'];
+  }
+  // Check old wizard structure (EventFormAlter).
+  elseif (isset($form['mel_wizard']['layout']['content'])) {
+    foreach ($form['mel_wizard']['layout']['content'] as $step_key => &$step_content) {
+      if (is_array($step_content) && isset($step_content['section']['field_location'])) {
+        $field_location_ref = &$step_content['section']['field_location'];
+        break;
+      }
+    }
+  }
+  
+  if (!$field_location_ref) {
     // Still attach library even if field doesn't exist (might be added later).
     $form['#attached']['library'][] = 'myeventlane_location/address_autocomplete';
     return;
   }
 
-  // NOTE: The AddressAutocompleteWidget already adds:
-  // - A search field with class 'myeventlane-location-address-search'
-  // - A map preview container with class 'myeventlane-location-map-preview'
-  // - Hidden latitude/longitude fields
-  // - The widget wrapper class 'myeventlane-location-address-widget'
-  // So we don't need to add these again here.
-  
-  // However, we still need to:
-  // 1. Ensure the widget has the wrapper class (widget should add it, but double-check)
-  if (!isset($form['field_location']['#attributes'])) {
-    $form['field_location']['#attributes'] = [];
+  // Ensure the widget has the wrapper class.
+  if (!isset($field_location_ref['#attributes'])) {
+    $field_location_ref['#attributes'] = [];
   }
-  if (!isset($form['field_location']['#attributes']['class'])) {
-    $form['field_location']['#attributes']['class'] = [];
+  if (!isset($field_location_ref['#attributes']['class'])) {
+    $field_location_ref['#attributes']['class'] = [];
   }
-  if (!in_array('myeventlane-location-address-widget', $form['field_location']['#attributes']['class'])) {
-    $form['field_location']['#attributes']['class'][] = 'myeventlane-location-address-widget';
+  if (!in_array('myeventlane-location-address-widget', $field_location_ref['#attributes']['class'])) {
+    $field_location_ref['#attributes']['class'][] = 'myeventlane-location-address-widget';
   }
   
-  // 2. Update field_location title to be more descriptive (if widget hasn't already)
-  if (isset($form['field_location']['#title']) && $form['field_location']['#title'] === 'Location') {
-    $form['field_location']['#title'] = t('Address Details');
-    if (!isset($form['field_location']['#description'])) {
-      $form['field_location']['#description'] = t('Use the search field above to find and select an address. The address fields below will be automatically filled.');
+  // Add the address search field if it doesn't exist (in case widget isn't using AddressAutocompleteWidget).
+  // Check if address_search already exists in any widget delta.
+  $has_search_field = FALSE;
+  if (isset($field_location_ref['widget']) && is_array($field_location_ref['widget'])) {
+    foreach ($field_location_ref['widget'] as $delta => $widget_element) {
+      if (is_numeric($delta) && isset($widget_element['address_search'])) {
+        $has_search_field = TRUE;
+        break;
+      }
+    }
+  }
+  
+  // If no search field exists, add it to the first widget delta (delta 0).
+  if (!$has_search_field && isset($field_location_ref['widget'][0])) {
+    $field_location_ref['widget'][0]['address_search'] = [
+      '#type' => 'textfield',
+      '#title' => t('Search for address or venue'),
+      '#description' => t('Start typing to search for an address. Select from the suggestions to populate the address fields.'),
+      '#attributes' => [
+        'class' => ['myeventlane-location-address-search'],
+        'autocomplete' => 'off',
+        'placeholder' => t('Type address or venue name...'),
+      ],
+      '#weight' => -10,
+    ];
+    
+    // Add hidden latitude/longitude fields if they don't exist.
+    if (!isset($field_location_ref['widget'][0]['latitude'])) {
+      $field_location_ref['widget'][0]['latitude'] = [
+        '#type' => 'hidden',
+        '#attributes' => [
+          'class' => ['myeventlane-location-latitude'],
+        ],
+      ];
+    }
+    
+    if (!isset($field_location_ref['widget'][0]['longitude'])) {
+      $field_location_ref['widget'][0]['longitude'] = [
+        '#type' => 'hidden',
+        '#attributes' => [
+          'class' => ['myeventlane-location-longitude'],
+        ],
+      ];
+    }
+    
+    // Add map preview container.
+    if (!isset($field_location_ref['widget'][0]['map_preview'])) {
+      $field_location_ref['widget'][0]['map_preview'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => ['myeventlane-location-map-preview'],
+          'style' => 'width: 100%; height: 200px; margin-top: 1em; border: 1px solid #ccc; display: none;',
+        ],
+        '#weight' => 100,
+      ];
+    }
+    
+    // Set default country to Australia if address field exists.
+    if (isset($field_location_ref['widget'][0]['address'])) {
+      if (isset($field_location_ref['widget'][0]['address']['country_code'])) {
+        $country_element = &$field_location_ref['widget'][0]['address']['country_code'];
+        if (isset($country_element['#options']) && isset($country_element['#options']['AU'])) {
+          // Set default value to AU if not already set.
+          if (!isset($country_element['#default_value']) || empty($country_element['#default_value'])) {
+            $country_element['#default_value'] = 'AU';
+          }
+        }
+      }
+    }
+  }
+  
+  // Update field_location title to be more descriptive.
+  if (isset($field_location_ref['#title']) && $field_location_ref['#title'] === 'Location') {
+    $field_location_ref['#title'] = t('Address Details');
+    if (!isset($field_location_ref['#description'])) {
+      $field_location_ref['#description'] = t('Use the search field above to find and select an address. The address fields below will be automatically filled.');
     }
   }
 
@@ -140,12 +222,29 @@ function _myeventlane_location_alter_event_form(array &$form, FormStateInterface
   // We'll use hidden form elements instead that are populated by JavaScript.
   $node = $form_state->getFormObject()->getEntity();
   
-  // Hide the actual coordinate fields if they exist in the form.
+  // Hide the actual coordinate fields if they exist in the form - they're auto-populated.
+  // These fields should not be visible or editable by users.
   if (isset($form['field_location_latitude'])) {
     $form['field_location_latitude']['#access'] = FALSE;
+    // Also hide any widgets within the field
+    if (isset($form['field_location_latitude']['widget'])) {
+      foreach ($form['field_location_latitude']['widget'] as $delta => &$widget_element) {
+        if (is_numeric($delta) && is_array($widget_element)) {
+          $widget_element['#access'] = FALSE;
+        }
+      }
+    }
   }
   if (isset($form['field_location_longitude'])) {
     $form['field_location_longitude']['#access'] = FALSE;
+    // Also hide any widgets within the field
+    if (isset($form['field_location_longitude']['widget'])) {
+      foreach ($form['field_location_longitude']['widget'] as $delta => &$widget_element) {
+        if (is_numeric($delta) && is_array($widget_element)) {
+          $widget_element['#access'] = FALSE;
+        }
+      }
+    }
   }
   
   // Add our own hidden fields for coordinates (these will be populated by JavaScript).
