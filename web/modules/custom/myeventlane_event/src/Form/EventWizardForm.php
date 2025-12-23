@@ -383,6 +383,8 @@ final class EventWizardForm extends FormBase {
         '#default_value' => $default_category,
         '#required' => TRUE,
         '#tags' => FALSE,
+        '#size' => 60,
+        '#placeholder' => $this->t('Start typing to search...'),
         '#attributes' => [
           'class' => ['mel-form-field', 'form-autocomplete'],
         ],
