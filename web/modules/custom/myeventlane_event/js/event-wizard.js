@@ -9,7 +9,7 @@
  *   - Rebind change/blur listeners after AJAX rebuilds.
  */
 
-(function (Drupal, once) {
+(function (Drupal, once, drupalSettings) {
   'use strict';
 
   Drupal.behaviors.melEventWizard = {
@@ -103,25 +103,23 @@
      * Initialize autocomplete fields after form load or AJAX rebuild.
      */
     initializeAutocomplete(form) {
-      // Find all autocomplete inputs in the form.
-      const autocompleteInputs = form.querySelectorAll('input.form-autocomplete[data-autocomplete-path]');
-      
-      autocompleteInputs.forEach((input) => {
-        // Check if autocomplete is already initialized.
-        if (input.hasAttribute('data-autocomplete-processed')) {
-          return;
-        }
-        
-        // Trigger Drupal autocomplete behavior if available.
-        if (typeof Drupal !== 'undefined' && Drupal.autocomplete && Drupal.autocomplete.attach) {
-          try {
-            Drupal.autocomplete.attach(input);
-            input.setAttribute('data-autocomplete-processed', 'true');
-          } catch (e) {
-            console.warn('Failed to initialize autocomplete for input:', e);
+      // Drupal's autocomplete behavior uses 'once' to prevent double initialization.
+      // After AJAX, we need to remove the 'autocomplete' marker and re-attach behaviors.
+      if (typeof Drupal !== 'undefined' && Drupal.behaviors && Drupal.behaviors.autocomplete) {
+        // Remove the 'autocomplete' once marker from all inputs in the form.
+        // This allows the behavior to re-attach after AJAX.
+        const autocompleteInputs = form.querySelectorAll('input.form-autocomplete');
+        autocompleteInputs.forEach((input) => {
+          // Remove the once marker if it exists.
+          if (typeof once !== 'undefined' && once.remove) {
+            once.remove('autocomplete', input);
           }
-        }
-      });
+        });
+        
+        // Re-attach the autocomplete behavior.
+        // This will use once() internally to prevent double initialization.
+        Drupal.behaviors.autocomplete.attach(form, drupalSettings);
+      }
     },
     
     /**
@@ -263,4 +261,4 @@
     };
   }
 
-})(Drupal, once);
+})(Drupal, once, drupalSettings);
