@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\myeventlane_event\Form;
 
 use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -443,7 +444,19 @@ final class EventWizardForm extends FormBase {
       $start_default = NULL;
       if (!$event->get('field_event_start')->isEmpty()) {
         $start_value = $event->get('field_event_start')->value;
-        $start_default = $start_value ? date('Y-m-d\TH:i:s', strtotime($start_value)) : NULL;
+        if ($start_value) {
+          try {
+            $start_default = DrupalDateTime::createFromFormat('Y-m-d\TH:i:s', $start_value);
+            if (!$start_default) {
+              // Try alternative format.
+              $start_default = new DrupalDateTime($start_value);
+            }
+          }
+          catch (\Exception $e) {
+            $this->logger->warning('Failed to parse start date: @value', ['@value' => $start_value]);
+            $start_default = NULL;
+          }
+        }
       }
 
       $form['wizard']['content']['step_content']['section']['date_time']['field_event_start'] = [
@@ -452,6 +465,7 @@ final class EventWizardForm extends FormBase {
         '#required' => TRUE,
         '#default_value' => $start_default,
         '#date_time_element' => 'datetime',
+        '#date_time_format' => 'Y-m-d H:i:s',
         '#attributes' => ['class' => ['mel-form-field']],
       ];
     }
@@ -461,7 +475,19 @@ final class EventWizardForm extends FormBase {
       $end_default = NULL;
       if (!$event->get('field_event_end')->isEmpty()) {
         $end_value = $event->get('field_event_end')->value;
-        $end_default = $end_value ? date('Y-m-d\TH:i:s', strtotime($end_value)) : NULL;
+        if ($end_value) {
+          try {
+            $end_default = DrupalDateTime::createFromFormat('Y-m-d\TH:i:s', $end_value);
+            if (!$end_default) {
+              // Try alternative format.
+              $end_default = new DrupalDateTime($end_value);
+            }
+          }
+          catch (\Exception $e) {
+            $this->logger->warning('Failed to parse end date: @value', ['@value' => $end_value]);
+            $end_default = NULL;
+          }
+        }
       }
 
       $form['wizard']['content']['step_content']['section']['date_time']['field_event_end'] = [
@@ -470,6 +496,7 @@ final class EventWizardForm extends FormBase {
         '#required' => FALSE,
         '#default_value' => $end_default,
         '#date_time_element' => 'datetime',
+        '#date_time_format' => 'Y-m-d H:i:s',
         '#attributes' => ['class' => ['mel-form-field']],
       ];
     }
@@ -540,6 +567,7 @@ final class EventWizardForm extends FormBase {
           'autocomplete' => 'off',
           'placeholder' => $this->t('Type address or venue name...'),
           'data-address-search' => 'true',
+          'id' => 'edit-field-location-address-search',
         ],
         '#weight' => -1,
         '#states' => [
@@ -1199,35 +1227,71 @@ final class EventWizardForm extends FormBase {
     // Save dates.
     if (isset($values['date_time']['field_event_start']) && $event->hasField('field_event_start')) {
       $start_value = $values['date_time']['field_event_start'];
-      // Handle datetime widget format.
-      if (is_array($start_value)) {
+      $start_string = NULL;
+      
+      // Handle DrupalDateTime object.
+      if ($start_value instanceof DrupalDateTime) {
+        $start_string = $start_value->format('Y-m-d\TH:i:s');
+      }
+      // Handle datetime widget format (array with date/time).
+      elseif (is_array($start_value)) {
         if (isset($start_value['date']) && isset($start_value['time'])) {
-          $start_value = $start_value['date'] . 'T' . $start_value['time'] . ':00';
+          $start_string = $start_value['date'] . 'T' . $start_value['time'] . ':00';
         }
         elseif (isset($start_value['value'])) {
-          $start_value = $start_value['value'];
+          $start_string = $start_value['value'];
+        }
+        elseif (isset($start_value['date'])) {
+          // Date only, use midnight.
+          $start_string = $start_value['date'] . 'T00:00:00';
         }
       }
-      // Handle string format (Y-m-d\TH:i:s).
-      if (is_string($start_value) && !empty($start_value)) {
-        $event->set('field_event_start', $start_value);
+      // Handle string format (Y-m-d\TH:i:s or Y-m-d H:i:s).
+      elseif (is_string($start_value) && !empty($start_value)) {
+        // Normalize format.
+        $start_string = str_replace(' ', 'T', $start_value);
+        if (strlen($start_string) === 10) {
+          $start_string .= 'T00:00:00';
+        }
+      }
+      
+      if ($start_string) {
+        $event->set('field_event_start', $start_string);
       }
     }
 
     if (isset($values['date_time']['field_event_end']) && $event->hasField('field_event_end')) {
       $end_value = $values['date_time']['field_event_end'];
-      // Handle datetime widget format.
-      if (is_array($end_value)) {
+      $end_string = NULL;
+      
+      // Handle DrupalDateTime object.
+      if ($end_value instanceof DrupalDateTime) {
+        $end_string = $end_value->format('Y-m-d\TH:i:s');
+      }
+      // Handle datetime widget format (array with date/time).
+      elseif (is_array($end_value)) {
         if (isset($end_value['date']) && isset($end_value['time'])) {
-          $end_value = $end_value['date'] . 'T' . $end_value['time'] . ':00';
+          $end_string = $end_value['date'] . 'T' . $end_value['time'] . ':00';
         }
         elseif (isset($end_value['value'])) {
-          $end_value = $end_value['value'];
+          $end_string = $end_value['value'];
+        }
+        elseif (isset($end_value['date'])) {
+          // Date only, use midnight.
+          $end_string = $end_value['date'] . 'T00:00:00';
         }
       }
-      // Handle string format (Y-m-d\TH:i:s).
-      if (is_string($end_value) && !empty($end_value)) {
-        $event->set('field_event_end', $end_value);
+      // Handle string format (Y-m-d\TH:i:s or Y-m-d H:i:s).
+      elseif (is_string($end_value) && !empty($end_value)) {
+        // Normalize format.
+        $end_string = str_replace(' ', 'T', $end_value);
+        if (strlen($end_string) === 10) {
+          $end_string .= 'T00:00:00';
+        }
+      }
+      
+      if ($end_string) {
+        $event->set('field_event_end', $end_string);
       }
       else {
         // Clear end date if empty.
@@ -1447,7 +1511,7 @@ final class EventWizardForm extends FormBase {
       $this->saveStepData($event, $current_step, $values, $form_state);
       $event->save();
       $form_state->setRebuild(TRUE);
-      $this->messenger->addMessage($this->t('Draft saved.'));
+      $this->messenger()->addMessage($this->t('Draft saved.'));
       return;
     }
 
@@ -1462,7 +1526,7 @@ final class EventWizardForm extends FormBase {
       $event->setPublished(TRUE);
       $event->save();
 
-      $this->messenger->addMessage($this->t('Event published successfully.'));
+      $this->messenger()->addMessage($this->t('Event published successfully.'));
       $form_state->setRedirect('entity.node.canonical', ['node' => $event->id()]);
       return;
     }
