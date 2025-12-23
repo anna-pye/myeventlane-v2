@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\myeventlane_event\Form;
 
+use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -11,13 +12,16 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\node\NodeInterface;
 use Drupal\taxonomy\TermInterface;
+use Drupal\myeventlane_location\Service\LocationProviderManager;
+use Drupal\myeventlane_location\Service\MapKitTokenGenerator;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Event Creation Wizard Form.
- * 
- * Multi-step wizard for creating/editing events at /vendor/events/wizard
- * 
+ *
+ * Multi-step wizard for creating/editing events at /vendor/events/wizard.
+ *
  * Steps:
  * 1. Basics - title, category, tags, event type
  * 2. When & Where - start/end date, venue name, address, lat/lng, place_id
@@ -52,6 +56,10 @@ final class EventWizardForm extends FormBase {
     private readonly EntityTypeManagerInterface $entityTypeManager,
     RouteMatchInterface $routeMatch,
     private readonly AccountProxyInterface $currentUser,
+    private readonly LocationProviderManager $locationProviderManager,
+    private readonly LoggerInterface $logger,
+    private readonly DateFormatterInterface $dateFormatter,
+    private readonly ?MapKitTokenGenerator $mapkitTokenGenerator = NULL,
   ) {
     $this->routeMatch = $routeMatch;
   }
@@ -64,6 +72,10 @@ final class EventWizardForm extends FormBase {
       $container->get('entity_type.manager'),
       $container->get('current_route_match'),
       $container->get('current_user'),
+      $container->get('myeventlane_location.provider_manager'),
+      $container->get('logger.factory')->get('myeventlane_event'),
+      $container->get('date.formatter'),
+      $container->has('myeventlane_location.mapkit_token_generator') ? $container->get('myeventlane_location.mapkit_token_generator') : NULL,
     );
   }
 
@@ -92,10 +104,11 @@ final class EventWizardForm extends FormBase {
 
     // Create new draft event.
     $storage = $this->entityTypeManager->getStorage('node');
+    // Create draft event.
     $event = $storage->create([
       'type' => 'event',
       'title' => 'New Event',
-      'status' => 0, // Draft
+      'status' => 0,
       'uid' => $this->currentUser->id(),
     ]);
     $event->save();
@@ -120,23 +133,20 @@ final class EventWizardForm extends FormBase {
 
     // Attach wizard library.
     $form['#attached']['library'][] = 'myeventlane_event/event_wizard';
-    
+
     // Attach address autocomplete library and settings.
     $form['#attached']['library'][] = 'myeventlane_location/address_autocomplete';
-    
+
     // Add drupalSettings for address autocomplete.
-    $provider_manager = \Drupal::service('myeventlane_location.provider_manager');
-    $settings = $provider_manager->getFrontendSettings();
-    
+    $settings = $this->locationProviderManager->getFrontendSettings();
+
     // For Apple Maps, generate token server-side.
-    if ($settings['provider'] === 'apple_maps') {
-      $token_generator = \Drupal::service('myeventlane_location.mapkit_token_generator');
-      $token = $token_generator->generateToken();
+    if ($settings['provider'] === 'apple_maps' && $this->mapkitTokenGenerator !== NULL) {
+      $token = $this->mapkitTokenGenerator->generateToken();
       if (!empty($token)) {
         $settings['apple_maps_token'] = $token;
       }
     }
-    
     if (!isset($form['#attached']['drupalSettings'])) {
       $form['#attached']['drupalSettings'] = [];
     }
@@ -169,7 +179,7 @@ final class EventWizardForm extends FormBase {
     foreach (self::STEPS as $step_id => $step_info) {
       $is_active = ($step_id === $current_step);
       $is_completed = $this->isStepCompleted($event, $step_id);
-      
+
       $form['wizard']['navigation']['steps'][$step_id] = [
         '#type' => 'container',
         '#attributes' => [
@@ -297,7 +307,8 @@ final class EventWizardForm extends FormBase {
       'basics' => !$event->getTitle()->isEmpty() && $event->hasField('field_event_type') && !$event->get('field_event_type')->isEmpty(),
       'when_where' => $event->hasField('field_event_start') && !$event->get('field_event_start')->isEmpty(),
       'branding' => $event->hasField('field_event_image') && !$event->get('field_event_image')->isEmpty(),
-      'tickets_capacity' => TRUE, // Always show as available
+      // Always show as available.
+      'tickets_capacity' => TRUE,
       'content' => $event->hasField('body') && !$event->get('body')->isEmpty(),
       'policies_accessibility' => $event->hasField('field_refund_policy') && !$event->get('field_refund_policy')->isEmpty(),
       'review' => FALSE,
@@ -553,7 +564,7 @@ final class EventWizardForm extends FormBase {
       $existing_lat = $event->hasField('field_location_latitude') && !$event->get('field_location_latitude')->isEmpty()
         ? $event->get('field_location_latitude')->value
         : NULL;
-      
+
       $form['wizard']['content']['step_content']['section']['location']['field_location_latitude'] = [
         '#type' => 'hidden',
         '#default_value' => $existing_lat,
@@ -565,7 +576,7 @@ final class EventWizardForm extends FormBase {
       $existing_lng = $event->hasField('field_location_longitude') && !$event->get('field_location_longitude')->isEmpty()
         ? $event->get('field_location_longitude')->value
         : NULL;
-      
+
       $form['wizard']['content']['step_content']['section']['location']['field_location_longitude'] = [
         '#type' => 'hidden',
         '#default_value' => $existing_lng,
@@ -577,7 +588,7 @@ final class EventWizardForm extends FormBase {
       $existing_place_id = $event->hasField('field_location_place_id') && !$event->get('field_location_place_id')->isEmpty()
         ? $event->get('field_location_place_id')->value
         : '';
-      
+
       $form['wizard']['content']['step_content']['section']['location']['field_location_place_id'] = [
         '#type' => 'hidden',
         '#default_value' => $existing_place_id,
@@ -635,7 +646,8 @@ final class EventWizardForm extends FormBase {
         '#default_value' => $default_image,
         '#upload_validators' => [
           'file_validate_extensions' => ['png gif jpg jpeg webp'],
-          'file_validate_size' => [5242880], // 5MB
+          // 5MB max file size.
+          'file_validate_size' => [5242880],
         ],
         '#attributes' => ['class' => ['mel-form-field']],
       ];
@@ -830,7 +842,7 @@ final class EventWizardForm extends FormBase {
       '#title' => $this->t('When & Where'),
     ];
     if ($event->hasField('field_event_start') && !$event->get('field_event_start')->isEmpty()) {
-      $start_date = \Drupal::service('date.formatter')->format(strtotime($event->get('field_event_start')->value), 'custom', 'l j F Y g:ia');
+      $start_date = $this->dateFormatter->format(strtotime($event->get('field_event_start')->value), 'custom', 'l j F Y g:ia');
       $summary['when_where']['start'] = [
         '#markup' => '<p><strong>' . $this->t('Start:') . '</strong> ' . $start_date . '</p>',
       ];
@@ -950,7 +962,7 @@ final class EventWizardForm extends FormBase {
         $element[$component]['#attributes']['class'][] = 'mel-address-component';
         $element[$component]['#attributes']['data-mel-address-component'] = $component;
       }
-      
+
       if (isset($element['widget']) && is_array($element['widget'])) {
         foreach ($element['widget'] as $delta => &$widget_element) {
           if (is_numeric($delta) && isset($widget_element['address'][$component])) {
@@ -1004,7 +1016,7 @@ final class EventWizardForm extends FormBase {
    */
   private function validateBasicsStep(array &$form, FormStateInterface $form_state, NodeInterface $event): void {
     $values = $form_state->getValues();
-    
+
     if (empty($values['title'])) {
       $form_state->setErrorByName('title', $this->t('Event title is required.'));
     }
@@ -1061,7 +1073,7 @@ final class EventWizardForm extends FormBase {
    */
   private function validateTicketsCapacityStep(array &$form, FormStateInterface $form_state, NodeInterface $event): void {
     $values = $form_state->getValues();
-    
+
     // Validate capacity is positive if set.
     if (isset($values['field_capacity']) && $values['field_capacity'] !== '' && (int) $values['field_capacity'] < 0) {
       $form_state->setErrorByName('field_capacity', $this->t('Capacity must be a positive number or zero.'));
@@ -1277,11 +1289,13 @@ final class EventWizardForm extends FormBase {
     if (isset($values['field_event_image']) && $event->hasField('field_event_image')) {
       $fids = is_array($values['field_event_image']) ? $values['field_event_image'] : [$values['field_event_image']];
       $fids = array_filter($fids);
-      
+
       if (!empty($fids)) {
         // Mark files as permanent.
+        $file_storage = $this->entityTypeManager->getStorage('file');
         foreach ($fids as $fid) {
-          $file = \Drupal::entityTypeManager()->getStorage('file')->load($fid);
+          /** @var \Drupal\file\FileInterface|null $file */
+          $file = $file_storage->load($fid);
           if ($file) {
             $file->setPermanent();
             $file->save();
@@ -1380,8 +1394,9 @@ final class EventWizardForm extends FormBase {
     if (isset($form['wizard'])) {
       return $form['wizard'];
     }
-    
-    \Drupal::logger('myeventlane_event')->error('AJAX callback: wizard container not found, returning full form');
+
+    // Fallback if wizard container not found.
+    $this->logger->error('AJAX callback: wizard container not found, returning full form');
     return $form;
   }
 
@@ -1409,7 +1424,7 @@ final class EventWizardForm extends FormBase {
       $this->saveStepData($event, $current_step, $values, $form_state);
       $event->save();
       $form_state->setRebuild(TRUE);
-      \Drupal::messenger()->addMessage($this->t('Draft saved.'));
+      $this->messenger->addMessage($this->t('Draft saved.'));
       return;
     }
 
@@ -1423,8 +1438,8 @@ final class EventWizardForm extends FormBase {
       // Publish event and redirect.
       $event->setPublished(TRUE);
       $event->save();
-      
-      \Drupal::messenger()->addMessage($this->t('Event published successfully.'));
+
+      $this->messenger->addMessage($this->t('Event published successfully.'));
       $form_state->setRedirect('entity.node.canonical', ['node' => $event->id()]);
       return;
     }
@@ -1440,7 +1455,7 @@ final class EventWizardForm extends FormBase {
   private function getNextStep(string $current_step): string {
     $step_order = array_keys(self::STEPS);
     $current_index = array_search($current_step, $step_order, TRUE);
-    
+
     if ($current_index === FALSE || $current_index === count($step_order) - 1) {
       return $current_step;
     }
@@ -1454,7 +1469,7 @@ final class EventWizardForm extends FormBase {
   private function getPreviousStep(string $current_step): string {
     $step_order = array_keys(self::STEPS);
     $current_index = array_search($current_step, $step_order, TRUE);
-    
+
     if ($current_index === FALSE || $current_index === 0) {
       return 'basics';
     }
