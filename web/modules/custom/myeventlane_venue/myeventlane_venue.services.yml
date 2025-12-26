@@ -1,0 +1,4 @@
+services:
+  myeventlane_venue.autocomplete:
+    class: Drupal\myeventlane_venue\Service\VenueAutocompleteService
+    arguments: ['@entity_type.manager', '@current_user']

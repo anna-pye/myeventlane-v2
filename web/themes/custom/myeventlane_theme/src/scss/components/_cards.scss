@@ -174,3 +174,57 @@
 .mel-card-feature-content {
   flex: 1;
 }
+
+// ---------------------------------------------------------------------------
+// Wizard Section Cards
+// ---------------------------------------------------------------------------
+
+.mel-card--wizard-section {
+  background: colors.$mel-color-surface;
+  border-radius: radii.$mel-radius-lg;
+  box-shadow: shadows.$mel-shadow-md;
+  padding: 0;
+  overflow: hidden;
+  margin-bottom: spacing.mel-space(4);
+
+  @include breakpoints.mel-break(sm, max) {
+    border-radius: radii.$mel-radius-md;
+    margin-bottom: spacing.mel-space(3);
+  }
+
+  .mel-card__header {
+    padding: spacing.mel-space(5) spacing.mel-space(5) spacing.mel-space(4);
+    border-bottom: 1px solid colors.$mel-color-border;
+
+    @include breakpoints.mel-break(sm, max) {
+      padding: spacing.mel-space(4) spacing.mel-space(4) spacing.mel-space(3);
+    }
+  }
+
+  .mel-card__title {
+    font-size: typography.mel-font-size(xl);
+    font-weight: typography.$mel-font-bold;
+    margin: 0 0 spacing.mel-space(2) 0;
+    color: colors.$mel-color-text;
+    line-height: typography.$mel-leading-tight;
+
+    @include breakpoints.mel-break(sm, max) {
+      font-size: typography.mel-font-size(lg);
+    }
+  }
+
+  .mel-card__help {
+    color: colors.$mel-color-text-muted;
+    font-size: typography.mel-font-size(base);
+    line-height: typography.$mel-leading-relaxed;
+    margin: 0;
+  }
+
+  .mel-card__body {
+    padding: spacing.mel-space(5);
+
+    @include breakpoints.mel-break(sm, max) {
+      padding: spacing.mel-space(4);
+    }
+  }
+}

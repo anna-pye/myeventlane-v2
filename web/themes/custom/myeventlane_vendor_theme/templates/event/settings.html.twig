@@ -35,7 +35,7 @@
   </div>
   <div class="mel-card__body">
     <div class="mel-list mel-list--actions">
-      <a class="mel-list__item mel-list__item--link" href="{{ path('entity.node.edit_form', {'node': event.id()}) }}">
+      <a class="mel-list__item mel-list__item--link" href="{{ path('myeventlane_event.wizard.edit', {'node': event.id()}) }}">
         <span class="mel-list__icon">✏️</span>
         <span class="mel-list__text">{{ 'Edit Event Details'|t }}</span>
         <span class="mel-list__arrow">→</span>
@@ -63,7 +63,7 @@
 <div class="mel-card mel-mb-lg">
   <div class="mel-card__header">
     <div class="mel-card__title">{{ 'Event Information'|t }}</div>
-    <a href="{{ path('entity.node.edit_form', {'node': event.id()}) }}" class="mel-btn mel-btn--sm mel-btn--ghost">{{ 'Edit'|t }}</a>
+    <a href="{{ path('myeventlane_event.wizard.edit', {'node': event.id()}) }}" class="mel-btn mel-btn--sm mel-btn--ghost">{{ 'Edit'|t }}</a>
   </div>
   <div class="mel-card__body">
     <dl class="mel-dl">
@@ -103,7 +103,7 @@
             <strong>{{ 'Unpublish Event'|t }}</strong>
             <p class="mel-text--muted mel-text--sm">{{ 'Hide this event from the public. You can republish it later.'|t }}</p>
           </div>
-          <a href="{{ path('entity.node.edit_form', {'node': event.id()}) }}" class="mel-btn mel-btn--sm mel-btn--ghost mel-btn--danger">{{ 'Unpublish'|t }}</a>
+          <a href="{{ path('myeventlane_event.wizard.edit', {'node': event.id()}) }}" class="mel-btn mel-btn--sm mel-btn--ghost mel-btn--danger">{{ 'Unpublish'|t }}</a>
         </div>
       {% else %}
         <div class="mel-list__item mel-list__item--success">
@@ -111,7 +111,7 @@
             <strong>{{ 'Publish Event'|t }}</strong>
             <p class="mel-text--muted mel-text--sm">{{ 'Make this event visible to the public.'|t }}</p>
           </div>
-          <a href="{{ path('entity.node.edit_form', {'node': event.id()}) }}" class="mel-btn mel-btn--sm mel-btn--primary">{{ 'Publish'|t }}</a>
+          <a href="{{ path('myeventlane_event.wizard.edit', {'node': event.id()}) }}" class="mel-btn mel-btn--sm mel-btn--primary">{{ 'Publish'|t }}</a>
         </div>
       {% endif %}
       

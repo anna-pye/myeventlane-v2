@@ -1,0 +1,36 @@
+// ==========================================================================
+// MyEventLane Design Tokens (CSS Custom Properties)
+// ==========================================================================
+// Single source of truth for design tokens as CSS variables.
+// These are available globally via :root and can be overridden per component.
+
+:root {
+  // Background & Surface
+  --mel-bg: #fef5ec;
+  --mel-card: #ffffff;
+  --mel-ink: #293241;
+  --mel-muted: #6b7280;
+
+  // Brand Colors
+  --mel-primary: #f26d5b;
+  --mel-secondary: #6e7ef2;
+  --mel-accent: #f5c04c;
+
+  // Border Radius
+  --mel-radius-lg: 18px;
+  --mel-radius-md: 12px;
+
+  // Shadows
+  --mel-shadow-soft: 0 10px 30px rgba(41, 50, 65, 0.08);
+
+  // Spacing Scale
+  --mel-space-1: 6px;
+  --mel-space-2: 10px;
+  --mel-space-3: 14px;
+  --mel-space-4: 18px;
+  --mel-space-5: 24px;
+  --mel-space-6: 32px;
+
+  // Layout
+  --mel-max: 1100px;
+}

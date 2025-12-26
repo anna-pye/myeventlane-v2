@@ -11,7 +11,7 @@
 
     <div class="mel-card-media">
       {% if image %}
-        <img src="{{ image }}" alt="{{ title }}" loading="lazy">
+        <img src="{{ image }}" alt="{{ title|default('') }}" loading="lazy">
       {% else %}
         <div class="mel-card-placeholder"></div>
       {% endif %}
@@ -27,36 +27,18 @@
     </div>
 
     <div class="mel-card-body">
-      <h3 class="mel-card-title">{{ title }}</h3>
-
-      <div class="mel-card-meta">
-        <span class="mel-meta-date">{{ date_full }}</span>
-        {% if location %}
-          <span class="mel-meta-location">{{ location }}</span>
-        {% endif %}
+      {# Date/Time - first, smaller, lighter #}
+      <div class="mel-card-date">
+        {{ date_full }}
       </div>
 
-      <div class="mel-card-hover-meta">
-        {% if category %}
-          <span class="mel-category-pill mel-cat-{{ category_slug }}">
-            {{ category }}
-          </span>
-        {% endif %}
+      {# Event Title - larger, bolder #}
+      <h3 class="mel-card-title">{{ title|default('') }}</h3>
 
-        {% if accessibility %}
-          <div class="mel-accessibility">
-            {% for icon in accessibility %}
-              <span class="mel-accessibility-icon">{{ icon }}</span>
-            {% endfor %}
-          </div>
-        {% endif %}
-      </div>
-
-      <div class="mel-card-cta">
-        <span class="mel-btn mel-btn-primary">
-          {{ ticket_label }}
-        </span>
-      </div>
+      {# Location - smaller, lighter #}
+      {% if location %}
+        <div class="mel-card-location">{{ location }}</div>
+      {% endif %}
     </div>
 
   </a>

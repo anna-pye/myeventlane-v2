@@ -241,8 +241,17 @@ function myeventlane_theme_preprocess_page(array &$variables): void {
       $variables['hero_pie_chart'] = NULL;
     }
 
-    // Add calendar data for mini calendar.
-    $variables['calendar'] = _myeventlane_theme_get_calendar_data();
+    // Add calendar data for mini calendar (current month and next month).
+    $next_month = date('n') + 1;
+    $next_year = date('Y');
+    if ($next_month > 12) {
+      $next_month = 1;
+      $next_year++;
+    }
+    $variables['calendar'] = [
+      'current' => _myeventlane_theme_get_calendar_data(),
+      'next' => _myeventlane_theme_get_calendar_data($next_year, $next_month),
+    ];
 
     // Load and render Featured Events view.
     $featured_view = Views::getView('featured_events');
@@ -742,7 +751,70 @@ function myeventlane_theme_preprocess_node(array &$variables): void {
     if ($view instanceof ViewExecutable && $view->id() === 'featured_events') {
       $variables['mel_card_variant'] = 'featured';
     }
-    // Return early for teaser - let the template handle the rest.
+    
+    // Set card variables according to Theme + Preprocess Contract.
+    // URL (for card link).
+    try {
+      $variables['url'] = $node->toUrl()->toString();
+    }
+    catch (\Exception $e) {
+      $variables['url'] = '#';
+    }
+    
+    // Title.
+    $variables['card_title'] = (string) $node->label();
+    
+    // Image URL.
+    $variables['card_image_url'] = NULL;
+    if ($node->hasField('field_event_image') && !$node->get('field_event_image')->isEmpty()) {
+      $image_file = $node->get('field_event_image')->entity;
+      if ($image_file) {
+        try {
+          $file_url_generator = \Drupal::service('file_url_generator');
+          $variables['card_image_url'] = $file_url_generator->generateString($image_file->getFileUri());
+        }
+        catch (\Exception $e) {
+          // Image unavailable.
+        }
+      }
+    }
+    
+    // Date.
+    $variables['card_date'] = NULL;
+    if ($node->hasField('field_event_start') && !$node->get('field_event_start')->isEmpty()) {
+      $start_value = $node->get('field_event_start')->value;
+      $start_timestamp = strtotime($start_value);
+      if ($start_timestamp) {
+        $date_formatter = \Drupal::service('date.formatter');
+        $variables['card_date'] = $date_formatter->format($start_timestamp, 'custom', 'M j, Y');
+      }
+    }
+    
+    // Location.
+    $variables['card_location'] = NULL;
+    if ($node->hasField('field_venue_name') && !$node->get('field_venue_name')->isEmpty()) {
+      $variables['card_location'] = (string) $node->get('field_venue_name')->value;
+    }
+    elseif ($node->hasField('field_location') && !$node->get('field_location')->isEmpty()) {
+      $location_item = $node->get('field_location')->first();
+      if ($location_item) {
+        $location_value = $location_item->getValue();
+        $variables['card_location'] = (string) ($location_value['locality'] ?? $location_value['address_line1'] ?? '');
+      }
+    }
+    
+    // Badge (optional).
+    $variables['card_badge'] = NULL;
+    $event_type = $node->hasField('field_event_type') && !$node->get('field_event_type')->isEmpty()
+      ? (string) $node->get('field_event_type')->value
+      : 'rsvp';
+    if (in_array($event_type, ['paid', 'both'], TRUE)) {
+      $variables['card_badge'] = t('Tickets');
+    }
+    elseif ($event_type === 'rsvp') {
+      $variables['card_badge'] = t('RSVP');
+    }
+    
     return;
   }
 
@@ -769,71 +841,130 @@ function myeventlane_theme_preprocess_node(array &$variables): void {
   // Clean title string.
   $variables['mel_title'] = (string) $node->label();
 
-  // Venue name.
+  // Get venue data from Venue entity (canonical source).
   $venue = '';
-  if ($node->hasField('field_venue_name') && !$node->get('field_venue_name')->isEmpty()) {
-    $venue = (string) $node->get('field_venue_name')->value;
-  }
-  elseif ($node->hasField('field_event_venue') && !$node->get('field_event_venue')->isEmpty()) {
-    $venue = (string) $node->get('field_event_venue')->value;
-  }
-  $variables['mel_venue'] = trim($venue);
-
-  // Address (single string, for map card only).
   $address = '';
-  if ($node->hasField('field_location') && !$node->get('field_location')->isEmpty()) {
-    $item = $node->get('field_location')->first();
-    if ($item) {
-      $v = $item->getValue();
-      $parts = [];
-
-      if (!empty($v['address_line1'])) {
-        $parts[] = (string) $v['address_line1'];
-      }
-      if (!empty($v['locality'])) {
-        $parts[] = (string) $v['locality'];
-      }
-
-      $state_post = [];
-      if (!empty($v['administrative_area'])) {
-        $state_post[] = (string) $v['administrative_area'];
-      }
-      if (!empty($v['postal_code'])) {
-        $state_post[] = (string) $v['postal_code'];
-      }
-      if ($state_post) {
-        $parts[] = implode(' ', $state_post);
-      }
-
-      if (!empty($v['country_code'])) {
-        $parts[] = (string) $v['country_code'];
-      }
-
-      $address = trim(implode(', ', array_filter($parts)));
-    }
-  }
-  elseif ($node->hasField('field_event_address') && !$node->get('field_event_address')->isEmpty()) {
-    $address = (string) $node->get('field_event_address')->value;
-  }
-  $variables['mel_address'] = trim($address);
-
-  // Coordinates for map only.
   $lat = NULL;
   $lng = NULL;
 
-  if ($node->hasField('field_location_latitude') && !$node->get('field_location_latitude')->isEmpty()) {
-    $lat = (float) $node->get('field_location_latitude')->value;
-  }
-  elseif ($node->hasField('field_event_lat') && !$node->get('field_event_lat')->isEmpty()) {
-    $lat = (float) $node->get('field_event_lat')->value;
+  // First, try to get data from Venue entity (field_venue).
+  if ($node->hasField('field_venue') && !$node->get('field_venue')->isEmpty()) {
+    $venue_entity = $node->get('field_venue')->entity;
+    if ($venue_entity && $venue_entity->getEntityTypeId() === 'myeventlane_venue') {
+      // Get venue name.
+      $venue = $venue_entity->getName();
+
+      // Get coordinates from venue.
+      if ($venue_entity->hasField('field_latitude') && !$venue_entity->get('field_latitude')->isEmpty()) {
+        $lat = (float) $venue_entity->get('field_latitude')->value;
+      }
+      if ($venue_entity->hasField('field_longitude') && !$venue_entity->get('field_longitude')->isEmpty()) {
+        $lng = (float) $venue_entity->get('field_longitude')->value;
+      }
+
+      // Get address from venue.
+      if ($venue_entity->hasField('field_location') && !$venue_entity->get('field_location')->isEmpty()) {
+        $item = $venue_entity->get('field_location')->first();
+        if ($item) {
+          $v = $item->getValue();
+          $parts = [];
+
+          if (!empty($v['address_line1'])) {
+            $parts[] = (string) $v['address_line1'];
+          }
+          if (!empty($v['locality'])) {
+            $parts[] = (string) $v['locality'];
+          }
+
+          $state_post = [];
+          if (!empty($v['administrative_area'])) {
+            $state_post[] = (string) $v['administrative_area'];
+          }
+          if (!empty($v['postal_code'])) {
+            $state_post[] = (string) $v['postal_code'];
+          }
+          if ($state_post) {
+            $parts[] = implode(' ', $state_post);
+          }
+
+          if (!empty($v['country_code'])) {
+            $parts[] = (string) $v['country_code'];
+          }
+
+          $address = trim(implode(', ', array_filter($parts)));
+        }
+      }
+    }
   }
 
-  if ($node->hasField('field_location_longitude') && !$node->get('field_location_longitude')->isEmpty()) {
-    $lng = (float) $node->get('field_location_longitude')->value;
+  // Fallback to legacy fields if venue entity not available.
+  if (empty($venue)) {
+    if ($node->hasField('field_venue_name') && !$node->get('field_venue_name')->isEmpty()) {
+      $venue = (string) $node->get('field_venue_name')->value;
+    }
+    elseif ($node->hasField('field_event_venue') && !$node->get('field_event_venue')->isEmpty()) {
+      $venue = (string) $node->get('field_event_venue')->value;
+    }
   }
-  elseif ($node->hasField('field_event_lng') && !$node->get('field_event_lng')->isEmpty()) {
-    $lng = (float) $node->get('field_event_lng')->value;
+
+  if (empty($address)) {
+    if ($node->hasField('field_location') && !$node->get('field_location')->isEmpty()) {
+      $item = $node->get('field_location')->first();
+      if ($item) {
+        $v = $item->getValue();
+        $parts = [];
+
+        if (!empty($v['address_line1'])) {
+          $parts[] = (string) $v['address_line1'];
+        }
+        if (!empty($v['locality'])) {
+          $parts[] = (string) $v['locality'];
+        }
+
+        $state_post = [];
+        if (!empty($v['administrative_area'])) {
+          $state_post[] = (string) $v['administrative_area'];
+        }
+        if (!empty($v['postal_code'])) {
+          $state_post[] = (string) $v['postal_code'];
+        }
+        if ($state_post) {
+          $parts[] = implode(' ', $state_post);
+        }
+
+        if (!empty($v['country_code'])) {
+          $parts[] = (string) $v['country_code'];
+        }
+
+        $address = trim(implode(', ', array_filter($parts)));
+      }
+    }
+    elseif ($node->hasField('field_event_address') && !$node->get('field_event_address')->isEmpty()) {
+      $address = (string) $node->get('field_event_address')->value;
+    }
   }
+
+  // Fallback coordinates from legacy fields.
+  if ($lat === NULL) {
+    if ($node->hasField('field_location_latitude') && !$node->get('field_location_latitude')->isEmpty()) {
+      $lat = (float) $node->get('field_location_latitude')->value;
+    }
+    elseif ($node->hasField('field_event_lat') && !$node->get('field_event_lat')->isEmpty()) {
+      $lat = (float) $node->get('field_event_lat')->value;
+    }
+  }
+
+  if ($lng === NULL) {
+    if ($node->hasField('field_location_longitude') && !$node->get('field_location_longitude')->isEmpty()) {
+      $lng = (float) $node->get('field_location_longitude')->value;
+    }
+    elseif ($node->hasField('field_event_lng') && !$node->get('field_event_lng')->isEmpty()) {
+      $lng = (float) $node->get('field_event_lng')->value;
+    }
+  }
+
+  $variables['mel_venue'] = trim($venue);
+  $variables['mel_address'] = trim($address);
 
   $variables['mel_lat'] = $lat;
   $variables['mel_lng'] = $lng;
@@ -869,7 +1000,7 @@ function myeventlane_theme_preprocess_node(array &$variables): void {
   // Add ticket CTA via EventModeManager.
   try {
     /** @var \Drupal\myeventlane_event\Service\EventModeManager $mode_manager */
-    $mode_manager = \Drupal::service('myeventlane_event.mode_manager');
+    $mode_manager = \Drupal::service('myeventlane_event.event_mode_manager');
     $primary_cta = $mode_manager->getPrimaryCta($node);
     if ($primary_cta) {
       $variables['content']['mel_ticket_cta'] = $primary_cta;
@@ -1127,7 +1258,7 @@ function myeventlane_theme_preprocess_node(array &$variables): void {
     // Use EventModeManager to get primary CTA
     try {
       /** @var \Drupal\myeventlane_event\Service\EventModeManager $mode_manager */
-      $mode_manager = \Drupal::service('myeventlane_event.mode_manager');
+      $mode_manager = \Drupal::service('myeventlane_event.event_mode_manager');
       $primary_cta = $mode_manager->getPrimaryCta($node);
       
       if (!empty($primary_cta) && isset($primary_cta['#url'])) {
@@ -1165,11 +1296,63 @@ function myeventlane_theme_preprocess_node(array &$variables): void {
           $event_cta['disabled'] = FALSE;
         }
       }
+      
+      // Additional fallback: If tickets are enabled but product isn't published,
+      // still show button (booking page will handle the message).
+      // This check happens after all other fallbacks to ensure we catch cases where
+      // a product exists but isn't published.
+      // Check if we still don't have a URL set.
+      if (empty($event_cta['url']) && $mode_manager->isTicketsEnabled($node)) {
+        $ticket_avail = $mode_manager->getTicketAvailability($node);
+        // If a product exists (even if not published), show the button.
+        if (!empty($ticket_avail['product'])) {
+          $event_cta['label'] = t('Get Tickets');
+          $event_cta['url'] = Url::fromRoute('myeventlane_commerce.event_book', ['node' => $node->id()])->toString();
+          $event_cta['disabled'] = FALSE;
+        }
+      }
+      
+      // Final fallback: If we still don't have a CTA but tickets are enabled,
+      // check if a product is linked (regardless of published status).
+      if (empty($event_cta['url']) && $mode_manager->isTicketsEnabled($node)) {
+        // Check directly if product field has a value.
+        if ($node->hasField('field_product_target') && !$node->get('field_product_target')->isEmpty()) {
+          $product = $node->get('field_product_target')->entity;
+          if ($product) {
+            $event_cta['label'] = t('Get Tickets');
+            $event_cta['url'] = Url::fromRoute('myeventlane_commerce.event_book', ['node' => $node->id()])->toString();
+            $event_cta['disabled'] = FALSE;
+          }
+        }
+      }
     }
     catch (\Exception $e) {
       // Service unavailable, default to disabled
       $event_cta['label'] = t('Registration unavailable');
       $event_cta['disabled'] = TRUE;
+    }
+  }
+
+  // Final safety check: If tickets are enabled and we still don't have a CTA with URL,
+  // and the event is not cancelled/ended, show the button anyway.
+  if (empty($event_cta['url']) && $state !== 'cancelled' && $state !== 'ended') {
+    try {
+      /** @var \Drupal\myeventlane_event\Service\EventModeManager $mode_manager */
+      $mode_manager = \Drupal::service('myeventlane_event.event_mode_manager');
+      if ($mode_manager->isTicketsEnabled($node)) {
+        // Check directly if product field has a value.
+        if ($node->hasField('field_product_target') && !$node->get('field_product_target')->isEmpty()) {
+          $product = $node->get('field_product_target')->entity;
+          if ($product) {
+            $event_cta['label'] = t('Get Tickets');
+            $event_cta['url'] = Url::fromRoute('myeventlane_commerce.event_book', ['node' => $node->id()])->toString();
+            $event_cta['disabled'] = FALSE;
+          }
+        }
+      }
+    }
+    catch (\Exception $e) {
+      // Service unavailable, skip this check.
     }
   }
 
@@ -1367,6 +1550,241 @@ function myeventlane_theme_preprocess_node(array &$variables): void {
   $variables['mel_host_block'] = NULL;
   $variables['mel_more_from_host_block'] = NULL;
   $variables['mel_trending_block'] = NULL;
+}
+
+/**
+ * Implements hook_preprocess_node__event__full().
+ *
+ * Adds CTA, location, and host variables for the full event view.
+ * Implements the Theme + Preprocess Contract.
+ */
+function myeventlane_theme_preprocess_node__event__full(array &$variables): void {
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $variables['node'];
+
+  // Get hero image URL if available.
+  if ($node->hasField('field_event_image') && !$node->get('field_event_image')->isEmpty()) {
+    $image_file = $node->get('field_event_image')->entity;
+    if ($image_file) {
+      try {
+        $file_url_generator = \Drupal::service('file_url_generator');
+        $variables['hero_image_url'] = $file_url_generator->generateString($image_file->getFileUri());
+      }
+      catch (\Exception $e) {
+        $variables['hero_image_url'] = NULL;
+      }
+    }
+  }
+
+  /* ==========================
+   * CTA (MANDATORY)
+   * ========================== */
+
+  // Don't reset event_cta - it may already be set by the main preprocess_node hook.
+  // Only set it if it's not already set, or if we need to override it.
+  if (!isset($variables['event_cta'])) {
+    $variables['event_cta'] = NULL;
+  }
+  if (!isset($variables['event_cta_secondary'])) {
+    $variables['event_cta_secondary'] = NULL;
+  }
+
+  try {
+    /** @var \Drupal\myeventlane_event\Service\EventModeManager $mode_manager */
+    $mode_manager = \Drupal::service('myeventlane_event.event_mode_manager');
+    $event_mode = $mode_manager->getEffectiveMode($node);
+    
+    // For "both" mode, show both RSVP and Tickets buttons.
+    if ($event_mode === 'both') {
+      $rsvp_avail = $mode_manager->getRsvpAvailability($node);
+      $ticket_avail = $mode_manager->getTicketAvailability($node);
+      
+      // Tickets button (primary).
+      // Show button if tickets are available OR if a product is linked (even if not published).
+      // The booking page will handle showing appropriate messages for unpublished products.
+      if ($ticket_avail['available'] || !empty($ticket_avail['product'])) {
+        $variables['event_cta'] = [
+          'label' => t('Buy Tickets'),
+          'url' => \Drupal\Core\Url::fromRoute('myeventlane_commerce.event_book', ['node' => $node->id()])->toString(),
+          'type' => 'tickets',
+        ];
+      }
+      
+      // RSVP button (secondary).
+      if ($rsvp_avail['available']) {
+        $variables['event_cta_secondary'] = [
+          'label' => t('RSVP Now'),
+          'url' => \Drupal\Core\Url::fromRoute('myeventlane_commerce.event_book', ['node' => $node->id()])->toString(),
+          'type' => 'rsvp',
+        ];
+      }
+    }
+    else {
+      // Single mode: Check RSVP availability first (priority).
+      if ($mode_manager->isRsvpEnabled($node)) {
+        $rsvp_avail = $mode_manager->getRsvpAvailability($node);
+        if ($rsvp_avail['available']) {
+          $variables['event_cta'] = [
+            'label' => t('RSVP now'),
+            'url' => \Drupal\Core\Url::fromRoute('myeventlane_commerce.event_book', ['node' => $node->id()])->toString(),
+            'type' => 'rsvp',
+          ];
+        }
+      }
+      
+      // Check tickets if RSVP not available.
+      if (!$variables['event_cta'] && $mode_manager->isTicketsEnabled($node)) {
+        $ticket_avail = $mode_manager->getTicketAvailability($node);
+        // Show button if tickets are available OR if a product is linked (even if not published).
+        // The booking page will handle showing appropriate messages for unpublished products.
+        if ($ticket_avail['available'] || !empty($ticket_avail['product'])) {
+          $variables['event_cta'] = [
+            'label' => t('Get tickets'),
+            'url' => \Drupal\Core\Url::fromRoute('myeventlane_commerce.event_book', ['node' => $node->id()])->toString(),
+            'type' => 'tickets',
+          ];
+        }
+      }
+    }
+    
+    // Additional check: If tickets are enabled but no CTA was set yet,
+    // check if a product exists (even if not published).
+    if (!$variables['event_cta'] && $mode_manager->isTicketsEnabled($node)) {
+      $ticket_avail = $mode_manager->getTicketAvailability($node);
+      if (!empty($ticket_avail['product'])) {
+        $variables['event_cta'] = [
+          'label' => t('Get tickets'),
+          'url' => \Drupal\Core\Url::fromRoute('myeventlane_commerce.event_book', ['node' => $node->id()])->toString(),
+          'type' => 'tickets',
+        ];
+      }
+    }
+    
+    // Final fallback: Directly check product field if CTA still not set.
+    if (!$variables['event_cta'] && $mode_manager->isTicketsEnabled($node)) {
+      if ($node->hasField('field_product_target') && !$node->get('field_product_target')->isEmpty()) {
+        $product = $node->get('field_product_target')->entity;
+        if ($product) {
+          $variables['event_cta'] = [
+            'label' => t('Get tickets'),
+            'url' => \Drupal\Core\Url::fromRoute('myeventlane_commerce.event_book', ['node' => $node->id()])->toString(),
+            'type' => 'tickets',
+          ];
+        }
+      }
+    }
+    
+    // Check external URL if neither RSVP nor tickets available.
+    if (!$variables['event_cta'] && $node->hasField('field_external_url') && !$node->get('field_external_url')->isEmpty()) {
+      $url_item = $node->get('field_external_url')->first();
+      if ($url_item) {
+        $url = $url_item->getUrl();
+        $variables['event_cta'] = [
+          'label' => t('View event'),
+          'url' => $url->toString(),
+          'type' => 'external',
+        ];
+      }
+    }
+    
+    // Default: registration unavailable.
+    if (!$variables['event_cta']) {
+      $variables['event_cta'] = [
+        'label' => t('Registration unavailable'),
+        'url' => NULL,
+        'type' => 'disabled',
+      ];
+    }
+  }
+  catch (\Exception $e) {
+    // Service unavailable, set disabled CTA.
+    $variables['event_cta'] = [
+      'label' => t('Registration unavailable'),
+      'url' => NULL,
+      'type' => 'disabled',
+    ];
+  }
+
+  /* ==========================
+   * LOCATION + MAP
+   * ========================== */
+
+  $variables['event_location'] = NULL;
+
+  $address = NULL;
+  $venue_name = NULL;
+
+  // Try venue entity first.
+  if ($node->hasField('field_venue') && !$node->get('field_venue')->isEmpty()) {
+    $venue = $node->get('field_venue')->entity;
+    if ($venue) {
+      $venue_name = $venue->label();
+      if ($venue->hasField('field_address') && !$venue->get('field_address')->isEmpty()) {
+        $address = $venue->get('field_address')->value;
+      }
+      elseif ($venue->hasField('field_location') && !$venue->get('field_location')->isEmpty()) {
+        $location_item = $venue->get('field_location')->first();
+        if ($location_item) {
+          $location_value = $location_item->getValue();
+          $address = implode(' ', array_filter([
+            $location_value['address_line1'] ?? '',
+            $location_value['locality'] ?? '',
+            $location_value['administrative_area'] ?? '',
+          ]));
+        }
+      }
+    }
+  }
+  // Fallback to node's location field.
+  elseif ($node->hasField('field_location') && !$node->get('field_location')->isEmpty()) {
+    $address_array = $node->get('field_location')->first()->toArray();
+    $address = implode(' ', array_filter([
+      $address_array['address_line1'] ?? '',
+      $address_array['locality'] ?? '',
+      $address_array['administrative_area'] ?? '',
+    ]));
+  }
+
+  if ($address) {
+    $variables['event_location'] = [
+      'venue_name' => $venue_name,
+      'address' => $address,
+      'map_url' => 'https://maps.google.com/?q=' . urlencode($address),
+    ];
+  }
+
+  /* ==========================
+   * HOST / ORGANISER
+   * ========================== */
+
+  $variables['event_host'] = NULL;
+
+  // Get vendor from field_event_vendor.
+  if ($node->hasField('field_event_vendor') && !$node->get('field_event_vendor')->isEmpty()) {
+    $vendor = $node->get('field_event_vendor')->entity;
+    if ($vendor && $vendor->getEntityTypeId() === 'myeventlane_vendor') {
+      $variables['event_host'] = [
+        'name' => $vendor->label(),
+        'url' => $vendor->toUrl(),
+      ];
+    }
+  }
+  
+  // Backward compatibility: also set 'location' variable for existing template.
+  if ($variables['event_location']) {
+    $variables['location'] = [
+      'label' => $variables['event_location']['venue_name'] ?: $variables['event_location']['address'],
+      'map_url' => $variables['event_location']['map_url'],
+    ];
+  }
+  
+  // Backward compatibility: also set 'cta' variable for existing template.
+  if ($variables['event_cta'] && $variables['event_cta']['url']) {
+    $variables['cta'] = [
+      'label' => $variables['event_cta']['label'],
+      'url' => $variables['event_cta']['url'],
+    ];
+  }
 }
 
 /**
@@ -1811,6 +2229,20 @@ function myeventlane_theme_theme_suggestions_form_alter(array &$suggestions, arr
     // Prepend the most specific suggestion to ensure it's used first.
     array_unshift($suggestions, 'form__node__event__form');
   }
+  
+  // CRITICAL: Add template suggestion for EventWizardForm.
+  if ($form_id === 'myeventlane_event_wizard') {
+    // Prepend to ensure it's checked first - this MUST be the first suggestion.
+    array_unshift($suggestions, 'form__myeventlane_event_wizard');
+    // Also add it again to be absolutely sure.
+    if (!in_array('form__myeventlane_event_wizard', $suggestions, TRUE)) {
+      array_unshift($suggestions, 'form__myeventlane_event_wizard');
+    }
+    \Drupal::logger('myeventlane_theme')->error('TEMPLATE SUGGESTION: form__myeventlane_event_wizard added. Form ID: @id. All suggestions: @suggestions', [
+      '@id' => $form_id,
+      '@suggestions' => implode(', ', $suggestions),
+    ]);
+  }
 }
 
 /**
@@ -1861,19 +2293,32 @@ function myeventlane_theme_preprocess_views_view_fields(array &$variables): void
     return;
   }
 
-  // Title.
-  _myeventlane_theme_set_views_field_content($variables, 'title', $node->label());
+  // Title - ensure it's a clean string.
+  $title = (string) $node->label();
+  $title = strip_tags($title);
+  $title = trim($title);
+  _myeventlane_theme_set_views_field_content($variables, 'title', $title);
 
-  // URL.
-  _myeventlane_theme_set_views_field_content($variables, 'view_node', $node->toUrl()->toString());
+  // URL - ensure it's a clean string.
+  try {
+    $url = $node->toUrl()->toString();
+    $url = strip_tags($url);
+    $url = trim($url);
+  }
+  catch (\Exception $e) {
+    $url = '';
+  }
+  _myeventlane_theme_set_views_field_content($variables, 'view_node', $url);
 
-  // Image URL (optional).
+  // Image URL (optional) - ensure it's a clean string.
   $image_url = '';
   if ($node->hasField('field_event_image') && !$node->get('field_event_image')->isEmpty()) {
     $file = $node->get('field_event_image')->entity;
     if ($file) {
       try {
         $image_url = \Drupal::service('file_url_generator')->generateString($file->getFileUri());
+        $image_url = strip_tags($image_url);
+        $image_url = trim($image_url);
       }
       catch (\Throwable $e) {
         $image_url = '';
@@ -1882,7 +2327,7 @@ function myeventlane_theme_preprocess_views_view_fields(array &$variables): void
   }
   _myeventlane_theme_set_views_field_content($variables, 'field_image', $image_url);
 
-  // Dates.
+  // Dates - ensure clean strings.
   $start_value = ($node->hasField('field_event_start') && !$node->get('field_event_start')->isEmpty())
     ? (string) $node->get('field_event_start')->value
     : '';
@@ -1891,9 +2336,12 @@ function myeventlane_theme_preprocess_views_view_fields(array &$variables): void
   if ($start_ts) {
     /** @var \Drupal\Core\Datetime\DateFormatterInterface $date_formatter */
     $date_formatter = \Drupal::service('date.formatter');
-    _myeventlane_theme_set_views_field_content($variables, 'field_date_day', $date_formatter->format($start_ts, 'custom', 'd'));
-    _myeventlane_theme_set_views_field_content($variables, 'field_date_month', $date_formatter->format($start_ts, 'custom', 'M'));
-    _myeventlane_theme_set_views_field_content($variables, 'field_date', $date_formatter->format($start_ts, 'custom', 'M j, Y'));
+    $day = strip_tags((string) $date_formatter->format($start_ts, 'custom', 'd'));
+    $month = strip_tags((string) $date_formatter->format($start_ts, 'custom', 'M'));
+    $full = strip_tags((string) $date_formatter->format($start_ts, 'custom', 'M j, Y'));
+    _myeventlane_theme_set_views_field_content($variables, 'field_date_day', trim($day));
+    _myeventlane_theme_set_views_field_content($variables, 'field_date_month', trim($month));
+    _myeventlane_theme_set_views_field_content($variables, 'field_date', trim($full));
   }
   else {
     _myeventlane_theme_set_views_field_content($variables, 'field_date_day', '');
@@ -1901,7 +2349,7 @@ function myeventlane_theme_preprocess_views_view_fields(array &$variables): void
     _myeventlane_theme_set_views_field_content($variables, 'field_date', '');
   }
 
-  // Location (venue name preferred).
+  // Location (venue name preferred) - ensure clean string.
   $location = '';
   if ($node->hasField('field_venue_name') && !$node->get('field_venue_name')->isEmpty()) {
     $location = (string) $node->get('field_venue_name')->value;
@@ -1914,22 +2362,25 @@ function myeventlane_theme_preprocess_views_view_fields(array &$variables): void
       $location = $locality ?: $line1;
     }
   }
+  $location = strip_tags($location);
+  $location = trim($location);
   _myeventlane_theme_set_views_field_content($variables, 'field_location', $location);
 
-  // Category + slug.
+  // Category + slug - ensure clean strings.
   $category = '';
   $category_slug = '';
   if ($node->hasField('field_category') && !$node->get('field_category')->isEmpty()) {
     $term = $node->get('field_category')->entity;
     if ($term instanceof TermInterface) {
-      $category = $term->label();
+      $category = strip_tags((string) $term->label());
+      $category = trim($category);
       $category_slug = _myeventlane_theme_slugify($category);
     }
   }
   _myeventlane_theme_set_views_field_content($variables, 'field_category', $category);
   _myeventlane_theme_set_views_field_content($variables, 'field_category_slug', $category_slug);
 
-  // Ticket type + label.
+  // Ticket type + label - ensure clean strings.
   $ticket_type = 'rsvp';
   $ticket_label = 'RSVP';
   $event_type = ($node->hasField('field_event_type') && !$node->get('field_event_type')->isEmpty())
@@ -1941,8 +2392,10 @@ function myeventlane_theme_preprocess_views_view_fields(array &$variables): void
     $ticket_label = ($event_type === 'external') ? 'Get Tickets' : 'Tickets';
   }
 
-  _myeventlane_theme_set_views_field_content($variables, 'field_ticket_type', $ticket_type);
-  _myeventlane_theme_set_views_field_content($variables, 'field_ticket_label', $ticket_label);
+  $ticket_type = strip_tags($ticket_type);
+  $ticket_label = strip_tags($ticket_label);
+  _myeventlane_theme_set_views_field_content($variables, 'field_ticket_type', trim($ticket_type));
+  _myeventlane_theme_set_views_field_content($variables, 'field_ticket_label', trim($ticket_label));
 
   // Accessibility icons (array of emoji).
   $icons = [];
@@ -2002,10 +2455,19 @@ function _myeventlane_theme_is_event_view(ViewExecutable $view): bool {
 
 /**
  * Sets a Views field's rendered content (object-safe).
+ * Ensures content is always a string, never an array.
  */
 function _myeventlane_theme_set_views_field_content(array &$variables, string $field_id, mixed $content): void {
   if (empty($variables['fields'][$field_id])) {
     return;
+  }
+
+  // Ensure content is always a string.
+  if (is_array($content)) {
+    $content = '';
+  }
+  elseif (!is_string($content)) {
+    $content = (string) $content;
   }
 
   if (is_object($variables['fields'][$field_id])) {

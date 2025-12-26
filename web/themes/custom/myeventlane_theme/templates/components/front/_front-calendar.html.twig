@@ -1,0 +1,91 @@
+{#
+/**
+ * @file
+ * Mini calendar component for homepage.
+ * Shows two months, no controls, event dots only.
+ */
+#}
+{% if calendar and calendar.current and calendar.next %}
+  {% set current = calendar.current %}
+  {% set next = calendar.next %}
+
+  <div class="mel-mini-calendar-wrapper">
+    {# Current Month #}
+    <div class="mel-mini-calendar">
+      <div class="mel-mini-calendar__header">
+        <span class="mel-mini-calendar__month">{{ current.month_name }} {{ current.year }}</span>
+      </div>
+
+      <div class="mel-mini-calendar__grid">
+        {# Day headers #}
+        <div class="mel-mini-calendar-day-header">S</div>
+        <div class="mel-mini-calendar-day-header">M</div>
+        <div class="mel-mini-calendar-day-header">T</div>
+        <div class="mel-mini-calendar-day-header">W</div>
+        <div class="mel-mini-calendar-day-header">T</div>
+        <div class="mel-mini-calendar-day-header">F</div>
+        <div class="mel-mini-calendar-day-header">S</div>
+
+        {# Empty cells for days before month starts #}
+        {% for i in 0..(current.start_day - 1) %}
+          <div class="mel-mini-calendar-day mel-mini-calendar-day--other-month"></div>
+        {% endfor %}
+
+        {# Days of the month #}
+        {% for day in 1..current.days_in_month %}
+          {% set has_event = current.events_by_day[day] is defined and current.events_by_day[day]|length > 0 %}
+          {% set event_count = has_event ? current.events_by_day[day]|length : 0 %}
+          {% set is_today = current.is_current_month and day == current.today %}
+          {% set month_num = current.month < 10 ? '0' ~ current.month : current.month %}
+          {% set day_num = day < 10 ? '0' ~ day : day %}
+          {% set day_url = has_event ? current.events_by_day[day][0].url : '/events?date=' ~ current.year ~ '-' ~ month_num ~ '-' ~ day_num %}
+          {% set dot_count = event_count > 3 ? 0 : event_count %}
+          {% set show_plus = event_count > 3 %}
+
+          <a href="{{ day_url }}" class="mel-mini-calendar-day{% if is_today %} mel-mini-calendar-day--today{% endif %}{% if has_event %} mel-mini-calendar-day--has-event{% endif %}{% if show_plus %} mel-mini-calendar-day--has-many{% endif %}" data-dot-count="{{ dot_count }}">
+            {{ day }}
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# Next Month #}
+    <div class="mel-mini-calendar">
+      <div class="mel-mini-calendar__header">
+        <span class="mel-mini-calendar__month">{{ next.month_name }} {{ next.year }}</span>
+      </div>
+
+      <div class="mel-mini-calendar__grid">
+        {# Day headers #}
+        <div class="mel-mini-calendar-day-header">S</div>
+        <div class="mel-mini-calendar-day-header">M</div>
+        <div class="mel-mini-calendar-day-header">T</div>
+        <div class="mel-mini-calendar-day-header">W</div>
+        <div class="mel-mini-calendar-day-header">T</div>
+        <div class="mel-mini-calendar-day-header">F</div>
+        <div class="mel-mini-calendar-day-header">S</div>
+
+        {# Empty cells for days before month starts #}
+        {% for i in 0..(next.start_day - 1) %}
+          <div class="mel-mini-calendar-day mel-mini-calendar-day--other-month"></div>
+        {% endfor %}
+
+        {# Days of the month #}
+        {% for day in 1..next.days_in_month %}
+          {% set has_event = next.events_by_day[day] is defined and next.events_by_day[day]|length > 0 %}
+          {% set event_count = has_event ? next.events_by_day[day]|length : 0 %}
+          {% set is_today = next.is_current_month and day == next.today %}
+          {% set month_num = next.month < 10 ? '0' ~ next.month : next.month %}
+          {% set day_num = day < 10 ? '0' ~ day : day %}
+          {% set day_url = has_event ? next.events_by_day[day][0].url : '/events?date=' ~ next.year ~ '-' ~ month_num ~ '-' ~ day_num %}
+          {% set dot_count = event_count > 3 ? 0 : event_count %}
+          {% set show_plus = event_count > 3 %}
+
+          <a href="{{ day_url }}" class="mel-mini-calendar-day{% if is_today %} mel-mini-calendar-day--today{% endif %}{% if has_event %} mel-mini-calendar-day--has-event{% endif %}{% if show_plus %} mel-mini-calendar-day--has-many{% endif %}" data-dot-count="{{ dot_count }}">
+            {{ day }}
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endif %}

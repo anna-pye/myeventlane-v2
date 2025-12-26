@@ -561,11 +561,10 @@ class RsvpPublicForm extends FormBase {
     );
 
     // Redirect to thank you page or event page.
-    $thankYouRoute = 'myeventlane_rsvp.thank_you';
+    $thankYouRoute = 'myeventlane_rsvp.thankyou';
     try {
       $url = Url::fromRoute($thankYouRoute, [
-        'node' => $event->id(),
-        'submission' => $submission->id(),
+        'event' => $event->id(),
       ]);
       $form_state->setRedirectUrl($url);
     }

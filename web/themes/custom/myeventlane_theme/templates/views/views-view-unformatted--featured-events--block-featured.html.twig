@@ -2,14 +2,32 @@
 /**
  * @file
  * Template override for Featured Events unformatted rows.
- * Uses .mel-featured-hero wrapper for single hero row layout (max 1-2 items).
+ * Displays first event as large featured card, remaining events in a carousel.
  */
 #}
 
 {% if rows %}
-  <div class="mel-featured-hero">
-    {% for row in rows %}
-      {{- row.content -}}
-    {% endfor %}
+  <div class="mel-featured-events-carousel">
+    {# First event - large featured card #}
+    {% set first_row = rows|first %}
+    {% if first_row %}
+      <div class="mel-featured-events-carousel__hero">
+        {{ first_row.content }}
+      </div>
+    {% endif %}
+
+    {# Remaining events - carousel #}
+    {% set remaining_rows = rows|slice(1) %}
+    {% if remaining_rows|length > 0 %}
+      <div class="mel-featured-events-carousel__carousel">
+        <div class="mel-featured-events-carousel__track">
+          {% for row in remaining_rows %}
+            <div class="mel-featured-events-carousel__slide">
+              {{ row.content }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
   </div>
 {% endif %}

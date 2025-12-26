@@ -3,53 +3,36 @@
  * @file
  * Theme override for event nodes in teaser view mode.
  *
- * Delegates to the canonical MyEventLane event card.
+ * Implements Theme + Preprocess Contract: Twig renders only provided variables.
+ * Entire card is a clickable link to the event.
  */
 #}
 
-{% set start = node.field_event_start.value|default('') %}
-{% set image_url = (node.field_event_image.entity) ? file_url(node.field_event_image.entity.uri.value) : '' %}
+<article class="mel-event-card">
+  <a href="{{ url }}" class="mel-event-card__link">
+    <div class="mel-event-card__image">
+      {% if card_image_url %}
+        <img src="{{ card_image_url }}" alt="{{ card_title }}">
+      {% endif %}
+    </div>
 
-{% set ticket_type = 'rsvp' %}
-{% set ticket_label = 'RSVP' %}
-{% set raw_type = node.field_event_type.value|default('rsvp') %}
-{% if raw_type in ['paid', 'both', 'external'] %}
-  {% set ticket_type = 'tickets' %}
-  {% set ticket_label = (raw_type == 'external') ? 'Get Tickets' : 'Tickets' %}
-{% endif %}
+    <div class="mel-event-card__content">
+      <h3>{{ card_title }}</h3>
+      <div class="mel-event-card__meta">
+        {% if card_date and card_location %}
+          {{ card_date }} · {{ card_location }}
+        {% elseif card_date %}
+          {{ card_date }}
+        {% elseif card_location %}
+          {{ card_location }}
+        {% endif %}
+      </div>
 
-{% set category = node.field_category.entity ? node.field_category.entity.label : '' %}
-{% set category_slug = category|lower|replace({' ': '-', '&': 'and'}) %}
-
-{% set location = node.field_venue_name.value|default('') %}
-{% if not location and node.field_location and not node.field_location.isEmpty() %}
-  {% set loc = node.field_location.value %}
-  {% set location = loc.locality|default(loc.address_line1) %}
-{% endif %}
-
-{# Minimal accessibility: show one icon per term (fallback to ♿). #}
-{% set accessibility = [] %}
-{% if node.field_accessibility and not node.field_accessibility.isEmpty() %}
-  {% for term_item in node.field_accessibility %}
-    {% set accessibility = accessibility|merge(['♿']) %}
-  {% endfor %}
-{% endif %}
-
-{# Check if we're in featured_events view context #}
-{% set variant = mel_card_variant|default(null) %}
-
-{% include '@myeventlane_theme/event/event-card.html.twig' with {
-  title: label|default(node.label),
-  url: url,
-  image: image_url,
-  date_day: start ? start|date('d') : '',
-  date_month: start ? start|date('M') : '',
-  date_full: start ? start|date('M j, Y') : '',
-  location: location,
-  category: category,
-  category_slug: category_slug,
-  ticket_type: ticket_type,
-  ticket_label: ticket_label,
-  accessibility: accessibility,
-  variant: variant
-} %}
+      {% if card_badge %}
+        <span class="mel-event-card__badge">
+          {{ card_badge }}
+        </span>
+      {% endif %}
+    </div>
+  </a>
+</article>

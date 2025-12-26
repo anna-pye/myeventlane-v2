@@ -40,7 +40,7 @@
     </div>
     
     <div class="mel-dashboard__actions">
-      <a class="mel-btn mel-btn--primary mel-btn--lg" href="/vendor/events/add">
+      <a class="mel-btn mel-btn--primary mel-btn--lg" href="/vendor/events/create">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
@@ -70,7 +70,7 @@
         </div>
       </div>
       <div class="mel-welcome-banner__actions">
-        <a href="/vendor/events/add" class="mel-btn mel-btn--primary mel-btn--lg">{{ 'Create Your First Event'|t }}</a>
+        <a href="/vendor/events/create" class="mel-btn mel-btn--primary mel-btn--lg">{{ 'Create Your First Event'|t }}</a>
       </div>
     </div>
   {% endif %}
@@ -140,7 +140,7 @@
         <tbody>
           <tr>
             <td>
-              <a href="/vendor/events/add" class="mel-action-btn mel-action-btn--primary">
+              <a href="/vendor/events/create" class="mel-action-btn mel-action-btn--primary">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
@@ -285,7 +285,7 @@
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
               </svg>
               <p class="mel-empty-state__text">{{ 'No events yet. Create your first event to get started.'|t }}</p>
-              <a href="/vendor/events/add" class="mel-btn mel-btn--primary">{{ 'Create Event'|t }}</a>
+              <a href="/vendor/events/create" class="mel-btn mel-btn--primary">{{ 'Create Event'|t }}</a>
             </div>
           {% endif %}
         </div>

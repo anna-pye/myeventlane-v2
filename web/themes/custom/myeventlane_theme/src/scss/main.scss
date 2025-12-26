@@ -11,6 +11,10 @@
 // ---------------------------------------------------------------------------
 // Core values: colors, typography, spacing, etc.
 
+// CSS Custom Properties (single source of truth)
+@use 'tokens';
+
+// Sass tokens (for mixins, functions, and calculations)
 @use 'tokens/colors';
 @use 'tokens/typography' as type-tokens;
 @use 'tokens/spacing' as space-tokens;
@@ -34,8 +38,10 @@
 
 @use 'base/reset';
 @use 'base/base';
+@use 'base/global';
 @use 'base/typography' as type-styles;
 @use 'base/forms';
+@use 'base/layout';
 
 // ---------------------------------------------------------------------------
 // 4. Layout
@@ -65,6 +71,7 @@
 @use 'components/tables';
 @use 'components/header';
 @use 'components/hero';
+@use 'components/home-hero';
 @use 'components/event-grid';
 @use 'components/event-card';
 @use 'components/event-page';
@@ -81,7 +88,6 @@
 @use 'components/feature-block';
 @use 'components/taxonomy-tags';
 @use 'components/wizard';
-@use 'components/event-wizard';
 @use 'components/ticket-types';
 @use 'components/diagnostics';
 

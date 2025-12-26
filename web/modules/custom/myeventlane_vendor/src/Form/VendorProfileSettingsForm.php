@@ -136,10 +136,12 @@ class VendorProfileSettingsForm extends FormBase {
     $form_state->set('vendor', $vendor);
     $form_state->set('vendor_id', $vendor->id());
 
-    // Store vendor ID in form for rebuilds.
+    // Store vendor ID in form for rebuilds and POST submissions.
+    // This ensures vendor_id is available even if form state doesn't persist.
     $form['vendor_id'] = [
       '#type' => 'value',
       '#value' => $vendor->id(),
+      '#weight' => -1000,
     ];
 
     $form['#tree'] = TRUE;
@@ -672,6 +674,11 @@ class VendorProfileSettingsForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
+    // Log that submit handler was called.
+    \Drupal::logger('myeventlane_vendor')->info('VendorProfileSettingsForm::submitForm called. Form ID: @form_id', [
+      '@form_id' => $this->getFormId(),
+    ]);
+    
     /** @var \Drupal\myeventlane_vendor\Entity\Vendor|null $vendor */
     $vendor = $form_state->get('vendor');
     
@@ -682,6 +689,8 @@ class VendorProfileSettingsForm extends FormBase {
         $vendor_id = $form_state->getValue('vendor_id');
       }
       if ($vendor_id) {
+        // Reset cache before loading to ensure fresh data.
+        $this->entityTypeManager->getStorage('myeventlane_vendor')->resetCache([$vendor_id]);
         $vendor = $this->entityTypeManager->getStorage('myeventlane_vendor')->load($vendor_id);
         if ($vendor) {
           $form_state->set('vendor', $vendor);
@@ -689,8 +698,22 @@ class VendorProfileSettingsForm extends FormBase {
       }
     }
     
+    // If still no vendor, try to get from current user as fallback.
     if (!$vendor) {
-      $this->messenger()->addError($this->t('Vendor not found. Unable to save settings.'));
+      $vendor = $this->getCurrentVendor();
+      if ($vendor) {
+        $form_state->set('vendor', $vendor);
+        $form_state->set('vendor_id', $vendor->id());
+      }
+    }
+    
+    if (!$vendor) {
+      \Drupal::logger('myeventlane_vendor')->error('Vendor not found during form submission. User ID: @uid, Vendor ID from form: @vendor_id', [
+        '@uid' => $this->currentUser->id(),
+        '@vendor_id' => $form_state->getValue('vendor_id') ?? 'not set',
+      ]);
+      $this->messenger()->addError($this->t('Vendor not found. Unable to save settings. Please refresh the page and try again.'));
+      $form_state->setRebuild();
       return;
     }
 
@@ -727,10 +750,7 @@ class VendorProfileSettingsForm extends FormBase {
       }
     }
 
-    if ($vendor->hasField('field_summary')) {
-      $summary = $form_state->getValue(['profile', 'summary']);
-      $vendor->set('field_summary', $summary ?: NULL);
-    }
+    // Note: field_summary is already saved above, no need to save again here.
 
     // Save visual assets.
     if (isset($form['visual']['logo'])) {
@@ -839,6 +859,11 @@ class VendorProfileSettingsForm extends FormBase {
     }
 
     try {
+      // Log the save attempt for debugging.
+      \Drupal::logger('myeventlane_vendor')->info('Attempting to save vendor settings. Vendor ID: @vendor_id', [
+        '@vendor_id' => $vendor->id(),
+      ]);
+      
       $vendor->save();
       
       // Clear entity cache to ensure fresh data is displayed.
@@ -851,14 +876,19 @@ class VendorProfileSettingsForm extends FormBase {
       ];
       \Drupal::service('cache_tags.invalidator')->invalidateTags($cache_tags);
       
+      \Drupal::logger('myeventlane_vendor')->info('Vendor settings saved successfully. Vendor ID: @vendor_id', [
+        '@vendor_id' => $vendor->id(),
+      ]);
+      
       $this->messenger()->addStatus($this->t('Vendor settings saved successfully.'));
       
       // Redirect back to settings page to prevent form resubmission.
       $form_state->setRedirect('myeventlane_vendor.console.settings');
     }
     catch (\Exception $e) {
-      \Drupal::logger('myeventlane_vendor')->error('Failed to save vendor settings: @message', [
+      \Drupal::logger('myeventlane_vendor')->error('Failed to save vendor settings: @message. Vendor ID: @vendor_id. Trace: @trace', [
         '@message' => $e->getMessage(),
+        '@vendor_id' => $vendor->id() ?? 'unknown',
         '@trace' => $e->getTraceAsString(),
       ]);
       $this->messenger()->addError($this->t('An error occurred while saving. Please try again. If the problem persists, contact support.'));

@@ -29,6 +29,7 @@
   letter-spacing: -0.025em;
   line-height: 1.05;
   margin-bottom: spacing.mel-space(4);
+  max-width: 16ch;
 }
 
 .mel-hero-subtitle {
@@ -37,6 +38,17 @@
   color: colors.$mel-color-primary;
   opacity: 0.85;
   margin-top: 0.6rem;
+  line-height: 1.4;
+}
+
+.mel-hero h1 {
+  max-width: 16ch;
+}
+
+.mel-hero p {
+  max-width: 36ch;
+  font-size: 1.05rem;
+  line-height: 1.55;
 }
 
 /* Search Bar */

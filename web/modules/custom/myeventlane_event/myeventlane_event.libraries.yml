@@ -20,3 +20,10 @@ hide_venue_name:
   css:
     component:
       css/hide-venue-name.css: {}
+
+wizard_fixes:
+  css:
+    component:
+      css/wizard-fixes.css: {}
+  dependencies:
+    - core/drupal

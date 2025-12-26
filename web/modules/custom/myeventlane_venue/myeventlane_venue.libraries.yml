@@ -1,0 +1,9 @@
+venue_selection:
+  js:
+    js/venue-selection.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/jquery.once
+    - core/drupal.autocomplete
+    - myeventlane_location/address_autocomplete

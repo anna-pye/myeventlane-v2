@@ -13,7 +13,7 @@
 #}
 
 {% if latitude and longitude %}
-  <div class="myeventlane-event-location-map">
+  <div class="mel-event-location">
     <h3 class="mel-event-section-title">Location</h3>
 
     {% if venue_name %}
@@ -22,10 +22,21 @@
       </div>
     {% endif %}
     
-    <div class="myeventlane-event-map-container" 
+    {% if address %}
+      <address class="myeventlane-event-address">
+        {{ address }}
+      </address>
+    {% endif %}
+    
+    <button type="button" class="mel-event-map-toggle" aria-expanded="false">
+      {{ 'Show map'|t }}
+    </button>
+    
+    <div class="mel-event-map-container myeventlane-event-map-container" 
          data-latitude="{{ latitude }}" 
          data-longitude="{{ longitude }}"
-         data-title="{{ event.label }}">
+         data-title="{{ event.label }}"
+         style="display: none;">
     </div>
 
     <div class="myeventlane-event-map-actions">
@@ -43,12 +54,6 @@
         Open in Google Maps
       </a>
     </div>
-
-    {% if address %}
-      <address class="myeventlane-event-address">
-        {{ address }}
-      </address>
-    {% endif %}
   </div>
 {% endif %}
 

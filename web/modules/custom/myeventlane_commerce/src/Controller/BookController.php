@@ -38,7 +38,7 @@ final class BookController extends ControllerBase {
   public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('file_url_generator'),
-      $container->get('myeventlane_event.mode_manager'),
+      $container->get('myeventlane_event.event_mode_manager'),
       $container->get('form_builder'),
     );
   }

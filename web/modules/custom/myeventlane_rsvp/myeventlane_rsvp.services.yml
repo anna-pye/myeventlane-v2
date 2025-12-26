@@ -6,7 +6,7 @@ services:
 
   myeventlane_rsvp.mailer:
     class: Drupal\myeventlane_rsvp\Service\RsvpMailer
-    arguments: ['@plugin.manager.mail', '@renderer', '@config.factory']
+    arguments: ['@plugin.manager.mail', '@config.factory']
 
   myeventlane_rsvp.ics_generator:
     class: Drupal\myeventlane_rsvp\Service\IcsGenerator

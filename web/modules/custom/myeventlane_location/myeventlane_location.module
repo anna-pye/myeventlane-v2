@@ -105,10 +105,32 @@ function _myeventlane_location_alter_event_form(array &$form, FormStateInterface
   // Find field_location wherever it exists in the form (might be at root or moved to wizard).
   // Check root first (normal form).
   $field_location_ref = NULL;
+  $is_wizard_form = FALSE;
+  
+  // Check if this is the wizard form (EventWizardForm).
+  if (isset($form['#form_id']) && $form['#form_id'] === 'myeventlane_event_wizard') {
+    $is_wizard_form = TRUE;
+  }
+  elseif (isset($form['wizard']) || isset($form['wizard_step'])) {
+    $is_wizard_form = TRUE;
+  }
+  
   if (isset($form['field_location'])) {
     $field_location_ref = &$form['field_location'];
   }
-  // Check new wizard structure (EventWizardForm).
+  // Check wizard structure with venue wrapper (EventWizardForm - when_where step).
+  elseif (isset($form['wizard']['content']['_venue_wrapper']['field_location'])) {
+    $field_location_ref = &$form['wizard']['content']['_venue_wrapper']['field_location'];
+  }
+  // Check wizard structure with location wrapper (EventWizardForm - when_where step).
+  elseif (isset($form['wizard']['content']['_location_wrapper']['field_location'])) {
+    $field_location_ref = &$form['wizard']['content']['_location_wrapper']['field_location'];
+  }
+  // Check new wizard structure (EventWizardForm - other steps).
+  elseif (isset($form['wizard']['content']['field_location'])) {
+    $field_location_ref = &$form['wizard']['content']['field_location'];
+  }
+  // Check new wizard structure (EventWizardForm - alternative path).
   elseif (isset($form['wizard']['content']['step_content']['location_fields']['field_location'])) {
     $field_location_ref = &$form['wizard']['content']['step_content']['location_fields']['field_location'];
   }
@@ -120,6 +142,13 @@ function _myeventlane_location_alter_event_form(array &$form, FormStateInterface
         break;
       }
     }
+  }
+  
+  // For wizard forms, if field_location is hidden (by EventWizardForm), don't add search field to it.
+  if ($is_wizard_form && isset($field_location_ref) && isset($field_location_ref['#access']) && $field_location_ref['#access'] === FALSE) {
+    // Field is intentionally hidden in wizard - just attach library for the custom search field.
+    $form['#attached']['library'][] = 'myeventlane_location/address_autocomplete';
+    return;
   }
   
   if (!$field_location_ref) {
@@ -152,7 +181,8 @@ function _myeventlane_location_alter_event_form(array &$form, FormStateInterface
   }
   
   // If no search field exists, add it to the first widget delta (delta 0).
-  if (!$has_search_field && isset($field_location_ref['widget'][0])) {
+  // BUT: Skip this for wizard forms - they have their own search field.
+  if (!$has_search_field && isset($field_location_ref['widget'][0]) && !$is_wizard_form) {
     $field_location_ref['widget'][0]['address_search'] = [
       '#type' => 'textfield',
       '#title' => t('Search for address or venue'),
@@ -224,6 +254,7 @@ function _myeventlane_location_alter_event_form(array &$form, FormStateInterface
   
   // Hide the actual coordinate fields if they exist in the form - they're auto-populated.
   // These fields should not be visible or editable by users.
+  // Check root level.
   if (isset($form['field_location_latitude'])) {
     $form['field_location_latitude']['#access'] = FALSE;
     // Also hide any widgets within the field
@@ -245,6 +276,14 @@ function _myeventlane_location_alter_event_form(array &$form, FormStateInterface
         }
       }
     }
+  }
+  
+  // Also check wizard structure.
+  if (isset($form['wizard']['content']['field_location_latitude'])) {
+    $form['wizard']['content']['field_location_latitude']['#access'] = FALSE;
+  }
+  if (isset($form['wizard']['content']['field_location_longitude'])) {
+    $form['wizard']['content']['field_location_longitude']['#access'] = FALSE;
   }
   
   // Add our own hidden fields for coordinates (these will be populated by JavaScript).
@@ -474,65 +513,110 @@ function myeventlane_location_node_view(array &$build, EntityInterface $entity, 
     return;
   }
 
-  // Get coordinates.
+  // Get venue data from Venue entity (canonical source).
   $lat = NULL;
   $lng = NULL;
-
-  if ($entity->hasField('field_location_latitude') && !$entity->get('field_location_latitude')->isEmpty()) {
-    $lat = (float) $entity->get('field_location_latitude')->value;
-  }
-  elseif ($entity->hasField('field_event_lat') && !$entity->get('field_event_lat')->isEmpty()) {
-    $lat = (float) $entity->get('field_event_lat')->value;
-  }
-
-  if ($entity->hasField('field_location_longitude') && !$entity->get('field_location_longitude')->isEmpty()) {
-    $lng = (float) $entity->get('field_location_longitude')->value;
-  }
-  elseif ($entity->hasField('field_event_lng') && !$entity->get('field_event_lng')->isEmpty()) {
-    $lng = (float) $entity->get('field_event_lng')->value;
-  }
-
-  // Get address string from either field_location (new) or field_event_address (legacy).
   $address = '';
   $venue_name = '';
 
-  $address_field = NULL;
-  if ($entity->hasField('field_location') && !$entity->get('field_location')->isEmpty()) {
-    $address_field = $entity->get('field_location');
-  }
-  elseif ($entity->hasField('field_event_address') && !$entity->get('field_event_address')->isEmpty()) {
-    $address_field = $entity->get('field_event_address');
-  }
+  // First, try to get data from Venue entity (field_venue).
+  if ($entity->hasField('field_venue') && !$entity->get('field_venue')->isEmpty()) {
+    $venue = $entity->get('field_venue')->entity;
+    if ($venue && $venue->getEntityTypeId() === 'myeventlane_venue') {
+      // Get venue name.
+      $venue_name = $venue->getName();
 
-  if ($address_field && !$address_field->isEmpty()) {
-    $location_item = $address_field->first();
-    if ($location_item) {
-      $location = $location_item->getValue();
-      if (is_array($location)) {
-        $parts = [];
-        if (!empty($location['address_line1'])) {
-          $parts[] = $location['address_line1'];
+      // Get coordinates from venue.
+      if ($venue->hasField('field_latitude') && !$venue->get('field_latitude')->isEmpty()) {
+        $lat = (float) $venue->get('field_latitude')->value;
+      }
+      if ($venue->hasField('field_longitude') && !$venue->get('field_longitude')->isEmpty()) {
+        $lng = (float) $venue->get('field_longitude')->value;
+      }
+
+      // Get address from venue.
+      if ($venue->hasField('field_location') && !$venue->get('field_location')->isEmpty()) {
+        $location_item = $venue->get('field_location')->first();
+        if ($location_item) {
+          $location = $location_item->getValue();
+          if (is_array($location)) {
+            $parts = [];
+            if (!empty($location['address_line1'])) {
+              $parts[] = $location['address_line1'];
+            }
+            if (!empty($location['locality'])) {
+              $parts[] = $location['locality'];
+            }
+            if (!empty($location['administrative_area'])) {
+              $parts[] = $location['administrative_area'];
+            }
+            if (!empty($location['postal_code'])) {
+              $parts[] = $location['postal_code'];
+            }
+            $address = implode(', ', $parts);
+          }
         }
-        if (!empty($location['locality'])) {
-          $parts[] = $location['locality'];
-        }
-        if (!empty($location['administrative_area'])) {
-          $parts[] = $location['administrative_area'];
-        }
-        if (!empty($location['postal_code'])) {
-          $parts[] = $location['postal_code'];
-        }
-        $address = implode(', ', $parts);
       }
     }
   }
 
-  // Get venue name from either field_venue_name (new) or field_event_venue (legacy).
-  if ($entity->hasField('field_venue_name') && !$entity->get('field_venue_name')->isEmpty()) {
-    $venue_name = $entity->get('field_venue_name')->value;
+  // Fallback to legacy fields if venue entity not available.
+  if ($lat === NULL && $entity->hasField('field_location_latitude') && !$entity->get('field_location_latitude')->isEmpty()) {
+    $lat = (float) $entity->get('field_location_latitude')->value;
   }
-  elseif ($entity->hasField('field_event_venue') && !$entity->get('field_event_venue')->isEmpty()) {
-    $venue_name = $entity->get('field_event_venue')->value;
+  elseif ($lat === NULL && $entity->hasField('field_event_lat') && !$entity->get('field_event_lat')->isEmpty()) {
+    $lat = (float) $entity->get('field_event_lat')->value;
+  }
+
+  if ($lng === NULL && $entity->hasField('field_location_longitude') && !$entity->get('field_location_longitude')->isEmpty()) {
+    $lng = (float) $entity->get('field_location_longitude')->value;
+  }
+  elseif ($lng === NULL && $entity->hasField('field_event_lng') && !$entity->get('field_event_lng')->isEmpty()) {
+    $lng = (float) $entity->get('field_event_lng')->value;
+  }
+
+  // Fallback address from legacy fields.
+  if (empty($address)) {
+    $address_field = NULL;
+    if ($entity->hasField('field_location') && !$entity->get('field_location')->isEmpty()) {
+      $address_field = $entity->get('field_location');
+    }
+    elseif ($entity->hasField('field_event_address') && !$entity->get('field_event_address')->isEmpty()) {
+      $address_field = $entity->get('field_event_address');
+    }
+
+    if ($address_field && !$address_field->isEmpty()) {
+      $location_item = $address_field->first();
+      if ($location_item) {
+        $location = $location_item->getValue();
+        if (is_array($location)) {
+          $parts = [];
+          if (!empty($location['address_line1'])) {
+            $parts[] = $location['address_line1'];
+          }
+          if (!empty($location['locality'])) {
+            $parts[] = $location['locality'];
+          }
+          if (!empty($location['administrative_area'])) {
+            $parts[] = $location['administrative_area'];
+          }
+          if (!empty($location['postal_code'])) {
+            $parts[] = $location['postal_code'];
+          }
+          $address = implode(', ', $parts);
+        }
+      }
+    }
+  }
+
+  // Fallback venue name from legacy fields.
+  if (empty($venue_name)) {
+    if ($entity->hasField('field_venue_name') && !$entity->get('field_venue_name')->isEmpty()) {
+      $venue_name = $entity->get('field_venue_name')->value;
+    }
+    elseif ($entity->hasField('field_event_venue') && !$entity->get('field_event_venue')->isEmpty()) {
+      $venue_name = $entity->get('field_event_venue')->value;
+    }
   }
 
   // Only add map if coordinates exist.
@@ -552,6 +636,9 @@ function myeventlane_location_node_view(array &$build, EntityInterface $entity, 
       '#venue_name' => $venue_name,
       '#provider' => $provider,
       '#weight' => 100,
+      '#attached' => [
+        'library' => ['myeventlane_location/event_map_toggle'],
+      ],
       '#cache' => [
         'tags' => $entity->getCacheTags(),
         'contexts' => ['url.path'],

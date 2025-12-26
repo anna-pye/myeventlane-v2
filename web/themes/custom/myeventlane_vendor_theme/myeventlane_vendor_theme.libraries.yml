@@ -58,3 +58,12 @@ analytics:
     - core/once
     - myeventlane_vendor_theme/chartjs
 
+# Vendor Event Wizard
+vendor_wizard:
+  css:
+    theme:
+      dist/vendor-wizard.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.form
+

@@ -37,7 +37,7 @@
   border: 2px solid transparent;
   border-radius: radii.$mel-radius-md;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 
   // Focus
   &:focus {
@@ -68,6 +68,8 @@
 
   &:hover {
     background-color: colors.$mel-color-primary-hover;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(242, 109, 91, 0.35);
   }
 
   &:active {
@@ -80,12 +82,24 @@
 .button--ticket {
   color: white;
   background-color: #C74848; // Meets 4.5:1 contrast ratio
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(199, 72, 72, 0.35);
+  }
 }
 
 // CTA Button Hierarchy
 .button--primary {
   background: #FC9167;
   color: #fff;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(252, 145, 103, 0.35);
+  }
 }
 
 .button--secondary {
@@ -253,4 +267,41 @@
   svg, .mel-icon {
     margin-left: spacing.mel-space(1);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Mobile-First Button Variants (CSS Variables)
+// ---------------------------------------------------------------------------
+// Additional button classes using CSS custom properties for consistency.
+
+.mel-btn--primary {
+  background: var(--mel-primary);
+  color: #fff;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(242, 109, 91, 0.35);
+  }
+}
+
+.mel-btn--disabled {
+  background: rgba(41, 50, 65, 0.10);
+  color: var(--mel-muted);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+// Ensure all interactive elements meet 44px tap target requirement
+a.mel-btn,
+button.mel-btn,
+.mel-btn[role="button"] {
+  min-height: 44px;
+  min-width: 44px; // For icon-only buttons
+}
+
+// Pills and icon buttons
+.mel-btn-pill,
+.mel-btn-icon {
+  min-height: 44px;
+  min-width: 44px;
 }

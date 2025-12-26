@@ -8,6 +8,7 @@
 @use '../tokens/typography' as *;
 @use '../tokens/radii' as *;
 @use '../tokens/shadows' as *;
+@use '../tokens/breakpoints' as *;
 
 // ============================================================================
 // FORM CARD (styled form sections)
@@ -279,5 +280,436 @@
 .mel-category-chip__icon {
   width: 18px;
   height: 18px;
+}
+
+// ============================================================================
+// WIZARD LAYOUT (LEFT SIDEBAR + RIGHT CONTENT)
+// ============================================================================
+
+.mel-wizard,
+.mel-wizard--event,
+.mel-vendor-wizard {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: $spacing-8;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: $spacing-8;
+  background: $bg-secondary;
+  width: 100%;
+
+  @include respond-down(lg) {
+    grid-template-columns: 1fr;
+    padding: $spacing-4;
+    gap: $spacing-4;
+    max-width: 100%;
+  }
+}
+
+.mel-wizard__layout,
+.mel-vendor-wizard__layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: $spacing-8;
+  width: 100%;
+  max-width: 100%;
+
+  @include respond-down(lg) {
+    grid-template-columns: 1fr;
+    gap: $spacing-4;
+  }
+}
+
+// ============================================================================
+// WIZARD SIDEBAR NAVIGATION
+// ============================================================================
+
+.mel-wizard__sidebar,
+.mel-wizard__nav,
+.mel-vendor-wizard__rail {
+  background: $bg-primary;
+  border-radius: $radius-card;
+  box-shadow: $shadow-card;
+  padding: $spacing-5;
+  position: sticky;
+  top: $spacing-6;
+  height: fit-content;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+
+  @include respond-down(lg) {
+    display: none;
+  }
+}
+
+.mel-event-form__wizard-nav-title {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $text-muted;
+  margin: 0 0 $spacing-4 0;
+  padding-bottom: $spacing-3;
+  border-bottom: 1px solid $border-color-light;
+}
+
+.mel-wizard__nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mel-wizard__step-row {
+  display: block;
+  width: 100%;
+  margin-bottom: $spacing-2;
+}
+
+// Target both the button element and any wrapper
+.mel-wizard__step,
+.mel-vendor-wizard__step,
+.mel-wizard__step-row button,
+.mel-wizard__step-row .mel-wizard__step,
+.mel-vendor-wizard__step-row button,
+.mel-vendor-wizard__step-row .mel-vendor-wizard__step {
+  display: flex !important;
+  align-items: center;
+  gap: $spacing-3;
+  padding: $spacing-4 $spacing-5 !important;
+  border-radius: $radius-lg !important;
+  font-weight: $font-weight-semibold;
+  color: $text-primary !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  cursor: pointer;
+  border: 2px solid rgba($primary, 0.2) !important;
+  width: 100%;
+  text-align: left;
+  background: linear-gradient(135deg, $bg-primary 0%, rgba($primary, 0.03) 100%) !important;
+  font-size: $font-size-sm;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  margin: 0;
+
+  // Funky hover effect
+  &:hover:not(.is-active) {
+    background: linear-gradient(135deg, rgba($primary, 0.08) 0%, rgba($primary, 0.15) 100%) !important;
+    border-color: rgba($primary, 0.4) !important;
+    transform: translateX(4px) scale(1.02);
+    box-shadow: 0 4px 12px rgba($primary, 0.15), 0 0 0 2px rgba($primary, 0.1);
+    color: $primary !important;
+  }
+
+  // Active state - funky and bold
+  &.is-active {
+    background: linear-gradient(135deg, rgba($primary, 0.15) 0%, rgba($primary, 0.25) 100%) !important;
+    color: $primary !important;
+    border-color: $primary !important;
+    border-width: 3px !important;
+    box-shadow: 
+      0 0 0 6px rgba($primary, 0.12),
+      0 4px 16px rgba($primary, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    font-weight: $font-weight-bold;
+    transform: translateX(6px) scale(1.03);
+    
+    // Funky left accent bar
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      background: linear-gradient(180deg, $primary 0%, lighten($primary, 10%) 100%);
+      border-radius: $radius-lg 0 0 $radius-lg;
+      box-shadow: 2px 0 8px rgba($primary, 0.4);
+      z-index: 1;
+    }
+
+    // Subtle shine effect
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: melShine 3s infinite;
+      z-index: 0;
+    }
+  }
+
+  &:focus-visible {
+    outline: 3px solid $primary !important;
+    outline-offset: 3px;
+    border-color: $primary !important;
+    box-shadow: 0 0 0 6px rgba($primary, 0.2);
+  }
+}
+
+// Force styling on step buttons - override Drupal defaults
+.mel-wizard__step-row button,
+.mel-vendor-wizard__step-row button,
+.mel-wizard__nav-list button,
+.mel-vendor-wizard__steps button {
+  // Reset Drupal button defaults
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  
+  // Apply funky styles
+  display: flex !important;
+  align-items: center !important;
+  gap: $spacing-3 !important;
+  padding: $spacing-4 $spacing-5 !important;
+  border-radius: $radius-lg !important;
+  font-weight: $font-weight-semibold !important;
+  color: $text-primary !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  border: 2px solid rgba($primary, 0.2) !important;
+  width: 100% !important;
+  text-align: left !important;
+  background: linear-gradient(135deg, $bg-primary 0%, rgba($primary, 0.03) 100%) !important;
+  font-size: $font-size-sm !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+  margin: 0 !important;
+  font-family: inherit !important;
+  line-height: 1.4 !important;
+
+  &:hover:not(.is-active) {
+    background: linear-gradient(135deg, rgba($primary, 0.08) 0%, rgba($primary, 0.15) 100%) !important;
+    border-color: rgba($primary, 0.4) !important;
+    transform: translateX(4px) scale(1.02) !important;
+    box-shadow: 0 4px 12px rgba($primary, 0.15), 0 0 0 2px rgba($primary, 0.1) !important;
+    color: $primary !important;
+  }
+
+  &.is-active {
+    background: linear-gradient(135deg, rgba($primary, 0.15) 0%, rgba($primary, 0.25) 100%) !important;
+    color: $primary !important;
+    border-color: $primary !important;
+    border-width: 3px !important;
+    box-shadow: 
+      0 0 0 6px rgba($primary, 0.12),
+      0 4px 16px rgba($primary, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    font-weight: $font-weight-bold !important;
+    transform: translateX(6px) scale(1.03) !important;
+    
+    &::before {
+      content: '' !important;
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      bottom: 0 !important;
+      width: 5px !important;
+      background: linear-gradient(180deg, $primary 0%, lighten($primary, 10%) 100%) !important;
+      border-radius: $radius-lg 0 0 $radius-lg !important;
+      box-shadow: 2px 0 8px rgba($primary, 0.4) !important;
+      z-index: 1 !important;
+    }
+
+    &::after {
+      content: '' !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: -100% !important;
+      width: 100% !important;
+      height: 100% !important;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent) !important;
+      animation: melShine 3s infinite !important;
+      z-index: 0 !important;
+    }
+  }
+
+  &:focus-visible {
+    outline: 3px solid $primary !important;
+    outline-offset: 3px !important;
+    border-color: $primary !important;
+    box-shadow: 0 0 0 6px rgba($primary, 0.2) !important;
+  }
+}
+
+@keyframes melShine {
+  0% {
+    left: -100%;
+  }
+  50%, 100% {
+    left: 100%;
+  }
+}
+
+.mel-event-form__step-inner {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  width: 100%;
+}
+
+.mel-event-form__step-number {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  border-radius: $radius-full !important;
+  background: linear-gradient(135deg, rgba($text-muted, 0.2) 0%, rgba($text-muted, 0.3) 100%) !important;
+  color: $text-muted !important;
+  font-size: $font-size-sm !important;
+  font-weight: $font-weight-bold !important;
+  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1;
+  border: 2px solid rgba($text-muted, 0.2) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  position: relative;
+
+  .mel-wizard__step.is-active &,
+  .mel-vendor-wizard__step.is-active &,
+  button.is-active & {
+    background: linear-gradient(135deg, $primary 0%, lighten($primary, 8%) 100%) !important;
+    color: $text-inverse !important;
+    box-shadow: 
+      0 4px 12px rgba($primary, 0.4),
+      0 0 0 3px rgba($primary, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.15) rotate(5deg);
+    border-color: lighten($primary, 15%) !important;
+    animation: melPulse 2s ease-in-out infinite;
+  }
+
+  .mel-wizard__step:hover:not(.is-active) &,
+  .mel-vendor-wizard__step:hover:not(.is-active) &,
+  button:hover:not(.is-active) & {
+    background: linear-gradient(135deg, rgba($primary, 0.2) 0%, rgba($primary, 0.3) 100%) !important;
+    border-color: rgba($primary, 0.4) !important;
+    color: $primary !important;
+    transform: scale(1.08);
+    box-shadow: 0 3px 8px rgba($primary, 0.2);
+  }
+}
+
+@keyframes melPulse {
+  0%, 100% {
+    transform: scale(1.15) rotate(5deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(5deg);
+  }
+}
+
+.mel-event-form__step-label {
+  font-size: $font-size-sm;
+  font-weight: inherit;
+  color: inherit;
+  flex: 1;
+  line-height: 1.4;
+}
+
+// ============================================================================
+// WIZARD CONTENT AREA
+// ============================================================================
+
+.mel-wizard__content {
+  min-width: 0; // Prevent flex overflow
+}
+
+.mel-wizard-step {
+  background: $bg-primary;
+  border-radius: $radius-card;
+  box-shadow: $shadow-card;
+  padding: 0;
+  animation: melFadeUp 0.25s ease-out;
+
+  @include respond-down(sm) {
+    border-radius: $radius-md;
+  }
+
+  &.is-hidden {
+    display: none;
+  }
+
+  &.is-active {
+    display: block;
+  }
+}
+
+// ============================================================================
+// WIZARD CARD SECTIONS
+// ============================================================================
+
+.mel-card--wizard-section {
+  background: $bg-primary;
+  border-radius: $radius-card;
+  box-shadow: $shadow-card;
+  padding: 0;
+  overflow: hidden;
+  margin-bottom: $spacing-6;
+
+  @include respond-down(sm) {
+    border-radius: $radius-md;
+    margin-bottom: $spacing-4;
+  }
+
+  .mel-card__header {
+    padding: $spacing-6 $spacing-6 $spacing-5;
+    border-bottom: 1px solid $border-color-light;
+
+    @include respond-down(sm) {
+      padding: $spacing-5 $spacing-5 $spacing-4;
+    }
+  }
+
+  .mel-card__title {
+    @include section-title;
+    margin: 0 0 $spacing-3 0;
+    line-height: 1.2;
+
+    @include respond-down(sm) {
+      font-size: $font-size-lg;
+    }
+  }
+
+  .mel-card__help {
+    color: $text-secondary;
+    font-size: $font-size-base;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .mel-card__body {
+    padding: $spacing-6;
+
+    @include respond-down(sm) {
+      padding: $spacing-5;
+    }
+  }
+}
+
+// ============================================================================
+// WIZARD STEP ANIMATION
+// ============================================================================
+
+@keyframes melFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 

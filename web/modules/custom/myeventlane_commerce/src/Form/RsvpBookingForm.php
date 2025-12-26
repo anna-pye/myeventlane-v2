@@ -6,14 +6,10 @@ namespace Drupal\myeventlane_commerce\Form;
 
 use Drupal\commerce_cart\CartManagerInterface;
 use Drupal\commerce_cart\CartProviderInterface;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\Core\Module\ModuleHandlerInterface;
-use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\paragraphs\Entity\Paragraph;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -29,10 +25,6 @@ final class RsvpBookingForm extends FormBase {
     private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly CartManagerInterface $cartManager,
     private readonly CartProviderInterface $cartProvider,
-    private readonly ConfigFactoryInterface $configFactory,
-    private readonly AccountProxyInterface $currentUser,
-    private readonly LoggerChannelFactoryInterface $loggerFactory,
-    private readonly MessengerInterface $messenger,
     private readonly ModuleHandlerInterface $moduleHandler,
   ) {}
 
@@ -40,16 +32,17 @@ final class RsvpBookingForm extends FormBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): static {
-    return new static(
+    $form = new static(
       $container->get('entity_type.manager'),
       $container->get('commerce_cart.cart_manager'),
       $container->get('commerce_cart.cart_provider'),
-      $container->get('config.factory'),
-      $container->get('current_user'),
-      $container->get('logger.factory'),
-      $container->get('messenger'),
       $container->get('module_handler')
     );
+    // Set services provided by FormBase traits.
+    $form->setConfigFactory($container->get('config.factory'));
+    $form->setLoggerFactory($container->get('logger.factory'));
+    $form->setMessenger($container->get('messenger'));
+    return $form;
   }
 
   /**
@@ -134,7 +127,7 @@ final class RsvpBookingForm extends FormBase {
     ];
 
     // Optional donation panel (same as RsvpPublicForm).
-    $donationConfig = $this->configFactory->get('myeventlane_donations.settings');
+    $donationConfig = $this->config('myeventlane_donations.settings');
     $donationEnabled = $donationConfig->get('enable_rsvp_donations') ?? FALSE;
     $requireStripeConnected = $donationConfig->get('require_stripe_connected_for_attendee_donations') ?? TRUE;
 
@@ -253,7 +246,7 @@ final class RsvpBookingForm extends FormBase {
     // Validate donation amount if donation toggle is enabled.
     $donationToggle = $form_state->getValue('donation_toggle');
     if ($donationToggle) {
-      $donationConfig = $this->configFactory->get('myeventlane_donations.settings');
+      $donationConfig = $this->config('myeventlane_donations.settings');
       $minAmount = (float) ($donationConfig->get('min_amount') ?? 1.00);
       $preset = $form_state->getValue('donation_preset');
       $customAmount = $form_state->getValue('donation_custom');
@@ -349,7 +342,7 @@ final class RsvpBookingForm extends FormBase {
             $rsvpStorage = $this->entityTypeManager->getStorage('rsvp_submission');
 
             // Anonymous users should store user_id as 0.
-            $user_id = $this->currentUser->id() ?: 0;
+            $user_id = $this->currentUser()->id() ?: 0;
 
             $submission = $rsvpStorage->create([
               'event_id' => ['target_id' => $event_id],
@@ -379,10 +372,10 @@ final class RsvpBookingForm extends FormBase {
       }
       catch (\Exception $e) {
         // Log error but don't fail RSVP submission.
-        $this->loggerFactory->get('myeventlane_commerce')->error('Failed to process RSVP donation: @message', [
+        $this->getLogger('myeventlane_commerce')->error('Failed to process RSVP donation: @message', [
           '@message' => $e->getMessage(),
         ]);
-        $this->messenger->addWarning($this->t('Your RSVP was saved, but we could not process your donation. Please contact support.'));
+        $this->messenger()->addWarning($this->t('Your RSVP was saved, but we could not process your donation. Please contact support.'));
       }
     }
 

@@ -137,7 +137,8 @@ final class VendorEventsBulkActionsForm extends FormBase {
         'status' => $status,
         'status_class' => $statusClass,
         'view_url' => $node->toUrl()->toString(),
-        'edit_url' => $node->toUrl('edit-form')->toString(),
+        // Use wizard route for editing (vendors never see default node edit form).
+        'edit_url' => Url::fromRoute('myeventlane_event.wizard.edit', ['node' => $nodeId])->toString(),
         'manage_url' => '/vendor/events/' . $nodeId . '/overview',
       ];
     }

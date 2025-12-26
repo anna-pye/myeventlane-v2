@@ -1,0 +1,66 @@
+// ==========================================================================
+// Global Typography & Base Styles
+// ==========================================================================
+// Mobile-first typography and body defaults using CSS custom properties.
+
+html {
+  font-size: 16px;
+}
+
+body {
+  background: var(--mel-bg);
+  color: var(--mel-ink);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1 {
+  font-size: 1.9rem;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--mel-space-4);
+}
+
+h2 {
+  font-size: 1.4rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--mel-space-3);
+}
+
+h3 {
+  font-size: 1.15rem;
+  line-height: 1.25;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--mel-space-2);
+}
+
+@media (min-width: 900px) {
+  h1 {
+    font-size: 2.4rem;
+  }
+
+  h2 {
+    font-size: 1.7rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+}
+
+p {
+  margin-bottom: var(--mel-space-3);
+  line-height: 1.55;
+}
+
+small,
+.mel-muted {
+  font-size: 0.9rem;
+  color: var(--mel-muted);
+}

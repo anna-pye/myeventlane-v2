@@ -1,0 +1,66 @@
+entity.myeventlane_venue.canonical:
+  path: '/venue/{myeventlane_venue}'
+  defaults:
+    _entity_view: 'myeventlane_venue'
+    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title'
+  requirements:
+    _entity_access: 'myeventlane_venue.view'
+  options:
+    parameters:
+      myeventlane_venue:
+        type: entity:myeventlane_venue
+
+entity.myeventlane_venue.collection:
+  path: '/admin/structure/myeventlane/venue'
+  defaults:
+    _entity_list: 'myeventlane_venue'
+    _title: 'Venues'
+  requirements:
+    _permission: 'administer myeventlane venue'
+
+entity.myeventlane_venue.add_form:
+  path: '/admin/structure/myeventlane/venue/add'
+  defaults:
+    _entity_form: 'myeventlane_venue.add'
+    _title: 'Add venue'
+  requirements:
+    _permission: 'administer myeventlane venue'
+
+entity.myeventlane_venue.edit_form:
+  path: '/admin/structure/myeventlane/venue/{myeventlane_venue}/edit'
+  defaults:
+    _entity_form: 'myeventlane_venue.edit'
+    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::editTitle'
+  requirements:
+    _entity_access: 'myeventlane_venue.update'
+
+entity.myeventlane_venue.delete_form:
+  path: '/admin/structure/myeventlane/venue/{myeventlane_venue}/delete'
+  defaults:
+    _entity_form: 'myeventlane_venue.delete'
+    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::deleteTitle'
+  requirements:
+    _entity_access: 'myeventlane_venue.delete'
+
+myeventlane_venue.settings:
+  path: '/admin/structure/myeventlane/venue/settings'
+  defaults:
+    _form: '\Drupal\myeventlane_venue\Form\VenueSettingsForm'
+    _title: 'Venue settings'
+  requirements:
+    _permission: 'administer myeventlane venue'
+
+myeventlane_venue.autocomplete:
+  path: '/venue/autocomplete'
+  defaults:
+    _controller: '\Drupal\myeventlane_venue\Controller\VenueAutocompleteController::autocomplete'
+  requirements:
+    _access: 'TRUE'
+
+myeventlane_venue.vendor_list:
+  path: '/vendor/venues'
+  defaults:
+    _controller: '\Drupal\myeventlane_venue\Controller\VendorVenueController::list'
+    _title: 'My Venues'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'

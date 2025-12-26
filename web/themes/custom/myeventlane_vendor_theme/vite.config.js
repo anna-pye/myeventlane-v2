@@ -9,21 +9,27 @@ export default defineConfig({
     rollupOptions: {
       input: {
         styles: resolve(__dirname, 'src/scss/main.scss'),
+        'vendor-wizard': resolve(__dirname, 'src/scss/vendor-wizard.scss'),
         main: resolve(__dirname, 'src/js/main.js'),
       },
       output: {
         entryFileNames: '[name].js',
         chunkFileNames: '[name].js',
         assetFileNames: (assetInfo) => {
-          // Rename CSS to main.css for Drupal compatibility
+          // Rename CSS files appropriately based on entry point
           if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+            // vendor-wizard entry produces vendor-wizard.css
+            if (assetInfo.name === 'vendor-wizard.css' || assetInfo.name?.includes('vendor-wizard')) {
+              return 'vendor-wizard.css';
+            }
+            // styles entry produces main.css
             return 'main.css';
           }
           return '[name].[ext]';
         },
       },
     },
-    cssCodeSplit: false,
+    cssCodeSplit: true,
     sourcemap: true,
   },
   css: {

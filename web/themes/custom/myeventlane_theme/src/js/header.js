@@ -5,6 +5,7 @@
 
 // Store references globally to avoid re-querying
 let mobileNavState = {
+  checkbox: null,
   toggle: null,
   mobileNav: null,
   closeBtn: null,
@@ -14,7 +15,7 @@ let mobileNavState = {
 
 /**
  * Initialize mobile navigation with enhanced accessibility.
- * Uses event delegation for reliability.
+ * Works with CSS checkbox approach - toggles checkbox state.
  */
 export function initMobileNav() {
   // If already initialized, don't re-initialize
@@ -23,13 +24,14 @@ export function initMobileNav() {
   }
 
   // Try to find elements
+  const checkbox = document.querySelector('#mel-nav-toggle-checkbox');
   mobileNavState.toggle = document.querySelector('.mel-nav-toggle');
   mobileNavState.mobileNav = document.querySelector('.mel-nav-mobile-wrapper');
   mobileNavState.closeBtn = document.querySelector('.mel-nav-mobile-close');
   mobileNavState.overlay = document.querySelector('.mel-nav-overlay');
 
   // If elements not found, retry
-  if (!mobileNavState.toggle || !mobileNavState.mobileNav) {
+  if (!checkbox || !mobileNavState.toggle || !mobileNavState.mobileNav) {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initMobileNav);
     } else {
@@ -38,17 +40,51 @@ export function initMobileNav() {
     return;
   }
 
-  // Create overlay if it doesn't exist
-  if (!mobileNavState.overlay) {
-    mobileNavState.overlay = document.createElement('div');
-    mobileNavState.overlay.className = 'mel-nav-overlay';
-    mobileNavState.overlay.setAttribute('aria-hidden', 'true');
-    mobileNavState.overlay.setAttribute('tabindex', '-1');
-    document.body.appendChild(mobileNavState.overlay);
-  }
+  // Store checkbox reference
+  mobileNavState.checkbox = checkbox;
 
   // Mark as initialized
   mobileNavState.initialized = true;
+
+  // Listen for checkbox changes (when label is clicked, checkbox toggles)
+  mobileNavState.checkbox.addEventListener('change', function() {
+    if (mobileNavState.checkbox.checked) {
+      // Checkbox was checked - open menu
+      previousActiveElement = document.activeElement;
+      mobileNavState.mobileNav.classList.add('is-open');
+      if (mobileNavState.overlay) {
+        mobileNavState.overlay.classList.add('is-visible');
+      }
+      mobileNavState.toggle.setAttribute('aria-expanded', 'true');
+      mobileNavState.mobileNav.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      
+      // Focus first link
+      const firstLink = mobileNavState.mobileNav.querySelector('a, button');
+      if (firstLink) {
+        setTimeout(() => firstLink.focus(), 100);
+      }
+      // Add focus trap
+      document.addEventListener('keydown', trapFocus);
+    } else {
+      // Checkbox was unchecked - close menu
+      mobileNavState.mobileNav.classList.remove('is-open');
+      if (mobileNavState.overlay) {
+        mobileNavState.overlay.classList.remove('is-visible');
+      }
+      mobileNavState.toggle.setAttribute('aria-expanded', 'false');
+      mobileNavState.mobileNav.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      // Remove focus trap
+      document.removeEventListener('keydown', trapFocus);
+      // Return focus
+      if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
+        setTimeout(() => previousActiveElement.focus(), 100);
+      } else {
+        mobileNavState.toggle.focus();
+      }
+    }
+  });
 
   // Get all focusable elements in mobile nav
   const getFocusableElements = () => {
@@ -70,7 +106,7 @@ export function initMobileNav() {
    * Trap focus within mobile nav.
    */
   function trapFocus(e) {
-    if (!mobileNavState.mobileNav.classList.contains('is-open')) {
+    if (!mobileNavState.checkbox.checked) {
       return;
     }
 
@@ -107,9 +143,13 @@ export function initMobileNav() {
     // Store current focus
     previousActiveElement = document.activeElement;
 
+    // Toggle checkbox to open (CSS handles the rest)
+    mobileNavState.checkbox.checked = true;
+    // Also add class as fallback
     mobileNavState.mobileNav.classList.add('is-open');
-    mobileNavState.toggle.classList.add('is-active');
-    mobileNavState.overlay.classList.add('is-visible');
+    if (mobileNavState.overlay) {
+      mobileNavState.overlay.classList.add('is-visible');
+    }
     mobileNavState.toggle.setAttribute('aria-expanded', 'true');
     mobileNavState.mobileNav.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
@@ -128,9 +168,13 @@ export function initMobileNav() {
    * Close mobile nav.
    */
   function closeNav() {
+    // Toggle checkbox to close (CSS handles the rest)
+    mobileNavState.checkbox.checked = false;
+    // Also remove class as fallback
     mobileNavState.mobileNav.classList.remove('is-open');
-    mobileNavState.toggle.classList.remove('is-active');
-    mobileNavState.overlay.classList.remove('is-visible');
+    if (mobileNavState.overlay) {
+      mobileNavState.overlay.classList.remove('is-visible');
+    }
     mobileNavState.toggle.setAttribute('aria-expanded', 'false');
     mobileNavState.mobileNav.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
@@ -147,20 +191,8 @@ export function initMobileNav() {
   }
 
   // Use event delegation on document for maximum reliability
+  // Close button and overlay clicks
   document.addEventListener('click', function(e) {
-    // Toggle button click
-    if (e.target.closest('.mel-nav-toggle')) {
-      e.preventDefault();
-      e.stopPropagation();
-      const isOpen = mobileNavState.mobileNav.classList.contains('is-open');
-      if (isOpen) {
-        closeNav();
-      } else {
-        openNav();
-      }
-      return;
-    }
-
     // Close button click (by class or data attribute)
     if (e.target.closest('.mel-nav-mobile-close') || e.target.closest('[data-nav-close]')) {
       e.preventDefault();
@@ -180,7 +212,7 @@ export function initMobileNav() {
 
   // Escape key
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && mobileNavState.mobileNav.classList.contains('is-open')) {
+    if (e.key === 'Escape' && mobileNavState.checkbox.checked) {
       closeNav();
     }
   });
@@ -189,14 +221,14 @@ export function initMobileNav() {
   const mediaQuery = window.matchMedia('(min-width: 768px)');
   if (mediaQuery.addEventListener) {
     mediaQuery.addEventListener('change', function(e) {
-      if (e.matches && mobileNavState.mobileNav.classList.contains('is-open')) {
+      if (e.matches && mobileNavState.checkbox.checked) {
         closeNav();
       }
     });
   } else {
     // Fallback for older browsers
     mediaQuery.addListener(function(e) {
-      if (e.matches && mobileNavState.mobileNav.classList.contains('is-open')) {
+      if (e.matches && mobileNavState.checkbox.checked) {
         closeNav();
       }
     });

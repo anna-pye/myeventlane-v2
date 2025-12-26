@@ -18,4 +18,9 @@ event_map:
     - core/drupal
     - core/jquery
 
-
+event_map_toggle:
+  js:
+    js/event-map-toggle.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

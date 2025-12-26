@@ -310,7 +310,9 @@ final class EventModeManager {
     // Paid tickets are primary in 'both' and 'paid' modes.
     if (in_array($mode, [self::MODE_PAID, self::MODE_BOTH], TRUE)) {
       $ticketAvail = $this->getTicketAvailability($event);
-      if ($ticketAvail['available']) {
+      // Show CTA if tickets are available OR if a product is linked (even if not published).
+      // The booking page will handle showing appropriate messages for unpublished products.
+      if ($ticketAvail['available'] || !empty($ticketAvail['product'])) {
         return $this->buildTicketCta($event);
       }
     }
@@ -354,7 +356,9 @@ final class EventModeManager {
     // Tickets CTA.
     if (in_array($mode, [self::MODE_PAID, self::MODE_BOTH], TRUE)) {
       $ticketAvail = $this->getTicketAvailability($event);
-      if ($ticketAvail['available']) {
+      // Show CTA if tickets are available OR if a product is linked (even if not published).
+      // The booking page will handle showing appropriate messages for unpublished products.
+      if ($ticketAvail['available'] || !empty($ticketAvail['product'])) {
         $ctas['tickets'] = $this->buildTicketCta($event);
       }
     }

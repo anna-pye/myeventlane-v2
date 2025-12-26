@@ -1,0 +1,12 @@
+/**
+ * @file
+ * Vendor Wizard Entry Point
+ *
+ * Standalone SCSS file for vendor wizard styles.
+ * Compiled separately to vendor-wizard.css.
+ */
+
+@use 'tokens/colors';
+@use 'tokens/spacing';
+@use 'tokens/breakpoints';
+@use 'vendor/vendor-wizard';

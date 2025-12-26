@@ -1,0 +1,145 @@
+// ==========================================================================
+// Home Hero Component
+// ==========================================================================
+// Event-led hero section for homepage
+
+@use '../tokens/colors';
+@use '../tokens/spacing';
+@use '../tokens/typography';
+@use '../tokens/radii';
+@use '../tokens/shadows';
+@use '../tokens/breakpoints';
+
+// ---------------------------------------------------------------------------
+// Hero Container
+// ---------------------------------------------------------------------------
+
+.mel-home-hero {
+  padding: 80px 0 60px;
+
+  @include breakpoints.mel-break(md, max) {
+    padding: 48px 0;
+  }
+}
+
+.mel-home-hero__wrapper {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+
+  @include breakpoints.mel-break(md, max) {
+    grid-template-columns: 1fr;
+    padding: 0 16px;
+    gap: 32px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Hero Content
+// ---------------------------------------------------------------------------
+
+.mel-home-hero__content {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(4);
+
+  h1 {
+    font-size: 2.6rem;
+    line-height: 1.1;
+    font-weight: typography.$mel-font-extrabold;
+    color: colors.$mel-color-primary;
+    margin: 0;
+    letter-spacing: -0.02em;
+    max-width: 16ch;
+
+    @include breakpoints.mel-break(md, max) {
+      font-size: 2rem;
+    }
+  }
+
+  p {
+    font-size: 1.05rem;
+    color: colors.$mel-color-text-muted;
+    margin: 0;
+    line-height: 1.55;
+    max-width: 36ch;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Hero Categories
+// ---------------------------------------------------------------------------
+
+.mel-home-hero__categories {
+  margin-top: spacing.mel-space(1);
+
+  &-intro {
+    font-size: typography.mel-font-size(sm);
+    color: colors.$mel-color-text-muted;
+    margin-bottom: spacing.mel-space(2);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Hero Visual (Event Strip)
+// ---------------------------------------------------------------------------
+
+.mel-home-hero__visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+
+  @include breakpoints.mel-break(md, max) {
+    min-height: auto;
+  }
+}
+
+.mel-home-hero__event-strip {
+  width: 100%;
+  
+  // Limit to 2 events max in hero strip
+  .mel-event-grid,
+  .view-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: spacing.mel-space(4);
+
+    @include breakpoints.mel-break(md, max) {
+      grid-template-columns: 1fr;
+      gap: spacing.mel-space(3);
+    }
+
+    // Hide all but first 2 events in hero
+    > *:nth-child(n + 3) {
+      display: none;
+    }
+  }
+
+  // Make event cards larger and more prominent in hero
+  .mel-event-card {
+    min-height: 300px;
+    
+    @include breakpoints.mel-break(md) {
+      min-height: 360px;
+    }
+
+    .mel-event-card__image {
+      min-height: 180px;
+      
+      @include breakpoints.mel-break(md) {
+        min-height: 220px;
+      }
+    }
+
+    .mel-event-card__content {
+      h3 {
+        font-size: typography.mel-font-size(lg);
+        font-weight: typography.$mel-font-bold;
+      }
+    }
+  }
+}

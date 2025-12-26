@@ -1,0 +1,12 @@
+{#
+  EventWizardForm template.
+  Renders the wizard structure built by EventWizardForm::buildForm().
+  
+  Note: Drupal's form template preprocessing moves form elements into the 'children' variable.
+  The wizard structure built in EventWizardForm::buildForm() is included in children.
+#}
+<form{{ attributes.addClass('mel-event-form-page') }}>
+  {# Render all form elements including the wizard structure #}
+  {{ children }}
+
+</form>

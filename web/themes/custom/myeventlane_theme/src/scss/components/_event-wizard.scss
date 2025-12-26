@@ -232,14 +232,20 @@
 // ============================================================================
 // EVENT WIZARD ROOT (EventFormAlter - backward compatibility)
 // ============================================================================
+// Updated with Figma-aligned MEL design tokens
 
 .mel-event-form--wizard {
-  width: 100%;
-  padding: spacing.mel-space(4);
-  background: colors.$mel-color-bg;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px;
+  background: #fef5ec;
 
-  @include breakpoints.mel-break(lg) {
-    padding: spacing.mel-space(6);
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    padding: 16px;
   }
 
   // ==========================================================================
@@ -248,157 +254,108 @@
 
   .mel-event-form__wizard-layout {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: spacing.mel-space(4);
-    max-width: 1600px;
+    grid-template-columns: 240px 1fr;
+    gap: 32px;
+    max-width: 1100px;
     margin: 0 auto;
 
-    @include breakpoints.mel-break(lg) {
-      grid-template-columns: 280px 1fr;
-      gap: spacing.mel-space(6);
-      align-items: start;
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+      gap: 16px;
     }
   }
 
   // ==========================================================================
-  // LEFT: STEPPER NAVIGATION
+  // LEFT: STEPPER NAVIGATION (Desktop Rail)
   // ==========================================================================
 
   .mel-event-form__wizard-nav {
-    background: colors.$mel-color-surface;
-    border: 1px solid rgba(colors.$mel-color-text-light, 0.1);
-    border-radius: radii.$mel-radius-xl;
-    padding: spacing.mel-space(4);
-    box-shadow: shadows.$mel-shadow-sm;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(41, 50, 65, 0.08);
+    padding: 20px;
+    position: sticky;
+    top: 24px;
 
-    @include breakpoints.mel-break(lg, max) {
-      position: relative;
-      top: 0;
-      margin-bottom: spacing.mel-space(4);
-    }
-
-    @include breakpoints.mel-break(lg) {
-      position: sticky;
-      top: spacing.mel-space(4);
-      align-self: start;
+    @media (max-width: 900px) {
+      display: none;
     }
   }
 
   .mel-event-form__wizard-nav-title {
-    font-size: typography.mel-font-size(sm);
-    font-weight: typography.$mel-font-semibold;
+    font-size: 0.75rem;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: colors.$mel-color-text-muted;
-    margin: 0 0 spacing.mel-space(3) 0;
+    color: #6b7280;
+    margin: 0 0 16px 0;
   }
 
   .mel-event-form__wizard-nav-list {
-    display: flex;
-    flex-direction: column;
-    gap: spacing.mel-space(2);
     list-style: none;
-    padding: 0;
     margin: 0;
+    padding: 0;
   }
 
   .mel-event-form__step-row {
     position: relative;
-    display: flex;
-
-    // Vertical connector line (desktop only)
-    @include breakpoints.mel-break(lg) {
-      &:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        left: 16px;
-        top: 40px;
-        bottom: calc(-1 * #{spacing.mel-space(2)});
-        width: 2px;
-        background: rgba(colors.$mel-color-text-light, 0.2);
-        z-index: 0;
-        transition: background-color 0.2s ease;
-      }
-    }
+    display: block;
   }
 
   .mel-event-form__step {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: spacing.mel-space(2);
-    padding: spacing.mel-space(2) spacing.mel-space(3);
-    text-align: left;
-    background: rgba(colors.$mel-color-text-light, 0.04);
-    border: 1px solid rgba(colors.$mel-color-text-light, 0.1);
-    border-radius: radii.$mel-radius-md;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: typography.mel-font-size(sm);
-    color: colors.$mel-color-text-muted;
+    display: block;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 6px;
+    transition: background 0.2s ease;
     text-decoration: none;
-    font-family: inherit;
-    position: relative;
-    z-index: 1;
-    // Remove default button styling
-    appearance: none;
-    -webkit-appearance: none;
-    margin: 0;
+    cursor: pointer;
 
-    // Focus state for accessibility
-    &:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 2px colors.$mel-color-surface,
-                  0 0 0 4px colors.$mel-focus-ring-color;
-    }
-
-    &:hover:not([aria-disabled="true"]) {
-      background: rgba(colors.$mel-color-primary, 0.08);
-      border-color: colors.$mel-color-primary;
-      color: colors.$mel-color-text;
+    &:hover:not(.is-active) {
+      background: rgba(41, 50, 65, 0.04);
     }
 
     &.is-active {
-      background: rgba(colors.$mel-color-primary, 0.12);
-      border-color: colors.$mel-color-primary;
-      color: colors.$mel-color-primary;
-      font-weight: typography.$mel-font-semibold;
+      background: rgba(242, 109, 91, 0.12);
+      color: #f26d5b;
+      box-shadow: 0 0 0 6px rgba(242, 109, 91, 0.08);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #f26d5b;
+      outline-offset: 2px;
     }
   }
 
-  .mel-event-form__step-inner {
-    display: flex;
-    align-items: center;
-    gap: spacing.mel-space(2);
-    width: 100%;
+  // Mobile step chips (shown < 900px, hidden on desktop)
+  .mel-event-form__mobile-steps {
+    display: none;
+
+    @media (max-width: 900px) {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
   }
 
-  .mel-event-form__step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    font-size: typography.mel-font-size(sm);
-    font-weight: typography.$mel-font-semibold;
-    background: rgba(colors.$mel-color-text-light, 0.15);
-    color: colors.$mel-color-text-muted;
-    border-radius: radii.$mel-radius-full;
-    flex-shrink: 0;
-    transition: all 0.2s ease;
-  }
-
-  .mel-event-form__step.is-active .mel-event-form__step-number {
-    background: colors.$mel-color-primary;
-    color: colors.$mel-color-on-primary;
-    box-shadow: 0 2px 8px rgba(colors.$mel-color-primary, 0.3);
-  }
-
-  .mel-event-form__step-label {
-    flex: 1;
+  .mel-event-form__mobile-chip {
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(41, 50, 65, 0.08);
+    font-size: 0.85rem;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: #293241;
+    transition: transform 0.15s ease, background 0.15s ease;
+
+    &.is-active {
+      background: #f26d5b;
+      color: #fff;
+      transform: scale(1.03);
+    }
   }
 
   // ==========================================================================
@@ -411,15 +368,14 @@
 
   .mel-event-form__panel,
   .mel-wizard-step {
-    background: colors.$mel-color-surface;
-    border-radius: radii.$mel-radius-xl;
-    padding: spacing.mel-space(6);
-    box-shadow: shadows.$mel-shadow-md;
-    border: 1px solid rgba(colors.$mel-color-text-light, 0.1);
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(41, 50, 65, 0.08);
+    padding: 32px;
+    animation: melFadeUp 0.25s ease-out;
 
-    @include breakpoints.mel-break(sm, max) {
-      padding: spacing.mel-space(4);
-      border-radius: radii.$mel-radius-lg;
+    @media (max-width: 600px) {
+      padding: 20px;
     }
 
     // Hidden step panels
@@ -435,22 +391,22 @@
 
   .mel-wizard-step__title,
   .mel-event-form__section-title {
-    font-size: typography.mel-font-size(2xl);
-    font-weight: typography.$mel-font-bold;
-    color: colors.$mel-color-text;
-    margin: 0 0 spacing.mel-space(2) 0;
-    line-height: typography.$mel-leading-tight;
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+    color: #293241;
+    font-weight: 600;
+    line-height: 1.2;
 
-    @include breakpoints.mel-break(sm, max) {
-      font-size: typography.mel-font-size(xl);
+    @media (max-width: 600px) {
+      font-size: 1.4rem;
     }
   }
 
-  .mel-wizard-step__description {
-    font-size: typography.mel-font-size(base);
-    color: colors.$mel-color-text-muted;
-    margin: 0 0 spacing.mel-space(4) 0;
-    line-height: typography.$mel-leading-relaxed;
+  .mel-wizard-step__description,
+  .mel-event-form__hint {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 24px;
   }
 
   .mel-event-form__section {
@@ -522,45 +478,92 @@
 
   .mel-event-form__actions {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: spacing.mel-space(3);
-    margin-top: spacing.mel-space(8);
-    padding-top: spacing.mel-space(6);
-    border-top: 1px solid rgba(colors.$mel-color-text-light, 0.1);
+    margin-top: 32px;
+    gap: 12px;
+    flex-wrap: wrap;
 
-    @include breakpoints.mel-break(sm, max) {
+    @media (max-width: 600px) {
       flex-direction: column-reverse;
-      gap: spacing.mel-space(2);
-      margin-top: spacing.mel-space(6);
-      padding-top: spacing.mel-space(4);
     }
 
     &--sticky {
-      @include breakpoints.mel-break(sm, max) {
+      @media (max-width: 600px) {
         position: sticky;
         bottom: 0;
-        background: colors.$mel-color-surface;
-        padding: spacing.mel-space(3);
-        margin-left: calc(-1 * #{spacing.mel-space(4)});
-        margin-right: calc(-1 * #{spacing.mel-space(4)});
-        margin-bottom: calc(-1 * #{spacing.mel-space(4)});
-        border-radius: 0 0 radii.$mel-radius-lg radii.$mel-radius-lg;
+        background: #ffffff;
+        padding: 16px;
+        margin-left: -20px;
+        margin-right: -20px;
+        margin-bottom: -20px;
+        border-radius: 0 0 18px 18px;
         box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
-        border-top: 1px solid rgba(colors.$mel-color-text-light, 0.1);
         z-index: 10;
+      }
+    }
+
+    input[type="submit"],
+    .button {
+      border-radius: 999px;
+      padding: 12px 22px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      min-height: 44px;
+      transition: all 0.2s ease;
+
+      &.button--primary,
+      &[value*="Continue"],
+      &[value*="Next"],
+      &[value*="Publish"],
+      &[value*="Submit"] {
+        background: #f26d5b;
+        color: #fff;
+
+        &:hover {
+          background: #e55a48;
+        }
+      }
+
+      &.button--secondary,
+      &[value*="Back"],
+      &[value*="Save draft"] {
+        background: transparent;
+        color: #6b7280;
+        border: 1px solid rgba(107, 114, 128, 0.2);
+
+        &:hover {
+          color: #293241;
+          border-color: #293241;
+        }
       }
     }
   }
 
-  // Action button styling
-  .mel-event-form__actions-back,
-  .mel-event-form__actions-next,
-  .mel-event-form__actions-publish,
-  .mel-event-form__actions-draft,
-  .mel-event-form__actions-delete {
-    // Buttons inherit from base button styles
-    // Additional wizard-specific styling can be added here
+  // Info boxes
+  .mel-event-form__info-box {
+    background: rgba(110, 126, 242, 0.08);
+    border-left: 4px solid #6e7ef2;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 20px;
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+// Step transition animation
+@keyframes melFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

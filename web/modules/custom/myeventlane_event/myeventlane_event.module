@@ -253,17 +253,25 @@ function myeventlane_event_form_node_event_form_alter(array &$form, FormStateInt
   
   // CRITICAL: Force buttons to exist and be visible - create if missing.
   $form_object = $form_state->getFormObject();
+  $entity = $form_object->getEntity();
+  $is_new = $entity->isNew();
   
+  // Ensure a "Save" button exists (for edit forms, this is the primary action).
   if (!isset($form['actions']['submit']) || (isset($form['actions']['submit']['#access']) && $form['actions']['submit']['#access'] === FALSE)) {
     $submit_handlers = [];
-    $submit_handlers[] = ['\Drupal\myeventlane_event\Form\EventFormAlter', 'submitPublish'];
+    if ($is_new) {
+      // For new events, publish on submit.
+      $submit_handlers[] = ['\Drupal\myeventlane_event\Form\EventFormAlter', 'submitPublish'];
+    }
     if ($form_object instanceof \Drupal\Core\Entity\EntityFormInterface) {
       $submit_handlers[] = [$form_object, 'save'];
     }
-    $submit_handlers[] = ['\Drupal\myeventlane_event\Form\EventFormAlter', 'submitPublishPostSave'];
+    if ($is_new) {
+      $submit_handlers[] = ['\Drupal\myeventlane_event\Form\EventFormAlter', 'submitPublishPostSave'];
+    }
     $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#value' => t('Publish event'),
+      '#value' => $is_new ? t('Publish event') : t('Save'),
       '#submit' => $submit_handlers,
       '#access' => TRUE,
       '#weight' => 10,
@@ -271,6 +279,10 @@ function myeventlane_event_form_node_event_form_alter(array &$form, FormStateInt
     ];
   } else {
     $form['actions']['submit']['#access'] = TRUE;
+    // Update label for edit forms if it says "Publish event".
+    if (!$is_new && isset($form['actions']['submit']['#value']) && $form['actions']['submit']['#value'] === t('Publish event')) {
+      $form['actions']['submit']['#value'] = t('Save');
+    }
   }
   
   if (!isset($form['actions']['save_draft']) || (isset($form['actions']['save_draft']['#access']) && $form['actions']['save_draft']['#access'] === FALSE)) {

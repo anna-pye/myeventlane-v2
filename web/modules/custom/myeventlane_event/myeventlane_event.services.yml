@@ -27,3 +27,9 @@ services:
       - '@myeventlane_event_attendees.manager'
       - '@url_generator'
       - '@datetime.time'
+
+  myeventlane_event.ticket_type_manager:
+    class: Drupal\myeventlane_event\Service\TicketTypeManager
+    arguments:
+      - '@entity_type.manager'
+      - '@logger.factory'

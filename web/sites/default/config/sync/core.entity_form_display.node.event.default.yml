@@ -29,6 +29,7 @@ dependencies:
     - field.field.node.event.field_location
     - field.field.node.event.field_location_latitude
     - field.field.node.event.field_location_longitude
+    - field.field.node.event.field_location_place_id
     - field.field.node.event.field_product_target
     - field.field.node.event.field_promo_expires
     - field.field.node.event.field_promoted
@@ -41,13 +42,12 @@ dependencies:
     - image.style.thumbnail
     - node.type.event
   module:
-    - address
-    - commerce
     - datetime
     - field_layout
     - image
     - layout_discovery
     - link
+    - myeventlane_location
     - paragraphs
     - text
 third_party_settings:
@@ -71,18 +71,18 @@ content:
       show_summary: false
     third_party_settings: {  }
   field_accessibility:
-    type: commerce_entity_select
-    weight: 16
+    type: entity_reference_autocomplete
+    weight: 15
     region: content
     settings:
-      hide_single_entity: true
-      autocomplete_threshold: 7
-      autocomplete_size: 60
-      autocomplete_placeholder: ''
+      match_operator: STARTS_WITH
+      match_limit: 10
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   field_accessibility_contact:
     type: text_textarea
-    weight: 17
+    weight: 16
     region: content
     settings:
       rows: 3
@@ -90,7 +90,7 @@ content:
     third_party_settings: {  }
   field_accessibility_directions:
     type: text_textarea
-    weight: 18
+    weight: 17
     region: content
     settings:
       rows: 3
@@ -98,7 +98,7 @@ content:
     third_party_settings: {  }
   field_accessibility_entry:
     type: text_textarea
-    weight: 19
+    weight: 18
     region: content
     settings:
       rows: 3
@@ -106,7 +106,7 @@ content:
     third_party_settings: {  }
   field_accessibility_parking:
     type: text_textarea
-    weight: 20
+    weight: 19
     region: content
     settings:
       rows: 3
@@ -114,7 +114,7 @@ content:
     third_party_settings: {  }
   field_attendee_questions:
     type: paragraphs
-    weight: 21
+    weight: 20
     region: content
     settings:
       title: Question
@@ -133,20 +133,24 @@ content:
     third_party_settings: {  }
   field_capacity:
     type: number
-    weight: 10
+    weight: 9
     region: content
     settings:
       placeholder: ''
     third_party_settings: {  }
   field_category:
-    type: options_select
-    weight: 15
+    type: entity_reference_autocomplete
+    weight: 14
     region: content
-    settings: {  }
+    settings:
+      match_operator: STARTS_WITH
+      match_limit: 10
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   field_collect_per_ticket:
     type: boolean_checkbox
-    weight: 22
+    weight: 21
     region: content
     settings:
       display_label: true
@@ -179,36 +183,36 @@ content:
     third_party_settings: {  }
   field_external_url:
     type: link_default
-    weight: 14
+    weight: 13
     region: content
     settings:
       placeholder_url: 'https://'
       placeholder_title: ''
     third_party_settings: {  }
   field_location:
-    type: address_default
-    weight: 7
+    type: myeventlane_location_address_autocomplete
+    weight: 22
     region: content
     settings:
-      wrapper_type: fieldset
+      wrapper_type: container
     third_party_settings: {  }
   field_location_latitude:
-    type: number
-    weight: 9
-    region: content
-    settings:
-      placeholder: 'this will auto populate '
-    third_party_settings: {  }
-  field_location_longitude:
     type: number
     weight: 8
     region: content
     settings:
       placeholder: 'this will auto populate '
     third_party_settings: {  }
+  field_location_longitude:
+    type: number
+    weight: 7
+    region: content
+    settings:
+      placeholder: 'this will auto populate '
+    third_party_settings: {  }
   field_product_target:
     type: entity_reference_autocomplete
-    weight: 12
+    weight: 11
     region: content
     settings:
       match_operator: CONTAINS
@@ -218,7 +222,7 @@ content:
     third_party_settings: {  }
   field_ticket_types:
     type: paragraphs
-    weight: 13
+    weight: 12
     region: content
     settings:
       title: 'Ticket Type'
@@ -246,7 +250,7 @@ content:
     third_party_settings: {  }
   field_waitlist_capacity:
     type: number
-    weight: 11
+    weight: 10
     region: content
     settings:
       placeholder: 'Leave empty for unlimited'
@@ -269,6 +273,7 @@ hidden:
   field_event_store: true
   field_event_vendor: true
   field_featured: true
+  field_location_place_id: true
   field_promo_expires: true
   field_promoted: true
   field_sales_end: true

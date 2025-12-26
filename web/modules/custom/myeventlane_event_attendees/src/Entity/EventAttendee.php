@@ -303,7 +303,7 @@ class EventAttendee extends ContentEntityBase implements EntityChangedInterface,
       ->setDescription(new TranslatableMarkup('The user account if the attendee is registered.'))
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default:user')
-      ->setDefaultValueCallback('Drupal\user\Entity\User::getCurrentUserId')
+      ->setDefaultValueCallback(static::class . '::getCurrentUserId')
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete',
         'weight' => 35,
@@ -480,6 +480,26 @@ class EventAttendee extends ContentEntityBase implements EntityChangedInterface,
   public function setCreatedTime(int $timestamp): static {
     $this->set('created', $timestamp);
     return $this;
+  }
+
+  /**
+   * Default value callback for the uid field.
+   *
+   * Returns the current user ID if the user is authenticated.
+   *
+   * @return array
+   *   An array containing the target_id for the entity reference field.
+   */
+  public static function getCurrentUserId(): array {
+    $current_user = \Drupal::currentUser();
+    $uid = $current_user->id();
+    
+    // Return empty array for anonymous users (no default value).
+    if ($uid === 0) {
+      return [];
+    }
+    
+    return [['target_id' => $uid]];
   }
 
 }

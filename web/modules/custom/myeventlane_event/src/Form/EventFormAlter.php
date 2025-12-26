@@ -80,7 +80,7 @@ final class EventFormAlter {
       '#type' => 'container',
       '#attributes' => [
         'id' => 'mel-event-wizard-wrapper',
-        'class' => ['mel-event-form', 'mel-event-form--wizard'],
+        'class' => ['mel-wizard', 'mel-wizard--event', 'mel-event-form', 'mel-event-form--wizard'],
         'data-mel-current-step' => $current,
       ],
       '#weight' => -1000,
@@ -101,14 +101,14 @@ final class EventFormAlter {
     // Layout: LEFT stepper + RIGHT content.
     $form['mel_wizard']['layout'] = [
       '#type' => 'container',
-      '#attributes' => ['class' => ['mel-event-form__wizard-layout']],
+      '#attributes' => ['class' => ['mel-wizard__layout', 'mel-event-form__wizard-layout']],
     ];
 
     $form['mel_wizard']['layout']['nav'] = $this->buildLeftStepper($steps, $current);
 
     $form['mel_wizard']['layout']['content'] = [
       '#type' => 'container',
-      '#attributes' => ['class' => ['mel-event-form__wizard-content']],
+      '#attributes' => ['class' => ['mel-wizard__content', 'mel-event-form__wizard-content']],
     ];
 
     // Move ALL fields into step panels. PHP controls visibility via CSS classes.
@@ -128,24 +128,55 @@ final class EventFormAlter {
         ],
       ];
 
-      $form['mel_wizard']['layout']['content'][$panel_key]['title'] = [
+      // Card wrapper for step content.
+      $form['mel_wizard']['layout']['content'][$panel_key]['card'] = [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['mel-card', 'mel-card--wizard-section']],
+      ];
+
+      // Card header with title and help text.
+      $form['mel_wizard']['layout']['content'][$panel_key]['card']['header'] = [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['mel-card__header']],
+      ];
+
+      $form['mel_wizard']['layout']['content'][$panel_key]['card']['header']['title'] = [
         '#type' => 'html_tag',
         '#tag' => 'h2',
         '#value' => $step['label'],
         '#attributes' => [
-          'class' => ['mel-event-form__section-title', 'mel-wizard-step__title'],
+          'class' => ['mel-event-form__section-title', 'mel-wizard-step__title', 'mel-card__title'],
         ],
       ];
 
+      // Help text for each step (Australian English, gender-neutral).
+      $help_text = $this->getStepHelpText($step_id);
+      if ($help_text) {
+        $form['mel_wizard']['layout']['content'][$panel_key]['card']['header']['help'] = [
+          '#type' => 'html_tag',
+          '#tag' => 'p',
+          '#value' => $help_text,
+          '#attributes' => [
+            'class' => ['mel-card__help', 'mel-wizard-step__description'],
+          ],
+        ];
+      }
+
+      // Card body with section container.
+      $form['mel_wizard']['layout']['content'][$panel_key]['card']['body'] = [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['mel-card__body']],
+      ];
+
       // Section container (vendor theme uses this card look).
-      $form['mel_wizard']['layout']['content'][$panel_key]['section'] = [
+      $form['mel_wizard']['layout']['content'][$panel_key]['card']['body']['section'] = [
         '#type' => 'container',
         '#attributes' => ['class' => ['mel-event-form__section']],
       ];
 
       // Move fields - handle both top-level and nested in sections.
       foreach ($step['fields'] as $field_name) {
-        $this->moveFieldToWizard($form, $form['mel_wizard']['layout']['content'][$panel_key]['section'], $field_name);
+        $this->moveFieldToWizard($form, $form['mel_wizard']['layout']['content'][$panel_key]['card']['body']['section'], $field_name);
       }
     }
 
@@ -326,8 +357,8 @@ final class EventFormAlter {
       // Also hide in wizard if fields were moved there.
       if (isset($form['mel_wizard']['layout']['content'])) {
         foreach ($form['mel_wizard']['layout']['content'] as $step_key => &$step_content) {
-          if (is_array($step_content) && isset($step_content['section'][$field_name])) {
-            $step_content['section'][$field_name]['#access'] = FALSE;
+          if (is_array($step_content) && isset($step_content['card']['body']['section'][$field_name])) {
+            $step_content['card']['body']['section'][$field_name]['#access'] = FALSE;
           }
         }
       }
@@ -391,14 +422,14 @@ final class EventFormAlter {
       
       if (isset($form['mel_wizard']['layout']['content'])) {
         foreach ($form['mel_wizard']['layout']['content'] as $step_key => &$step_content) {
-          if (is_array($step_content) && isset($step_content['section'][$field_name])) {
-            $step_content['section'][$field_name]['#access'] = FALSE;
-            $step_content['section'][$field_name]['#required'] = FALSE;
-            $step_content['section'][$field_name]['#validated'] = TRUE;
-            if (!isset($step_content['section'][$field_name]['#element_validate'])) {
-              $step_content['section'][$field_name]['#element_validate'] = [];
+          if (is_array($step_content) && isset($step_content['card']['body']['section'][$field_name])) {
+            $step_content['card']['body']['section'][$field_name]['#access'] = FALSE;
+            $step_content['card']['body']['section'][$field_name]['#required'] = FALSE;
+            $step_content['card']['body']['section'][$field_name]['#validated'] = TRUE;
+            if (!isset($step_content['card']['body']['section'][$field_name]['#element_validate'])) {
+              $step_content['card']['body']['section'][$field_name]['#element_validate'] = [];
             }
-            $step_content['section'][$field_name]['#element_validate'][] = [get_class($this), 'validateCoordinateField'];
+            $step_content['card']['body']['section'][$field_name]['#element_validate'][] = [get_class($this), 'validateCoordinateField'];
           }
         }
       }
@@ -509,6 +540,29 @@ final class EventFormAlter {
       }
     }
     return $steps;
+  }
+
+  /**
+   * Get help text for a wizard step (Australian English, gender-neutral).
+   *
+   * @param string $step_id
+   *   The step ID.
+   *
+   * @return string|null
+   *   The help text, or NULL if no help text is defined.
+   */
+  private function getStepHelpText(string $step_id): ?string {
+    $help_texts = [
+      'basics' => 'Tell us about your event. Give it a clear name and description so people know what to expect. You can change these details later if needed.',
+      'schedule' => 'When does your event start and finish? Add the date and times. If your event runs over multiple days, you can add recurring dates later.',
+      'location' => 'Where will your event be held? Use the address search to find your venue quickly. If it\'s an online event, you can add a link instead. You can change the location later if needed.',
+      'tickets' => 'How do people attend your event? Choose RSVP for free events, paid tickets, or both. You can also link to an external booking system. Don\'t worry—you can adjust ticket settings later.',
+      'design' => 'Make your event stand out. Add accessibility information and tags to help people find your event. These details help create an inclusive experience for everyone.',
+      'questions' => 'Want to collect extra information from attendees? Add custom questions here. This step is optional—you can skip it if you don\'t need additional details.',
+      'review' => 'Review all your event details before publishing. Check that everything looks correct. You can go back to any step to make changes.',
+    ];
+
+    return $help_texts[$step_id] ?? NULL;
   }
 
   /**
@@ -686,7 +740,7 @@ final class EventFormAlter {
 
       $items[$step_id] = [
         '#type' => 'container',
-        '#attributes' => ['class' => ['mel-event-form__step-row']],
+        '#attributes' => ['class' => ['mel-wizard__step-row', 'mel-event-form__step-row']],
         'button' => [
           '#type' => 'html_tag',
           '#tag' => 'button',
@@ -694,6 +748,7 @@ final class EventFormAlter {
           '#attributes' => [
             'type' => 'button',
             'class' => array_values(array_filter([
+              'mel-wizard__step',
               'mel-event-form__step',
               'js-mel-stepper-button',
               $is_active ? 'is-active' : NULL,
@@ -724,7 +779,7 @@ final class EventFormAlter {
 
     return [
       '#type' => 'container',
-      '#attributes' => ['class' => ['mel-event-form__wizard-nav']],
+      '#attributes' => ['class' => ['mel-wizard__sidebar', 'mel-wizard__nav', 'mel-event-form__wizard-nav']],
       'heading' => [
         '#type' => 'html_tag',
         '#tag' => 'div',
@@ -733,7 +788,7 @@ final class EventFormAlter {
       ],
       'list' => [
         '#type' => 'container',
-        '#attributes' => ['class' => ['mel-event-form__wizard-nav-list']],
+        '#attributes' => ['class' => ['mel-wizard__nav-list', 'mel-event-form__wizard-nav-list']],
         'items' => $items,
       ],
     ];
@@ -978,7 +1033,7 @@ final class EventFormAlter {
     if (isset($steps[$step_id])) {
       foreach ($steps[$step_id]['fields'] as $field_name) {
         $limited[] = [$field_name];
-        $limited[] = ['mel_wizard', 'layout', 'content', 'step_' . $step_id, 'section', $field_name];
+        $limited[] = ['mel_wizard', 'layout', 'content', 'step_' . $step_id, 'card', 'body', 'section', $field_name];
       }
     }
 

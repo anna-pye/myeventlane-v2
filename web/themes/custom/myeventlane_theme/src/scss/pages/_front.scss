@@ -34,6 +34,414 @@
 }
 
 // ---------------------------------------------------------------------------
+// Featured Events Section
+// ---------------------------------------------------------------------------
+
+.mel-featured-events {
+  margin-bottom: spacing.mel-space(8);
+
+  h2 {
+    font-size: typography.mel-font-size(2xl);
+    font-weight: typography.$mel-font-bold;
+    color: colors.$mel-color-text;
+    margin-bottom: spacing.mel-space(1);
+  }
+
+  &__helper {
+    font-size: typography.mel-font-size(sm);
+    color: colors.$mel-color-text-muted;
+    margin-bottom: spacing.mel-space(5);
+  }
+}
+
+.mel-featured-events__row {
+  // Override default event grid for featured section
+  .mel-event-grid,
+  .view-content {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 24px !important;
+
+    @include breakpoints.mel-break(md, max) {
+      grid-template-columns: 1fr !important;
+    }
+
+    // Limit to max 3 events
+    > *:nth-child(n + 4) {
+      display: none;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Featured Events Carousel Layout
+// ---------------------------------------------------------------------------
+// One large featured card + horizontal scrollable carousel
+
+.mel-featured-events-carousel {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.mel-space(4);
+
+  @include breakpoints.mel-break(md) {
+    flex-direction: row;
+    gap: spacing.mel-space(6);
+    align-items: flex-start;
+  }
+}
+
+// Hero card (first event) - larger, prominent
+.mel-featured-events-carousel__hero {
+  flex: 0 0 100%;
+
+  @include breakpoints.mel-break(md) {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  .mel-event-card {
+    height: 100%;
+    min-height: 400px;
+
+    .mel-card-media {
+      aspect-ratio: 16 / 9;
+      min-height: 240px;
+    }
+
+    .mel-card-title {
+      font-size: typography.mel-font-size(xl);
+      font-weight: typography.$mel-font-bold;
+      margin-bottom: spacing.mel-space(2);
+    }
+  }
+}
+
+// Carousel container for remaining events
+.mel-featured-events-carousel__carousel {
+  flex: 0 0 100%;
+  overflow: hidden;
+  position: relative;
+
+  @include breakpoints.mel-break(md) {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+// Carousel track (scrollable container)
+.mel-featured-events-carousel__track {
+  display: flex;
+  gap: spacing.mel-space(4);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: spacing.mel-space(2);
+
+  // Hide scrollbar but keep functionality
+  scrollbar-width: thin;
+  scrollbar-color: colors.$mel-color-border colors.$mel-color-surface;
+
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: colors.$mel-color-surface;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: colors.$mel-color-border;
+    border-radius: 3px;
+
+    &:hover {
+      background: colors.$mel-color-border-strong;
+    }
+  }
+}
+
+// Individual carousel slide - larger size
+.mel-featured-events-carousel__slide {
+  flex: 0 0 auto;
+  width: 320px;
+  scroll-snap-align: start;
+
+  @include breakpoints.mel-break(md) {
+    width: 380px;
+  }
+
+  @include breakpoints.mel-break(lg) {
+    width: 420px;
+  }
+
+  .mel-event-card {
+    height: 100%;
+    min-height: 380px;
+
+    @include breakpoints.mel-break(md) {
+      min-height: 420px;
+    }
+
+    .mel-event-card__image {
+      min-height: 220px;
+
+      @include breakpoints.mel-break(md) {
+        min-height: 260px;
+      }
+    }
+
+    .mel-event-card__content {
+      h3 {
+        font-size: typography.mel-font-size(lg);
+        font-weight: typography.$mel-font-bold;
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// All Events Section
+// ---------------------------------------------------------------------------
+
+.mel-all-events {
+  margin-top: 48px;
+
+  h2 {
+    margin-bottom: spacing.mel-space(1);
+    font-size: typography.mel-font-size(2xl);
+    font-weight: typography.$mel-font-bold;
+    color: colors.$mel-color-text;
+  }
+
+  &__helper {
+    font-size: typography.mel-font-size(sm);
+    color: colors.$mel-color-text-muted;
+    margin-bottom: 24px;
+  }
+
+  // Reduce vertical spacing in event grid
+  .mel-event-grid {
+    gap: spacing.mel-space(3);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Home Calendar Section
+// ---------------------------------------------------------------------------
+
+.mel-home-calendar {
+  margin-top: 64px;
+  padding: 32px;
+  background: rgba(110, 126, 242, 0.06);
+  border-radius: 18px;
+
+  @include breakpoints.mel-break(md, max) {
+    padding: 24px 16px;
+    margin-top: 48px;
+  }
+
+  h2 {
+    font-size: typography.mel-font-size(xl);
+    font-weight: typography.$mel-font-bold;
+    color: colors.$mel-color-text;
+    margin-bottom: spacing.mel-space(1);
+  }
+
+  &__intro {
+    font-size: typography.mel-font-size(sm);
+    color: colors.$mel-color-text-muted;
+    margin-bottom: spacing.mel-space(5);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Mini Calendar Component
+// ---------------------------------------------------------------------------
+
+.mel-mini-calendar-wrapper {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: spacing.mel-space(6);
+
+  @include breakpoints.mel-break(md, max) {
+    grid-template-columns: 1fr;
+    gap: spacing.mel-space(4);
+  }
+}
+
+.mel-mini-calendar {
+  &__header {
+    margin-bottom: spacing.mel-space(4);
+    text-align: center;
+  }
+
+  &__month {
+    font-size: typography.mel-font-size(lg);
+    font-weight: typography.$mel-font-bold;
+    color: colors.$mel-color-text;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: spacing.mel-space(1);
+    text-align: center;
+  }
+}
+
+.mel-mini-calendar-day-header {
+  padding: spacing.mel-space(2);
+  font-size: typography.mel-font-size(xs);
+  font-weight: typography.$mel-font-semibold;
+  color: colors.$mel-color-text-muted;
+  text-transform: uppercase;
+}
+
+.mel-mini-calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: typography.mel-font-size(sm);
+  color: colors.$mel-color-text;
+  border-radius: radii.$mel-radius-md;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  position: relative;
+  min-height: 44px;
+
+  &:hover {
+    background: colors.$mel-color-bg;
+  }
+
+  &:focus-visible {
+    @include colors.mel-focus-ring;
+    outline-offset: 2px;
+  }
+
+  &--today {
+    background: colors.$mel-color-secondary;
+    color: colors.$mel-color-text-inverse;
+    font-weight: typography.$mel-font-bold;
+  }
+
+  &--has-event {
+    font-weight: typography.$mel-font-semibold;
+    color: colors.$mel-color-primary;
+
+    // Base dot indicator
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      background: colors.$mel-color-primary;
+      border-radius: radii.$mel-radius-full;
+    }
+
+    // Two dots
+    &[data-dot-count="2"]::after {
+      width: 10px;
+      height: 4px;
+      background: 
+        radial-gradient(circle at 2px 2px, colors.$mel-color-primary 2px, transparent 2px),
+        radial-gradient(circle at 8px 2px, colors.$mel-color-primary 2px, transparent 2px);
+    }
+
+    // Three dots
+    &[data-dot-count="3"]::after {
+      width: 14px;
+      height: 4px;
+      background: 
+        radial-gradient(circle at 2px 2px, colors.$mel-color-primary 2px, transparent 2px),
+        radial-gradient(circle at 7px 2px, colors.$mel-color-primary 2px, transparent 2px),
+        radial-gradient(circle at 12px 2px, colors.$mel-color-primary 2px, transparent 2px);
+    }
+
+    // Plus sign for 4+ events
+    &--has-many::after {
+      content: '+';
+      width: auto;
+      height: auto;
+      background: none;
+      font-size: typography.mel-font-size(xs);
+      font-weight: typography.$mel-font-bold;
+      color: colors.$mel-color-primary;
+      line-height: 1;
+      bottom: 4px;
+    }
+  }
+
+  &--other-month {
+    color: colors.$mel-color-text-light;
+    pointer-events: none;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Home CTA Section
+// ---------------------------------------------------------------------------
+
+.mel-home-cta {
+  margin-top: 64px;
+  padding: 32px;
+  text-align: center;
+
+  @include breakpoints.mel-break(md, max) {
+    padding: 24px;
+    margin-top: 48px;
+  }
+
+  &__content {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  &__question {
+    font-size: typography.mel-font-size(lg);
+    color: colors.$mel-color-text-muted;
+    margin-bottom: spacing.mel-space(1);
+  }
+
+  &__text {
+    font-size: typography.mel-font-size(base);
+    color: colors.$mel-color-text;
+    font-weight: typography.$mel-font-medium;
+    margin: 0;
+  }
+}
+
+.mel-btn-large {
+  padding: spacing.mel-space(4) spacing.mel-space(6);
+  font-size: typography.mel-font-size(lg);
+  font-weight: typography.$mel-font-bold;
+}
+
+// ---------------------------------------------------------------------------
+// Footer Transition Fix
+// ---------------------------------------------------------------------------
+// Ensure content visually leads into footer without abrupt stops
+
+.mel-front-content {
+  padding-bottom: spacing.mel-space(10);
+
+  @include breakpoints.mel-break(md) {
+    padding-bottom: spacing.mel-space(12);
+  }
+}
+
+.mel-region-footer {
+  margin-top: 0;
+  border-top: 1px solid colors.$mel-color-border;
+  background: colors.$mel-color-surface;
+}
+
+// ---------------------------------------------------------------------------
 // Page Sections
 // ---------------------------------------------------------------------------
 

@@ -31,3 +31,10 @@
     <p class="mel-helper">{{ cta.helper }}</p>
   {% endif %}
 {% endif %}
+
+{# Secondary CTA for "both" mode (RSVP when tickets are primary) #}
+{% if event_cta_secondary and event_cta_secondary.url %}
+  <a class="mel-btn mel-btn-secondary" href="{{ event_cta_secondary.url }}" style="margin-top: 0.75rem; display: block;">
+    {{ event_cta_secondary.label }}
+  </a>
+{% endif %}

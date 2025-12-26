@@ -1,13 +1,14 @@
 # Event creation wizard routes.
+# Canonical create route: redirects to wizard form.
 myeventlane_event.wizard.create:
   path: '/vendor/events/create'
   defaults:
-    _controller: '\Drupal\myeventlane_event\Controller\VendorEventWizardController::createDraft'
+    _form: '\Drupal\myeventlane_event\Form\EventWizardForm'
     _title: 'Create event'
   requirements:
     _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
 
-# New wizard form routes.
+# New wizard form routes (legacy, kept for backward compatibility).
 myeventlane_event.wizard_form_new:
   path: '/vendor/events/wizard'
   defaults:
@@ -16,6 +17,23 @@ myeventlane_event.wizard_form_new:
   requirements:
     _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
 
+# Edit event via wizard (canonical edit route for vendors).
+myeventlane_event.wizard.edit:
+  path: '/vendor/events/{node}/edit'
+  defaults:
+    _form: '\Drupal\myeventlane_event\Form\EventWizardForm'
+    _title: 'Edit event'
+  requirements:
+    _custom_access: '\Drupal\myeventlane_vendor\Access\VendorConsoleAccess::access'
+    node: '\d+'
+  options:
+    parameters:
+      node:
+        type: entity:node
+        bundle:
+          - event
+
+# Legacy wizard edit route (kept for backward compatibility).
 myeventlane_event.wizard_form_edit:
   path: '/vendor/events/wizard/{node}'
   defaults:

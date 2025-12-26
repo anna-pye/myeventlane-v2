@@ -4,23 +4,98 @@
 
 @use '../tokens/spacing' as space-tokens;
 
-.mel-event-card {
-  padding: 0.75rem;
-  background: #fff;
-  border-radius: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+// ---------------------------------------------------------------------------
+// Mobile-First Event Grid (CSS Variables)
+// ---------------------------------------------------------------------------
+// Global event grid using CSS custom properties for mobile-first layout.
 
+.mel-event-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 700px) {
+  .mel-event-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .mel-event-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+  }
+}
+
+.mel-event-card {
+  background: var(--mel-card);
+  border-radius: var(--mel-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--mel-shadow-soft);
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-
   transition: box-shadow 0.2s ease, transform 0.2s ease;
+  padding: 0; // No padding on card itself - image should be edge-to-edge
 
   @media (hover: hover) {
     &:hover {
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+    }
+  }
+
+  // Entire card is a link
+  .mel-event-card__link {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    color: inherit;
+    text-decoration: none;
+    width: 100%;
+    height: 100%;
+
+    &:hover,
+    &:focus,
+    &:active {
+      text-decoration: none;
+      color: inherit;
+    }
+  }
+
+  // Image = full width (edge-to-edge with card border)
+  .mel-event-card__image {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: block;
+    
+    img {
+      width: 100%;
+      display: block;
+      height: auto;
+    }
+  }
+
+  // Content = below image with reduced padding
+  .mel-event-card__content {
+    padding: 12px 14px 14px;
+  }
+
+  // Image container for mobile-first sizing
+  .mel-event-card__image img {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    display: block;
+  }
+
+  @media (min-width: 900px) {
+    .mel-event-card__image img {
+      height: 200px;
     }
   }
 
@@ -37,19 +112,26 @@
     &:focus,
     &:active {
       text-decoration: none;
+      
+      .mel-card-title {
+        text-decoration: none;
+      }
     }
   }
 
   // Support both new spec class names and legacy class names for backward compatibility
   .mel-event-card__media,
   .mel-card-media {
-    aspect-ratio: 1 / 1;
-    max-height: 140px;
-    border-radius: 10px;
+    aspect-ratio: 4 / 3;
+    min-height: 180px;
+    max-height: 220px;
+    border-radius: 0;
     overflow: hidden;
-    margin-bottom: 0.5rem;
+    margin: 0;
+    padding: 0;
     position: relative;
     background: #f3f4f6;
+    width: 100%;
 
     img {
       display: block;
@@ -58,7 +140,11 @@
       object-fit: cover;
       object-position: center;
       transition: transform .3s ease;
+      margin: 0;
+      padding: 0;
     }
+
+    // Remove gradient overlay for cleaner look
   }
 
   .mel-card-placeholder {
@@ -71,22 +157,24 @@
     position: absolute;
     top: 12px;
     left: 12px;
-    background: #fff;
-    border-radius: 10px;
-    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-radius: 8px;
+    padding: 6px 10px;
     text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    z-index: 2;
 
     .mel-date-day {
       display: block;
       font-weight: 700;
-      font-size: 1rem;
+      font-size: 0.875rem;
     }
 
     .mel-date-month {
-      font-size: .7rem;
+      font-size: 0.65rem;
       text-transform: uppercase;
-      opacity: .7;
+      opacity: .8;
     }
   }
 
@@ -94,10 +182,11 @@
     position: absolute;
     top: 12px;
     right: 12px;
-    padding: 6px 12px;
+    padding: 4px 10px;
     border-radius: 999px;
-    font-size: .75rem;
+    font-size: 0.7rem;
     font-weight: 600;
+    z-index: 2;
     color: #fff;
 
     &.mel-status-rsvp {
@@ -112,41 +201,64 @@
   // Support both new spec class names and legacy class names for backward compatibility
   .mel-event-card__body,
   .mel-card-body {
+    position: relative;
+    z-index: 1;
     flex-grow: 1;
-    padding: 0 0.25rem;
+    padding: 0.75rem;
+    margin: 0;
+  }
+
+  // Date - first, smaller, lighter
+  .mel-card-date {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 0.375rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
   }
 
   .mel-event-card__title,
-  .mel-card-title {
-    font-size: 0.95rem;
-    line-height: 1.3;
-    margin: 0 0 0.25rem;
+  .mel-card-title,
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0 0 4px;
+    color: #1f2937;
+    text-decoration: none;
 
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+
+    // Remove underline from link
+    a &,
+    .mel-card-link & {
+      text-decoration: none;
+    }
+  }
+
+  // Location - smaller, lighter
+  .mel-card-location {
+    font-size: 0.7rem;
+    color: #6b7280;
+    margin-bottom: 0;
+    line-height: 1.3;
   }
 
   .mel-event-card__meta,
   .mel-card-meta {
-    font-size: 0.75rem;
-    color: var(--mel-muted, #6b7280);
+    color: var(--mel-muted);
+    font-size: 0.875rem;
+    margin-top: 2px;
+    line-height: 1.4;
   }
 
   .mel-card-hover-meta {
-    margin-top: 0.5rem;
-    display: flex;
-    gap: .4rem;
-    align-items: center;
-    opacity: 0;
-    transform: translateY(6px);
-    transition: opacity .25s ease, transform .25s ease;
-
-    @media (max-width: 768px) {
-      opacity: 1;
-      transform: none;
-    }
+    display: none; // Hide category and accessibility on cards for cleaner look
   }
 
   .mel-category-pill {
@@ -157,25 +269,29 @@
     font-size: .7rem;
   }
 
+  .mel-event-card__badge {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 3px 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    border-radius: 999px;
+    background: rgba(110, 126, 242, 0.12);
+    color: var(--mel-secondary);
+    line-height: 1.3;
+  }
+
   .mel-accessibility {
     display: flex;
     gap: .25rem;
     font-size: .85rem;
   }
 
-  // Support both new spec class names and legacy class names for backward compatibility
+  // Hide CTA button on cards (cleaner look like reference)
   .mel-event-card__actions,
   .mel-card-cta {
-    margin-top: 0.25rem;
-  }
-
-  .mel-event-card__actions .button,
-  .mel-card-cta .mel-btn-primary {
-    font-size: 0.75rem;
-    padding: 0.35rem 0.75rem;
-    border-radius: 999px;
-    background: var(--mel-muted-bg, #f3f4f6);
-    color: var(--mel-primary, #4f7cff);
+    display: none;
   }
 }
 

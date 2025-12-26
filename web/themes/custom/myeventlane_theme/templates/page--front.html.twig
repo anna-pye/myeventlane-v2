@@ -21,36 +21,33 @@
     {% include '@myeventlane_theme/includes/header.html.twig' %}
   </div>
 
-  {# ==================== HERO (CUSTOM TWIG) ==================== #}
-  <section class="mel-front-hero">
+  {# ==================== HERO (EVENT-LED) ==================== #}
+  <section class="mel-home-hero">
     <div class="mel-container">
-      <div class="mel-front-hero__inner">
-
-        <div class="mel-front-hero__left">
-          {% include '@myeventlane_theme/components/front/_front-hero.html.twig' with {
-            front: mel_front|default({}),
-            logo_src: '/themes/custom/myeventlane_theme/images/logo.svg'
-          } only %}
+      <div class="mel-home-hero__wrapper">
+        <div class="mel-home-hero__content">
+          <h1>Your lane to great events.</h1>
+          <p>Discover local events, workshops, gigs, and community gatherings — or create your own in minutes.</p>
 
           {% include '@myeventlane_theme/components/front/_front-search.html.twig' with {
             front: mel_front|default({})
           } only %}
 
-          {% include '@myeventlane_theme/components/front/_front-pills.html.twig' with {
-            front: mel_front|default({})
-          } only %}
-
-          {% include '@myeventlane_theme/components/front/_front-values.html.twig' with {
-            front: mel_front|default({})
-          } only %}
+          <div class="mel-home-hero__categories">
+            <p class="mel-home-hero__categories-intro">Explore by interest</p>
+            {% include '@myeventlane_theme/components/front/_front-pills.html.twig' with {
+              front: mel_front|default({})
+            } only %}
+          </div>
         </div>
 
-        <div class="mel-front-hero__right">
-          {% include '@myeventlane_theme/components/front/_front-pie.html.twig' with {
-            front: mel_front|default({})
-          } only %}
+        <div class="mel-home-hero__visual">
+          {% if featured_events is defined and featured_events %}
+            <div class="mel-home-hero__event-strip">
+              {{ featured_events }}
+            </div>
+          {% endif %}
         </div>
-
       </div>
     </div>
   </section>
@@ -58,18 +55,40 @@
   {# ==================== MAIN (TWO VIEWS ONLY) ==================== #}
   <main id="main-content" class="mel-main mel-front-content" role="main">
     <div class="mel-container mel-home-events">
-      <section class="mel-section">
-        <h2>Featured Events</h2>
-        {% if featured_events is defined and featured_events %}
-          {{ featured_events }}
-        {% else %}
-          {{ drupal_block('views_block:featured_events-block_featured') }}
+      <section class="mel-featured-events">
+        <h2>Featured events</h2>
+        <p class="mel-featured-events__helper">Handpicked events happening soon.</p>
+        <div class="mel-featured-events__row">
+          {% if featured_events is defined and featured_events %}
+            {{ featured_events }}
+          {% else %}
+            {{ drupal_block('views_block:featured_events-block_featured') }}
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="mel-all-events">
+        <h2>All events</h2>
+        <p class="mel-all-events__helper">Browse everything happening on MyEventLane.</p>
+        {{ drupal_view('upcoming_events', 'block_upcoming') }}
+      </section>
+
+      <section class="mel-home-calendar">
+        <h2>Browse by date</h2>
+        <p class="mel-home-calendar__intro">See what's happening over the next few weeks.</p>
+        {% if calendar is defined and calendar %}
+          {% include '@myeventlane_theme/components/front/_front-calendar.html.twig' with {
+            calendar: calendar
+          } only %}
         {% endif %}
       </section>
 
-      <section class="mel-section">
-        <h2>All Events</h2>
-        {{ drupal_view('upcoming_events', 'block_upcoming') }}
+      {# Call to Action #}
+      <section class="mel-home-cta">
+        <div class="mel-home-cta__content">
+          <p class="mel-home-cta__question">Got something to share?</p>
+          <p class="mel-home-cta__text">Create an event in minutes.</p>
+        </div>
       </section>
     </div>
   </main>

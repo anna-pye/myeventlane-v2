@@ -51,9 +51,9 @@ class CreateEventGatewayController extends ControllerBase {
       return new RedirectResponse($onboard_url->toString());
     }
 
-    // User has a vendor: redirect to vendor dashboard where they can create events.
-    $dashboard_url = Url::fromRoute('myeventlane_vendor.console.dashboard');
-    return new RedirectResponse($dashboard_url->toString());
+    // User has a vendor: redirect directly to event creation wizard.
+    $create_url = Url::fromRoute('myeventlane_event.wizard.create');
+    return new RedirectResponse($create_url->toString());
   }
 
   /**

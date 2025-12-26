@@ -188,3 +188,14 @@ a.mel-card,
   }
 }
 
+// ============================================================================
+// WIZARD SECTION CARD HELP TEXT
+// ============================================================================
+
+.mel-card__help {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  line-height: 1.6;
+  margin-top: $spacing-2;
+}
+

@@ -1,295 +1,190 @@
 /**
- * Wizard JS (vendor form).
+ * @file
+ * MyEventLane Event Wizard controller.
  *
- * Server-authoritative wizard:
- * - PHP controls which step is visible via CSS classes (.is-active, .is-hidden).
- * - JS only:
- *   - Stepper click -> set target step -> trigger hidden AJAX submit (goto).
- *   - Focus step title after rebuild for accessibility.
- *   - Rebind change/blur listeners after AJAX rebuilds.
+ * Responsibilities:
+ * - Step navigation + persistence
+ * - AJAX-safe initialization
+ * - Save-per-step UX hooks
+ *
+ * IMPORTANT:
+ * - This file MUST NOT contain address autocomplete logic.
+ * - Location handling lives in myeventlane-location.js ONLY.
  */
 
-(function (Drupal, once, drupalSettings) {
+(function (Drupal, once) {
   'use strict';
 
-  Drupal.behaviors.melEventWizard = {
-    attach(context) {
-      // Find wizard forms - support both old and new class names.
-      const wrappers = once('mel-event-wizard', '.mel-event-form--wizard, .mel-event-wizard, form#event-wizard-form', context);
-      wrappers.forEach((wrapper) => {
-        const form = wrapper.closest('form') || (wrapper.tagName === 'FORM' ? wrapper : null);
+  /**
+   * Wizard state helpers
+   */
+  function getWizardForm(context) {
+    return (
+      context.querySelector('form#event-wizard-form') ||
+      context.querySelector('form[id*="event_wizard"]') ||
+      context.querySelector('.mel-event-wizard form')
+    );
+  }
+
+  function getCurrentStep(form) {
+    return form.querySelector('[data-wizard-step].is-active');
+  }
+
+  function getStepIndex(stepEl) {
+    return stepEl ? parseInt(stepEl.getAttribute('data-wizard-step'), 10) : null;
+  }
+
+  /**
+   * Ensure Drupal detects changes before step submit
+   */
+  function triggerFormUpdated(form) {
+    if (window.jQuery) {
+      window.jQuery(form).trigger('formUpdated');
+    }
+  }
+
+  /**
+   * Attach handlers for wizard navigation
+   */
+  function initWizard(form) {
+    if (!form) return;
+
+    const steps = form.querySelectorAll('[data-wizard-step]');
+    if (!steps.length) return;
+
+    // Next / Continue buttons
+    const nextButtons = form.querySelectorAll(
+      'button[data-wizard-next], input[data-wizard-next]'
+    );
+
+    nextButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        triggerFormUpdated(form);
+      });
+    });
+
+    // Back buttons
+    const backButtons = form.querySelectorAll(
+      'button[data-wizard-back], input[data-wizard-back]'
+    );
+
+    backButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        triggerFormUpdated(form);
+      });
+    });
+
+    // Safety: before submit (final publish)
+    form.addEventListener(
+      'submit',
+      () => {
+        triggerFormUpdated(form);
+      },
+      true
+    );
+  }
+
+  /**
+   * Handle stepper button clicks (for EventWizardForm and EventFormAlter).
+   */
+  function initStepperButtons(context) {
+    const buttons = once('mel-stepper-button', context.querySelectorAll('.js-mel-stepper-button'), context);
+    
+    // For EventWizardForm: handle clicks on step containers that trigger hidden submit buttons.
+    buttons.forEach((button) => {
+      // If it's a container (not a button element), find the hidden submit button inside.
+      if (button.tagName !== 'BUTTON' && button.tagName !== 'INPUT') {
+        const hiddenSubmit = button.querySelector('.js-mel-step-submit');
+        if (hiddenSubmit) {
+          button.addEventListener('click', (e) => {
+            e.preventDefault();
+            hiddenSubmit.click();
+          });
+          // Also handle keyboard navigation.
+          button.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              hiddenSubmit.click();
+            }
+          });
+          return;
+        }
+      }
+    });
+    
+    buttons.forEach((button) => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const targetStep = button.getAttribute('data-step-target');
+        if (!targetStep) return;
+
+        const form = button.closest('form');
         if (!form) return;
 
-        const target = form.querySelector('.js-mel-wizard-target-step');
-        const gotoBtn = form.querySelector('.js-mel-wizard-goto');
-        if (!target || !gotoBtn) return;
-
-        // Stepper click delegation.
-        wrapper.addEventListener('click', (e) => {
-          const btn = e.target.closest('.js-mel-stepper-button');
-          if (!btn) return;
-
-          e.preventDefault();
-          e.stopPropagation();
-          const step = btn.getAttribute('data-step-target');
-          if (!step) return;
-
-          target.value = step;
-          gotoBtn.click();
-        });
-        
-        // Rebind listeners after AJAX rebuilds.
-        this.rebindStepListeners(form);
-        
-        // Ensure autocomplete is initialized on initial load.
-        this.initializeAutocomplete(form);
-      });
-
-      // Focus management: after AJAX completes, focus the active step title.
-      const titles = once('mel-event-wizard-focus', '.mel-wizard-step__title', context);
-      titles.forEach((title) => {
-        const panel = title.closest('.mel-wizard-step');
-        if (panel && panel.classList.contains('is-active')) {
-          title.setAttribute('tabindex', '-1');
-          title.focus();
-        }
-      });
-    },
-    
-    /**
-     * Rebind change/blur listeners for fields in the active step.
-     */
-    rebindStepListeners(form) {
-      // Find the active step panel.
-      const activePanel = form.querySelector('.mel-wizard-step.is-active');
-      if (!activePanel) {
-        return;
-      }
-
-      const stepId = activePanel.getAttribute('data-step');
-      if (!stepId) {
-        return;
-      }
-
-      // Remove existing listeners by cloning and replacing.
-      const inputs = activePanel.querySelectorAll('input, select, textarea');
-      inputs.forEach((input) => {
-        // Debounced update to avoid too many requests.
-        let updateTimeout = null;
-        
-        const changeHandler = () => {
-          clearTimeout(updateTimeout);
-          updateTimeout = setTimeout(() => {
-            this.updateDiagnostics(form, stepId);
-          }, 500);
-        };
-        
-        const blurHandler = () => {
-          clearTimeout(updateTimeout);
-          this.updateDiagnostics(form, stepId);
-        };
-        
-        // Remove old listeners by cloning.
-        const newInput = input.cloneNode(true);
-        input.parentNode.replaceChild(newInput, input);
-        
-        // Add new listeners.
-        newInput.addEventListener('change', changeHandler);
-        newInput.addEventListener('blur', blurHandler);
-      });
-    },
-    
-    /**
-     * Initialize autocomplete fields after form load or AJAX rebuild.
-     */
-    initializeAutocomplete(form) {
-      // Drupal's autocomplete behavior uses 'once' to prevent double initialization.
-      // After AJAX, we need to remove the 'autocomplete' marker and re-attach behaviors.
-      if (typeof Drupal !== 'undefined' && Drupal.behaviors && Drupal.behaviors.autocomplete) {
-        // Find all autocomplete inputs in the form.
-        const autocompleteInputs = form.querySelectorAll('input.form-autocomplete');
-        
-        if (autocompleteInputs.length === 0) {
-          console.log('Event Wizard: No autocomplete inputs found in form');
+        // For EventWizardForm: find the stepper button's hidden field and click the button itself.
+        // The button is already a submit button with gotoStep handler.
+        const buttonStepField = button.querySelector('input[name="wizard_step"]');
+        if (buttonStepField && buttonStepField.value === targetStep) {
+          // Button already has the correct step value, just click it.
+          button.click();
           return;
         }
         
-        console.log('Event Wizard: Found', autocompleteInputs.length, 'autocomplete input(s), re-initializing...');
-        
-        // Remove the 'autocomplete' once marker from all inputs in the form.
-        // This allows the behavior to re-attach after AJAX.
-        autocompleteInputs.forEach((input) => {
-          // Check if input has the required data attribute.
-          if (!input.hasAttribute('data-autocomplete-path')) {
-            console.warn('Event Wizard: Autocomplete input missing data-autocomplete-path attribute:', input);
+        // Fallback: find any wizard_step field and set it, then find the matching button.
+        const stepField = form.querySelector('input[name="wizard_step"]');
+        if (stepField) {
+          stepField.value = targetStep;
+          // Find the button that matches this step and click it.
+          const matchingButton = form.querySelector(`.js-mel-stepper-button[data-step-target="${targetStep}"]`);
+          if (matchingButton) {
+            matchingButton.click();
             return;
           }
-          
-          // Remove the once marker if it exists.
-          if (typeof once !== 'undefined' && once.remove) {
-            once.remove('autocomplete', input);
-          }
-          
-          // Also destroy any existing jQuery UI autocomplete instance.
-          if (typeof jQuery !== 'undefined' && jQuery(input).autocomplete) {
-            try {
-              jQuery(input).autocomplete('destroy');
-            } catch (e) {
-              // Ignore errors if autocomplete wasn't initialized
+        }
+        // For EventFormAlter: use wizard_target_step mechanism.
+        else {
+          const targetField = form.querySelector('input[name="wizard_target_step"], .js-mel-wizard-target-step');
+          if (targetField) {
+            targetField.value = targetStep;
+            const gotoButton = form.querySelector('.js-mel-wizard-goto, input[name*="goto"], button[name*="goto"]');
+            if (gotoButton) {
+              gotoButton.click();
             }
           }
-        });
-        
-        // Re-attach the autocomplete behavior.
-        // This will use once() internally to prevent double initialization.
-        try {
-          Drupal.behaviors.autocomplete.attach(form, drupalSettings);
-          console.log('Event Wizard: Autocomplete behavior re-attached successfully');
-        } catch (e) {
-          console.error('Event Wizard: Failed to re-attach autocomplete behavior:', e);
         }
-      } else {
-        console.warn('Event Wizard: Drupal.autocomplete behavior not available');
-      }
-    },
-    
-    /**
-     * Updates diagnostics widget based on current wizard step.
-     */
-    updateDiagnostics(form, stepId) {
-      const stepScopeMap = {
-        'basics': 'basics',
-        'when-where': 'basics',
-        'sales_visibility': 'sales_state',
-        'tickets': 'tickets_rsvp',
-        'capacity_waitlist': 'capacity',
-        'review': null,
-      };
-      
-      const scope = stepScopeMap[stepId] || null;
-      
-      const eventId = form.querySelector('input[name="nid[0][value]"], input[name="nid"]')?.value ||
-                      form.querySelector('input[name="form_id"]')?.closest('form')?.dataset?.eventId;
-      
-      const widgetContainer = form.querySelector('#mel-diagnostics-widget, .mel-event-form__wizard-diagnostics');
-      if (!widgetContainer) {
-        return;
-      }
-      
-      if (!eventId) {
-        widgetContainer.innerHTML = '<div class="mel-diagnostics"><p class="mel-diagnostics__empty">Complete a step to see diagnostics.</p></div>';
-        return;
-      }
-      
-      let url = `/vendor/events/${eventId}/diagnostics/widget`;
-      if (scope) {
-        url += `?scope=${scope}`;
-      }
-      
-      const currentContent = widgetContainer.innerHTML;
-      if (!currentContent.includes('mel-diagnostics__loading')) {
-        const loadingHtml = '<div class="mel-diagnostics"><div class="mel-diagnostics__loading">Loading checklist...</div></div>';
-        widgetContainer.innerHTML = loadingHtml;
-      }
-      
-      fetch(url, {
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-          'Accept': 'text/html, application/vnd.drupal-ajax',
-        },
-        credentials: 'same-origin',
-        cache: 'no-cache',
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: Failed to fetch diagnostics`);
-          }
-          const contentType = response.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            return response.json().then(data => ({ type: 'json', data }));
-          }
-          return response.text().then(data => ({ type: 'html', data }));
-        })
-        .then(result => {
-          if (!widgetContainer) {
-            return;
-          }
-          
-          if (result.type === 'json') {
-            if (Array.isArray(result.data)) {
-              result.data.forEach(command => {
-                if (command.command === 'insert' || command.command === 'html' || command.command === 'replace') {
-                  const selector = command.selector || '#mel-diagnostics-widget';
-                  const target = document.querySelector(selector) || widgetContainer;
-                  if (target) {
-                    target.innerHTML = command.data;
-                  }
-                }
-              });
-            }
-          } else {
-            widgetContainer.innerHTML = result.data;
-          }
-          
-          if (typeof Drupal !== 'undefined' && Drupal.attachBehaviors) {
-            Drupal.attachBehaviors(widgetContainer);
-          }
-        })
-        .catch(error => {
-          console.warn('Failed to update diagnostics widget:', error);
-          if (widgetContainer) {
-            widgetContainer.innerHTML = '<div class="mel-diagnostics"><div class="mel-diagnostics__error">Unable to load diagnostics. Please refresh the page.</div></div>';
-          }
-        });
-    }
-  };
-
-  // Rebind listeners after AJAX completes.
-  if (typeof Drupal !== 'undefined' && Drupal.ajax) {
-    const originalBeforeSerialize = Drupal.ajax.prototype.beforeSerialize;
-    Drupal.ajax.prototype.beforeSerialize = function(element, options) {
-      if (originalBeforeSerialize) {
-        originalBeforeSerialize.call(this, element, options);
-      }
-    };
-    
-    const originalBeforeSend = Drupal.ajax.prototype.beforeSend;
-    Drupal.ajax.prototype.beforeSend = function(xmlhttprequest, options) {
-      if (originalBeforeSend) {
-        originalBeforeSend.call(this, xmlhttprequest, options);
-      }
-    };
-    
-    const originalSuccess = Drupal.ajax.prototype.success;
-    Drupal.ajax.prototype.success = function(response, status) {
-      if (originalSuccess) {
-        originalSuccess.call(this, response, status);
-      }
-      
-      // After AJAX completes, rebind listeners and re-initialize autocomplete.
-      setTimeout(() => {
-        // Find the wizard form - try multiple selectors.
-        const form = document.querySelector('form#event-wizard-form') || 
-                     document.querySelector('.mel-event-wizard')?.closest('form') ||
-                     document.querySelector('.mel-event-form--wizard')?.closest('form');
-        
-        if (form) {
-          Drupal.behaviors.melEventWizard.rebindStepListeners(form);
-          
-          // Re-attach behaviors to re-initialize autocomplete fields.
-          // This is critical for entity_autocomplete to work after AJAX rebuilds.
-          if (typeof Drupal !== 'undefined' && Drupal.attachBehaviors) {
-            // Attach behaviors to the entire form context to ensure autocomplete is re-initialized.
-            Drupal.attachBehaviors(form, document);
-          }
-          
-          // Explicitly re-initialize autocomplete after a short delay to ensure DOM is ready.
-          setTimeout(() => {
-            Drupal.behaviors.melEventWizard.initializeAutocomplete(form);
-          }, 150);
-        }
-      }, 200);
-    };
+      });
+    });
   }
 
-})(Drupal, once, drupalSettings);
+  /**
+   * Drupal behavior
+   */
+  Drupal.behaviors.myeventlaneEventWizard = {
+    attach(context) {
+      const forms = [];
+
+      if (context.tagName === 'FORM') {
+        forms.push(context);
+      } else {
+        forms.push(...context.querySelectorAll('form'));
+      }
+
+      for (const form of once('mel-event-wizard', forms, context)) {
+        // Only attach to wizard forms
+        if (
+          form.id === 'event-wizard-form' ||
+          form.classList.contains('mel-event-wizard') ||
+          form.querySelector('[data-wizard-step]')
+        ) {
+          // Delay allows AJAX-rendered steps to exist
+          setTimeout(() => initWizard(form), 50);
+        }
+      }
+
+      // Initialize stepper buttons for both EventWizardForm and EventFormAlter.
+      initStepperButtons(context);
+    },
+  };
+
+})(window.Drupal || {}, window.once);

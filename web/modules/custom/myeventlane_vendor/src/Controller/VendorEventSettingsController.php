@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\myeventlane_vendor\Controller;
 
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\myeventlane_core\Service\DomainDetector;
 
@@ -34,7 +35,8 @@ final class VendorEventSettingsController extends VendorConsoleBaseController {
       'header_actions' => [
         [
           'label' => 'Edit Event',
-          'url' => $event->toUrl('edit-form')->toString(),
+          // Use wizard route for editing (vendors never see default node edit form).
+          'url' => Url::fromRoute('myeventlane_event.wizard.edit', ['node' => $event->id()])->toString(),
           'class' => 'mel-btn--primary',
         ],
       ],

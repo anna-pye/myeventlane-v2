@@ -364,7 +364,8 @@ final class VendorDashboardController extends VendorConsoleBaseController {
         'rsvps' => $rsvps,
         'waitlist' => $waitlistAnalytics,
         'view_url' => $node->toUrl()->toString(),
-        'edit_url' => $node->toUrl('edit-form')->toString(),
+        // Use wizard route for editing (vendors never see default node edit form).
+        'edit_url' => Url::fromRoute('myeventlane_event.wizard.edit', ['node' => $eventId])->toString(),
         'manage_url' => '/vendor/events/' . $eventId . '/overview',
         'tickets_url' => '/vendor/events/' . $eventId . '/tickets',
         'analytics_url' => '/vendor/analytics/event/' . $eventId,

@@ -6,7 +6,7 @@ namespace Drupal\myeventlane_commerce\Form;
 
 use Drupal\commerce_cart\CartManagerInterface;
 use Drupal\commerce_cart\CartProviderInterface;
-use Drupal\commerce_price\CurrencyFormatterInterface;
+use Drupal\commerce_price\CurrencyFormatter;
 use Drupal\commerce_product\Entity\ProductInterface;
 use Drupal\commerce_product\Entity\ProductVariationInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -31,7 +31,7 @@ final class TicketSelectionForm extends FormBase {
     private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly CartProviderInterface $cartProvider,
     private readonly CartManagerInterface $cartManager,
-    private readonly CurrencyFormatterInterface $currencyFormatter,
+    private readonly CurrencyFormatter $currencyFormatter,
   ) {}
 
   /**

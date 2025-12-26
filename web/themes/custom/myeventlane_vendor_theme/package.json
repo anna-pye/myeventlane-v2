@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && npm run build:vendor-wizard",
+    "build:vendor-wizard": "cd /var/www/html/web/themes/custom/myeventlane_vendor_theme && sass src/scss/vendor-wizard.scss dist/vendor-wizard.css --no-source-map --style=compressed",
     "preview": "vite preview",
     "lint:scss": "stylelint 'src/scss/**/*.scss'",
     "lint:js": "eslint 'src/js/**/*.js'",

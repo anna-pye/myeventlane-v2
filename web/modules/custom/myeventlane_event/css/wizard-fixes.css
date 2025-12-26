@@ -1,0 +1,55 @@
+/**
+ * @file
+ * CSS fixes for wizard form issues.
+ */
+
+/* Ensure time input fields are visible */
+.mel-datetime-wrapper input[type="time"] {
+  display: block !important;
+  visibility: visible !important;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.mel-datetime-wrapper .form-item--name-field-event-start-time,
+.mel-datetime-wrapper .form-item--name-field-event-end-time {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Hide organization, name fields from address widget */
+.myeventlane-location-address-widget .form-item--name-organization,
+.myeventlane-location-address-widget .form-item--name-given-name,
+.myeventlane-location-address-widget .form-item--name-family-name,
+.myeventlane-location-address-widget .form-item--name-additional-name,
+.myeventlane-location-address-widget .address--organization,
+.myeventlane-location-address-widget .address--given-name,
+.myeventlane-location-address-widget .address--family-name,
+.myeventlane-location-address-widget .address--additional-name {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ensure address search field is prominent */
+.myeventlane-location-address-search {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.myeventlane-location-address-search:focus {
+  border-color: #0073e6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 115, 230, 0.1);
+}
+
+/* Make address fields read-only after autocomplete fill */
+.myeventlane-location-address-widget .mel-address-component input:not([readonly]) {
+  background-color: #f5f5f5;
+}

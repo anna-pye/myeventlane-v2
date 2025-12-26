@@ -131,7 +131,9 @@ final class TicketHolderParagraphPane extends CheckoutPaneBase {
     ];
 
     // Dynamic extra questions derived from templates (or existing children).
-    $question_sources = $holder?->get('field_attendee_questions')->referencedEntities() ?? $templates;
+    $question_sources = ($holder && $holder->hasField('field_attendee_questions') && !$holder->get('field_attendee_questions')->isEmpty())
+      ? $holder->get('field_attendee_questions')->referencedEntities()
+      : $templates;
     foreach ($question_sources as $q_index => $question) {
       $label = $question->get('field_question_label')->value ?? 'Extra Question';
       $type = $question->get('field_question_type')->value ?? 'text';

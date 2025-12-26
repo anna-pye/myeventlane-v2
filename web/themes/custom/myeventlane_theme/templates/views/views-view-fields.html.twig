@@ -10,19 +10,21 @@
 #}
 
 {% if mel_is_event_view %}
+  {# Preprocess sets these as strings via _myeventlane_theme_set_views_field_content #}
+  {# Use values directly - preprocess should provide clean strings #}
   {% include '@myeventlane_theme/event/event-card.html.twig' with {
-    title: fields.title.content,
-    url: fields.view_node.content,
-    image: fields.field_image.content,
-    date_day: fields.field_date_day.content,
-    date_month: fields.field_date_month.content,
-    date_full: fields.field_date.content,
-    location: fields.field_location.content,
-    category: fields.field_category.content,
-    category_slug: fields.field_category_slug.content,
-    ticket_type: fields.field_ticket_type.content,
-    ticket_label: fields.field_ticket_label.content,
-    accessibility: fields.field_accessibility_icons.content
+    title: fields.title.content|default(''),
+    url: fields.view_node.content|default(''),
+    image: fields.field_image.content|default(''),
+    date_day: fields.field_date_day.content|default(''),
+    date_month: fields.field_date_month.content|default(''),
+    date_full: fields.field_date.content|default(''),
+    location: fields.field_location.content|default(''),
+    category: fields.field_category.content|default(''),
+    category_slug: fields.field_category_slug.content|default(''),
+    ticket_type: fields.field_ticket_type.content|default('rsvp'),
+    ticket_label: fields.field_ticket_label.content|default('RSVP'),
+    accessibility: fields.field_accessibility_icons.content|default([])
   } %}
 {% else %}
   {% for field in fields -%}

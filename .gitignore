@@ -83,3 +83,8 @@ web/sites/*/private/
 
 # Local development scripts
 web/modules/custom/*/scripts/local/
+
+# Zip files (build artifacts, backups)
+*.zip
+!web/themes/contrib/**/*.zip
+!web/modules/contrib/**/*.zip

@@ -56,45 +56,13 @@
   }
 }
 
-.mel-logo-icon {
-  width: 40px;
+.mel-logo-image {
   height: 40px;
+  width: auto;
   flex-shrink: 0;
 
   @include breakpoints.mel-break(md) {
-    width: 44px;
     height: 44px;
-  }
-
-  svg {
-    width: 100%;
-    height: 100%;
-  }
-}
-
-.mel-logo-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-
-.mel-logo-my {
-  font-size: typography.mel-font-size(sm);
-  font-weight: typography.$mel-font-bold;
-  color: colors.$mel-color-primary;
-
-  @include breakpoints.mel-break(md) {
-    font-size: typography.mel-font-size(base);
-  }
-}
-
-.mel-logo-eventlane {
-  font-size: typography.mel-font-size(md);
-  font-weight: typography.$mel-font-extrabold;
-  color: colors.$mel-color-primary;
-
-  @include breakpoints.mel-break(md) {
-    font-size: typography.mel-font-size(lg);
   }
 }
 
@@ -265,7 +233,8 @@
 // Try multiple selector patterns to ensure it works
 .mel-nav-toggle-checkbox:checked ~ header .mel-nav-mobile-wrapper,
 .mel-nav-toggle-checkbox:checked ~ .mel-region-header header .mel-nav-mobile-wrapper,
-header:has(~ .mel-nav-toggle-checkbox:checked) .mel-nav-mobile-wrapper {
+header:has(~ .mel-nav-toggle-checkbox:checked) .mel-nav-mobile-wrapper,
+.mel-nav-mobile-wrapper.is-open {
   transform: translateX(0) !important; // Force it to work
 }
 
@@ -638,7 +607,8 @@ header:has(~ .mel-nav-toggle-checkbox:checked) .mel-nav-mobile-wrapper {
 
 // Show overlay when checkbox is checked - CSS-only!
 // Checkbox and overlay are both siblings of header
-.mel-nav-toggle-checkbox:checked ~ .mel-nav-overlay {
+.mel-nav-toggle-checkbox:checked ~ .mel-nav-overlay,
+.mel-nav-overlay.is-visible {
   opacity: 1;
   visibility: visible;
 }

@@ -1,0 +1,14 @@
+name: 'MyEventLane Venue'
+type: module
+description: 'Defines the Venue content entity for MyEventLane. Venues represent reusable location entities that can be referenced by Events.'
+package: MyEventLane
+core_version_requirement: ^11
+lifecycle: stable
+
+dependencies:
+  - myeventlane_core:myeventlane_core
+  - myeventlane_vendor:myeventlane_vendor
+  - drupal:field
+  - drupal:user
+  - drupal:field_ui
+  - address:address

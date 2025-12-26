@@ -199,7 +199,8 @@ function myeventlane_vendor_theme_preprocess_page(array &$variables): void {
     $variables['page']['quick_actions'][] = [
       '#type' => 'link',
       '#title' => t('+ Create Event'),
-      '#url' => \Drupal\Core\Url::fromRoute('myeventlane_vendor.create_event_gateway'),
+      // Use canonical wizard route for event creation.
+      '#url' => \Drupal\Core\Url::fromRoute('myeventlane_event.wizard.create'),
       '#attributes' => [
         'class' => ['mel-btn', 'mel-btn--primary', 'mel-header__action-btn'],
       ],
@@ -248,6 +249,21 @@ function myeventlane_vendor_theme_form_alter(array &$form, FormStateInterface $f
       $form['#attached']['library'][] = 'conditional_fields/conditional_fields';
     }
   }
+  
+  // Also attach event-form library for the custom wizard form.
+  if ($form_id === 'myeventlane_event_wizard') {
+    $form['#attributes']['class'][] = 'mel-event-form';
+    $form['#attributes']['class'][] = 'mel-event-form-page';
+    $form['#attributes']['data-event-form'] = TRUE;
+    
+    // Attach vendor theme's event-form library (includes compiled wizard styles).
+    $form['#attached']['library'][] = 'myeventlane_vendor_theme/event-form';
+    
+    // Attach required libraries for form functionality.
+    $form['#attached']['library'][] = 'core/drupal.form';
+    $form['#attached']['library'][] = 'core/drupal.states';
+    $form['#attached']['library'][] = 'core/drupal.ajax';
+  }
 }
 
 /**
@@ -278,6 +294,11 @@ function myeventlane_vendor_theme_theme_suggestions_form_alter(array &$suggestio
   $form_id = $variables['element']['#form_id'] ?? '';
   if (in_array($form_id, ['node_event_form', 'node_event_edit_form'], TRUE)) {
     $suggestions[] = 'form__node_event_form__vendor';
+  }
+  
+  // Also add suggestion for EventWizardForm.
+  if ($form_id === 'myeventlane_event_wizard') {
+    $suggestions[] = 'form__myeventlane_event_wizard';
   }
 }
 

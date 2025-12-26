@@ -200,9 +200,30 @@ final class VendorDomainSubscriber implements EventSubscriberInterface {
         $node_type = $this->routeMatch->getParameter('node_type');
         $bundle = $node_type ? (is_string($node_type) ? $node_type : $node_type->id()) : NULL;
         if ($bundle === 'event') {
-          $gateway_url = Url::fromRoute('myeventlane_vendor.create_event_gateway')->toString();
-          $event->setResponse(new TrustedRedirectResponse($gateway_url, 302));
+          // Redirect directly to wizard (gateway will handle auth/onboarding if needed).
+          $wizard_url = Url::fromRoute('myeventlane_event.wizard.create')->toString();
+          $event->setResponse(new TrustedRedirectResponse($wizard_url, 302));
           return;
+        }
+      }
+      catch (\Exception $e) {
+        // If parameter resolution fails, do nothing.
+      }
+    }
+
+    // On vendor domain, redirect event edit forms to the wizard.
+    // This ensures vendors never see the default Drupal node edit form.
+    if ($is_vendor_domain && $route_name === 'entity.node.edit_form') {
+      try {
+        $node = $this->routeMatch->getParameter('node');
+        if ($node && method_exists($node, 'bundle') && $node->bundle() === 'event') {
+          // Check if user owns the event or is admin.
+          if ($this->currentUser->hasPermission('administer nodes') || 
+              (int) $node->getOwnerId() === (int) $this->currentUser->id()) {
+            $wizard_url = Url::fromRoute('myeventlane_event.wizard.edit', ['node' => $node->id()])->toString();
+            $event->setResponse(new TrustedRedirectResponse($wizard_url, 302));
+            return;
+          }
         }
       }
       catch (\Exception $e) {

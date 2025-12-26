@@ -8,6 +8,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Url;
 use Drupal\myeventlane_vendor\Service\ManageEventNavigation;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -113,10 +114,10 @@ abstract class ManageEventControllerBase extends ControllerBase {
       $preview_url = $event->toUrl('canonical');
     }
 
-    // Build edit URL (standard node edit).
+    // Build edit URL (use wizard route for vendors).
     $edit_url = NULL;
     if (!$event->isNew()) {
-      $edit_url = $event->toUrl('edit-form');
+      $edit_url = Url::fromRoute('myeventlane_event.wizard.edit', ['node' => $event->id()]);
     }
 
     return [

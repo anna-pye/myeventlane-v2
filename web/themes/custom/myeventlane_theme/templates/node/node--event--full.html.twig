@@ -21,19 +21,19 @@
   {# ==========================================================================
      HERO SECTION
      ========================================================================== #}
-  <section class="mel-event-hero">
-    {% if node.hasField('field_event_image') and node.field_event_image.entity %}
-      <div class="mel-event-hero__image">
-        {{ content.field_event_image|default('') }}
-        <div class="mel-event-hero__overlay"></div>
-      </div>
-    {% endif %}
+  {% if hero_image_url is defined and hero_image_url %}
+    <section class="event-hero">
+      <img
+        src="{{ hero_image_url }}"
+        alt="{{ node.label }}"
+        class="event-hero__image"
+      />
 
-    <div class="mel-event-hero__content">
-      <div class="mel-event-hero__header">
-        {# State badge #}
+      <div class="event-hero__overlay">
+        <h1 class="event-hero__title">{{ node.label }}</h1>
+
         {% if mel_event_state is defined and mel_event_state %}
-          <div class="mel-status-badge mel-status-badge--{{ mel_event_state }}">
+          <span class="event-hero__status">
             {% if mel_event_state == 'scheduled' %}
               {{ 'Scheduled'|t }}
             {% elseif mel_event_state == 'live' %}
@@ -47,31 +47,11 @@
             {% else %}
               {{ 'Draft'|t }}
             {% endif %}
-          </div>
-        {% endif %}
-
-        {# Title #}
-        <h1 class="mel-event-hero__title">{{ node.label }}</h1>
-
-        {# Meta chips row #}
-        {% if mel_date_label is defined or mel_time_label is defined or mel_venue_label is defined or mel_category_label is defined %}
-          {% include '@myeventlane_theme/event/_event-meta.html.twig' with {
-            node: node,
-            mel_venue: mel_venue,
-            mel_address: mel_address,
-            mel_categories: mel_categories
-          } only %}
+          </span>
         {% endif %}
       </div>
-
-      {# Primary CTA group (hero) - visible on mobile/above fold #}
-      {% if event_cta is defined and event_cta and event_cta.label %}
-        <div class="mel-event-hero__cta">
-          {% include '@myeventlane_theme/event/_event-cta.html.twig' %}
-        </div>
-      {% endif %}
-    </div>
-  </section>
+    </section>
+  {% endif %}
 
   {# ==========================================================================
      CANCELLED BANNER (if cancelled)
@@ -139,14 +119,19 @@
         </section>
       {% endif %}
 
-      {# Hosted by Section Card #}
-      {% if mel_organiser_name %}
-        {% include '@myeventlane_theme/event/event-organiser.html.twig' with {
-          node: node,
-          mel_organiser_name: mel_organiser_name,
-          mel_organiser_logo: mel_organiser_logo,
-          mel_organiser_block: mel_organiser_block
-        } only %}
+      {# Hosted by Section Card (linked) #}
+      {% if event_host %}
+        <section class="mel-event-card mel-event-card--host">
+          <h2 class="mel-event-card__title">{{ 'Hosted by'|t }}</h2>
+          <div class="mel-event-card__content">
+            <div class="event-host">
+              {{ 'Hosted by'|t }}
+              <a href="{{ event_host.url }}">
+                {{ event_host.name }}
+              </a>
+            </div>
+          </div>
+        </section>
       {% endif %}
 
       {# Tags / Keywords Section Card #}
@@ -181,10 +166,25 @@
           </div>
         {% endif %}
 
-        {# Primary CTA - always show if event_cta exists #}
-        {% if event_cta is defined and event_cta and event_cta.label %}
+        {# Primary CTA - show if event_cta exists and has a label #}
+        {% if event_cta and event_cta.label %}
           <div class="mel-event-sidebar__section mel-event-sidebar__section--cta">
-            {% include '@myeventlane_theme/event/_event-cta.html.twig' %}
+            {% if event_cta.url %}
+              <a href="{{ event_cta.url }}" class="mel-btn mel-btn--primary event-cta">
+                {{ event_cta.label }}
+              </a>
+            {% else %}
+              <span class="mel-btn mel-btn--disabled">
+                {{ event_cta.label }}
+              </span>
+            {% endif %}
+            
+            {# Secondary CTA for "both" mode (RSVP when tickets are primary) #}
+            {% if event_cta_secondary and event_cta_secondary.url and event_cta_secondary.label %}
+              <a href="{{ event_cta_secondary.url }}" class="mel-btn mel-btn--secondary event-cta" style="margin-top: 0.75rem; display: block;">
+                {{ event_cta_secondary.label }}
+              </a>
+            {% endif %}
           </div>
         {% endif %}
 
@@ -234,70 +234,25 @@
           </div>
         {% endif %}
 
-        {# Location (full address) #}
-        {% if (mel_venue is defined and mel_venue) or (mel_address is defined and mel_address) or (content.field_location is defined and content.field_location) %}
-          <div class="mel-event-sidebar__section">
+        {# Location + Map (embedded) #}
+        {% if event_location %}
+          <div class="mel-event-sidebar__section event-info__location">
             <h3 class="mel-event-sidebar__title">{{ 'Location'|t }}</h3>
-            {% if mel_venue is defined and mel_venue %}
-              <div class="mel-event-sidebar__venue">{{ mel_venue }}</div>
+            {% if event_location.venue_name %}
+              <strong>{{ event_location.venue_name }}</strong>
             {% endif %}
-            {% if mel_address is defined and mel_address %}
-              <address class="mel-event-sidebar__address">{{ mel_address }}</address>
-            {% elseif content.field_location is defined and content.field_location %}
-              <div class="mel-event-sidebar__address">
-                {{ content.field_location }}
-              </div>
-            {% endif %}
-            
-            {# Map container - rendered by JavaScript when coords exist #}
-            {% if mel_lat is defined and mel_lng is defined and mel_lat and mel_lng %}
-              <div class="mel-event-sidebar__map myeventlane-event-map-container" 
-                   data-latitude="{{ mel_lat }}" 
-                   data-longitude="{{ mel_lng }}" 
-                   data-title="{{ node.label }}">
-                {# Map rendered by JavaScript from myeventlane_location/event_map library #}
-              </div>
-            {% endif %}
-            
-            {# Get directions link #}
-            {% if mel_directions_url is defined and mel_directions_url %}
-              <a href="{{ mel_directions_url }}" 
-                 target="_blank" 
-                 rel="noopener"
-                 class="mel-event-sidebar__directions">
-                {{ 'Get directions'|t }}
-              </a>
-            {% endif %}
+            <div class="event-location__address">
+              {{ event_location.address }}
+            </div>
+            <a href="{{ event_location.map_url }}"
+               target="_blank"
+               rel="noopener"
+               class="event-location__map-link">
+              {{ 'View on map'|t }} →
+            </a>
           </div>
         {% endif %}
 
-        {# Capacity Status #}
-        {% if mel_capacity is defined and mel_capacity and (mel_capacity.capacity is not null or (mel_capacity.attendee_count is defined and mel_capacity.attendee_count > 0)) %}
-          <div class="mel-event-sidebar__section">
-            <h3 class="mel-event-sidebar__title">{{ 'Capacity'|t }}</h3>
-            {% if mel_capacity.capacity is not null %}
-              <div class="mel-event-sidebar__capacity-info">
-                <span class="mel-event-sidebar__capacity-current">{{ mel_capacity.attendee_count|default(0) }}</span>
-                <span class="mel-event-sidebar__capacity-separator">/</span>
-                <span class="mel-event-sidebar__capacity-total">{{ mel_capacity.capacity }}</span>
-                <span class="mel-event-sidebar__capacity-label">{{ 'attending'|t }}</span>
-              </div>
-              {% if mel_capacity.remaining is defined and mel_capacity.remaining is not null %}
-                <div class="mel-event-sidebar__capacity-remaining">
-                  {{ mel_capacity.remaining }} {{ 'spots remaining'|t }}
-                </div>
-              {% endif %}
-            {% else %}
-              <div class="mel-event-sidebar__capacity-info">
-                <span class="mel-event-sidebar__capacity-current">{{ mel_capacity.attendee_count|default(0) }}</span>
-                <span class="mel-event-sidebar__capacity-label">{{ 'attending'|t }}</span>
-              </div>
-              <div class="mel-event-sidebar__capacity-remaining">
-                {{ 'Unlimited capacity'|t }}
-              </div>
-            {% endif %}
-          </div>
-        {% endif %}
 
       </div>
     </aside>
@@ -307,9 +262,12 @@
   {# ==========================================================================
      MOBILE STICKY CTA BAR
      ========================================================================== #}
-  {% if event_cta is defined and event_cta and event_cta.label and not event_cta.disabled %}
+  {% if event_cta and event_cta.url %}
     <div class="mel-event-cta-mobile-sticky">
-      {% include '@myeventlane_theme/event/_event-cta.html.twig' %}
+      <a href="{{ event_cta.url }}"
+         class="mel-btn mel-btn--primary event-cta">
+        {{ event_cta.label }}
+      </a>
     </div>
   {% endif %}
 

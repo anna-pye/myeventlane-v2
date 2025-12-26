@@ -1,0 +1,57 @@
+{#
+/**
+ * @file
+ * Template for vendor venue list page.
+ *
+ * Available variables:
+ * - venues: Array of venue entities.
+ * - vendor: The vendor entity.
+ */
+#}
+<div class="myeventlane-venue-list">
+  <div class="myeventlane-venue-list__header">
+    <h1>{{ 'My Venues'|t }}</h1>
+    <a href="{{ path('entity.myeventlane_venue.add_form') }}" class="button button--primary">
+      {{ '+ Add Venue'|t }}
+    </a>
+  </div>
+
+  {% if venues %}
+    <table class="myeventlane-venue-list__table">
+      <thead>
+        <tr>
+          <th>{{ 'Name'|t }}</th>
+          <th>{{ 'Address'|t }}</th>
+          <th>{{ 'Created'|t }}</th>
+          <th>{{ 'Operations'|t }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for venue in venues %}
+          <tr>
+            <td>{{ venue.name.value }}</td>
+            <td>
+              {% if venue.field_location.value %}
+                {{ venue.field_location.value.address_line1 }}{% if venue.field_location.value.locality %}, {{ venue.field_location.value.locality }}{% endif %}
+              {% else %}
+                {{ '-'|t }}
+              {% endif %}
+            </td>
+            <td>{{ venue.created.value|date('Y-m-d') }}</td>
+            <td>
+              <a href="{{ path('entity.myeventlane_venue.edit_form', {'myeventlane_venue': venue.id}) }}">{{ 'Edit'|t }}</a>
+              <a href="{{ path('entity.myeventlane_venue.delete_form', {'myeventlane_venue': venue.id}) }}">{{ 'Delete'|t }}</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="myeventlane-venue-list__empty">
+      <p>{{ 'You have not created any venues yet.'|t }}</p>
+      <a href="{{ path('entity.myeventlane_venue.add_form') }}" class="button button--primary">
+        {{ 'Create Your First Venue'|t }}
+      </a>
+    </div>
+  {% endif %}
+</div>

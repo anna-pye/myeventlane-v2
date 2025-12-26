@@ -5,6 +5,8 @@ namespace Drupal\myeventlane_rsvp\Service;
 use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
+use Drupal\myeventlane_rsvp\Entity\RsvpSubmission;
 use Drupal\myeventlane_rsvp\Service\RsvpStorage;
 use Drupal\Core\Config\ConfigFactoryInterface;
 
@@ -18,9 +20,48 @@ class RsvpMailer {
     $this->configFactory = $configFactory;
   }
 
-  public function sendConfirmation(array $submission) {
-    $event = Node::load($submission['event_nid']);
-    if (!$event) {
+  /**
+   * Sends a confirmation email for an RSVP submission.
+   *
+   * @param \Drupal\myeventlane_rsvp\Entity\RsvpSubmission|array $submission
+   *   The RSVP submission entity or an array with submission data.
+   * @param \Drupal\node\NodeInterface|null $event
+   *   The event node (optional, will be loaded from submission if not provided).
+   */
+  public function sendConfirmation($submission, ?NodeInterface $event = NULL) {
+    // Handle RsvpSubmission entity.
+    if ($submission instanceof RsvpSubmission) {
+      if (!$event) {
+        $event = $submission->getEvent();
+      }
+      
+      if (!$event) {
+        return;
+      }
+
+      $email = $submission->getEmail();
+      $name = $submission->getAttendeeName() ?? $submission->get('name')->value ?? '';
+      $event_nid = $submission->getEventId() ?? $event->id();
+    }
+    // Handle legacy array format.
+    elseif (is_array($submission)) {
+      if (!$event) {
+        $event = Node::load($submission['event_nid'] ?? NULL);
+      }
+      
+      if (!$event) {
+        return;
+      }
+
+      $email = $submission['email'] ?? '';
+      $name = $submission['name'] ?? '';
+      $event_nid = $submission['event_nid'] ?? $event->id();
+    }
+    else {
+      return;
+    }
+
+    if (empty($email)) {
       return;
     }
 
@@ -30,15 +71,15 @@ class RsvpMailer {
       'event_title' => $event->label(),
       'event_date' => $event->get('field_event_start')->value ?? '',
       'event_location' => $event->get('field_location')->value ?? '',
-      'name' => $submission['name'],
-      'email' => $submission['email'],
-      'event_nid' => $event->id(),
+      'name' => $name,
+      'email' => $email,
+      'event_nid' => $event_nid,
     ];
 
     $this->mailManager->mail(
       'myeventlane_rsvp',
       'rsvp_confirmation',
-      $submission['email'],
+      $email,
       $config->get('langcode') ?? 'en',
       $params
     );
@@ -54,16 +95,4 @@ class RsvpMailer {
     }
   }
 
-public function sendWaitlistPromotion(RsvpSubmission $submission, NodeInterface $event): void {
-    $to = $this->getRecipientEmail($submission);
-
-    $params['subject'] = $this->t('A spot opened up for @event', ['@event' => $event->label()]);
-    $params['message'] = $this->renderer->renderPlain([
-      '#theme' => 'myeventlane_rsvp_waitlist_promotion_email',
-      '#event' => $event,
-      '#submission' => $submission,
-    ]);
-
-    $this->mailManager->mail('myeventlane_rsvp', 'promotion', $to, 'en', $params);
-  }
 }

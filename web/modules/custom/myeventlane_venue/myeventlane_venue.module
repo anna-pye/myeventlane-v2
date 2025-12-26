@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for myeventlane_venue module.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_theme().
+ */
+function myeventlane_venue_theme(): array {
+  return [
+    'myeventlane_venue_list' => [
+      'variables' => [
+        'venues' => [],
+        'vendor' => NULL,
+      ],
+      'template' => 'myeventlane-venue-list',
+    ],
+  ];
+}

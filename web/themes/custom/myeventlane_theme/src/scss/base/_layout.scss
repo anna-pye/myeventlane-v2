@@ -1,0 +1,35 @@
+// ==========================================================================
+// Canonical Layout Wrappers (Mobile-First)
+// ==========================================================================
+// Container and section utilities for consistent page structure.
+
+.mel-container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+@media (min-width: 900px) {
+  .mel-container {
+    max-width: var(--mel-max);
+    padding: 0 24px;
+  }
+}
+
+.mel-section {
+  padding: 28px 0;
+}
+
+@media (min-width: 900px) {
+  .mel-section {
+    padding: 44px 0;
+  }
+}
+
+.mel-section + .mel-section {
+  padding-top: 16px;
+
+  @media (min-width: 900px) {
+    padding-top: 20px;
+  }
+}

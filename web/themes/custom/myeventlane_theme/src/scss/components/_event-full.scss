@@ -244,10 +244,23 @@
 }
 
 // ---------------------------------------------------------------------------
-// Event Layout (Two-Column)
+// Event Layout (Two-Column) - Mobile-First
 // ---------------------------------------------------------------------------
 
 .mel-event-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+
+  @media (min-width: 900px) {
+    grid-template-columns: 1.4fr 0.6fr;
+    gap: 28px;
+    align-items: start;
+  }
+}
+
+// Legacy support for existing flex-based layout
+.mel-event-layout--flex {
   display: flex;
   flex-direction: column;
   gap: space-tokens.mel-space(4);
@@ -434,6 +447,38 @@
   .field--name-field-map {
     margin-top: space-tokens.mel-space(3);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Mobile-First Event Page Components (CSS Variables)
+// ---------------------------------------------------------------------------
+
+.mel-event-layout h1 {
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.mel-event-layout p {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: var(--mel-space-3);
+}
+
+.event-location strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.event-cta {
+  margin-top: 12px;
+}
+
+.event-location,
+.event-host {
+  background: var(--mel-card);
+  border-radius: var(--mel-radius-lg);
+  padding: 14px;
+  box-shadow: var(--mel-shadow-soft);
 }
 
 // ---------------------------------------------------------------------------
